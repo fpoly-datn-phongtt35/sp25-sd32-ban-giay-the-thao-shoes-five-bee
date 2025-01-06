@@ -1,0 +1,42 @@
+package com.example.demo.entity;
+
+import jakarta.persistence.*;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+
+import java.math.BigDecimal;
+import java.sql.Date;
+import java.util.UUID;
+
+@Entity
+@Table(name = "CHUONG_TRINH_GIAM_GIA_HOA_DON")
+@Getter
+@Setter
+@NoArgsConstructor
+@AllArgsConstructor
+public class ChuongTrinhGiamGiaHoaDonEntity {
+    @Id
+    @GeneratedValue(strategy = GenerationType.AUTO)
+    @Column(name = "ID")
+    private UUID id;
+    @Column(name = "MA")
+    private String ma;
+    @Column(name = "TEN")
+    private String ten;
+    @Column(name = "DIEU_KIEN")
+    private BigDecimal dieuKien;
+    @Column(name = "SO_TIEN_GIAM_MAX")
+    private BigDecimal soTienGiamMax;
+    @Column(name = "NGAY_BAT_DAU")
+    private Date ngayBatDau;
+    @Column(name = "NGAY_KET_THUC")
+    private Date ngayKetThuc;
+    @Column(name = "PHAN_TRAM_GIAM")
+    private Integer phanTramGiam;
+    @Column(name = "SO_LUONG")
+    private Integer soLuong;
+    @Column(name = "TRANG_THAI")
+    private Integer trangThai;
+}
