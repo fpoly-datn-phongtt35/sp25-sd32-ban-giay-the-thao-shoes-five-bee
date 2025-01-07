@@ -22,11 +22,13 @@ public class GiayChiTietEntity {
     @Column(name = "ID")
     private UUID id;
 
-    @OneToMany(mappedBy = "giayChiTietEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<MauSacEntity> mauSacEntities;
+    @ManyToOne
+    @JoinColumn(name = "ID_MAUSAC")
+    private MauSacEntity mauSacEntity;
 
-    @OneToMany(mappedBy = "giayChiTietEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<KichCoEntity> kichCoEntities;
+    @ManyToOne
+    @JoinColumn(name = "ID_KICK_CO")
+    private KichCoEntity kichCoEntity;
 
     @Column(name = "GIA_BAN")
     private BigDecimal giaBan;

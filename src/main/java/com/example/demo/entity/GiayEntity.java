@@ -63,6 +63,9 @@ public class GiayEntity {
     @JoinColumn(name = "ID_KIEU_DANG")
     private KieuDangEntity kieuDang;
 
-    @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
-    private List<AnhGiayEntity> anhGiayEntities;
+    @ManyToOne
+    @JoinColumn(name = "ID_ANH_GIAY")
+    private AnhGiayEntity anhGiayEntity;
+
+
 }

@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+
 import java.util.UUID;
 
 @Entity
@@ -23,7 +24,5 @@ public class AnhGiayEntity {
     private String tenUrl;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
-    @ManyToOne
-    @JoinColumn(name = "ID_ANH_GIAY")
-    private GiayEntity giayEntity;
+
 }
