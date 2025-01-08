@@ -23,11 +23,11 @@ public class GiayChiTietEntity {
     private UUID id;
 
     @ManyToOne
-    @JoinColumn(name = "ID_MAUSAC")
+    @JoinColumn(name = "ID_MAU_SAC")
     private MauSacEntity mauSacEntity;
 
     @ManyToOne
-    @JoinColumn(name = "ID_KICK_CO")
+    @JoinColumn(name = "ID_KICH_CO")
     private KichCoEntity kichCoEntity;
 
     @Column(name = "GIA_BAN")

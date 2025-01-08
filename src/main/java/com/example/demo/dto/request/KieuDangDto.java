@@ -9,7 +9,7 @@ import lombok.Setter;
 @NoArgsConstructor
 @Getter
 @Setter
-public class DeGiayDto extends PageDto{
+public class KieuDangDto extends PageDto{
     private String ma;
     private String ten;
     private Integer trangThai;
