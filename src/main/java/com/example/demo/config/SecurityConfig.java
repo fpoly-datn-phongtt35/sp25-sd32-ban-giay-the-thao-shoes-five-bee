@@ -54,7 +54,8 @@ public class SecurityConfig {
                 .cors(cors -> cors.configurationSource(request -> corsConfiguration()))
                 .csrf(AbstractHttpConfigurer::disable)
                 .authorizeHttpRequests(request -> request
-                        .requestMatchers("/chat-lieu/**","/anh-giay/**").permitAll()
+                        .requestMatchers("/chat-lieu/**","/anh-giay/**","/kich-co/**","mau-sac/**","/de-giay/**",
+                                "/thuong-hieu/**","/xuat-xu/**","/kieu-dang/**").permitAll()
                         .anyRequest().authenticated())
                 .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
         return http.build();
