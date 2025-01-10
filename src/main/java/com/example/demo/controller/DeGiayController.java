@@ -27,7 +27,7 @@ public class DeGiayController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?> findAndPageChatLieu(@RequestBody DeGiayDto deGiayDto){
+    public ResponseEntity<?> findAndPageDeGiay(@RequestBody DeGiayDto deGiayDto){
         Pageable pageable = PageRequest.of(deGiayDto.getPage(),deGiayDto.getSize());
         return ResponseEntity.ok(deGiayService.findByPagingCriteria(deGiayDto,pageable));
     }

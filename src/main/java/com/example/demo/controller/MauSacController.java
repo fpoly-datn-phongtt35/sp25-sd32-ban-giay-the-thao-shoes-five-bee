@@ -27,7 +27,7 @@ public class MauSacController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?> findAndPageChatLieu(@RequestBody MauSacDto mauSacDto){
+    public ResponseEntity<?> findAndPageMausac(@RequestBody MauSacDto mauSacDto){
         Pageable pageable = PageRequest.of(mauSacDto.getPage(),mauSacDto.getSize());
         return ResponseEntity.ok(mauSacService.findByPagingCriteria(mauSacDto,pageable));
     }

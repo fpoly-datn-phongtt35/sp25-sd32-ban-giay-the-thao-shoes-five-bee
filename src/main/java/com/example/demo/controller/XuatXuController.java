@@ -27,7 +27,7 @@ public class XuatXuController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?> findAndPageChatLieu(@RequestBody XuatXuDto xuatXuDto){
+    public ResponseEntity<?> findAndPageXuatXu(@RequestBody XuatXuDto xuatXuDto){
         Pageable pageable = PageRequest.of(xuatXuDto.getPage(),xuatXuDto.getSize());
         return ResponseEntity.ok(xuatXuService.findByPagingCriteria(xuatXuDto,pageable));
     }

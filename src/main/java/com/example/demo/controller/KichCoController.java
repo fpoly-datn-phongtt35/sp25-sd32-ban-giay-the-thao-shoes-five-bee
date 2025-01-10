@@ -27,7 +27,7 @@ public class KichCoController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?> findAndPageChatLieu(@RequestBody KichCoDto kichCoDto){
+    public ResponseEntity<?> findAndPageKichCo(@RequestBody KichCoDto kichCoDto){
         Pageable pageable = PageRequest.of(kichCoDto.getPage(),kichCoDto.getSize());
         return ResponseEntity.ok(kichCoService.findByPagingCriteria(kichCoDto,pageable));
     }

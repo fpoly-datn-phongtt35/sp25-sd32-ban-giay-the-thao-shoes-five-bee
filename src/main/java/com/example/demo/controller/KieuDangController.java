@@ -24,7 +24,7 @@ public class KieuDangController {
     }
 
     @PostMapping("/search")
-    public ResponseEntity<?> findAndPageChatLieu(@RequestBody KieuDangDto kieuDangDto){
+    public ResponseEntity<?> findAndPageKieuDang(@RequestBody KieuDangDto kieuDangDto){
         Pageable pageable = PageRequest.of(kieuDangDto.getPage(),kieuDangDto.getSize());
         return ResponseEntity.ok(kieuDangService.findByPagingCriteria(kieuDangDto,pageable));
     }
