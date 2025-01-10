@@ -29,4 +29,5 @@ public class XuatXuEntity {
 
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
+    //test push
 }
