@@ -74,6 +74,6 @@ public class HoaDonEntity {
     @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<HoaDonChiTietEntity> items;
 
-    @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChuongTrinhGiamGiaHoaDonChiTietEntity> chuongTrinhGiamGiaChiTietHoaDons;
+//    @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+//    private List<ChuongTrinhGiamGiaHoaDonChiTietEntity> chuongTrinhGiamGiaChiTietHoaDons;
 }

@@ -1,6 +1,6 @@
-package com.example.demo.entity;
+package com.example.demo.dto.request;
 
-import jakarta.persistence.*;
+import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -11,34 +11,20 @@ import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.UUID;
 
-@Entity
-@Table(name = "CHUONG_TRINH_GIAM_GIA_HOA_DON")
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
 @Setter
-public class ChuongTrinhGiamGiaHoaDonEntity {
-    @Id
-    @GeneratedValue(strategy = GenerationType.AUTO)
-    @Column(name = "ID")
+public class GiamGiaHoaDonDto extends PageDto{
     private UUID id;
-    @Column(name = "MA")
     private String ma;
-    @Column(name = "TEN")
     private String ten;
-    @Column(name = "DIEU_KIEN")
     private BigDecimal dieuKien;
-    @Column(name = "SO_TIEN_GIAM_MAX")
     private BigDecimal soTienGiamMax;
-    @Column(name = "NGAY_BAT_DAU")
     private Date ngayBatDau;
-    @Column(name = "NGAY_KET_THUC")
     private Date ngayKetThuc;
-    @Column(name = "PHAN_TRAM_GIAM")
     private Integer phanTramGiam;
-    @Column(name = "SO_LUONG")
     private Integer soLuong;
-    @Column(name = "TRANG_THAI")
     private Integer trangThai;
 }

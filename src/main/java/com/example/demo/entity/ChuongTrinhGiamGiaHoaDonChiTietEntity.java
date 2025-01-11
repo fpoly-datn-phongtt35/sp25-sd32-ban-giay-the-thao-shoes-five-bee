@@ -5,16 +5,18 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
 import java.util.UUID;
 
 @Entity
 @Table(name = "CHUONG_TRINH_GIAM_GIA_CHI_TIET_HOA_DON")
+@AllArgsConstructor
+@NoArgsConstructor
+@SuperBuilder(toBuilder = true)
 @Getter
 @Setter
-@NoArgsConstructor
-@AllArgsConstructor
 public class ChuongTrinhGiamGiaHoaDonChiTietEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
@@ -28,10 +30,10 @@ public class ChuongTrinhGiamGiaHoaDonChiTietEntity {
     private BigDecimal tongTienThanhToan;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
-    @ManyToOne
-    @JoinColumn(name = "ID_HOA_DON")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_HOA_DON",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private HoaDonEntity hoaDonEntity;
-    @ManyToOne
-    @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_HOA_DON")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_HOA_DON",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private ChuongTrinhGiamGiaHoaDonEntity chuongTrinhGiamGiaHoaDonEntity;
 }

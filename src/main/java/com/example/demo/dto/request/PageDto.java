@@ -1,5 +1,8 @@
 package com.example.demo.dto.request;
 
+import lombok.experimental.SuperBuilder;
+
+@SuperBuilder(toBuilder = true)
 public class PageDto {
     private Integer page;
     private Integer size;
