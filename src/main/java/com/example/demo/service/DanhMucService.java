@@ -14,7 +14,6 @@ import java.util.List;
 public interface DanhMucService {
     List<DanhMucEntity> getAll();
     DanhMucEntity add(DanhMucDto danhMucDto);
-    DanhMucEntity addNhanh(DanhMucDto danhMucDto);
     DanhMucEntity update(DanhMucUpdateDto danhMucUpdateDto);
     DanhMucEntity detail(DanhMucUpdateDto danhMucUpdateDto);
     DanhMucEntity delete(DanhMucUpdateDto danhMucUpdateDto);

@@ -5,7 +5,6 @@ import com.example.demo.dto.request.DanhMucUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.DanhMucEntity;
-import com.example.demo.entity.KieuDangEntity;
 import com.example.demo.repository.DanhMucRepository;
 import com.example.demo.service.DanhMucService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -38,30 +37,6 @@ public class DanhMucServiceImpl implements DanhMucService {
         danhMucEntity.setTen(danhMucDto.getTen());
         danhMucEntity.setTrangThai(danhMucDto.getTrangThai());
         return danhMucRepository.save(danhMucEntity);
-    }
-
-    @Override
-    public DanhMucEntity addNhanh(DanhMucDto danhMucDto) {
-        if (danhMucDto.getTen() == null || danhMucDto.getTen().trim().isEmpty()) {
-            throw new IllegalArgumentException("Danh muc khong duoc de trong.");
-        }
-
-
-        DanhMucEntity danhMucEntity = new DanhMucEntity();
-
-
-        danhMucEntity.setMa(danhMucDto.getMa() != null ? danhMucDto.getMa() : generateMa());
-
-
-        danhMucEntity.setTrangThai(danhMucDto.getTrangThai() != null ? danhMucDto.getTrangThai() : 1);
-
-
-        danhMucEntity.setTen(danhMucDto.getTen().trim());
-
-
-        return danhMucRepository.save(danhMucEntity);}
-    private String generateMa() {
-        return "DM" + System.currentTimeMillis();
     }
 
     @Override
