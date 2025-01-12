@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "USER_ROLE")
+@Table(name = "TBL_USER_ROLE")
 public class UserRoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
