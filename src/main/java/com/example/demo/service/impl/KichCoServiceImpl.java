@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.request.KichCoDto;
 import com.example.demo.dto.request.KichCoUpdateDto;
 import com.example.demo.dto.response.PageResponse;
+import com.example.demo.entity.DeGiayEntity;
 import com.example.demo.entity.KichCoEntity;
 import com.example.demo.entity.MauSacEntity;
 import com.example.demo.repository.KichCoRepository;
@@ -37,6 +38,33 @@ public class KichCoServiceImpl implements KichCoService {
         kichCoEntity.setTen(kichCoDto.getTen());
         kichCoEntity.setTrangThai(kichCoDto.getTrangThai());
         return kichCoRepository.save(kichCoEntity);
+    }
+
+    @Override
+    public KichCoEntity addNhanh(KichCoDto kichCoDto) {
+        if (kichCoDto.getTen() == null || kichCoDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Kích cỡ không được để trống.");
+        }
+
+
+        KichCoEntity kichCoEntity = new KichCoEntity();
+
+
+        kichCoEntity.setMa(kichCoDto.getMa() != null ? kichCoDto.getMa() : generateMa());
+
+
+        kichCoEntity.setTrangThai(kichCoDto.getTrangThai() != null ? kichCoDto.getTrangThai() : 1);
+
+
+        kichCoEntity.setTen(kichCoDto.getTen().trim());
+
+
+        return kichCoRepository.save(kichCoEntity);
+    }
+
+
+    private String generateMa() {
+        return "kC" + System.currentTimeMillis();
     }
 
     @Override

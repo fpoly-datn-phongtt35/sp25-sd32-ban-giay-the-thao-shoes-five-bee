@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.ChatLieuDto;
-import com.example.demo.dto.request.ChatLieuUpdateDto;
-import com.example.demo.dto.request.KichCoDto;
-import com.example.demo.dto.request.KichCoUpdateDto;
+import com.example.demo.dto.request.*;
+import com.example.demo.entity.DeGiayEntity;
+import com.example.demo.entity.KichCoEntity;
 import com.example.demo.service.ChatLieuService;
 import com.example.demo.service.KichCoService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +49,14 @@ public class KichCoController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody KichCoUpdateDto kichCoUpdateDto){
         return ResponseEntity.ok(kichCoService.delete(kichCoUpdateDto));
+    }
+    @PostMapping("/addNhanh")
+    public ResponseEntity<?> addNhanhKichCo(@RequestBody KichCoDto kichCoDto) {
+        try {
+            KichCoEntity kichCoEntity = kichCoService.addNhanh(kichCoDto);
+            return ResponseEntity.ok(kichCoEntity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }
