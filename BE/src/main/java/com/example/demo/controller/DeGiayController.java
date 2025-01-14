@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.DeGiayDto;
-import com.example.demo.dto.request.DeGiayUpdateDto;
-import com.example.demo.dto.request.MauSacDto;
-import com.example.demo.dto.request.MauSacUpdateDto;
+import com.example.demo.dto.request.*;
+import com.example.demo.entity.ChatLieuEntity;
+import com.example.demo.entity.DeGiayEntity;
 import com.example.demo.service.DeGiayService;
 import com.example.demo.service.MauSacService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +49,14 @@ public class DeGiayController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody DeGiayUpdateDto deGiayUpdateDto){
         return ResponseEntity.ok(deGiayService.delete(deGiayUpdateDto));
+    }
+    @PostMapping("/addNhanh")
+    public ResponseEntity<?> addNhanhDeGiaiy(@RequestBody DeGiayDto deGiayDto) {
+        try {
+            DeGiayEntity deGiay = deGiayService.addNhanh(deGiayDto);
+            return ResponseEntity.ok(deGiay);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
 }

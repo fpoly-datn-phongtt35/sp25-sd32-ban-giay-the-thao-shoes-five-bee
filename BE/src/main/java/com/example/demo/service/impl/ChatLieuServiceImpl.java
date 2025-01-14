@@ -40,6 +40,34 @@ public class ChatLieuServiceImpl implements ChatLieuService {
     }
 
     @Override
+    public ChatLieuEntity addNhanh(ChatLieuDto chatLieuDto) {
+
+        if (chatLieuDto.getTen() == null || chatLieuDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên chất liệu không được để trống.");
+        }
+
+
+        ChatLieuEntity chatLieuEntity = new ChatLieuEntity();
+
+
+        chatLieuEntity.setMa(chatLieuDto.getMa() != null ? chatLieuDto.getMa() : generateMa());
+
+
+        chatLieuEntity.setTrangThai(chatLieuDto.getTrangThai() != null ? chatLieuDto.getTrangThai() : 1);
+
+
+        chatLieuEntity.setTen(chatLieuDto.getTen().trim());
+
+
+        return chatLieuRepository.save(chatLieuEntity);
+    }
+
+
+    private String generateMa() {
+        return "CL" + System.currentTimeMillis();
+    }
+
+    @Override
     public ChatLieuEntity update(ChatLieuUpdateDto chatLieuUpdateDto) {
         Optional<ChatLieuEntity> optional = chatLieuRepository.findById(chatLieuUpdateDto.getId());
         return optional.map(o ->{

@@ -4,6 +4,7 @@ import com.example.demo.dto.request.DeGiayDto;
 import com.example.demo.dto.request.DeGiayUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 
+import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.DeGiayEntity;
 import com.example.demo.repository.DeGiayRepository;
 import com.example.demo.service.DeGiayService;
@@ -37,6 +38,33 @@ public class DeGiayServiceImpl implements DeGiayService {
         deGiayEntity.setTen(deGiayDto.getTen());
         deGiayEntity.setTrangThai(deGiayDto.getTrangThai());
         return deGiayRepository.save(deGiayEntity);
+    }
+
+    @Override
+    public DeGiayEntity addNhanh(DeGiayDto deGiayDto) {
+        if (deGiayDto.getTen() == null || deGiayDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Đế giày không được để trống.");
+        }
+
+
+        DeGiayEntity deGiayEntity = new DeGiayEntity();
+
+
+        deGiayEntity.setMa(deGiayDto.getMa() != null ? deGiayDto.getMa() : generateMa());
+
+
+        deGiayEntity.setTrangThai(deGiayDto.getTrangThai() != null ? deGiayDto.getTrangThai() : 1);
+
+
+        deGiayEntity.setTen(deGiayDto.getTen().trim());
+
+
+        return deGiayRepository.save(deGiayEntity);
+    }
+
+
+    private String generateMa() {
+        return "DG" + System.currentTimeMillis();
     }
 
     @Override
