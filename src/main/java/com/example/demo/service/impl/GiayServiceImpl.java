@@ -3,7 +3,8 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.request.GiayDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiayEntity;
-import com.example.demo.repository.GiayRepository;
+import com.example.demo.repository.*;
+import com.example.demo.service.AnhGiayService;
 import com.example.demo.service.GiayService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -12,6 +13,8 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +25,14 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GiayServiceImpl implements GiayService {
   private final GiayRepository giayRepository;
+  private final ThuongHieuRepository thuongHieuRepository;
+  private final ChatLieuRepository chatLieuRepository;
+  private final DeGiayRepository deGiayRepository;
+  private final XuatXuRepository xuatXuRepository;
+  private final KieuDangRepository kieuDangRepository;
+  private final AnhGiayRepository anhGiayRepository;
+
+  private final AnhGiayService anhGiayService;
 
   @Override
   public List<GiayEntity> getAll() {
@@ -39,6 +50,11 @@ public class GiayServiceImpl implements GiayService {
             .giaBan(giayDto.getGiaBan())
             .soLuongTon(giayDto.getSoLuongTon())
             .trangThai(giayDto.getTrangThai())
+            .thuongHieu(thuongHieuRepository.findById(giayDto.getIdThuongHieu()).orElse(null))
+            .chatLieu(chatLieuRepository.findById(giayDto.getIdChatLieu()).orElse(null))
+            .deGiay(deGiayRepository.findById(giayDto.getIdDeGiay()).orElse(null))
+            .xuatXu(xuatXuRepository.findById(giayDto.getIdXuatXu()).orElse(null))
+            .kieuDang(kieuDangRepository.findById(giayDto.getIdKieuDang()).orElse(null))
             .build());
   }
 
@@ -55,6 +71,12 @@ public class GiayServiceImpl implements GiayService {
               o.setGiaBan(giayDto.getGiaBan());
               o.setSoLuongTon(giayDto.getSoLuongTon());
               o.setTrangThai(giayDto.getTrangThai());
+              o.setThuongHieu(
+                  thuongHieuRepository.findById(giayDto.getIdThuongHieu()).orElse(null));
+              o.setChatLieu(chatLieuRepository.findById(giayDto.getIdChatLieu()).orElse(null));
+              o.setDeGiay(deGiayRepository.findById(giayDto.getIdDeGiay()).orElse(null));
+              o.setXuatXu(xuatXuRepository.findById(giayDto.getIdXuatXu()).orElse(null));
+              o.setKieuDang(kieuDangRepository.findById(giayDto.getIdKieuDang()).orElse(null));
               return giayRepository.save(o);
             })
         .orElse(null);
@@ -142,4 +164,18 @@ public class GiayServiceImpl implements GiayService {
 
     return pageResponse;
   }
+
+
+    @Override
+    public GiayDto assignAnhGiay(@NonNull Long id, @NonNull List<Long> anhGiayIds) {
+
+        anhGiayService.assignToGiayByAnhGiayIdAndIds(id, anhGiayIds);
+
+
+        GiayEntity giayEntity = giayRepository.findWithAnhGiayById(id);
+
+
+    }
+
+
 }

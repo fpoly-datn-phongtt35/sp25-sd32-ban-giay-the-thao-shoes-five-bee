@@ -2,21 +2,21 @@ package com.example.demo.service;
 
 import com.example.demo.dto.request.GiamGiaHoaDonDto;
 import com.example.demo.dto.response.PageResponse;
-import com.example.demo.entity.ChuongTrinhGiamGiaHoaDonEntity;
+import com.example.demo.entity.GiamGiaHoaDonEntity;
 import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface GiamGiaHoaDonService {
-  List<ChuongTrinhGiamGiaHoaDonEntity> getAll();
+  List<GiamGiaHoaDonEntity> getAll();
 
-  ChuongTrinhGiamGiaHoaDonEntity add(GiamGiaHoaDonDto giamGiaHoaDonDto);
+  GiamGiaHoaDonEntity add(GiamGiaHoaDonDto giamGiaHoaDonDto);
 
-  ChuongTrinhGiamGiaHoaDonEntity update(GiamGiaHoaDonDto giamGiaHoaDonDto);
+  GiamGiaHoaDonEntity update(GiamGiaHoaDonDto giamGiaHoaDonDto);
 
-  ChuongTrinhGiamGiaHoaDonEntity detail(GiamGiaHoaDonDto giamGiaHoaDonDto);
+  GiamGiaHoaDonEntity detail(GiamGiaHoaDonDto giamGiaHoaDonDto);
 
-  ChuongTrinhGiamGiaHoaDonEntity delete(GiamGiaHoaDonDto giamGiaHoaDonDto);
+  GiamGiaHoaDonEntity delete(GiamGiaHoaDonDto giamGiaHoaDonDto);
 
-  PageResponse<ChuongTrinhGiamGiaHoaDonEntity> findByPagingCriteria(
+  PageResponse<GiamGiaHoaDonEntity> findByPagingCriteria(
       GiamGiaHoaDonDto giamGiaHoaDonDto, Pageable pageable);
 }

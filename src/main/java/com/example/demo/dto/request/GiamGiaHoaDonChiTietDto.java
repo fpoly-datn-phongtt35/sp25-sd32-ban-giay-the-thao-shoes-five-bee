@@ -1,18 +1,12 @@
 package com.example.demo.dto.request;
 
-import com.example.demo.entity.ChuongTrinhGiamGiaHoaDonEntity;
-import com.example.demo.entity.HoaDonEntity;
-import jakarta.persistence.Column;
-import jakarta.persistence.JoinColumn;
-import jakarta.persistence.ManyToOne;
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -25,4 +19,6 @@ public class GiamGiaHoaDonChiTietDto extends PageDto{
     private BigDecimal soTienDaGiam;
     private BigDecimal tongTienThanhToan;
     private Integer trangThai;
+    private  UUID idHoaDon;
+    private  UUID idGiamGiaHoaDon;
 }

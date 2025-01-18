@@ -1,10 +1,7 @@
 package com.example.demo.service;
 
-import com.example.demo.dto.request.GiamGiaSanPhamDto;
 import com.example.demo.dto.request.GiayChiTietDto;
-import com.example.demo.dto.request.GiayDto;
 import com.example.demo.dto.response.PageResponse;
-import com.example.demo.entity.ChuongTrinhGiamSanPhamEntity;
 import com.example.demo.entity.GiayChiTietEntity;
 import org.springframework.data.domain.Pageable;
 

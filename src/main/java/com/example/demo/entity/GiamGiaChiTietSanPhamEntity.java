@@ -17,7 +17,7 @@ import java.util.UUID;
 @SuperBuilder(toBuilder = true)
 @Getter
 @Setter
-public class ChuongTrinhGiamGiaChiTietSanPhamEntity {
+public class GiamGiaChiTietSanPhamEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
@@ -35,5 +35,5 @@ public class ChuongTrinhGiamGiaChiTietSanPhamEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_SAN_PHAM",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
-    private ChuongTrinhGiamSanPhamEntity chuongTrinhGiamSanPhamEntity;
+    private GiamGiaSanPhamEntity chuongTrinhGiamSanPhamEntity;
 }

@@ -22,9 +22,15 @@ import java.util.UUID;
 public class GiayChiTietDto extends PageDto {
   private UUID id;
 
+  private UUID idMauSac;
+
+  private UUID idKichCo;
+
   private BigDecimal giaBan;
 
   private Integer soLuongTon;
 
   private Integer trangThai;
+
+  private UUID idGiay;
 }

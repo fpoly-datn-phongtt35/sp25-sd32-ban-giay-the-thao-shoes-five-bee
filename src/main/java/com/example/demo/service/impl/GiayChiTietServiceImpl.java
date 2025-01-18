@@ -4,6 +4,9 @@ import com.example.demo.dto.request.GiayChiTietDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.repository.GiayChiTietRepository;
+import com.example.demo.repository.GiayRepository;
+import com.example.demo.repository.KichCoRepository;
+import com.example.demo.repository.MauSacRepository;
 import com.example.demo.service.GiayChiTietService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -23,6 +26,10 @@ import org.springframework.stereotype.Service;
 public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final GiayChiTietRepository giayChiTietRepository;
 
+  private final GiayRepository giayRepository;
+  private final MauSacRepository mauSacRepository;
+  private final KichCoRepository kichCoRepository;
+
   @Override
   public List<GiayChiTietEntity> getAll() {
     return giayChiTietRepository.findAll();
@@ -34,7 +41,10 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         GiayChiTietEntity.builder()
             .giaBan(giayChiTietDto.getGiaBan())
             .soLuongTon(giayChiTietDto.getSoLuongTon())
+            .mauSacEntity(mauSacRepository.findById(giayChiTietDto.getIdMauSac()).orElse(null))
+            .kichCoEntity(kichCoRepository.findById(giayChiTietDto.getIdKichCo()).orElse(null))
             .trangThai(giayChiTietDto.getTrangThai())
+            .giayEntity(giayRepository.findById(giayChiTietDto.getIdGiay()).orElse(null))
             .build());
   }
 
@@ -46,7 +56,12 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
             o -> {
               o.setGiaBan(giayChiTietDto.getGiaBan());
               o.setSoLuongTon(giayChiTietDto.getSoLuongTon());
+              o.setMauSacEntity(
+                  mauSacRepository.findById(giayChiTietDto.getIdMauSac()).orElse(null));
+              o.setKichCoEntity(
+                  kichCoRepository.findById(giayChiTietDto.getIdKichCo()).orElse(null));
               o.setTrangThai(giayChiTietDto.getTrangThai());
+              o.setGiayEntity(giayRepository.findById(giayChiTietDto.getIdGiay()).orElse(null));
               return giayChiTietRepository.save(o);
             })
         .orElse(null);

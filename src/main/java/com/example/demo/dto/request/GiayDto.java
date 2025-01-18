@@ -1,6 +1,7 @@
 package com.example.demo.dto.request;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -41,5 +42,5 @@ public class GiayDto extends PageDto {
 
   private UUID idKieuDang;
 
-  private UUID idAnhGiay;
+  private List<UUID> anhGiayIds;
 }

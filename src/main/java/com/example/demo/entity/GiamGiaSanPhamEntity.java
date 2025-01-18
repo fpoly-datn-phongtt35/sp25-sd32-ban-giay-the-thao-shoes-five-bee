@@ -7,18 +7,17 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
-import java.math.BigDecimal;
 import java.sql.Date;
 import java.util.UUID;
 
 @Entity
-@Table(name = "CHUONG_TRINH_GIAM_GIA_HOA_DON")
+@Table(name = "CHUONG_TRINH_GIAM_GIA_SAN_PHAM")
 @AllArgsConstructor
 @NoArgsConstructor
 @SuperBuilder(toBuilder = true)
 @Getter
 @Setter
-public class ChuongTrinhGiamGiaHoaDonEntity {
+public class GiamGiaSanPhamEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
     @Column(name = "ID")
@@ -27,18 +26,16 @@ public class ChuongTrinhGiamGiaHoaDonEntity {
     private String ma;
     @Column(name = "TEN")
     private String ten;
-    @Column(name = "DIEU_KIEN")
-    private BigDecimal dieuKien;
-    @Column(name = "SO_TIEN_GIAM_MAX")
-    private BigDecimal soTienGiamMax;
+    @Column(name = "PHAN_TRAM_GIAM")
+    private Integer phanTramGiam;
     @Column(name = "NGAY_BAT_DAU")
     private Date ngayBatDau;
     @Column(name = "NGAY_KET_THUC")
     private Date ngayKetThuc;
-    @Column(name = "PHAN_TRAM_GIAM")
-    private Integer phanTramGiam;
-    @Column(name = "SO_LUONG")
-    private Integer soLuong;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_USER",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    private UserEntity userEntity;
+
 }
