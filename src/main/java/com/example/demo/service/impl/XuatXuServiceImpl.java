@@ -94,6 +94,16 @@ public class XuatXuServiceImpl implements XuatXuService {
     }
 
     @Override
+    public XuatXuEntity toggleTrangThai(XuatXuUpdateDto xuatXuUpdateDto) {
+        Optional<XuatXuEntity> optional = xuatXuRepository.findById(xuatXuUpdateDto.getId());
+        return optional.map(xuatXuEntity -> {
+
+            xuatXuEntity.setTrangThai(xuatXuEntity.getTrangThai() == 1 ? 0 : 1);
+            return xuatXuRepository.save(xuatXuEntity);
+        }).orElse(null);
+    }
+
+    @Override
     public PageResponse<XuatXuEntity> findByPagingCriteria(XuatXuDto xuatXuDto, Pageable pageable) {
         Page<XuatXuEntity> page = xuatXuRepository.findAll(new Specification<XuatXuEntity>() {
             @Override
