@@ -14,6 +14,7 @@ import java.util.List;
 public interface ThuongHieuService {
     List<ThuongHieuEntity> getAll();
     ThuongHieuEntity add(ThuongHieuDto thuongHieuDto);
+    ThuongHieuEntity addNhanh(ThuongHieuDto thuongHieuDto);
     ThuongHieuEntity update(ThuongHieuUpdateDto thuongHieuUpdateDto);
     ThuongHieuEntity detail(ThuongHieuUpdateDto thuongHieuUpdateDto);
     ThuongHieuEntity delete(ThuongHieuUpdateDto thuongHieuUpdateDto);

@@ -14,6 +14,7 @@ import java.util.List;
 public interface XuatXuService {
     List<XuatXuEntity> getAll();
     XuatXuEntity add(XuatXuDto xuatXuDto);
+    XuatXuEntity addNhanh(XuatXuDto xuatXuDto);
     XuatXuEntity update(XuatXuUpdateDto xuatXuUpdateDto);
     XuatXuEntity detail(XuatXuUpdateDto xuatXuUpdateDto);
     XuatXuEntity delete(XuatXuUpdateDto xuatXuUpdateDto);
