@@ -5,6 +5,7 @@ import com.example.demo.dto.request.KieuDangUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 
 import com.example.demo.entity.KieuDangEntity;
+import com.example.demo.entity.MauSacEntity;
 import com.example.demo.repository.KieuDangRepository;
 import com.example.demo.service.KieuDangService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -38,6 +39,30 @@ public class KieuDangServiceImpl implements KieuDangService {
         kieuDangEntity.setTen(kieuDangDto.getTen());
         kieuDangEntity.setTrangThai(kieuDangDto.getTrangThai());
         return kieuDangRepository.save(kieuDangEntity);
+    }
+
+    @Override
+    public KieuDangEntity addNhanh(KieuDangDto kieuDangDto) {
+        if (kieuDangDto.getTen() == null || kieuDangDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Kieu dang khong duoc de trong.");
+        }
+
+
+        KieuDangEntity kieuDangEntity = new KieuDangEntity();
+
+
+        kieuDangEntity.setMa(kieuDangDto.getMa() != null ? kieuDangDto.getMa() : generateMa());
+
+
+        kieuDangEntity.setTrangThai(kieuDangDto.getTrangThai() != null ? kieuDangDto.getTrangThai() : 1);
+
+
+        kieuDangEntity.setTen(kieuDangDto.getTen().trim());
+
+
+        return kieuDangRepository.save(kieuDangEntity);}
+    private String generateMa() {
+        return "KD" + System.currentTimeMillis();
     }
 
     @Override

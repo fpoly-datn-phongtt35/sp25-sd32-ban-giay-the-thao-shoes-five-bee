@@ -5,6 +5,7 @@ import com.example.demo.dto.request.MauSacUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.MauSacEntity;
+import com.example.demo.entity.ThuongHieuEntity;
 import com.example.demo.repository.MauSacRepository;
 import com.example.demo.service.MauSacService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -37,6 +38,30 @@ public class MauSacServiceImpl implements MauSacService {
         mauSacEntity.setTen(mauSacDto.getTen());
         mauSacEntity.setTrangThai(mauSacDto.getTrangThai());
         return mauSacRepository.save(mauSacEntity);
+    }
+
+    @Override
+    public MauSacEntity addNhanh(MauSacDto mauSacDto) {
+        if (mauSacDto.getTen() == null || mauSacDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mau sac khong duoc de trong.");
+        }
+
+
+        MauSacEntity mauSacEntity = new MauSacEntity();
+
+
+        mauSacEntity.setMa(mauSacDto.getMa() != null ? mauSacDto.getMa() : generateMa());
+
+
+        mauSacEntity.setTrangThai(mauSacDto.getTrangThai() != null ? mauSacDto.getTrangThai() : 1);
+
+
+        mauSacEntity.setTen(mauSacDto.getTen().trim());
+
+
+        return mauSacRepository.save(mauSacEntity);}
+    private String generateMa() {
+        return "MS" + System.currentTimeMillis();
     }
 
     @Override
