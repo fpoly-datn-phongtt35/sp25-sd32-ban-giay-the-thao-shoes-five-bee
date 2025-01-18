@@ -24,5 +24,8 @@ public class AnhGiayEntity {
     private String tenUrl;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
+    @ManyToOne
+    @JoinColumn(name = "ID_GIAY")
+    private GiayEntity giayEntity;
 
 }
