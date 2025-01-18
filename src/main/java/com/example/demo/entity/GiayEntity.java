@@ -66,5 +66,8 @@ public class GiayEntity {
     @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AnhGiayEntity> anhGiayEntities;
 
+    @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GiayChiTietEntity> giayChiTietEntities;
+
 
 }
