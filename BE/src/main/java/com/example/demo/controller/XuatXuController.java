@@ -59,4 +59,8 @@ public class XuatXuController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PostMapping("/toggle-trangthai")
+    public XuatXuEntity toggleTrangThai(@RequestBody XuatXuUpdateDto xuatXuUpdateDto) {
+        return xuatXuService.toggleTrangThai(xuatXuUpdateDto);
+    }
 }

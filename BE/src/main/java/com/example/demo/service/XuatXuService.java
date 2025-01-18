@@ -18,5 +18,6 @@ public interface XuatXuService {
     XuatXuEntity update(XuatXuUpdateDto xuatXuUpdateDto);
     XuatXuEntity detail(XuatXuUpdateDto xuatXuUpdateDto);
     XuatXuEntity delete(XuatXuUpdateDto xuatXuUpdateDto);
+    XuatXuEntity toggleTrangThai(XuatXuUpdateDto xuatXuUpdateDto);
     PageResponse<XuatXuEntity> findByPagingCriteria(XuatXuDto xuatXuDto, Pageable pageable);
 }
