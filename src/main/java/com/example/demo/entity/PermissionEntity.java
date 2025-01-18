@@ -25,4 +25,7 @@ public class PermissionEntity {
     private String moTa;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
+    @ManyToOne
+    @JoinColumn(name = "FUNCTION_ID")
+    private FunctionEntity functionEntity;
 }
