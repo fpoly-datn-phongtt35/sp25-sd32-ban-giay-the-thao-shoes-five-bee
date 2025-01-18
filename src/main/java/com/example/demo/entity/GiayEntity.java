@@ -43,7 +43,7 @@ public class GiayEntity {
 
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
- 
+
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "ID_THUONG_HIEU",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private ThuongHieuEntity thuongHieu;
@@ -64,9 +64,11 @@ public class GiayEntity {
     @JoinColumn(name = "ID_KIEU_DANG",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private KieuDangEntity kieuDang;
 
-    @ManyToOne(fetch = FetchType.LAZY)
-    @JoinColumn(name = "ID_ANH_GIAY",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
-    private AnhGiayEntity anhGiayEntity;
+    @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<AnhGiayEntity> anhGiayEntities;
+
+    @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GiayChiTietEntity> giayChiTietEntities;
 
 
 }

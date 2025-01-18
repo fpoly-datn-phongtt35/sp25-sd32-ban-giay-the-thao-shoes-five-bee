@@ -11,7 +11,7 @@ import java.util.UUID;
 @Getter
 @NoArgsConstructor
 @AllArgsConstructor
-@Table(name = "ROLE")
+@Table(name = "TBL_ROLE")
 public class RoleEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.AUTO)
