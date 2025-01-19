@@ -6,6 +6,7 @@ import com.example.demo.dto.request.AnhGiayDto;
 import com.example.demo.entity.AnhGiayEntity;
 import com.example.demo.repository.AnhGiayRepository;
 import com.example.demo.service.AnhGiayService;
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
@@ -18,6 +19,7 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
+import java.util.List;
 import java.util.UUID;
 
 @Service
@@ -80,4 +82,13 @@ public class AnhGiayServiceImpl implements AnhGiayService {
         }
         return new String[]{originalName, ""};
     }
+
+
+    @Override
+    public void assignToGiayByAnhGiayIdAndIds(
+            @NonNull UUID giayId, @NonNull List<UUID> ids) {
+        anhGiayRepository.assignToGiayByAnhGiayIdAndIds(giayId, ids);
+    }
 }
+
+

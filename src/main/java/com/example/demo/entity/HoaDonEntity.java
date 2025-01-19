@@ -1,6 +1,5 @@
 package com.example.demo.entity;
 
-import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -66,8 +65,8 @@ public class HoaDonEntity {
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
 
-    @ManyToOne
-    @JoinColumn(name = "ID_USER")
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "ID_USER",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private UserEntity userEntity;
 
 
@@ -75,5 +74,5 @@ public class HoaDonEntity {
     private List<HoaDonChiTietEntity> items;
 
     @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    private List<ChuongTrinhGiamGiaHoaDonChiTietEntity> chuongTrinhGiamGiaChiTietHoaDons;
+    private List<GiamGiaHoaDonChiTietEntity> chuongTrinhGiamGiaChiTietHoaDons;
 }
