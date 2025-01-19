@@ -32,15 +32,15 @@ public class GiayDto extends PageDto {
 
   private Integer trangThai;
 
-  private UUID idThuongHieu;
+  private ThuongHieuUpdateDto thuongHieuDto;
 
-  private UUID idChatLieu;
+  private ChatLieuUpdateDto chatLieuDto;
 
-  private UUID idDeGiay;
+  private DeGiayUpdateDto deGiayDto;
 
-  private UUID idXuatXu;
+  private XuatXuUpdateDto xuatXuDto;
 
-  private UUID idKieuDang;
+  private KieuDangUpdateDto kieuDangDto;
 
-  private List<UUID> anhGiayIds;
+  private List<AnhGiayDto> anhGiayDtos;
 }

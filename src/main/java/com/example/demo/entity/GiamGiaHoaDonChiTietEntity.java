@@ -30,10 +30,10 @@ public class GiamGiaHoaDonChiTietEntity {
     private BigDecimal tongTienThanhToan;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_HOA_DON",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private HoaDonEntity hoaDonEntity;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_HOA_DON",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private GiamGiaHoaDonEntity chuongTrinhGiamGiaHoaDonEntity;
 }

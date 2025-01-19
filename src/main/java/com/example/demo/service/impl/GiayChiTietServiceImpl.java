@@ -41,10 +41,10 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         GiayChiTietEntity.builder()
             .giaBan(giayChiTietDto.getGiaBan())
             .soLuongTon(giayChiTietDto.getSoLuongTon())
-            .mauSacEntity(mauSacRepository.findById(giayChiTietDto.getIdMauSac()).orElse(null))
-            .kichCoEntity(kichCoRepository.findById(giayChiTietDto.getIdKichCo()).orElse(null))
+            .mauSacEntity(mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null))
+            .kichCoEntity(kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null))
             .trangThai(giayChiTietDto.getTrangThai())
-            .giayEntity(giayRepository.findById(giayChiTietDto.getIdGiay()).orElse(null))
+            .giayEntity(giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null))
             .build());
   }
 
@@ -57,11 +57,11 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
               o.setGiaBan(giayChiTietDto.getGiaBan());
               o.setSoLuongTon(giayChiTietDto.getSoLuongTon());
               o.setMauSacEntity(
-                  mauSacRepository.findById(giayChiTietDto.getIdMauSac()).orElse(null));
+                  mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null));
               o.setKichCoEntity(
-                  kichCoRepository.findById(giayChiTietDto.getIdKichCo()).orElse(null));
+                  kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null));
               o.setTrangThai(giayChiTietDto.getTrangThai());
-              o.setGiayEntity(giayRepository.findById(giayChiTietDto.getIdGiay()).orElse(null));
+              o.setGiayEntity(giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null));
               return giayChiTietRepository.save(o);
             })
         .orElse(null);

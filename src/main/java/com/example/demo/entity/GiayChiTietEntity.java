@@ -22,11 +22,11 @@ public class GiayChiTietEntity {
   @Column(name = "ID")
   private UUID id;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "ID_MAUSAC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private MauSacEntity mauSacEntity;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "ID_KICK_CO", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private KichCoEntity kichCoEntity;
 
@@ -39,7 +39,7 @@ public class GiayChiTietEntity {
   @Column(name = "TRANG_THAI")
   private Integer trangThai;
 
-  @ManyToOne(fetch = FetchType.LAZY)
+  @ManyToOne(fetch = FetchType.EAGER)
   @JoinColumn(name = "ID_GIAY", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private GiayEntity giayEntity;
 }

@@ -42,10 +42,10 @@ public class GiamGiaHoaDonChiTietServiceImpl implements GiamGiaHoaDonChiTietServ
             .tongTienThanhToan(giamGiaHoaDonChiTietDto.getTongTienThanhToan())
             .trangThai(giamGiaHoaDonChiTietDto.getTrangThai())
             .hoaDonEntity(
-                hoaDonRepository.findById(giamGiaHoaDonChiTietDto.getIdHoaDon()).orElse(null))
+                hoaDonRepository.findById(giamGiaHoaDonChiTietDto.getHoaDonDto().getId()).orElse(null))
             .chuongTrinhGiamGiaHoaDonEntity(
                 giamGiaHoaDonRepository
-                    .findById(giamGiaHoaDonChiTietDto.getIdGiamGiaHoaDon())
+                    .findById(giamGiaHoaDonChiTietDto.getGiamGiaHoaDonDto().getId())
                     .orElse(null))
             .build());
   }
@@ -63,10 +63,10 @@ public class GiamGiaHoaDonChiTietServiceImpl implements GiamGiaHoaDonChiTietServ
               o.setTongTienThanhToan(giamGiaHoaDonChiTietDto.getTongTienThanhToan());
               o.setTrangThai(giamGiaHoaDonChiTietDto.getTrangThai());
               o.setHoaDonEntity(
-                  hoaDonRepository.findById(giamGiaHoaDonChiTietDto.getIdHoaDon()).orElse(null));
+                  hoaDonRepository.findById(giamGiaHoaDonChiTietDto.getHoaDonDto().getId()).orElse(null));
               o.setChuongTrinhGiamGiaHoaDonEntity(
                   giamGiaHoaDonRepository
-                      .findById(giamGiaHoaDonChiTietDto.getIdGiamGiaHoaDon())
+                      .findById(giamGiaHoaDonChiTietDto.getGiamGiaHoaDonDto().getId())
                       .orElse(null));
               return giamGiaHoaDonChiTietRepository.save(o);
             })

@@ -15,6 +15,6 @@ public interface AnhGiayRepository extends JpaRepository<AnhGiayEntity, UUID> {
 
   @Modifying
   @Transactional
-  @Query("UPDATE AnhGiayEntity a SET a.giay.id = :giayId WHERE a.id IN :ids")
-  void assignToGiayByAnhGiayIdAndIds(@Param("giayId") Long giayId, @Param("ids") List<Long> ids);
+  @Query("UPDATE AnhGiayEntity a SET a.giayEntity.id = :giayId WHERE a.id IN :ids")
+  void assignToGiayByAnhGiayIdAndIds(@Param("giayId") UUID giayId, @Param("ids") List<UUID> ids);
 }

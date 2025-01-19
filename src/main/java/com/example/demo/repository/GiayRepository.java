@@ -12,7 +12,4 @@ import java.util.UUID;
 @Repository
 public interface GiayRepository extends JpaRepository<GiayEntity, UUID>, JpaSpecificationExecutor<GiayEntity> {
 
-    @Query("SELECT g FROM GiayEntity g JOIN FETCH g.anhGiayEntities WHERE g.id = :id")
-    GiayEntity findWithAnhGiayById(@Param("id") Long id);
-
 }

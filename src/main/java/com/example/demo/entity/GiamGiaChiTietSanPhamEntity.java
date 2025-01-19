@@ -29,11 +29,11 @@ public class GiamGiaChiTietSanPhamEntity {
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_GIAY",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private GiayEntity giay;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_SAN_PHAM",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private GiamGiaSanPhamEntity chuongTrinhGiamSanPhamEntity;
 }

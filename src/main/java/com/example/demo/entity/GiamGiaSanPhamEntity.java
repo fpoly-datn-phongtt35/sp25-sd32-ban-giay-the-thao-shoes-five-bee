@@ -34,7 +34,7 @@ public class GiamGiaSanPhamEntity {
     private Date ngayKetThuc;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_USER",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private UserEntity userEntity;
 

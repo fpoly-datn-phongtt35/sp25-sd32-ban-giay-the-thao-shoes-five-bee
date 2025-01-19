@@ -8,10 +8,10 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/giay")
@@ -49,5 +49,10 @@ public class GiayController {
   @PostMapping("/delete")
   public ResponseEntity<?> delete(@RequestBody GiayDto giayDto) {
     return ResponseEntity.ok(giayService.delete(giayDto));
+  }
+
+  @PostMapping("/{id}/anhGiay")
+  public ResponseEntity<?> anhGiay(@PathVariable("id") UUID id, @RequestBody List<UUID> anhGiayIds) {
+    return ResponseEntity.ok(giayService.assignAnhGiay(id,anhGiayIds));
   }
 }

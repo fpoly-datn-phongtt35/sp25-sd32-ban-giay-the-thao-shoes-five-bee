@@ -39,10 +39,10 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
         GiamGiaChiTietSanPhamEntity.builder()
             .soTienDaGiam(giamGiaChiTietSanPhamDto.getSoTienDaGiam())
             .trangThai(giamGiaChiTietSanPhamDto.getTrangThai())
-            .giay(giayRepository.findById(giamGiaChiTietSanPhamDto.getIdGiay()).orElse(null))
+            .giay(giayRepository.findById(giamGiaChiTietSanPhamDto.getGiayDto().getId()).orElse(null))
             .chuongTrinhGiamSanPhamEntity(
                 giamGiaSanPhamRepository
-                    .findById(giamGiaChiTietSanPhamDto.getIdGiamGiaSanPham())
+                    .findById(giamGiaChiTietSanPhamDto.getGiamGiaSanPhamDto().getId())
                     .orElse(null))
             .build());
   }
@@ -57,10 +57,10 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
             o -> {
               o.setSoTienDaGiam(giamGiaChiTietSanPhamDto.getSoTienDaGiam());
               o.setTrangThai(giamGiaChiTietSanPhamDto.getTrangThai());
-              o.setGiay(giayRepository.findById(giamGiaChiTietSanPhamDto.getIdGiay()).orElse(null));
+              o.setGiay(giayRepository.findById(giamGiaChiTietSanPhamDto.getGiayDto().getId()).orElse(null));
               o.setChuongTrinhGiamSanPhamEntity(
                   giamGiaSanPhamRepository
-                      .findById(giamGiaChiTietSanPhamDto.getIdGiamGiaSanPham())
+                      .findById(giamGiaChiTietSanPhamDto.getGiamGiaSanPhamDto().getId())
                       .orElse(null));
               return giamGiaChiTietSanPhamRepository.save(o);
             })
