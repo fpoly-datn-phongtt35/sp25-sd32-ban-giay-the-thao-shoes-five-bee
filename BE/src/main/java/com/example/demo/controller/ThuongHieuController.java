@@ -59,4 +59,8 @@ public class ThuongHieuController {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
     }
+    @PostMapping("/toggle-trangthai")
+    public ThuongHieuEntity toggleTrangThai(@RequestBody ThuongHieuUpdateDto thuongHieuUpdateDto) {
+        return thuongHieuService.toggleTrangThai(thuongHieuUpdateDto);
+    }
 }
