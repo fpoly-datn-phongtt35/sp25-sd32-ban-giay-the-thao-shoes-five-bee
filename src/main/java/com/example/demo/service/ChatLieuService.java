@@ -21,5 +21,7 @@ public interface ChatLieuService {
 
     ChatLieuEntity delete(ChatLieuUpdateDto chatLieuUpdateDto);
 
+    ChatLieuEntity toggleTrangThai(ChatLieuUpdateDto chatLieuUpdateDto);
+
     PageResponse<ChatLieuEntity> findByPagingCriteria(ChatLieuDto chatLieuDto, Pageable pageable);
 }

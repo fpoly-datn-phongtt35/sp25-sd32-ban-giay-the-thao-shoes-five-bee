@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.request.*;
 import com.example.demo.entity.KieuDangEntity;
 import com.example.demo.entity.MauSacEntity;
+import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.service.KieuDangService;
 import com.example.demo.service.MauSacService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +59,9 @@ public class KieuDangController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @PostMapping("/toggle-trangthai")
+    public KieuDangEntity toggleTrangThai(@RequestBody KieuDangUpdateDto kieuDangUpdateDto) {
+        return kieuDangService.toggleTrangThai(kieuDangUpdateDto);
     }
 }

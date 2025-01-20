@@ -18,5 +18,6 @@ public interface DeGiayService {
     DeGiayEntity update(DeGiayUpdateDto deGiayUpdateDto);
     DeGiayEntity detail(DeGiayUpdateDto deGiayUpdateDto);
     DeGiayEntity delete(DeGiayUpdateDto deGiayUpdateDto);
+    DeGiayEntity toggleTrangThai(DeGiayUpdateDto deGiayUpdateDto);
     PageResponse<DeGiayEntity> findByPagingCriteria(DeGiayDto deGiayDto, Pageable pageable);
 }
