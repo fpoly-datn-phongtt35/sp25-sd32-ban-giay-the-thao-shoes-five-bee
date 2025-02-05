@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class GiayServiceImpl implements GiayService {
   private final GiayRepository giayRepository;
   private final ThuongHieuRepository thuongHieuRepository;
+  private final DanhMucRepository danhMucRepository;
   private final ChatLieuRepository chatLieuRepository;
   private final DeGiayRepository deGiayRepository;
   private final XuatXuRepository xuatXuRepository;
@@ -43,45 +44,25 @@ public class GiayServiceImpl implements GiayService {
 
   @Override
   public GiayEntity add(GiayDto giayDto) {
-      return giayRepository.save(
-              GiayEntity.builder()
-                      .ma(giayDto.getMa())
-                      .ten(giayDto.getTen())
-                      .moTa(giayDto.getMoTa())
-                      .giaNhap(giayDto.getGiaNhap())
-                      .giaBan(giayDto.getGiaBan())
-                      .soLuongTon(giayDto.getSoLuongTon())
-                      .trangThai(giayDto.getTrangThai())
-                      .thuongHieu(
-                              giayDto.getThuongHieuDto() != null ?
-                                      thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .chatLieu(
-                              giayDto.getChatLieuDto() != null ?
-                                      chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .deGiay(
-                              giayDto.getDeGiayDto() != null ?
-                                      deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .xuatXu(
-                              giayDto.getXuatXuDto() != null ?
-                                      xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .kieuDang(
-                              giayDto.getKieuDangDto() != null ?
-                                      kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .build());
+    return giayRepository.save(
+        GiayEntity.builder()
+            .ma(giayDto.getMa())
+            .ten(giayDto.getTen())
+            .moTa(giayDto.getMoTa())
+            .giaNhap(giayDto.getGiaNhap())
+            .giaBan(giayDto.getGiaBan())
+            .soLuongTon(giayDto.getSoLuongTon())
+            .trangThai(giayDto.getTrangThai())
+            .thuongHieu(thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null))
+            .chatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null))
+                .danhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null))
+            .deGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null))
+            .xuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null))
+            .kieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null))
+            .build());
   }
 
-
-    @Override
+  @Override
   public GiayEntity update(GiayDto giayDto) {
     Optional<GiayEntity> optional = giayRepository.findById(giayDto.getId());
     return optional
@@ -98,6 +79,7 @@ public class GiayServiceImpl implements GiayService {
                   thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null));
               o.setChatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null));
               o.setDeGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null));
+              o.setDanhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null));
               o.setXuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null));
               o.setKieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null));
               return giayRepository.save(o);
