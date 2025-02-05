@@ -23,11 +23,11 @@ public class GiayChiTietEntity {
   private UUID id;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "ID_MAUSAC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+  @JoinColumn(name = "ID_MAU_SAC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private MauSacEntity mauSacEntity;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JoinColumn(name = "ID_KICK_CO", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+  @JoinColumn(name = "ID_KICH_CO", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private KichCoEntity kichCoEntity;
 
   @Column(name = "GIA_BAN")

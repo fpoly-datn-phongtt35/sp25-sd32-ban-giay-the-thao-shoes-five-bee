@@ -28,6 +28,7 @@ import org.springframework.stereotype.Service;
 public class GiayServiceImpl implements GiayService {
   private final GiayRepository giayRepository;
   private final ThuongHieuRepository thuongHieuRepository;
+  private final DanhMucRepository danhMucRepository;
   private final ChatLieuRepository chatLieuRepository;
   private final DeGiayRepository deGiayRepository;
   private final XuatXuRepository xuatXuRepository;
@@ -54,6 +55,7 @@ public class GiayServiceImpl implements GiayService {
             .trangThai(giayDto.getTrangThai())
             .thuongHieu(thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null))
             .chatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null))
+                .danhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null))
             .deGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null))
             .xuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null))
             .kieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null))
@@ -77,6 +79,7 @@ public class GiayServiceImpl implements GiayService {
                   thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null));
               o.setChatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null));
               o.setDeGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null));
+              o.setDanhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null));
               o.setXuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null));
               o.setKieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null));
               return giayRepository.save(o);
