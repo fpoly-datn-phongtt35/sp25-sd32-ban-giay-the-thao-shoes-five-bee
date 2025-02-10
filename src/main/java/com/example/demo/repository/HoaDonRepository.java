@@ -48,7 +48,7 @@ public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, Jpa
             "('DATE', h.ngayThanhToan) ORDER BY FUNCTION('DATE', h.ngayThanhToan)")
     List<Object[]> doanhThuTheoNgay();
 
-
+//TRANG THAI 1 DE TAM THOI
 
 
 }
