@@ -89,6 +89,11 @@ public class AnhGiayServiceImpl implements AnhGiayService {
             @NonNull UUID giayId, @NonNull List<UUID> ids) {
         anhGiayRepository.assignToGiayByAnhGiayIdAndIds(giayId, ids);
     }
+
+    @Override
+    public List<AnhGiayEntity> getAll() {
+        return anhGiayRepository.findAll();
+    }
 }
 
 
