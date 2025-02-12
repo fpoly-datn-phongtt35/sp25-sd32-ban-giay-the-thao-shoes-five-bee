@@ -15,4 +15,5 @@ public interface AnhGiayService {
 
     void assignToGiayByAnhGiayIdAndIds(
             @NonNull UUID giayId, @NonNull List<UUID> ids);
+    List<AnhGiayEntity> getAll();
 }
