@@ -1,0 +1,158 @@
+.bill_container {
+    display: flex;
+    flex-direction: column;
+    padding: 20px;
+    font-family: Arial, sans-serif;
+  }
+  
+  .bill_form {
+    display: flex;
+    justify-content: space-between;
+  }
+  
+  .bill_left {
+     /* flex: 2;  */
+     padding-right: 40px;
+     width: 35%; /* Tăng chiều rộng của phần bên trái */
+     /* padding: 20px; */
+     border-right: 1px solid #ccc;
+  }
+  
+  .customer_info,
+  .payment_info {
+    margin-bottom: 20px;
+  }
+  
+  .section_content {
+    margin-top: 10px;
+  }
+  
+  .shipping_fee input {
+    font-size: 16px;
+    padding: 8px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    width: 100%;
+  }
+  
+  .payment_methods {
+    margin-top: 10px;
+  }
+  
+  .payment_option {
+    margin-bottom: 10px;
+  }
+  
+  .order_summary {
+    margin-top: 20px;
+  }
+  
+  .order_summary div {
+    margin-bottom: 8px;
+  }
+  
+  .buttons {
+    display: flex;
+    gap: 15px; /* Khoảng cách giữa các nút */
+  }
+  
+  .buttons button {
+    background-color: #FFB700; /* Màu nền của nút */
+    color: white; /* Màu chữ của nút */
+    border: none; /* Xóa đường viền mặc định */
+    border-radius: 5px; /* Bo góc nút */
+    padding: 12px 20px; /* Khoảng cách bên trong nút */
+    cursor: pointer; /* Con trỏ khi di chuột qua nút */
+    font-size: 16px; /* Kích thước chữ */
+    transition: background-color 0.3s, transform 0.2s; /* Hiệu ứng chuyển động */
+  }
+  
+  .buttons button:hover {
+    background-color: #FFB700; /* Màu nền khi di chuột qua nút */
+  }
+  
+  .buttons button:active {
+    transform: scale(0.98); /* Hiệu ứng khi nhấn nút */
+  }
+  
+  .buttons button a {
+    color: white; /* Màu chữ của liên kết trong nút */
+    text-decoration: none; /* Xóa gạch chân của liên kết */
+  }
+  
+  .buttons button a:hover {
+    text-decoration: underline; /* Gạch chân khi di chuột qua liên kết */
+  }
+  
+  .payment_methods input[type="radio"] {
+    margin-right: 10px;
+  }
+  
+  .payment_methods label {
+    margin-left: 5px;
+    font-size: 16px;
+  }
+  
+  .payment_methods .payment_option {
+    display: flex;
+    align-items: center;
+  }
+  
+  .bill_left h3 {
+    font-size: 18px;
+    margin-bottom: 10px;
+  }
+  
+  .bill_left .customer_info h3,
+  .bill_left .payment_info h3 {
+    border-bottom: 2px solid #FFB700;
+    padding-bottom: 5px;
+    margin-bottom: 20px;
+  }
+  
+  .bill_left .customer_info p,
+  .bill_left .payment_info p {
+    font-size: 16px;
+  }
+  
+  .order_summary div {
+    font-size: 18px;
+  }
+  
+  .order_summary span {
+    font-weight: bold;
+  }
+
+  .order_summary .order_summary_total span {
+    color: #ee4d2d;
+    font-weight: bold;
+  }
+  
+  .order_summary strong {
+    font-size: 20px;
+  }
+  
+  .hoa_don_cart {
+    flex: 1;
+    padding-left: 20px;
+  }
+  
+  .hoa_don_cart table {
+    width: 100%;
+    border-collapse: collapse;
+  }
+  
+  .hoa_don_cart th, .hoa_don_cart td {
+    border: 1px solid #ddd;
+    padding: 10px;
+    text-align: left;
+  }
+  
+  .hoa_don_cart th {
+    background-color: #f4f4f4;
+  }
+  
+  .hoa_don_cart tr:nth-child(even) {
+    background-color: #f9f9f9;
+  }
+  
