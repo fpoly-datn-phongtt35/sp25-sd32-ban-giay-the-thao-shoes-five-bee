@@ -1,47 +1,26 @@
 package com.example.demo.dto.request;
 
-import java.util.UUID;
+import lombok.AllArgsConstructor;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
+import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
-public class KhachHangDto {
+import java.util.List;
+import java.util.UUID;
+@Getter
+@Setter
+@SuperBuilder(toBuilder = true)
+@NoArgsConstructor
+@AllArgsConstructor
+public class KhachHangDto extends PageDto {
     private UUID id;
     private String ma;
     private String hoTen;
-    private String diaChi;
     private String email;
     private String soDienThoai;
+    private Integer trangThai;
+    private List<DiaChiDto> diaChiEntities;
 
-    // Constructor
-    public KhachHangDto(UUID id, String ma, String hoTen, String diaChi, String email, String soDienThoai) {
-        this.id = id;
-        this.ma = ma;
-        this.hoTen = hoTen;
-        this.diaChi = diaChi;
-        this.email = email;
-        this.soDienThoai = soDienThoai;
-    }
 
-    // Getters
-    public UUID getId() {
-        return id;
-    }
-
-    public String getMa() {
-        return ma;
-    }
-
-    public String getHoTen() {
-        return hoTen;
-    }
-
-    public String getDiaChi() {
-        return diaChi;
-    }
-
-    public String getEmail() {
-        return email;
-    }
-
-    public String getSoDienThoai() {
-        return soDienThoai;
-    }
 }

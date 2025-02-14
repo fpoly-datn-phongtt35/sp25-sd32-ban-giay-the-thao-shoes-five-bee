@@ -9,4 +9,5 @@ import java.util.UUID;
 
 @Repository
 public interface DeGiayRepository extends JpaRepository<DeGiayEntity, UUID>, JpaSpecificationExecutor<DeGiayEntity> {
+
 }
