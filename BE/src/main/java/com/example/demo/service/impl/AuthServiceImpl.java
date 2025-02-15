@@ -148,7 +148,15 @@ public class AuthServiceImpl implements AuthService {
         userRepository.save(user);
         return ResponseEntity.ok(Map.of("message", "Kích hoạt tài khoản thành công"));
     }
-
+    @Override
+    public ResponseEntity<?> logout() {
+        try {
+            SecurityContextHolder.getContext();
+            return  ResponseEntity.ok(Map.of("message","đăng xuất thành công"));
+        }catch (Exception e){
+            return ResponseEntity.badRequest().body("Có lỗi xảy ra khi đăng xuất");
+        }
+    }
     @Override
     public ResponseEntity<?> sendBackOtp(UserOtpDto userOtpDto) {
         UserEntity userEntity = userRepository.findByEmail(userOtpDto.getEmail())

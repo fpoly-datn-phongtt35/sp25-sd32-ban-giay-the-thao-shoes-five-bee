@@ -36,6 +36,12 @@ public class AuthController {
     public ResponseEntity<?> login(@RequestBody LoginRequest loginRequest){
         return authService.login(loginRequest);
     }
+
+    @PostMapping("/logout")
+    public ResponseEntity<?> logout(){
+        return authService.logout();
+    }
+
     @PostMapping("/check-otp")
     public ResponseEntity<?> checkOtp(@RequestBody UserOtpDto userOtpDto){
         return authService.checkOtp(userOtpDto);
