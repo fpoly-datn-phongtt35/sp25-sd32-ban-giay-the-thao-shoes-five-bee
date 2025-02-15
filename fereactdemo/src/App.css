@@ -1,0 +1,37 @@
+.ant-layout{
+  min-height: 100vh;
+  display:  flex;
+}
+.ant-layout-content{
+  min-height: 100vh;
+  display:  flex;
+  background-color: white;
+}
+.ant-layout-sider{
+  flex: 0 0 210px!important;
+  max-width: 210px!important;
+  min-width: 210px!important;
+  width: 210px!important;
+}
+.ant-layout-sider-collapsed{
+flex: 0 0 80px!important;
+max-width: 80px!important;
+min-width:80px!important;
+width: 80px!important;
+}
+.sm-logo{
+  display: none;
+}
+.ant-layout-sider-collapsed .sm-logo{
+  display: block;
+}
+.ant-layout-sider-collapsed .lg-logo{
+  display: none;
+}
+.logo{
+  margin: 0;
+  text-align: center;
+  
+}
+
+

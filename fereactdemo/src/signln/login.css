@@ -1,0 +1,96 @@
+body {
+    margin: 0;
+    font-family: 'Arial', sans-serif;
+    background: linear-gradient(135deg, #ffcc80, #ffa726);
+    /* Màu gradient vàng cam */
+    height: 100vh;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.login-container {
+    width: 100%;
+    max-width: 400px;
+    background: #ffffff;
+    border-radius: 12px;
+    box-shadow: 0px 8px 20px rgba(0, 0, 0, 0.1);
+    padding: 30px;
+    text-align: center;
+    animation: fadeIn 0.5s ease-in-out;
+}
+
+.login-title {
+    font-size: 24px;
+    font-weight: bold;
+    color: #333333;
+    margin-bottom: 10px;
+}
+
+.login-description {
+    font-size: 14px;
+    color: #666666;
+    margin-bottom: 20px;
+}
+
+.login-input {
+    width: 100%;
+    padding: 10px;
+    margin: 10px 0;
+    border: 1px solid #ddd;
+    border-radius: 6px;
+    font-size: 14px;
+    box-sizing: border-box;
+}
+
+.login-input:focus {
+    border-color: #ffa726;
+    outline: none;
+    box-shadow: 0 0 4px rgba(255, 167, 38, 0.6);
+    /* Ánh sáng cam */
+}
+
+.login-button {
+    width: 100%;
+    padding: 12px 20px;
+    font-size: 16px;
+    font-weight: bold;
+    color: white;
+    background: #ffa726;
+    border: none;
+    border-radius: 6px;
+    cursor: pointer;
+    transition: background 0.3s ease;
+}
+
+.login-button:hover {
+    background: #ff9800;
+    /* Màu cam đậm hơn khi hover */
+}
+
+.register-link {
+    font-size: 14px;
+    color: #ffa726;
+    text-decoration: none;
+    font-weight: bold;
+    margin-top: 15px;
+    display: inline-block;
+    transition: color 0.3s ease;
+}
+
+.register-link:hover {
+    color: #ff7e33;
+    /* Màu cam đậm hơn khi hover */
+}
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(-20px);
+    }
+
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}

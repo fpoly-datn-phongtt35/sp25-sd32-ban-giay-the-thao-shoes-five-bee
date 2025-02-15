@@ -1,0 +1,125 @@
+/* Tổng quát cho toàn bộ trang */
+.profile-page {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+}
+
+/* Phần nội dung chứa Sidebar và phần hiển thị */
+.content-wrapper {
+  display: flex;
+  flex: 1;
+  padding: 20px;
+  background-color: #f4f4f9;
+}
+
+/* Sidebar bố trí bên trái, chiếm không gian nhỏ hơn */
+.sidebar {
+  width: 250px;
+  background-color: #fff;
+  border-right: 1px solid #e0e0e0;
+  padding: 20px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+.profile-section {
+  text-align: center;
+  margin-bottom: 30px;
+}
+
+.avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  object-fit: cover;
+  margin-bottom: 10px;
+}
+
+.profile-section p {
+  font-size: 16px;
+  font-weight: 600;
+  color: #333;
+}
+
+/* Các liên kết menu trong Sidebar */
+.menu ul {
+  list-style: none;
+  padding: 0;
+}
+
+.menu li {
+  margin-bottom: 15px;
+}
+
+.menu li button {
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  color: #007bff;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.menu li button:hover {
+  background-color: #f0f0f0;
+  color: #0056b3;
+}
+
+.footer ul {
+  list-style: none;
+  padding: 0;
+  margin-top: 20px;
+}
+
+.footer li {
+  margin-bottom: 10px;
+}
+
+.footer li button {
+  background-color: transparent;
+  border: none;
+  font-size: 16px;
+  color: #007bff;
+  cursor: pointer;
+  text-align: left;
+  padding: 10px;
+  width: 100%;
+  transition: background-color 0.2s ease;
+}
+
+.footer li button:hover {
+  background-color: #f0f0f0;
+  color: #0056b3;
+}
+
+/* Phần hiển thị nội dung bên phải */
+.page-content {
+  flex: 1;
+  padding: 20px;
+  background-color: #fff;
+  margin-left: 20px;
+  border-radius: 8px;
+  box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+}
+
+/* Điều chỉnh phần header (nếu có) */
+header {
+  width: 100%;
+  background-color: #007bff;
+  padding: 10px 20px;
+  color: #fff;
+  font-size: 20px;
+  font-weight: bold;
+  text-align: center;
+}
+
+/* Phần loading và error */
+.loading, .error {
+  font-size: 16px;
+  color: #333;
+  text-align: center;
+  margin-top: 50px;
+}

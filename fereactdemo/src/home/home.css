@@ -1,0 +1,496 @@
+.home_container {
+    width: 100%;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
+}
+
+.header {
+    width: 100%;
+    height: 25vh;
+    background-color: aquamarine;
+}
+
+.header_content {
+    display: flex;
+    justify-content: space-between;
+}
+
+.header_content_left {
+    width: 20%;
+}
+
+.header_content_left p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-top: 10px;
+}
+
+.header_content_right {
+    display: flex;
+    align-items: center;
+    justify-content: flex-end;
+    font-size: 16px;
+    width: 60%;
+    float: right;
+}
+
+.item {
+    margin: 0 10px;
+}
+
+.separator {
+    margin: 0 5px;
+    color: #000;
+    /* Màu của dấu ngăn cách */
+}
+
+.header_header {
+    width: 100%;
+    height: 10vh;
+    background-color: #000;
+    display: flex;
+}
+
+.header_header_left {
+    width: 60%;
+    height: 10vh;
+    display: flex;
+}
+
+.header_header_left p {
+    width: 40%;
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-size: 50px;
+
+}
+
+.header_header_left input {
+    padding: 5px;
+    margin-left: 40px;
+    width: 50%;
+    height: 7vh;
+    margin-top: 10px;
+    border-radius: 16px;
+}
+
+.header_header_right {
+    width: 60%;
+    display: flex;
+
+}
+
+.header_header_left img {
+    width: 250px;
+}
+
+.header_header_right_content {
+    width: 30%;
+    height: 7vh;
+    display: flex;
+    margin-top: 10px;
+    margin-left: 10px;
+
+}
+
+.header_header_right_content img {
+    width: 50px;
+    height: 50px;
+
+}
+
+.header_header_right_content p {
+    color: white;
+    margin: auto;
+    margin-left: 10px;
+}
+
+.header_menu {
+    width: 100%;
+    height: 70px;
+    display: flex;
+}
+
+.header_menu_left {
+    width: 20%;
+    height: 40px;
+    background-color: #000;
+    margin-top: 12px;
+    margin-left: 50px;
+}
+
+.header_menu_left p {
+    color: white;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 6px;
+}
+
+.header_menu_right {
+    width: 80%;
+    height: 40px;
+    margin-top: 10px;
+    display: flex;
+}
+
+.header_menu_right p {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    padding-top: 6px;
+    margin: auto;
+}
+
+.banner img {
+    width: 100%;
+}
+
+.product_list {
+    width: 100%;
+    height: 350px;
+    display: flex;
+}
+
+/* .deal {
+    background-image: url('/banner_1.jpg');
+    width: 100%;
+    height: 350px;
+} */
+.product_container {
+    width: calc(100% - 120px);
+    margin: auto;
+}
+
+.product_deal {
+    background-image: url(//bizweb.dktcdn.net/100/493/970/themes/923518/assets/back_sale.jpg?1717384859524);
+    ;
+    margin-top: 20px;
+    height: 500px;
+}
+
+.count-down {
+    display: inline-block;
+    font-size: 14px;
+    padding: 0;
+    background: #fff;
+    padding: 0px 70px 10px;
+    clip-path: polygon(0 0, 100% 0, 84% 100%, 16% 100%);
+    margin-top: -1px;
+    margin-bottom: 20px;
+    margin-left: 480px;
+
+}
+
+.title-timer {
+    display: block;
+    text-align: center;
+    font-size: 18px;
+    font-weight: 700;
+    text-transform: uppercase;
+}
+
+.product_sale {
+    width: 90%;
+    height: 270px;
+    display: flex;
+    margin-top: 30px;
+    margin-left: 60px;
+    justify-content: space-around;
+
+}
+
+.product_sale_list {
+    width: 30%;
+    height: 270px;
+    background-color: orange;
+}
+
+.product_sale_list img {
+    float: right;
+    width: 70%;
+}
+
+.product_sale_list_content {
+    display: flex;
+    flex-direction: column;
+    padding-top: 40px;
+    gap: 20px;
+    padding-left: 20px;
+}
+
+.product_sale_list_content span {
+    border: 1px solid black;
+    background-color: black;
+    color: white;
+    text-align: center;
+}
+
+.product_sale_list_content button {
+    border: none;
+    font-weight: 500;
+    height: 30px;
+}
+
+.feedback {
+    background-image: url(//bizweb.dktcdn.net/100/493/970/themes/923518/assets/back_sale.jpg?1717384859524);
+    height: 500px;
+    display: flex;
+    margin-top: 20px;
+
+}
+
+.feedback span {
+    color: white;
+    font-size: 20px;
+    font-weight: 600;
+    margin-top: 20px;
+    margin-left: 130px;
+    width: 500px;
+    height: 60px;
+
+}
+
+.feedback_content {
+    width: 400px;
+    height: 300px;
+    background-color: #FFB700;
+    position: relative;
+    /* margin-left: 20px; */
+    margin-top: 150px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    margin-right: 10px;
+    margin-left: 70px;
+
+
+}
+
+.feedback_content p {
+    font-size: 16px;
+    color: black;
+    margin: auto;
+}
+
+.feedback_avatar {
+    width: 300px;
+    height: 100px;
+    background-color: white;
+    position: absolute;
+    top: -35px;
+    /* Hoặc điều chỉnh giá trị này theo ý bạn */
+    left: 40px;
+    z-index: 10;
+}
+
+.feedback_avatar img {
+    width: 30%;
+}
+
+.feedback_avatar_nd {
+    position: absolute;
+    top: 0;
+    /* Hoặc điều chỉnh giá trị này theo ý bạn */
+    left: 10px;
+    z-index: 10;
+    text-align: center;
+}
+
+.aside_right_home {
+    display: flex;
+    justify-content: center;
+}
+
+.all_products_home {
+    width: 100%;
+}
+
+.products_container_home {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 20px;
+    /* Khoảng cách giữa các sản phẩm */
+    justify-content: space-between;
+}
+
+.product_home {
+    flex: 1 1 calc(25% - 20px);
+    /* Chiều rộng mỗi sản phẩm là 25% trừ đi khoảng cách */
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    padding: 10px;
+    border: 1px solid #ddd;
+    border-radius: 5px;
+    background-color: #f9f9f9;
+}
+
+.product_image {
+    max-width: 100%;
+    height: auto;
+    margin-bottom: 10px;
+}
+
+.product_name {
+    font-size: 16px;
+    margin: 10px 0;
+    text-align: center;
+}
+
+.product_price {
+    font-size: 14px;
+    color: #333;
+    margin-bottom: 10px;
+    text-align: center;
+}
+
+.product_stock {
+    font-size: 12px;
+    color: #777;
+    text-align: center;
+    margin-bottom: 15px;
+}
+
+.banner {
+    position: relative;
+    width: 100%;
+    height: 600px;
+    display: flex;
+    justify-content: flex-start;
+    /* Đảm bảo slider nằm bên trái */
+    align-items: center;
+    overflow: hidden;
+}
+
+.banner img {
+    width: 100%;
+    height: auto;
+    object-fit: cover;
+}
+
+.slider {
+    position: absolute;
+
+    display: flex;
+    justify-content: flex-start;
+    /* Các slide item căn trái */
+    align-items: center;
+    gap: 15px;
+    transform: translateX(0);
+    /* Đảm bảo không có dịch chuyển mặc định */
+    left: 5%;
+    /* Đảm bảo slider bắt đầu từ bên trái */
+}
+
+.imgBanner {
+    display: flex;
+    justify-content: flex-start;
+    /* Đảm bảo các slide item căn trái */
+    align-items: center;
+    position: relative;
+    width: 20%;
+    /* Đảm bảo chiều rộng của container đầy đủ */
+}
+
+.slide-item {
+    width: 100px;
+    height: 150px;
+    border-radius: 10px;
+    transition: all 0.5s ease;
+    object-fit: cover;
+    opacity: 0.6;
+    transform: scale(0.9);
+    position: relative;
+    /* Đảm bảo các item không bị chồng lên nhau */
+    z-index: 1;
+}
+
+.slide-item.active {
+    width: 200px;
+    height: 200px;
+    opacity: 1;
+    transform: scale(1.2);
+    z-index: 2;
+}
+
+.slide-item.left {
+    transform: translateX(-180px) scale(0.9);
+    z-index: 1;
+    opacity: 0.8;
+}
+
+.slide-item.right {
+    transform: translateX(180px) scale(0.9);
+    z-index: 1;
+    opacity: 0.8;
+}
+
+/* Hiệu ứng hover cho mượt hơn */
+.slide-item:hover {
+    cursor: pointer;
+    transform: scale(1);
+    opacity: 1;
+}
+
+.product_sale {
+    width: 100%;
+    height: 500px;
+    display: flex;
+    margin-top: 30px;
+    justify-content: space-around;
+    background-color: #e1e1df;
+    position: relative;
+    z-index: 0;
+
+}
+
+.imgContent img {
+    width: 30%;
+    position: absolute;
+    z-index: 3;
+    bottom: 20%;
+    transition: transform 1.5s ease-in-out;
+    right: 20%;
+}
+
+.imgText {
+    position: absolute;
+    z-index: 1;
+    right: 25%;
+}
+
+.imgContent img:hover {
+    animation: randomMove 2.5s ease-in-out forwards;
+}
+
+@keyframes randomMove {
+    0% {
+        transform: translate(0, 0);
+    }
+
+    20% {
+        transform: translate(-15px, 10px);
+    }
+
+    40% {
+        transform: translate(10px, -15px);
+    }
+
+    60% {
+        transform: translate(-20px, 5px);
+    }
+
+    80% {
+        transform: translate(15px, -10px);
+    }
+
+    100% {
+        transform: translate(0, 0);
+    }
+}

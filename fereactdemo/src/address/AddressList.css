@@ -1,0 +1,108 @@
+Tổng thể container
+.address-container {
+  width: 80%;
+  margin: 0 auto;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.address {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 20px;
+  padding: 15px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.address h2 {
+  font-size: 1.5em;
+  color: #333;
+}
+
+.add-button {
+  background-color: #ff5722;
+  color: white;
+  border: none;
+  padding: 10px 15px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.add-button:hover {
+  background-color: #e64a19;
+}
+
+.address-list {
+  list-style: none;
+  padding: 0;
+}
+
+.address-item {
+  display: flex;
+  justify-content: space-between;
+  padding: 15px 0;
+  border-bottom: 1px solid #ddd;
+}
+
+.address-item:last-child {
+  border-bottom: none;
+}
+
+.address-info {
+  max-width: 70%;
+}
+
+.address-info strong {
+  display: block;
+  font-size: 1.2em;
+  color: #333;
+}
+
+.address-info span {
+  display: block;
+  margin-top: 5px;
+  color: #888;
+}
+
+.address-info p {
+  margin: 10px 0;
+  color: #666;
+}
+
+.default-tag {
+  display: inline-block;
+  background-color: #ff5722;
+  color: white;
+  padding: 5px 10px;
+  font-size: 0.9em;
+  border-radius: 5px;
+  margin-top: 10px;
+}
+
+.address-actions a {
+  margin-right: 15px;
+  color: #ff5722;
+  padding: 5px 10px 5px 20px;
+  text-decoration: none;
+}
+
+.address-actions a:hover {
+  text-decoration: underline;
+}
+
+.default-button {
+  background-color: white;
+  border: 1px solid #ff5722;
+  color: #ff5722;
+  padding: 5px 10px;
+  border-radius: 5px;
+  cursor: pointer;
+}
+
+.default-button:hover {
+  background-color: #ff5722;
+  color: white;
+}

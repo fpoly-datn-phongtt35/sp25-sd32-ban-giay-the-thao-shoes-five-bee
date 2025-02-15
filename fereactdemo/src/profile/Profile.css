@@ -1,0 +1,187 @@
+/* Container chính cho profile */
+.profile-container {
+  max-width: 900px;
+  margin: 0 auto;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+/* Tiêu đề chính của profile */
+.profile-title {
+  font-size: 24px;
+  font-weight: bold;
+  margin-bottom: 10px;
+}
+
+/* Mô tả nhỏ bên dưới tiêu đề */
+.profile-description {
+  color: #666;
+  margin-bottom: 20px;
+}
+
+/* Bố cục chia cột giữa thông tin và avatar */
+.profile-content {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+/* Cột trái - thông tin người dùng */
+.profile-left {
+  flex: 2;
+  padding-right: 20px;
+}
+
+/* Định dạng cho từng group form */
+.form-group {
+  margin-bottom: 20px;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+/* Nhãn (label) của mỗi field */
+.form-group label {
+  font-size: 16px;
+  font-weight: bold;
+  color: #333;
+}
+
+/* Input cho các text field */
+.form-group input[type="text"],
+.form-group input[type="date"] {
+  width: 100%;
+  padding: 10px;
+  margin-top: 5px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  font-size: 16px;
+  background-color: #f9f9f9;
+  transition: border-color 0.3s ease-in-out, background-color 0.3s ease-in-out;
+}
+
+.form-group input[type="text"]:focus,
+.form-group input[type="date"]:focus {
+  border-color: #007bff;
+  background-color: #fff;
+  outline: none;
+}
+
+/* Small text hướng dẫn dưới các input */
+.form-group small {
+  color: #999;
+  display: block;
+  margin-top: 5px;
+}
+
+/* Các lựa chọn giới tính */
+.gender-options {
+  display: flex;
+  gap: 20px;
+}
+
+.gender-options label {
+  display: flex;
+  align-items: center;
+  font-weight: 500;
+}
+
+/* Định dạng nút lưu */
+.save-button {
+  background-color: #f05642;
+  color: white;
+  padding: 10px 20px;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 16px;
+  transition: background-color 0.3s ease;
+}
+
+.save-button:hover {
+  background-color: #d64535;
+}
+
+/* Cột phải - phần avatar */
+.profile-right {
+  flex: 1;
+  text-align: center;
+}
+
+.avatar {
+  display: flex;
+  flex-direction: column; /* Avatar và nút chọn ảnh theo chiều dọc */
+  align-items: center;
+}
+
+.avatar img {
+  width: 100px;
+  height: 100px;
+  border-radius: 50%;
+  margin-bottom: 10px; /* Khoảng cách dưới avatar */
+}
+
+.upload-button {
+  background-color: #FFB700;
+  border: 1px solid #ccc;
+  padding: 8px 16px;
+  border-radius: 4px;
+  cursor: pointer;
+  transition: background-color 0.3s ease;
+}
+
+.upload-button:hover {
+  background-color: #FFB700;
+}
+
+/* Mô tả nhỏ dưới avatar */
+.avatar p {
+  color: #999;
+  font-size: 12px;
+  margin-top: 5px;
+  text-align: center;
+}
+
+/* Thông báo thành công */
+.alert {
+  padding: 10px;
+  margin-bottom: 10px;
+  border-radius: 5px;
+  color: white;
+  text-align: center;
+}
+
+.alert-success {
+  background-color: #4CAF50; /* Màu xanh cho thông báo thành công */
+}
+
+/* Nút hủy và nút thay đổi */
+.profile-container .save-button,
+.profile-container button {
+  padding: 8px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: white;
+  border: none;
+  border-radius: 5px;
+  cursor: pointer;
+  transition: background-color 0.3s ease-in-out;
+}
+/* Nút hủy với màu xám */
+.profile-container .change-button {
+  background-color: #FFB700;
+}
+.profile-container .cancel-button {
+  background-color: #FFB700;
+}
+
+.profile-container .cancel-button:hover {
+  background-color: #FFB700;
+}
+
+/* Căn chỉnh khoảng cách giữa nút thay đổi và hủy */
+.profile-container .button-group {
+  display: flex;
+  gap: 10px;
+  margin-top: 10px;
+}
