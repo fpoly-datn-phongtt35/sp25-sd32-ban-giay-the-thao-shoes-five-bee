@@ -30,6 +30,9 @@ public class GiayChiTietEntity {
   @JoinColumn(name = "ID_KICK_CO", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private KichCoEntity kichCoEntity;
 
+  @JoinColumn(name = "MA_VACH")
+  private String maVach;
+
   @Column(name = "GIA_BAN")
   private BigDecimal giaBan;
 

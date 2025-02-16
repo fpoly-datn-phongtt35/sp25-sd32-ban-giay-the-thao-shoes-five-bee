@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.GiamGiaChiTietSanPhamRequest;
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
 import com.example.demo.service.GiamGiaSanPhamService;
 import lombok.RequiredArgsConstructor;
@@ -16,6 +17,11 @@ import org.springframework.web.bind.annotation.RestController;
 @RequiredArgsConstructor
 public class GiamGiaSanPhamController {
   private final GiamGiaSanPhamService giamGiaSanPhamService;
+
+  @PostMapping("/tao-giam-gia")
+  public ResponseEntity<?> taoChuongTrinhGiamGia(@RequestBody GiamGiaChiTietSanPhamRequest request) {
+    return ResponseEntity.ok(giamGiaSanPhamService.taoChuongTrinhGiamGia(request));
+  }
 
   @PostMapping("/getAll")
   public ResponseEntity<?> getAll() {
