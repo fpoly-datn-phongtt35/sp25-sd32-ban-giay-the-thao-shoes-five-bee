@@ -49,6 +49,7 @@ public class GiayServiceImpl implements GiayService {
                       .ten(giayDto.getTen())
                       .moTa(giayDto.getMoTa())
                       .giaNhap(giayDto.getGiaNhap())
+                      .giaBan(giayDto.getGiaBan())
                       .soLuongTon(giayDto.getSoLuongTon())
                       .trangThai(giayDto.getTrangThai())
                       .thuongHieu(

@@ -98,7 +98,7 @@ const SanPham = () => {
           TEN: item.ten,
           MOTA: item.moTa,
           GIABAN: item.giaBan,
-          SOLUONGTON: totalSoLuongTon,
+          SOLUONGTON: item.soLuongTon,
           TRANG_THAI: item.trangThai,
           THUONG_HIEU: item.thuongHieu ? item.thuongHieu.ten : null,
           CHAT_LIEU: item.chatLieu ? item.chatLieu.ten : null,
