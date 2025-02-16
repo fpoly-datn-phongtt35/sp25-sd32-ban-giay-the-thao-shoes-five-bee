@@ -6,9 +6,12 @@ export const getGiay = () => axios.post(`${REST_API_URL}/getAll`);
 
 export const addGiay = (giay) => axios.post(`${REST_API_URL}/add`, giay);
 
-export const deleteGiay = (id) => axios.post(`${REST_API_URL}/delete/${id}`);
+export const deleteGiay = (id) => axios.post(`${REST_API_URL}/delete`, { id });
 
-export const updateGiay = (id, giay) =>
-  axios.post(`${REST_API_URL}/update/${id}`, giay);
+export const updateGiay = (giay) =>
+  axios.post(`${REST_API_URL}/update`, giay, {
+    headers: { "Content-Type": "application/json" }, // 👈 Bắt buộc để server hiểu là JSON
+  });
 
-export const getGiayDetail = (id) => axios.get(`${REST_API_URL}/detail/${id}`);
+export const getGiayDetail = (id) =>
+  axios.post(`${REST_API_URL}/detail`, { id });
