@@ -162,32 +162,55 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   @Override
   public HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease) {
     HoaDonChiTietEntity hoaDonChiTiet =
-        hoaDonChiTietRepository
-            .findById(idHoaDonChiTiet)
-            .orElseThrow(() -> new IllegalArgumentException("Hóa đơn chi tiết không tồn tại"));
+            hoaDonChiTietRepository
+                    .findById(idHoaDonChiTiet)
+                    .orElseThrow(() -> new IllegalArgumentException("Hóa đơn chi tiết không tồn tại"));
 
     GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
     int soLuongHienTai = hoaDonChiTiet.getSoLuong();
     int soLuongTon = giayChiTiet.getSoLuongTon();
 
-    hoaDonChiTiet.setSoLuong(
-        isIncrease
-            ? (soLuongHienTai < soLuongTon ? soLuongHienTai + 1 : soLuongHienTai)
-            : (soLuongHienTai > 1 ? soLuongHienTai - 1 : soLuongHienTai));
-
-    giayChiTiet.setSoLuongTon(
-        isIncrease
-            ? (soLuongHienTai < soLuongTon ? soLuongTon - 1 : soLuongTon)
-            : (soLuongHienTai > 1 ? soLuongTon + 1 : soLuongTon));
-
-    if (hoaDonChiTiet.getSoLuong() == soLuongHienTai) {
-      throw new IllegalStateException(
-          isIncrease ? "Số lượng tồn không đủ để tăng" : "Số lượng không thể nhỏ hơn 1");
+    if (isIncrease) {
+      if (soLuongTon <= 0) {
+        throw new IllegalStateException("Không đủ hàng để tăng số lượng");
+      }
+      hoaDonChiTiet.setSoLuong(soLuongHienTai + 1);
+      giayChiTiet.setSoLuongTon(soLuongTon - 1);
+    } else {
+      if (soLuongHienTai <= 1) {
+        throw new IllegalStateException("Số lượng không thể nhỏ hơn 1");
+      }
+      hoaDonChiTiet.setSoLuong(soLuongHienTai - 1);
+      giayChiTiet.setSoLuongTon(soLuongTon + 1);
     }
 
+    // **Cập nhật giá bán tổng (giá gốc * số lượng)**
+    BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
+    hoaDonChiTiet.setGiaBan(giaBanGoc.multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())));
+
+    // **Tính toán lại giá sau giảm**
+    BigDecimal giaSauGiam = giaBanGoc;
+    GiamGiaChiTietSanPhamEntity giamGiaOpt =
+            giamGiaChiTietSanPhamRepository.findByGiay(giayChiTiet.getGiayEntity());
+
+    if (giamGiaOpt != null) {
+      BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
+      giaSauGiam = giaBanGoc.subtract(soTienDaGiam);
+    }
+
+    // **Cập nhật đơn giá (giá sau giảm * số lượng)**
+    hoaDonChiTiet.setDonGia(giaSauGiam.multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())));
+
+    // **Lưu lại vào database**
     giayChiTietRepository.save(giayChiTiet);
     return hoaDonChiTietRepository.save(hoaDonChiTiet);
   }
+
+
+
+
+
+
 
   @Override
   public List<HoaDonEntity> getListHoaDonCho() {
