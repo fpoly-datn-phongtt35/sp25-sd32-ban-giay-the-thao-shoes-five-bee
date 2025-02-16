@@ -98,7 +98,7 @@ const SanPham = () => {
           TEN: item.ten,
           MOTA: item.moTa,
           GIABAN: item.giaBan,
-          SOLUONGTON: totalSoLuongTon,
+          SOLUONGTON: item.soLuongTon,
           TRANG_THAI: item.trangThai,
           THUONG_HIEU: item.thuongHieu ? item.thuongHieu.ten : null,
           CHAT_LIEU: item.chatLieu ? item.chatLieu.ten : null,
@@ -325,9 +325,11 @@ const SanPham = () => {
         onCancel={() => setIsModalVisible1(false)}
         okText="Thêm"
         cancelText="Hủy"
+      
       >
-        <div>
+        <div style={{float:"left",width:"45%"}}>
           <Select
+            style={{ width: "100%" }}
             placeholder="Chọn Thương Hiệu"
             value={selectedThuongHieu}
             onChange={handleThuongHieuChange}
@@ -342,6 +344,7 @@ const SanPham = () => {
           <br />
           <br />
           <Select
+            style={{ width: "100%" }}
             placeholder="Chọn Chất Liệu"
             value={selectedChatLieu}
             onChange={handleChatLieuChange}
@@ -356,6 +359,7 @@ const SanPham = () => {
           <br />
           <br />
           <Select
+            style={{ width: "100%" }}
             placeholder="Chọn Đế Giày"
             value={selectedDeGiay}
             onChange={handleDeGiayChange}
@@ -370,6 +374,7 @@ const SanPham = () => {
           <br />
           <br />
           <Select
+            style={{ width: "100%" }}
             placeholder="Chọn Xuất Xứ"
             value={selectedXuatXu}
             onChange={handleXuatXuChange}
@@ -384,6 +389,7 @@ const SanPham = () => {
           <br />
           <br />
           <Select
+            style={{ width: "100%" }}
             placeholder="Chọn Kiểu Dáng"
             value={selectedKieuDang}
             onChange={handleKieuDangChange}
@@ -397,7 +403,10 @@ const SanPham = () => {
           </Select>
           <br />
           <br />
+        </div>
+        <div style={{float:"right",width:"45%"}}>
           <Select
+           style={{ width: "100%" }}
             placeholder="Chọn Ảnh Giày"
             value={selectedAnhGiay}
             onChange={handleAnhGiayChange}
@@ -410,22 +419,18 @@ const SanPham = () => {
               ))}
           </Select>
           <br />
+          <br />
           <Input
+            style={{ width: "100%" }}
             placeholder="Tên Giày"
             value={ten}
             onChange={(e) => setTen(e.target.value)}
           />
           <br />
           <br />
-          <TextArea
-            rows={4}
-            placeholder="Mô Tả"
-            value={moTa}
-            onChange={(e) => setMoTa(e.target.value)}
-          />
-          <br />
-          <br />
+
           <Input
+            style={{ width: "100%" }}
             placeholder="Giá Bán ($)"
             value={giaBan}
             onChange={(e) => setGiaBan(e.target.value)}
@@ -433,6 +438,7 @@ const SanPham = () => {
           <br />
           <br />
           <Input
+            style={{ width: "100%" }}
             placeholder="Số Lượng Tồn"
             value={soLuongTon}
             onChange={(e) => setSoLuongTon(e.target.value)}
@@ -444,6 +450,17 @@ const SanPham = () => {
             <Radio value={2}>Hết</Radio>
           </Radio.Group>
         </div>
+
+        <br />
+
+        <TextArea
+          rows={4}
+          placeholder="Mô Tả"
+          value={moTa}
+          onChange={(e) => setMoTa(e.target.value)}
+        />
+        <br />
+        <br />
       </Modal>
 
       <Table

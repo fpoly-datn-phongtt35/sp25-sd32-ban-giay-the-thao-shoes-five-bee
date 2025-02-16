@@ -20,10 +20,10 @@ public class ThuongHieuEntity {
     @Column(name = "ID")
     private UUID id;
 
-    @Column(name = "MA" , nullable = false, unique = true)
+    @Column(name = "MA")
     private String ma;
 
-    @Column(name = "TEN" , nullable = false, unique = true)
+    @Column(name = "TEN")
     private String ten;
 
     @Column(name = "TRANG_THAI")
