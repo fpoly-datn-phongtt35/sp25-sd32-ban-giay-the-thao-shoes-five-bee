@@ -37,18 +37,31 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
 
   @Override
   public GiayChiTietEntity add(GiayChiTietDto giayChiTietDto) {
-    return giayChiTietRepository.save(
-        GiayChiTietEntity.builder()
-            .giaBan(giayChiTietDto.getGiaBan())
-            .soLuongTon(giayChiTietDto.getSoLuongTon())
-            .mauSacEntity(mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null))
-            .kichCoEntity(kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null))
-            .trangThai(giayChiTietDto.getTrangThai())
-            .giayEntity(giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null))
-            .build());
+      return giayChiTietRepository.save(
+              GiayChiTietEntity.builder()
+                      .giaBan(giayChiTietDto.getGiaBan())
+                      .soLuongTon(giayChiTietDto.getSoLuongTon())
+                      .mauSacEntity(
+                              giayChiTietDto.getMauSacDto() != null ?
+                                      mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null) :
+                                      null
+                      )
+                      .kichCoEntity(
+                              giayChiTietDto.getKichCoDto() != null ?
+                                      kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null) :
+                                      null
+                      )
+                      .trangThai(giayChiTietDto.getTrangThai())
+                      .giayEntity(
+                              giayChiTietDto.getGiayDto() != null ?
+                                      giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null) :
+                                      null
+                      )
+                      .build());
   }
 
-  @Override
+
+    @Override
   public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {
     Optional<GiayChiTietEntity> optional = giayChiTietRepository.findById(giayChiTietDto.getId());
     return optional

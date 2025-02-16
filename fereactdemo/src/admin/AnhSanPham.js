@@ -70,26 +70,30 @@ const AnhSanPham = () => {
 
   const creatAnhGiay = async () => {
     if (!file) {
-      message.error("Lỗi chưa chọn file ảnh");
-      return;
+        message.error("Lỗi chưa chọn file ảnh");
+        return;
     }
 
     const formData = new FormData();
     formData.append("file", file);
-    formData.append("trangThai", value);
+    formData.append("data", new Blob([JSON.stringify({ trangThai: value })], { type: "application/json" }));
+
+    console.log("FormData contents:", [...formData.entries()]); // Kiểm tra dữ liệu
 
     try {
-      const result = await addAnhGiay(formData);
-      console.log("API response:", result); // Log response để kiểm tra
-      message.success("Thêm ảnh giày thành công!");
-      getAllAnhGiay();
-      setFile(null);
-      setValue(1);
+        const result = await addAnhGiay(formData);
+        console.log("API response:", result);
+        message.success("Thêm ảnh giày thành công!");
+        getAllAnhGiay();
+        setFile(null);
+        setValue(1);
     } catch (error) {
-      console.error("Error:", error.response?.data || error.message); // Log lỗi chi tiết hơn
-      message.error("Có lỗi xảy ra!");
+        console.error("Error:", error.response?.data || error.message);
+        message.error("Có lỗi xảy ra!");
     }
-  };
+};
+
+
 
   const removeAnhGiay = async (record) => {
     try {
