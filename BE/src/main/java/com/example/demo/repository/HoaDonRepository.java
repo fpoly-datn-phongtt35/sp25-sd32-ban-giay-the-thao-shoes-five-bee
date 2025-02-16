@@ -1,7 +1,6 @@
 package com.example.demo.repository;
 
 import com.example.demo.entity.HoaDonEntity;
-import com.example.demo.entity.KichCoEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -9,7 +8,6 @@ import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
-import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 
@@ -17,42 +15,31 @@ import java.util.UUID;
 public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, JpaSpecificationExecutor<HoaDonEntity> {
 
     @Query("SELECT SUM(h.tongTien) FROM HoaDonEntity h " +
-            "WHERE h.trangThai = 1 AND FUNCTION('DATE', h.ngayThanhToan) = FUNCTION('CURRENT_DATE')")
+            "WHERE h.trangThai = 1 AND CAST(h.ngayThanhToan AS DATE) = CAST(GETDATE() AS DATE)")
     BigDecimal doanhThuNgayHienTai();
 
-
-    @Query("SELECT SUM(h.tongTien) FROM HoaDonEntity h " +
-            "WHERE h.trangThai = 1 AND YEAR(h.ngayThanhToan) = YEAR(CURRENT_DATE) " +
-            "AND MONTH(h.ngayThanhToan) = MONTH(CURRENT_DATE)")
+    @Query("SELECT COALESCE(SUM(h.tongTien), 0) FROM HoaDonEntity h " +
+            "WHERE h.trangThai = 1 AND YEAR(h.ngayThanhToan) = YEAR(CURRENT_TIMESTAMP) " +
+            "AND MONTH(h.ngayThanhToan) = MONTH(CURRENT_TIMESTAMP)")
     BigDecimal doanhThuThangHienTai();
 
 
-    @Query("SELECT SUM(h.tongTien) FROM HoaDonEntity h " +
-            "WHERE h.trangThai = 1 AND YEAR(h.ngayThanhToan) = YEAR(CURRENT_DATE)")
+    @Query("SELECT COALESCE(SUM(h.tongTien), 0) FROM HoaDonEntity h " +
+            "WHERE h.trangThai = 1 AND YEAR(h.ngayThanhToan) = YEAR(CURRENT_TIMESTAMP)")
     BigDecimal doanhThuNamHienTai();
 
-
     @Query("SELECT SUM(h.tongTien) FROM HoaDonEntity h " +
-            "WHERE h.trangThai = 1 AND FUNCTION('DATE', h.ngayThanhToan) = :ngay")
+            "WHERE h.trangThai = 1 AND CAST(h.ngayThanhToan AS DATE) = :ngay")
     BigDecimal doanhThuTheoNgayCuThe(LocalDate ngay);
 
-
     @Query("SELECT SUM(h.tongTien) FROM HoaDonEntity h " +
-            "WHERE h.trangThai = 1 AND FUNCTION('DATE', h.ngayThanhToan) " +
+            "WHERE h.trangThai = 1 AND CAST(h.ngayThanhToan AS DATE) " +
             "BETWEEN :startDate AND :endDate")
     BigDecimal doanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate);
 
-
-    @Query("SELECT FUNCTION('DATE', h.ngayThanhToan), SUM(h.tongTien)" +
-            " FROM HoaDonEntity h WHERE h.trangThai = 1 GROUP BY FUNCTION" +
-            "('DATE', h.ngayThanhToan) ORDER BY FUNCTION('DATE', h.ngayThanhToan)")
+    @Query("SELECT CAST(h.ngayThanhToan AS DATE), SUM(h.tongTien) " +
+            "FROM HoaDonEntity h WHERE h.trangThai = 1 " +
+            "GROUP BY CAST(h.ngayThanhToan AS DATE) " +
+            "ORDER BY CAST(h.ngayThanhToan AS DATE)")
     List<Object[]> doanhThuTheoNgay();
-
-//TRANG THAI 1 DE TAM THOI
-
-
 }
-
-
-
-

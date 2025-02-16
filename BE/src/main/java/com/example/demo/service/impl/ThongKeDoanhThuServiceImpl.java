@@ -8,41 +8,46 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
+import java.util.Objects;
+import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
 public class ThongKeDoanhThuServiceImpl implements ThongKeDoanhThuService {
     @Autowired
-    HoaDonRepository hoaDonRepository;
+    private HoaDonRepository hoaDonRepository;
+
     @Override
     public BigDecimal getDoanhThuNgayHienTai() {
-        return hoaDonRepository.doanhThuNgayHienTai();
+        return Optional.ofNullable(hoaDonRepository.doanhThuNgayHienTai()).orElse(BigDecimal.ZERO);
     }
 
     @Override
     public BigDecimal getDoanhThuThangHienTai() {
-        return hoaDonRepository.doanhThuThangHienTai();
+        return Optional.ofNullable(hoaDonRepository.doanhThuThangHienTai()).orElse(BigDecimal.ZERO);
     }
 
     @Override
     public BigDecimal getDoanhThuNamHienTai() {
-        return hoaDonRepository.doanhThuNamHienTai();
+        return Optional.ofNullable(hoaDonRepository.doanhThuNamHienTai()).orElse(BigDecimal.ZERO);
     }
 
     @Override
     public BigDecimal getDoanhThuTheoNgayCuThe(LocalDate ngay) {
-        return hoaDonRepository.doanhThuTheoNgayCuThe(ngay);
+        return Optional.ofNullable(hoaDonRepository.doanhThuTheoNgayCuThe(ngay)).orElse(BigDecimal.ZERO);
     }
 
     @Override
     public BigDecimal getDoanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate) {
-        return hoaDonRepository.doanhThuTheoKhoangNgay(startDate, endDate);
+        return Optional.ofNullable(hoaDonRepository.doanhThuTheoKhoangNgay(startDate, endDate)).orElse(BigDecimal.ZERO);
     }
 
     @Override
     public List<String> getDoanhThuTheoNgay() {
         return hoaDonRepository.doanhThuTheoNgay().stream()
-                .map(result -> "Ngày: " + result[0] + ", Doanh thu: " + result[1])
+                .map(result -> String.format("Ngày: %s, Doanh thu: %s",
+                        Objects.toString(result[0], "Không xác định"),
+                        Objects.toString(result[1], "0")))
                 .collect(Collectors.toList());
     }
 }
