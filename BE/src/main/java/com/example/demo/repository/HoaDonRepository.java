@@ -42,4 +42,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, Jpa
             "GROUP BY CAST(h.ngayThanhToan AS DATE) " +
             "ORDER BY CAST(h.ngayThanhToan AS DATE)")
     List<Object[]> doanhThuTheoNgay();
+    @Query("select h from HoaDonEntity h where h.trangThai = 1 and h.hinhThucMua=1 order by h.ngayTao")
+    List<HoaDonEntity> getListByTrangThai();
 }
