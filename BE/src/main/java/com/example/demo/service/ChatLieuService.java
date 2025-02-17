@@ -10,9 +10,18 @@ import java.util.List;
 
 public interface ChatLieuService {
     List<ChatLieuEntity> getAll();
+
     ChatLieuEntity add(ChatLieuDto chatLieuDto);
+
+    ChatLieuEntity addNhanh(ChatLieuDto chatLieuDto);
+
     ChatLieuEntity update(ChatLieuUpdateDto chatLieuUpdateDto);
+
     ChatLieuEntity detail(ChatLieuUpdateDto chatLieuUpdateDto);
+
     ChatLieuEntity delete(ChatLieuUpdateDto chatLieuUpdateDto);
+
+    ChatLieuEntity toggleTrangThai(ChatLieuUpdateDto chatLieuUpdateDto);
+
     PageResponse<ChatLieuEntity> findByPagingCriteria(ChatLieuDto chatLieuDto, Pageable pageable);
 }

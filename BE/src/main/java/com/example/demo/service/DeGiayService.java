@@ -14,8 +14,10 @@ import java.util.List;
 public interface DeGiayService {
     List<DeGiayEntity> getAll();
     DeGiayEntity add(DeGiayDto deGiayDto);
+    DeGiayEntity addNhanh(DeGiayDto deGiayDto);
     DeGiayEntity update(DeGiayUpdateDto deGiayUpdateDto);
     DeGiayEntity detail(DeGiayUpdateDto deGiayUpdateDto);
     DeGiayEntity delete(DeGiayUpdateDto deGiayUpdateDto);
+    DeGiayEntity toggleTrangThai(DeGiayUpdateDto deGiayUpdateDto);
     PageResponse<DeGiayEntity> findByPagingCriteria(DeGiayDto deGiayDto, Pageable pageable);
 }

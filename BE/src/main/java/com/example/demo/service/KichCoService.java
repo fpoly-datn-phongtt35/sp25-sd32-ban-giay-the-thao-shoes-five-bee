@@ -14,8 +14,10 @@ import java.util.List;
 public interface KichCoService {
     List<KichCoEntity> getAll();
     KichCoEntity add(KichCoDto kichCoDto);
+    KichCoEntity addNhanh(KichCoDto kichCoDto);
     KichCoEntity update(KichCoUpdateDto kichCoUpdateDto);
     KichCoEntity detail(KichCoUpdateDto kichCoUpdateDto);
     KichCoEntity delete(KichCoUpdateDto kichCoUpdateDto);
+    KichCoEntity toggleKichCo(KichCoUpdateDto kichCoUpdateDto);
     PageResponse<KichCoEntity> findByPagingCriteria(KichCoDto kichCoDto, Pageable pageable);
 }

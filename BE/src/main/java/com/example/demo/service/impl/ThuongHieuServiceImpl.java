@@ -5,6 +5,7 @@ import com.example.demo.dto.request.ThuongHieuUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.ThuongHieuEntity;
+import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.repository.ThuongHieuRepository;
 import com.example.demo.service.ThuongHieuService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -40,6 +41,30 @@ public class ThuongHieuServiceImpl implements ThuongHieuService {
     }
 
     @Override
+    public ThuongHieuEntity addNhanh(ThuongHieuDto thuongHieuDto) {
+        if (thuongHieuDto.getTen() == null || thuongHieuDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Thuong hieu khong duoc de trong.");
+        }
+
+
+        ThuongHieuEntity thuongHieuEntity = new ThuongHieuEntity();
+
+
+        thuongHieuEntity.setMa(thuongHieuDto.getMa() != null ? thuongHieuDto.getMa() : generateMa());
+
+
+        thuongHieuEntity.setTrangThai(thuongHieuDto.getTrangThai() != null ? thuongHieuDto.getTrangThai() : 1);
+
+
+        thuongHieuEntity.setTen(thuongHieuDto.getTen().trim());
+
+
+        return thuongHieuRepository.save(thuongHieuEntity);}
+    private String generateMa() {
+        return "TH" + System.currentTimeMillis();
+    }
+
+    @Override
     public ThuongHieuEntity update(ThuongHieuUpdateDto thuongHieuUpdateDto) {
         Optional<ThuongHieuEntity> optional = thuongHieuRepository.findById(thuongHieuUpdateDto.getId());
         return optional.map(o->{
@@ -62,6 +87,16 @@ public class ThuongHieuServiceImpl implements ThuongHieuService {
         return optional.map(o->{
             thuongHieuRepository.delete(o);
             return o;
+        }).orElse(null);
+    }
+
+    @Override
+    public ThuongHieuEntity toggleTrangThai(ThuongHieuUpdateDto thuongHieuUpdateDto) {
+        Optional<ThuongHieuEntity> optional = thuongHieuRepository.findById(thuongHieuUpdateDto.getId());
+        return optional.map(thuongHieuEntity -> {
+
+            thuongHieuEntity.setTrangThai(thuongHieuEntity.getTrangThai() == 1 ? 0 : 1);
+            return thuongHieuRepository.save(thuongHieuEntity);
         }).orElse(null);
     }
 

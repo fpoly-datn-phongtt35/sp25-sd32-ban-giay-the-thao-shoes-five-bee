@@ -1,9 +1,9 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.KichCoDto;
-import com.example.demo.dto.request.KichCoUpdateDto;
-import com.example.demo.dto.request.MauSacDto;
-import com.example.demo.dto.request.MauSacUpdateDto;
+import com.example.demo.dto.request.*;
+import com.example.demo.entity.MauSacEntity;
+import com.example.demo.entity.ThuongHieuEntity;
+import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.service.KichCoService;
 import com.example.demo.service.MauSacService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +50,18 @@ public class MauSacController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody MauSacUpdateDto mauSacUpdateDto){
         return ResponseEntity.ok(mauSacService.delete(mauSacUpdateDto));
+    }
+    @PostMapping("/addNhanh")
+    public ResponseEntity<?> addNhanhMauSac(@RequestBody MauSacDto mauSacDto) {
+        try {
+            MauSacEntity mauSacEntity = mauSacService.addNhanh(mauSacDto);
+            return ResponseEntity.ok(mauSacEntity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/toggle-trangthai")
+    public MauSacEntity toggleTrangThai(@RequestBody MauSacUpdateDto mauSacUpdateDto) {
+        return mauSacService.toggleTrangThai(mauSacUpdateDto);
     }
 }

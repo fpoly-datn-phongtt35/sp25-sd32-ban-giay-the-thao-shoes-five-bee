@@ -14,8 +14,10 @@ import java.util.List;
 public interface MauSacService {
     List<MauSacEntity> getAll();
     MauSacEntity add(MauSacDto mauSacDto);
+    MauSacEntity addNhanh(MauSacDto mauSacDto);
     MauSacEntity update(MauSacUpdateDto mauSacUpdateDto);
     MauSacEntity detail(MauSacUpdateDto mauSacUpdateDto);
     MauSacEntity delete(MauSacUpdateDto mauSacUpdateDto);
+    MauSacEntity toggleTrangThai (MauSacUpdateDto mauSacUpdateDto);
     PageResponse<MauSacEntity> findByPagingCriteria(MauSacDto mauSacDto, Pageable pageable);
 }
