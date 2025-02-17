@@ -10,5 +10,5 @@ export const addXuatXu = (xuatXu) =>
 export const deleteXuatXu = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete/${id}`);
 
-export const updateXuatXu = (xuatXu) =>
-  axios.post(`${REST_API_BASE_URL}/update`, xuatXu);
+export const updateXuatXu = (id, xuatXu) =>
+  axios.post(`${REST_API_BASE_URL}/update/${id}`, xuatXu);
