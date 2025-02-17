@@ -100,6 +100,7 @@ const XuatXu = () => {
             trangThai: updatedTrangThai,
         };
         try {
+            console.log(editXuatXu);
             await updateXuatXu(editXuatXu);
             message.success("Update xuất xứ thành công");
             getAllXuatXu();
