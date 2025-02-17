@@ -4,11 +4,10 @@ import com.example.demo.dto.request.UserDto;
 import com.example.demo.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
+import java.io.IOException;
 import java.util.Collections;
 
 @RestController
@@ -23,14 +22,14 @@ public class UsersController {
     }
 
     @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestBody UserDto userDto){
-        usersService.add(userDto);
+    public ResponseEntity<?> add(@RequestPart("userDto") UserDto userDto, @RequestParam("file")MultipartFile file)throws IOException {
+        usersService.add(userDto,file);
         return ResponseEntity.ok(Collections.singletonMap("message","add success"));
     }
 
     @PostMapping("/update")
-    public ResponseEntity<?> update(@RequestBody UserDto userDto){
-        usersService.update(userDto);
+    public ResponseEntity<?> update(@RequestPart("userDto") UserDto userDto, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException{
+        usersService.update(userDto,file);
         return ResponseEntity.ok(Collections.singletonMap("message","update success"));
     }
 
