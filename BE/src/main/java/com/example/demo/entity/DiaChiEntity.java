@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -47,5 +48,6 @@ public class DiaChiEntity {
     // khoa ngoai
     @ManyToOne
     @JoinColumn(name = "ID_USER")
+    @JsonIgnore
     private UserEntity userEntity;
 }

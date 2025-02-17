@@ -9,6 +9,8 @@ import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
+import java.util.Collections;
+
 @RestController
 @RequestMapping("/dia-chi")
 public class DiaChiController {
@@ -23,17 +25,20 @@ public class DiaChiController {
 
     @PostMapping("/add")
     public ResponseEntity<?> add(@RequestBody DiaChiDto diaChiDto){
-        return ResponseEntity.ok(diaChiService.add(diaChiDto));
+        diaChiService.add(diaChiDto);
+        return ResponseEntity.ok(Collections.singletonMap("message","add success"));
     }
 
     @PostMapping("/update")
     public ResponseEntity<?> update(@RequestBody DiaChiDto diaChiDto){
-        return ResponseEntity.ok(diaChiService.update(diaChiDto));
+        diaChiService.update(diaChiDto);
+        return ResponseEntity.ok(Collections.singletonMap("message","update success"));
     }
 
     @PostMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody DiaChiDto diaChiDto){
-        return ResponseEntity.ok(diaChiService.delete(diaChiDto));
+        diaChiService.delete(diaChiDto);
+        return ResponseEntity.ok(Collections.singletonMap("message","delete success"));
     }
 
     @PostMapping("/detail")

@@ -1,8 +1,11 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.request.DiaChiDto;
 import com.example.demo.dto.request.UserDto;
+import com.example.demo.entity.DiaChiEntity;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.entity.UserRoleEntity;
+import com.example.demo.repository.DiaChiRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.UserRoleRepository;
@@ -26,12 +29,28 @@ public class UsersServiceImpl implements UsersService {
     private UserRoleRepository userRoleRepository;
     @Autowired
     private PasswordEncoder passwordEncoder;
+    @Autowired
+    private DiaChiRepository diaChiRepository;
     @Override
     public List<UserDto> getAll() {
         return userRepository.findAll().stream().map(user -> {
             List<String> roleNames = user.getUserRoleEntities()
                     .stream()
                     .map(userRole -> userRole.getRoleEntity().getTen())
+                    .collect(Collectors.toList());
+            List<DiaChiDto> diaChiDtos = user.getDiaChiEntities()
+                    .stream()
+                    .map(diaChi -> new DiaChiDto(
+                            diaChi.getId(),
+                            diaChi.getXa(),
+                            diaChi.getHuyen(),
+                            diaChi.getThanhPho(),
+                            diaChi.getTenNguoiNhan(),
+                            diaChi.getTenDiaChi(),
+                            diaChi.getSdtNguoiNhan(),
+                            diaChi.getTrangThai(),
+                            diaChi.getUserEntity()
+                    ))
                     .collect(Collectors.toList());
             return new UserDto(
                     user.getId(),
@@ -42,7 +61,9 @@ public class UsersServiceImpl implements UsersService {
                     user.getEmail(),
                     user.getMatKhau(),
                     user.getIsEnabled(),
-                    roleNames
+                    roleNames,
+                    diaChiDtos
+
             );
         }).collect(Collectors.toList());
     }
@@ -67,6 +88,18 @@ public class UsersServiceImpl implements UsersService {
                     .collect(Collectors.toList());
             userRoleRepository.saveAll(userRoles);
         }
+        if (userDto.getDiaChi() != null && !userDto.getDiaChi().isEmpty()){
+            List<DiaChiEntity> diaChiEntities = userDto.getDiaChi().stream().map(diaChiDto -> {
+                DiaChiEntity diaChiEntity = new DiaChiEntity();
+                diaChiEntity.setXa(diaChiDto.getXa());
+                diaChiEntity.setHuyen(diaChiDto.getHuyen());
+                diaChiEntity.setThanhPho(diaChiDto.getThanhPho());
+                diaChiEntity.setUserEntity(savedUser);
+                return diaChiEntity;
+            }).collect(Collectors.toList());
+            diaChiRepository.saveAll(diaChiEntities);
+        }
+
         return savedUser;
     }
 
@@ -82,6 +115,7 @@ public class UsersServiceImpl implements UsersService {
             o.setEmail(userDto.getEmail());
             o.setMatKhau(userDto.getMatKhau());
             o.setIsEnabled(userDto.getIsEnabled());
+            // update role user
             userRoleRepository.deleteByUserEntityId(o.getId());
             if(userDto.getRoleNames() != null && !userDto.getRoleNames().isEmpty()){
                 List<UserRoleEntity> userRoleEntities = userDto.getRoleNames().stream()
@@ -90,6 +124,19 @@ public class UsersServiceImpl implements UsersService {
                         .map(role -> new UserRoleEntity(o,role))
                         .collect(Collectors.toList());
                 userRoleRepository.saveAll(userRoleEntities);
+            }
+            // update dia chi
+            diaChiRepository.deleteByUserEntityId(o.getId());
+            if (userDto.getDiaChi() != null && !userDto.getDiaChi().isEmpty()){
+                List<DiaChiEntity> diaChiEntities = userDto.getDiaChi().stream().map(diaChiDto ->{
+                    DiaChiEntity diaChiEntity = new DiaChiEntity();
+                    diaChiEntity.setXa(diaChiDto.getXa());
+                    diaChiEntity.setHuyen(diaChiDto.getHuyen());
+                    diaChiEntity.setThanhPho(diaChiDto.getThanhPho());
+                    diaChiEntity.setUserEntity(o);
+                    return diaChiEntity;
+                }).collect(Collectors.toList());
+                diaChiRepository.saveAll(diaChiEntities);
             }
             return userRepository.save(o);
         }).orElse(null);

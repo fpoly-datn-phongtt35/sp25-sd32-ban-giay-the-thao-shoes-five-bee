@@ -23,7 +23,7 @@ public class UserDto {
     private String matKhau;
     private Boolean isEnabled = true;
     private List<String> roleNames;
-    
-    public UserDto(UUID id, String anh, String hoTen, String email, String soDienThoai, Date ngaySinh, String matKhau, Boolean isEnabled, List<String> roleNames) {
-    }
+
+    private List<DiaChiDto> diaChi;
+
 }

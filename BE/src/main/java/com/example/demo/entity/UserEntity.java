@@ -44,6 +44,7 @@ public class UserEntity {
     @Column(name = "OTP_GENERATED_TIME")
     private LocalDateTime otpGeneratedTime;
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<DiaChiEntity> diaChiEntities;
     @OneToOne(mappedBy = "userEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
     @JsonIgnore

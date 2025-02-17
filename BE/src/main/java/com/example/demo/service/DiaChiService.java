@@ -6,7 +6,7 @@ import com.example.demo.entity.DiaChiEntity;
 import java.util.List;
 
 public interface DiaChiService {
-    List<DiaChiEntity> getAll();
+    List<DiaChiDto> getAll();
     DiaChiEntity add(DiaChiDto diaChiDto);
     DiaChiEntity update(DiaChiDto diaChiDto);
     DiaChiEntity detail(DiaChiDto diaChiDto);

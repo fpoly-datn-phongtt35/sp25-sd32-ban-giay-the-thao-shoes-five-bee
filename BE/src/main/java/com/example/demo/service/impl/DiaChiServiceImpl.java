@@ -9,6 +9,7 @@ import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 
 @Service
 public class DiaChiServiceImpl implements DiaChiService {
@@ -17,8 +18,21 @@ public class DiaChiServiceImpl implements DiaChiService {
     private DiaChiRepository diaChiRepository;
 
     @Override
-    public List<DiaChiEntity> getAll() {
-        return diaChiRepository.findAll();
+    public List<DiaChiDto> getAll() {
+        List<DiaChiEntity> diaChiEntities = diaChiRepository.findAll();
+        return diaChiEntities.stream().map(diaChi ->{
+            DiaChiDto diaChiDto = new DiaChiDto();
+            diaChiDto.setId(diaChi.getId());
+            diaChiDto.setTenDiaChi(diaChi.getTenDiaChi());
+            diaChiDto.setTenNguoiNhan(diaChi.getTenNguoiNhan());
+            diaChiDto.setSdtNguoiNhan(diaChi.getSdtNguoiNhan());
+            diaChiDto.setXa(diaChi.getXa());
+            diaChiDto.setHuyen(diaChi.getHuyen());
+            diaChiDto.setThanhPho(diaChi.getThanhPho());
+            diaChiDto.setTrangThai(diaChi.getTrangThai());
+            diaChiDto.setUserEntity(diaChi.getUserEntity());
+            return diaChiDto;
+        }).collect(Collectors.toList());
     }
 
     @Override

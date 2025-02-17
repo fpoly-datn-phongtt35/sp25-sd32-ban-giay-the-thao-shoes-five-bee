@@ -8,4 +8,5 @@ import java.util.UUID;
 
 @Repository
 public interface DiaChiRepository extends JpaRepository<DiaChiEntity, UUID> {
+    void deleteByUserEntityId(UUID userId);
 }
