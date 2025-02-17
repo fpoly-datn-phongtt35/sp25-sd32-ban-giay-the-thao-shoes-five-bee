@@ -1,19 +1,25 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.GiamGiaChiTietSanPhamDto;
+import com.example.demo.dto.request.GiamGiaChiTietSanPhamRequest;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
+import com.example.demo.entity.GiamGiaSanPhamEntity;
+import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
 import com.example.demo.repository.GiamGiaSanPhamRepository;
+import com.example.demo.repository.GiayChiTietRepository;
 import com.example.demo.repository.GiayRepository;
 import com.example.demo.service.GiamGiaChiTietSanPhamService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.math.BigDecimal;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -26,6 +32,7 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
   private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
   private final GiayRepository giayRepository;
   private final GiamGiaSanPhamRepository giamGiaSanPhamRepository;
+  private final GiayChiTietRepository giayChiTietRepository;
 
   @Override
   public List<GiamGiaChiTietSanPhamEntity> getAll() {
@@ -33,13 +40,13 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
   }
 
   @Override
-  public GiamGiaChiTietSanPhamEntity add(
-      GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
+  public GiamGiaChiTietSanPhamEntity add(GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
     return giamGiaChiTietSanPhamRepository.save(
         GiamGiaChiTietSanPhamEntity.builder()
             .soTienDaGiam(giamGiaChiTietSanPhamDto.getSoTienDaGiam())
             .trangThai(giamGiaChiTietSanPhamDto.getTrangThai())
-            .giay(giayRepository.findById(giamGiaChiTietSanPhamDto.getGiayDto().getId()).orElse(null))
+            .giay(
+                giayRepository.findById(giamGiaChiTietSanPhamDto.getGiayDto().getId()).orElse(null))
             .chuongTrinhGiamSanPhamEntity(
                 giamGiaSanPhamRepository
                     .findById(giamGiaChiTietSanPhamDto.getGiamGiaSanPhamDto().getId())
@@ -48,8 +55,7 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
   }
 
   @Override
-  public GiamGiaChiTietSanPhamEntity update(
-      GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
+  public GiamGiaChiTietSanPhamEntity update(GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
     Optional<GiamGiaChiTietSanPhamEntity> optional =
         giamGiaChiTietSanPhamRepository.findById(giamGiaChiTietSanPhamDto.getId());
     return optional
@@ -57,7 +63,10 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
             o -> {
               o.setSoTienDaGiam(giamGiaChiTietSanPhamDto.getSoTienDaGiam());
               o.setTrangThai(giamGiaChiTietSanPhamDto.getTrangThai());
-              o.setGiay(giayRepository.findById(giamGiaChiTietSanPhamDto.getGiayDto().getId()).orElse(null));
+              o.setGiay(
+                  giayRepository
+                      .findById(giamGiaChiTietSanPhamDto.getGiayDto().getId())
+                      .orElse(null));
               o.setChuongTrinhGiamSanPhamEntity(
                   giamGiaSanPhamRepository
                       .findById(giamGiaChiTietSanPhamDto.getGiamGiaSanPhamDto().getId())
@@ -68,16 +77,14 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
   }
 
   @Override
-  public GiamGiaChiTietSanPhamEntity detail(
-      GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
+  public GiamGiaChiTietSanPhamEntity detail(GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
     Optional<GiamGiaChiTietSanPhamEntity> optional =
         giamGiaChiTietSanPhamRepository.findById(giamGiaChiTietSanPhamDto.getId());
     return optional.orElse(null);
   }
 
   @Override
-  public GiamGiaChiTietSanPhamEntity delete(
-      GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
+  public GiamGiaChiTietSanPhamEntity delete(GiamGiaChiTietSanPhamDto giamGiaChiTietSanPhamDto) {
     Optional<GiamGiaChiTietSanPhamEntity> optional =
         giamGiaChiTietSanPhamRepository.findById(giamGiaChiTietSanPhamDto.getId());
     return optional
