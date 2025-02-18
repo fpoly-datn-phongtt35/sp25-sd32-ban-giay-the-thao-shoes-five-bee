@@ -11,5 +11,6 @@ import java.util.UUID;
 
 @Repository
 public interface GioHangChiTietRepository extends JpaRepository<GioHangChiTietEntity, UUID> {
-    Optional<GioHangChiTietEntity> findByGioHangEntityAndGiayChiTietEntity(GioHangEntity gioHangEntity, GiayChiTietEntity giayChiTietEntity);
+    Optional<GioHangChiTietEntity> findByGioHangEntityAndGiayChiTietEntity(UUID idGioHang, UUID idGiayChiTiet);
+
 }

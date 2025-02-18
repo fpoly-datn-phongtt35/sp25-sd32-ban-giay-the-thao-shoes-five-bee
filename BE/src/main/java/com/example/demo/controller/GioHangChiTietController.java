@@ -1,34 +1,34 @@
 package com.example.demo.controller;
 
-import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.UserEntity;
 import com.example.demo.service.GioHangChiTietService;
+import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
-
-import java.util.UUID;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/gio-hang-chi-tiet")
 public class GioHangChiTietController {
 
-    @Autowired
-    private GioHangChiTietService gioHangChiTietService;
+  @Autowired private GioHangChiTietService gioHangChiTietService;
 
-    @PostMapping("/add-to-cart")
-    public ResponseEntity<String> addToCart(@RequestParam UUID userId, @RequestParam UUID giayChiTietId, @RequestParam int soLuong) {
-        UserEntity user = new UserEntity();
-        user.setId(userId);
-        GiayChiTietEntity giayChiTiet = new GiayChiTietEntity();
-        giayChiTiet.setId(giayChiTietId);
+  @PostMapping("/add-to-cart")
+  public ResponseEntity<String> addToCart(
+      @RequestParam UUID idGiayChiTiet, @RequestParam int soLuong) {
+    gioHangChiTietService.addToCart(idGiayChiTiet, soLuong);
+    return ResponseEntity.ok("Thêm sản phẩm vào giỏ hàng thành công");
+  }
 
-        gioHangChiTietService.addToCart(user, giayChiTiet, soLuong);
-        return ResponseEntity.ok("Thêm sản phẩm vào giỏ hàng thành công");
-    }
+  @PutMapping("/update-so-luong")
+  public ResponseEntity<?> addToCart(
+      @RequestParam UUID idGioHangChiTiet, @RequestParam boolean isIncrease) {
 
+    return ResponseEntity.ok(gioHangChiTietService.updateSoLuongGiay(idGioHangChiTiet, isIncrease));
+  }
 
+  @DeleteMapping("/delete-giay")
+  public ResponseEntity<?> deleteAllHoaDonCho(@RequestParam UUID idGioHangChiTiet) {
+    gioHangChiTietService.deleteSanPhamTrongGioHang(idGioHangChiTiet);
+    return ResponseEntity.ok("Xóa giày thành công");
+  }
 }

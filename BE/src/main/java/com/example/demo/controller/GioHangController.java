@@ -18,13 +18,4 @@ public class GioHangController {
     @Autowired
     private GioHangService gioHangService;
 
-    @PostMapping("/{userId}")
-    public ResponseEntity<GioHangEntity> getGioHang(@PathVariable UUID userId) {
-        UserEntity user = new UserEntity();
-        user.setId(userId);
-        GioHangEntity gioHang = gioHangService.getOrCreateGioHang(user);
-        return ResponseEntity.ok(gioHang);
-    }
-
-
 }
