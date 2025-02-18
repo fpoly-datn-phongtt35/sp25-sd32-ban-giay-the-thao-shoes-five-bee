@@ -3,8 +3,10 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.request.KichCoDto;
 import com.example.demo.dto.request.KichCoUpdateDto;
 import com.example.demo.dto.response.PageResponse;
+import com.example.demo.entity.DeGiayEntity;
 import com.example.demo.entity.KichCoEntity;
 import com.example.demo.entity.MauSacEntity;
+import com.example.demo.entity.ThuongHieuEntity;
 import com.example.demo.repository.KichCoRepository;
 import com.example.demo.service.KichCoService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -40,6 +42,33 @@ public class KichCoServiceImpl implements KichCoService {
     }
 
     @Override
+    public KichCoEntity addNhanh(KichCoDto kichCoDto) {
+        if (kichCoDto.getTen() == null || kichCoDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Kích cỡ không được để trống.");
+        }
+
+
+        KichCoEntity kichCoEntity = new KichCoEntity();
+
+
+        kichCoEntity.setMa(kichCoDto.getMa() != null ? kichCoDto.getMa() : generateMa());
+
+
+        kichCoEntity.setTrangThai(kichCoDto.getTrangThai() != null ? kichCoDto.getTrangThai() : 1);
+
+
+        kichCoEntity.setTen(kichCoDto.getTen().trim());
+
+
+        return kichCoRepository.save(kichCoEntity);
+    }
+
+
+    private String generateMa() {
+        return "kC" + System.currentTimeMillis();
+    }
+
+    @Override
     public KichCoEntity update(KichCoUpdateDto kichCoUpdateDto) {
         Optional<KichCoEntity> optional = kichCoRepository.findById(kichCoUpdateDto.getId());
         return optional.map(o ->{
@@ -63,6 +92,16 @@ public class KichCoServiceImpl implements KichCoService {
         return optional.map(o ->{
             kichCoRepository.delete(o);
             return o;
+        }).orElse(null);
+    }
+
+    @Override
+    public KichCoEntity toggleKichCo(KichCoUpdateDto kichCoUpdateDto) {
+        Optional<KichCoEntity> optional = kichCoRepository.findById(kichCoUpdateDto.getId());
+        return optional.map(kichCoEntity -> {
+
+            kichCoEntity .setTrangThai(kichCoEntity.getTrangThai() == 1 ? 0 : 1);
+            return kichCoRepository.save(kichCoEntity );
         }).orElse(null);
     }
 

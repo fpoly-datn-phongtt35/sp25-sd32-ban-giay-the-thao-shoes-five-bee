@@ -35,7 +35,7 @@ const XuatXu = () => {
             const xuatXuData = result.data.map((item, index) => ({
                 key: index,
                 ID: item.id,
-
+                MA: item.ma,
                 TEN: item.ten,
                 TRANG_THAI: item.trangThai,
             }));
@@ -52,11 +52,17 @@ const XuatXu = () => {
         if (!ten) {
             message.error("Không được để trống mã và tên xuất xứ");
             return;
-        };
+        }
+
+        // Kiểm tra xem tên có phải là số hay không
+        if (!/^[a-zA-Z\s]+$/.test(ten)) {
+            message.error("Tên xuất xứ phải là chữ cái tiếng Anh");
+            return;
+        }
+
         const newTrangThai = value === 1 ? 0 : 1;
 
         const newXuatXu = {
-
             ten: ten,
             trangThai: newTrangThai,
         };
@@ -88,11 +94,13 @@ const XuatXu = () => {
         const updatedTrangThai = value === 1 ? 0 : 1;
 
         const editXuatXu = {
+            id: editingXuatXu.ID,
+            ma: editingXuatXu.MA,  
             ten: ten,
             trangThai: updatedTrangThai,
         };
         try {
-            await updateXuatXu(editingXuatXu.ID, editXuatXu);
+            await updateXuatXu(editXuatXu);
             message.success("Update xuất xứ thành công");
             getAllXuatXu();
             setIsModalVisible(false);
@@ -140,7 +148,7 @@ const XuatXu = () => {
                     },
                 ]} dataSource={xuatXu} />
             </div>
-            <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={handleUpdateXuatXuButton} onCancel={() => setIsModalVisible(false)}>
+            <Modal title="Update Xuất Xứ" open={isModalVisible} onOk={handleUpdateXuatXuButton} onCancel={() => setIsModalVisible(false)}>
                 <Form>
 
                     <Form.Item label="Tên Kích Cỡ">

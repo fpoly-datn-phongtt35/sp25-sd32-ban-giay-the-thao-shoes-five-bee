@@ -35,6 +35,8 @@ public class GiayDto extends PageDto {
 
   private Integer trangThai;
 
+  private  DanhMucUpdateDto danhMucDto;
+
   private ThuongHieuUpdateDto thuongHieuDto;
 
   private ChatLieuUpdateDto chatLieuDto;

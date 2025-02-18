@@ -1,9 +1,8 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.MauSacDto;
-import com.example.demo.dto.request.MauSacUpdateDto;
-import com.example.demo.dto.request.ThuongHieuDto;
-import com.example.demo.dto.request.ThuongHieuUpdateDto;
+import com.example.demo.dto.request.*;
+import com.example.demo.entity.ThuongHieuEntity;
+import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.service.MauSacService;
 import com.example.demo.service.ThuongHieuService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -50,5 +49,18 @@ public class ThuongHieuController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody ThuongHieuUpdateDto thuongHieuUpdateDto){
         return ResponseEntity.ok(thuongHieuService.delete(thuongHieuUpdateDto));
+    }
+    @PostMapping("/addNhanh")
+    public ResponseEntity<?> addNhanhThuongHieu(@RequestBody ThuongHieuDto thuongHieuDto) {
+        try {
+            ThuongHieuEntity thuongHieuEntity = thuongHieuService.addNhanh(thuongHieuDto);
+            return ResponseEntity.ok(thuongHieuEntity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/toggle-trangthai")
+    public ThuongHieuEntity toggleTrangThai(@RequestBody ThuongHieuUpdateDto thuongHieuUpdateDto) {
+        return thuongHieuService.toggleTrangThai(thuongHieuUpdateDto);
     }
 }

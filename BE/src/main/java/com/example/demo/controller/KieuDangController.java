@@ -1,6 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.*;
+import com.example.demo.entity.KieuDangEntity;
+import com.example.demo.entity.MauSacEntity;
+import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.service.KieuDangService;
 import com.example.demo.service.MauSacService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -47,5 +50,18 @@ public class KieuDangController {
     @PostMapping("/delete")
     public ResponseEntity<?> delete(@RequestBody KieuDangUpdateDto kieuDangUpdateDto){
         return ResponseEntity.ok(kieuDangService.delete(kieuDangUpdateDto));
+    }
+    @PostMapping("/addNhanh")
+    public ResponseEntity<?> addNhanhKieuDang(@RequestBody KieuDangDto kieuDangDto) {
+        try {
+            KieuDangEntity kieuDangEntity = kieuDangService.addNhanh(kieuDangDto);
+            return ResponseEntity.ok(kieuDangEntity);
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
+    }
+    @PostMapping("/toggle-trangthai")
+    public KieuDangEntity toggleTrangThai(@RequestBody KieuDangUpdateDto kieuDangUpdateDto) {
+        return kieuDangService.toggleTrangThai(kieuDangUpdateDto);
     }
 }

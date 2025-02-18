@@ -4,7 +4,9 @@ import com.example.demo.dto.request.DeGiayDto;
 import com.example.demo.dto.request.DeGiayUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 
+import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.DeGiayEntity;
+import com.example.demo.entity.MauSacEntity;
 import com.example.demo.repository.DeGiayRepository;
 import com.example.demo.service.DeGiayService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -40,6 +42,33 @@ public class DeGiayServiceImpl implements DeGiayService {
     }
 
     @Override
+    public DeGiayEntity addNhanh(DeGiayDto deGiayDto) {
+        if (deGiayDto.getTen() == null || deGiayDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Đế giày không được để trống.");
+        }
+
+
+        DeGiayEntity deGiayEntity = new DeGiayEntity();
+
+
+        deGiayEntity.setMa(deGiayDto.getMa() != null ? deGiayDto.getMa() : generateMa());
+
+
+        deGiayEntity.setTrangThai(deGiayDto.getTrangThai() != null ? deGiayDto.getTrangThai() : 1);
+
+
+        deGiayEntity.setTen(deGiayDto.getTen().trim());
+
+
+        return deGiayRepository.save(deGiayEntity);
+    }
+
+
+    private String generateMa() {
+        return "DG" + System.currentTimeMillis();
+    }
+
+    @Override
     public DeGiayEntity update(DeGiayUpdateDto deGiayUpdateDto) {
         Optional<DeGiayEntity> optional = deGiayRepository.findById(deGiayUpdateDto.getId());
         return optional.map(o ->{
@@ -62,6 +91,16 @@ public class DeGiayServiceImpl implements DeGiayService {
         return optional.map(o ->{
             deGiayRepository.delete(o);
             return o;
+        }).orElse(null);
+    }
+
+    @Override
+    public DeGiayEntity toggleTrangThai(DeGiayUpdateDto deGiayUpdateDto) {
+        Optional<DeGiayEntity> optional = deGiayRepository.findById(deGiayUpdateDto.getId());
+        return optional.map(deGiayEntity -> {
+
+            deGiayEntity.setTrangThai(deGiayEntity.getTrangThai() == 1 ? 0 : 1);
+            return deGiayRepository.save(deGiayEntity);
         }).orElse(null);
     }
 

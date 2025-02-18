@@ -15,8 +15,10 @@ import java.util.List;
 public interface KieuDangService {
     List<KieuDangEntity> getAll();
     KieuDangEntity add(KieuDangDto kieuDangDto);
+    KieuDangEntity addNhanh(KieuDangDto kieuDangDto);
     KieuDangEntity update(KieuDangUpdateDto kieuDangUpdateDto);
     KieuDangEntity detail(KieuDangUpdateDto kieuDangUpdateDto);
     KieuDangEntity delete(KieuDangUpdateDto kieuDangUpdateDto);
+    KieuDangEntity toggleTrangThai(KieuDangUpdateDto kieuDangUpdateDto);
     PageResponse<KieuDangEntity> findByPagingCriteria(KieuDangDto kieuDangDto, Pageable pageable);
 }
