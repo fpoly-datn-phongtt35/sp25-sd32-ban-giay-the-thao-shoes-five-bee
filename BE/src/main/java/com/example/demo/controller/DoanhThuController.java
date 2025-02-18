@@ -62,4 +62,5 @@ public class DoanhThuController {
         List<String> result = thongKeDoanhThuService.getDoanhThuTheoNgay();
         return result != null && !result.isEmpty() ? result : List.of("Chưa có dữ liệu trong database");
     }
+    //xong
 }

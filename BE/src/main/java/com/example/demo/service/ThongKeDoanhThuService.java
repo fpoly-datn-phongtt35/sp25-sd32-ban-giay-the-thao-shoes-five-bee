@@ -11,4 +11,5 @@ public interface ThongKeDoanhThuService {
     BigDecimal getDoanhThuTheoNgayCuThe(LocalDate ngay);
     BigDecimal getDoanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate);
     List<String> getDoanhThuTheoNgay();
+    //xong
 }

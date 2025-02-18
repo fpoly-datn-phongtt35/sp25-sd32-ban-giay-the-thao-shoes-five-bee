@@ -44,4 +44,5 @@ public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, Jpa
     List<Object[]> doanhThuTheoNgay();
     @Query("select h from HoaDonEntity h where h.trangThai = 1 and h.hinhThucMua=1 order by h.ngayTao")
     List<HoaDonEntity> getListByTrangThai();
+    //xong
 }

@@ -50,4 +50,5 @@ public class ThongKeDoanhThuServiceImpl implements ThongKeDoanhThuService {
                         Objects.toString(result[1], "0")))
                 .collect(Collectors.toList());
     }
+    //xong
 }
