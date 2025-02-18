@@ -38,6 +38,7 @@ import { CartProvider } from "./cart/CartContext";
 import HoaDonChiTiet from "./admin/HoaDonChiTiet";
 import ThongKe from "./admin/ThongKe";
 import ThongKeSanPham from "./admin/ThongKeSanPham";
+import GiamGiaHoaDon from "./admin/GiamGiaHoaDon";
 function App() {
   return (
     <CartProvider>
@@ -56,177 +57,40 @@ function App() {
           <Route path="/" element={<Login />} />
           <Route path="/admin" element={<AdminLayout />}>
             <Route path="/admin/statistics" element={<Statistics />} />
-            <Route
-              index
-              element={
-               
-                  <Dashbord />
-                
-              }
-            />
+            <Route index element={<Dashbord />} />
             <Route
               path="/admin/ban-hang-tai-quay"
-              element={
-               
-                  <BanHangTaiQuay />
-                
-              }
+              element={<BanHangTaiQuay />}
             />
-            <Route
-              path="/admin/Thong-Ke"
-              element={
-               
-                  <ThongKe />
-                
-              }
-            />
+            <Route path="/admin/Thong-Ke" element={<ThongKe />} />
 
             <Route
               path="/admin/Thong-Ke-San-Pham"
-              element={
-               
-                  <ThongKeSanPham />
-                
-              }
+              element={<ThongKeSanPham />}
             />
 
-            <Route
-              path="/admin/hoa-don-chi-tiet"
-              element={
-               
-                  <HoaDonChiTiet />
-                
-              }
-            />
-            <Route
-              path="/admin/quan-ly-hoa-don"
-              element={
-               
-                  <QuanLyHoaDon />
-                
-              }
-            />
+            <Route path="/admin/hoa-don-chi-tiet" element={<HoaDonChiTiet />} />
+            <Route path="/admin/quan-ly-hoa-don" element={<QuanLyHoaDon />} />
             <Route path="/admin/tra-hang" element={<ReturnOrderStatusPage />} />
-            <Route
-              path="/admin/san-pham"
-              element={
-               
-                  <SanPham />
-                
-              }
-            />
-            <Route
-              path="/admin/thuong-hieu"
-              element={
-               
-                  <ThuongHieu />
-                
-              }
-            />
+            <Route path="/admin/san-pham" element={<SanPham />} />
+            <Route path="/admin/thuong-hieu" element={<ThuongHieu />} />
             <Route
               path="/admin/san-pham-chi-tiet"
-              element={
-               
-                  <SanPhamChiTiet />
-                
-              }
+              element={<SanPhamChiTiet />}
             />
-            <Route
-              path="/admin/mau-sac"
-              element={
-               
-                  <MauSac />
-                
-              }
-            />
-            <Route
-              path="/admin/xuat-xu"
-              element={
-               
-                  <XuatXu />
-                
-              }
-            />
-            <Route
-              path="/admin/upload-file"
-              element={
-               
-                  <AnhSanPham />
-                
-              }
-            />
-            <Route
-              path="/admin/kieu-dang"
-              element={
-               
-                  <KieuDang />
-                
-              }
-            />
-            <Route
-              path="/admin/de-giay"
-              element={
-               
-                  <DeGiay />
-                
-              }
-            />
-            <Route
-              path="/admin/chat-lieu"
-              element={
-               
-                  <ChatLieu />
-                
-              }
-            />
-            <Route
-              path="/admin/nhan-vien"
-              element={
-               
-                  <NhanVien />
-                
-              }
-            />
-            <Route
-              path="/admin/khach-hang"
-              element={
-               
-                  <KhachHang />
-                
-              }
-            />
-            <Route
-              path="/admin/chuc-vu"
-              element={
-               
-                  <ChucVu />
-                
-              }
-            />
-            <Route
-              path="/admin/hang-khachHang"
-              element={
-               
-                  <HangKhachHang />
-                
-              }
-            />
-            <Route
-              path="/admin/phieu-giam-gia"
-              element={
-               
-                  <PhieuGiamGia />
-                
-              }
-            />
-            <Route
-              path="/admin/kich-co"
-              element={
-               
-                  <KichCo />
-                
-              }
-            />
+            <Route path="/admin/mau-sac" element={<MauSac />} />
+            <Route path="/admin/xuat-xu" element={<XuatXu />} />
+            <Route path="/admin/upload-file" element={<AnhSanPham />} />
+            <Route path="/admin/kieu-dang" element={<KieuDang />} />
+            <Route path="/admin/de-giay" element={<DeGiay />} />
+            <Route path="/admin/chat-lieu" element={<ChatLieu />} />
+            <Route path="/admin/nhan-vien" element={<NhanVien />} />
+            <Route path="/admin/khach-hang" element={<KhachHang />} />
+            <Route path="/admin/chuc-vu" element={<ChucVu />} />
+            <Route path="/admin/hang-khachHang" element={<HangKhachHang />} />
+            <Route path="/admin/phieu-giam-gia" element={<PhieuGiamGia />} />
+            <Route path="/admin/giam-gia-hoa-don" element={<GiamGiaHoaDon />} />
+            <Route path="/admin/kich-co" element={<KichCo />} />
           </Route>
         </Routes>
       </Router>

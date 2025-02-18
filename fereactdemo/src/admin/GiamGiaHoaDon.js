@@ -2,47 +2,50 @@ import React, { useState, useEffect } from "react";
 import "./GiamGiaSanPham.css";
 import { Space, Table, Button, Input, message, Modal, Form } from "antd";
 import {
-  addPhieuGiamGia,
-  deletePhieuGiamGia,
-  getPhieuGiamGia,
-  updatePhieuGiamGia,
-} from "../service/PhieuGiamGiaService";
+  addGiamGiaHoaDon,
+  deleteGiamGiaHoaDon,
+  getGiamGiaHoaDon,
+  updateGiamGiaHoaDon,
+} from "../service/GiamGiaHoaDonService";
 
-const DotGiamGia = () => {
+const GiamGiaHoaDon = () => {
   const [ma, setMa] = useState("");
   const [ten, setTen] = useState("");
   const [phanTramGiam, setPhamTramGiam] = useState("");
   const [ngayBatDau, setNgayBatDau] = useState("");
   const [ngayKetThuc, setNgayKetThuc] = useState("");
-  const [dotGiamGia, setDotGiamGia] = useState([]);
+  const [GiamGiaHoaDon, setGiamGiaHoaDon] = useState([]);
   const [dieuKien, setDieuKien] = useState("");
   const [soTienGiamMax, setSoTienGiamMax] = useState("");
   const [soLuong, setSoLuong] = useState("");
-  const [editingDotGiamGia, setEditingDotGiamGia] = useState(null);
+  const [editingGiamGiaHoaDon, setEditingGiamGiaHoaDon] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
 
-  const loadDotGiamGia = async () => {
+  const loadGiamGiaHoaDon = async () => {
     try {
-      const result = await getPhieuGiamGia();
-      const dotGiamGiaData = result.data.map((item, index) => ({
+      const result = await getGiamGiaHoaDon();
+      const GiamGiaHoaDonData = result.data.map((item, index) => ({
         key: index,
         ID: item.id,
         MA: item.ma,
         TEN: item.ten,
-        PHAN_TRAM_GIAM: item.phanTramGiam,
+        DIEU_KIEN: item.dieuKien,
+        SO_TIEN_GIAM_MAX: item.soTienGiamMax,
         NGAY_BAT_DAU: item.ngayBatDau,
         NGAY_KET_THUC: item.ngayKetThuc,
+        PHAN_TRAM_GIAM: item.phanTramGiam,
+        SO_LUONG: item.soLuong,
         TRANG_THAI: item.trangThai,
       }));
-      setDotGiamGia(dotGiamGiaData);
+      setGiamGiaHoaDon(GiamGiaHoaDonData);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu đợt giảm giá:", error);
     }
   };
 
   useEffect(() => {
-    loadDotGiamGia();
+    loadGiamGiaHoaDon();
   }, []);
 
   const handleAddSubmit = async () => {
@@ -56,20 +59,26 @@ const DotGiamGia = () => {
       new Date(ngayKetThuc)
     );
 
-    const newDotGiamGia = {
+    const newGiamGiaHoaDon = {
       ma: ma,
       ten: ten,
+      dieuKien: parseFloat(dieuKien),
+      soTienGiamMax: parseFloat(soTienGiamMax),
       ngayBatDau: ngayBatDau,
       ngayKetThuc: ngayKetThuc,
       phanTramGiam: parseFloat(phanTramGiam),
+      soLuong: parseInt(soLuong),
       trangThai: newTrangThai,
     };
     try {
-      await addPhieuGiamGia(newDotGiamGia);
+      await addGiamGiaHoaDon(newGiamGiaHoaDon);
       message.success("Thêm thành công!");
-      loadDotGiamGia();
+      loadGiamGiaHoaDon();
       setMa("");
       setTen("");
+      setDieuKien("");
+      setSoTienGiamMax("");
+      setSoLuong("");
       setPhamTramGiam("");
       setNgayBatDau("");
       setNgayKetThuc("");
@@ -91,25 +100,29 @@ const DotGiamGia = () => {
       new Date(ngayKetThuc)
     );
 
-    const updatedDotGiamGia = {
+    const updatedGiamGiaHoaDon = {
       ma: ma,
       ten: ten,
-
+      dieuKien: parseFloat(dieuKien),
+      soTienGiamMax: parseFloat(soTienGiamMax),
       ngayBatDau: ngayBatDau,
       ngayKetThuc: ngayKetThuc,
       phanTramGiam: parseFloat(phanTramGiam),
- 
+      soLuong: parseInt(soLuong),
       trangThai: updatedTrangThai,
     };
 
     try {
-      await updatePhieuGiamGia(editingDotGiamGia.ID, updatedDotGiamGia);
+      await updateGiamGiaHoaDon(editingGiamGiaHoaDon.ID, updatedGiamGiaHoaDon);
       message.success("Cập nhật thành công");
-      loadDotGiamGia();
+      loadGiamGiaHoaDon();
       setIsModalVisible(false);
-      setEditingDotGiamGia(null);
+      setEditingGiamGiaHoaDon(null);
       setMa("");
       setTen("");
+      setDieuKien("");
+      setSoTienGiamMax("");
+      setSoLuong("");
       setPhamTramGiam("");
       setNgayBatDau("");
       setNgayKetThuc("");
@@ -121,9 +134,9 @@ const DotGiamGia = () => {
 
   const handleDelete = async (record) => {
     try {
-      await deletePhieuGiamGia(record.ID);
+      await deleteGiamGiaHoaDon(record.ID);
       message.success("Xóa đợt giảm giá thành công ");
-      loadDotGiamGia();
+      loadGiamGiaHoaDon();
     } catch (error) {
       message.error("Lỗi khi xóa đợt giảm giá");
     }
@@ -144,7 +157,17 @@ const DotGiamGia = () => {
     // { title: "ID", dataIndex: "ID", key: "ID" },
     // { title: "Mã", dataIndex: "MA", key: "MA" },
     { title: "Tên", dataIndex: "TEN", key: "TEN" },
-
+    {
+      title: "Điều Kiện",
+      dataIndex: "DIEU_KIEN",
+      key: "DIEU_KIEN",
+      render: (text) => `${text ? text.toLocaleString() : "0"} VND`,
+    },
+    {
+      title: "Số tiền giảm Max",
+      dataIndex: "SO_TIEN_GIAM_MAX",
+      key: "SO_TIEN_GIAM_MAX",
+    },
     { title: "Ngày Bắt Đầu", dataIndex: "NGAY_BAT_DAU", key: "NGAY_BAT_DAU" },
     {
       title: "Ngày Kết Thúc",
@@ -156,7 +179,7 @@ const DotGiamGia = () => {
       dataIndex: "PHAN_TRAM_GIAM",
       key: "PHAN_TRAM_GIAM",
     },
-
+    { title: "Số Lượng", dataIndex: "SO_LUONG", key: "SO_LUONG" },
     {
       title: "Trạng Thái",
       dataIndex: "TRANG_THAI",
@@ -176,9 +199,12 @@ const DotGiamGia = () => {
   ];
 
   const handleUpdate = (record) => {
-    setEditingDotGiamGia(record);
+    setEditingGiamGiaHoaDon(record);
     setMa(record.MA);
     setTen(record.TEN);
+    setDieuKien(record.DIEU_KIEN);
+    setSoTienGiamMax(record.SO_TIEN_GIAM_MAX);
+    setSoLuong(record.SO_LUONG);
     setPhamTramGiam(record.PHAN_TRAM_GIAM);
     setNgayBatDau(record.NGAY_BAT_DAU);
     setNgayKetThuc(record.NGAY_KET_THUC);
@@ -199,7 +225,7 @@ const DotGiamGia = () => {
 
   const handleModalCancel = () => {
     setIsModalVisible(false);
-    setEditingDotGiamGia(null);
+    setEditingGiamGiaHoaDon(null);
   };
 
   const handleAddModalCancel = () => {
@@ -211,9 +237,8 @@ const DotGiamGia = () => {
       <Button onClick={handleAdd}>Thêm Phiếu Giảm Giá</Button>
       <Table
         columns={columns}
-        dataSource={dotGiamGia}
+        dataSource={GiamGiaHoaDon}
         pagination={{ pageSize: 5 }}
-        style={{ marginLeft: "200px" }}
       />
 
       {/* Modal Thêm Phiếu Giảm Giá */}
@@ -230,10 +255,16 @@ const DotGiamGia = () => {
           <Form.Item label="Tên">
             <Input value={ten} onChange={(e) => setTen(e.target.value)} />
           </Form.Item>
-          <Form.Item label="Phần Trăm Giảm">
+          <Form.Item label="Điều Kiện">
             <Input
-              value={phanTramGiam}
-              onChange={(e) => setPhamTramGiam(e.target.value)}
+              value={dieuKien}
+              onChange={(e) => setDieuKien(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item label="Số Tiền Giảm Max">
+            <Input
+              value={soTienGiamMax}
+              onChange={(e) => setSoTienGiamMax(e.target.value)}
             />
           </Form.Item>
           <Form.Item label="Ngày Bắt Đầu">
@@ -243,7 +274,18 @@ const DotGiamGia = () => {
               onChange={(e) => setNgayBatDau(e.target.value)}
             />
           </Form.Item>
-
+          <Form.Item label="Phần Trăm Giảm">
+            <Input
+              value={phanTramGiam}
+              onChange={(e) => setPhamTramGiam(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item label="Số Lượng">
+            <Input
+              value={soLuong}
+              onChange={(e) => setSoLuong(e.target.value)}
+            />
+          </Form.Item>
           <Form.Item label="Ngày Kết Thúc">
             <Input
               type="date"
@@ -262,11 +304,23 @@ const DotGiamGia = () => {
         onCancel={handleModalCancel}
       >
         <Form layout="vertical">
-          <Form.Item label="Mã">
+          {/* <Form.Item label="Mã">
             <Input value={ma} onChange={(e) => setMa(e.target.value)} />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="Tên">
             <Input value={ten} onChange={(e) => setTen(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Điều Kiện">
+            <Input
+              value={dieuKien}
+              onChange={(e) => setDieuKien(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item label="Số Tiền Giảm Max">
+            <Input
+              value={soTienGiamMax}
+              onChange={(e) => setSoTienGiamMax(e.target.value)}
+            />
           </Form.Item>
           <Form.Item label="Ngày Bắt Đầu">
             <Input
@@ -288,10 +342,16 @@ const DotGiamGia = () => {
               onChange={(e) => setPhamTramGiam(e.target.value)}
             />
           </Form.Item>
+          <Form.Item label="Số Lượng">
+            <Input
+              value={soLuong}
+              onChange={(e) => setSoLuong(e.target.value)}
+            />
+          </Form.Item>
         </Form>
       </Modal>
     </div>
   );
 };
 
-export default DotGiamGia;
+export default GiamGiaHoaDon;

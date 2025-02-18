@@ -46,15 +46,15 @@ const SanPham = () => {
   const [xuatXuList, setXuatXuList] = useState([]);
   const [kieuDangList, setKieuDangList] = useState([]);
   const [anhGiayList, setAnhGiayList] = useState([]);
-  const [selectedThuongHieu, setSelectedThuongHieu] = useState(null);
-  const [selectedChatLieu, setSelectedChatLieu] = useState(null);
-  const [selectedDeGiay, setSelectedDeGiay] = useState(null);
-  const [selectedXuatXu, setSelectedXuatXu] = useState(null);
-  const [selectedKieuDang, setSelectedKieuDang] = useState(null);
-  const [selectedMauSac, setSelectedMauSac] = useState(null);
-  const [selectdKichCo, setSelectedKichCo] = useState(null);
-  const [selectedAnhGiay, setSelectedAnhGiay] = useState(null);
-  const [editingGiay, setEditingGiay] = useState(null);
+  const [selectedThuongHieu, setSelectedThuongHieu] = useState();
+  const [selectedChatLieu, setSelectedChatLieu] = useState();
+  const [selectedDeGiay, setSelectedDeGiay] = useState();
+  const [selectedXuatXu, setSelectedXuatXu] = useState();
+  const [selectedKieuDang, setSelectedKieuDang] = useState();
+  const [selectedMauSac, setSelectedMauSac] = useState();
+  const [selectdKichCo, setSelectedKichCo] = useState();
+  const [selectedAnhGiay, setSelectedAnhGiay] = useState();
+  const [editingGiay, setEditingGiay] = useState();
   const [isModalVisible, setIsModalVisible] = useState(false);
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", newSelectedRowKeys);
@@ -116,6 +116,7 @@ const SanPham = () => {
   //viết hàm get để map lên select
   const getThuongHieuList = async () => {
     const result = await getThuongHieu();
+
     setThuongHieuList(result.data);
   };
 
@@ -175,7 +176,7 @@ const SanPham = () => {
   };
 
   const creatGiay = async () => {
-    if (!ten || !moTa || !giaBan) {
+    if (!ten || !giaBan) {
       message.error("Không được để trống ! ");
       return;
     }
@@ -189,14 +190,14 @@ const SanPham = () => {
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
       //id được chọn từ danh sách nếu không có giá trị sẽ là null
-      thuongHieu: selectedThuongHieu ? { id: selectedThuongHieu } : null,
-      chatLieu: selectedChatLieu ? { id: selectedChatLieu } : null,
-      deGiay: selectedDeGiay ? { id: selectedDeGiay } : null,
-      xuatXu: selectedXuatXu ? { id: selectedXuatXu } : null,
-      kieuDang: selectedKieuDang ? { id: selectedKieuDang } : null,
-      mauSac: selectedMauSac ? { id: selectedMauSac } : null,
-      kichCo: selectdKichCo ? { id: selectdKichCo } : null,
-      anhGiay: selectedAnhGiay ? { id: selectedAnhGiay } : null,
+      thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
+      chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
+      deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
+      xuatXuDto: selectedXuatXu ? { id: selectedXuatXu } : null,
+      kieuDangDto: selectedKieuDang ? { id: selectedKieuDang } : null,
+      mauSacDto: selectedMauSac ? { id: selectedMauSac } : null,
+      kichCoDto: selectdKichCo ? { id: selectdKichCo } : null,
+      anhGiayDtos: selectedAnhGiay ? { id: selectedAnhGiay } : null,
     };
     try {
       await addGiay(newDataGiay);
@@ -218,6 +219,8 @@ const SanPham = () => {
       setSelectedMauSac(null);
       setSelectedKichCo(null);
       setSelectedAnhGiay(null);
+
+      console.log("du liệu giày mới thêm", newDataGiay);
     } catch (error) {
       message.error("Lỗi thêm sản phẩm " + error.message);
     }
@@ -235,10 +238,33 @@ const SanPham = () => {
   };
 
   const detailGiay = async (record) => {
-    console.log("ID giày là :", record.ID);
+    console.log("Thông tin giày là:", record);
+
+    // Tạo đối tượng GiayDto từ thông tin của giày mà bạn có
+    const giayDto = {
+      id: record.ID, // Nếu bạn muốn gửi ID cùng với các thông tin khác
+      ten: record.ten,
+      moTa: record.moTa,
+      giaBan: record.giaBan,
+      soLuongTon: record.soLuongTon,
+      trangThai: record.trangThai,
+      thuongHieu: record.thuongHieu ? { id: record.thuongHieu.id } : null,
+      chatLieu: record.chatLieu ? { id: record.chatLieu.id } : null,
+      deGiay: record.deGiay ? { id: record.deGiay.id } : null,
+      kieuDang: record.kieuDang ? { id: record.kieuDang.id } : null,
+      xuatXu: record.xuatXu ? { id: record.xuatXu.id } : null,
+      mauSac: record.mauSac ? { id: record.mauSac.id } : null,
+      kichCo: record.kichCo ? { id: record.kichCo.id } : null,
+      anhGiay: record.anhGiay ? { id: record.anhGiay.id } : null,
+    };
+
     try {
-      const response = await getGiayDetail(record.ID);
+      // Gửi DTO qua API để lấy chi tiết giày
+      const response = await getGiayDetail(giayDto);
       const giay = response.data;
+      console.log("Dữ liệu nhận được từ API:", giay);
+
+      // Cập nhật state với dữ liệu nhận được
       setEditingGiay(giay);
       setTen(giay.ten);
       setMoTa(giay.moTa);
@@ -325,9 +351,8 @@ const SanPham = () => {
         onCancel={() => setIsModalVisible1(false)}
         okText="Thêm"
         cancelText="Hủy"
-      
       >
-        <div style={{float:"left",width:"45%"}}>
+        <div style={{ float: "left", width: "45%" }}>
           <Select
             style={{ width: "100%" }}
             placeholder="Chọn Thương Hiệu"
@@ -404,9 +429,9 @@ const SanPham = () => {
           <br />
           <br />
         </div>
-        <div style={{float:"right",width:"45%"}}>
+        <div style={{ float: "right", width: "45%" }}>
           <Select
-           style={{ width: "100%" }}
+            style={{ width: "100%" }}
             placeholder="Chọn Ảnh Giày"
             value={selectedAnhGiay}
             onChange={handleAnhGiayChange}
