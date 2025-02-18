@@ -5,6 +5,7 @@ import com.example.demo.dto.request.MauSacUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.MauSacEntity;
+import com.example.demo.entity.ThuongHieuEntity;
 import com.example.demo.repository.MauSacRepository;
 import com.example.demo.service.MauSacService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -40,6 +41,30 @@ public class MauSacServiceImpl implements MauSacService {
     }
 
     @Override
+    public MauSacEntity addNhanh(MauSacDto mauSacDto) {
+        if (mauSacDto.getTen() == null || mauSacDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Mau sac khong duoc de trong.");
+        }
+
+
+        MauSacEntity mauSacEntity = new MauSacEntity();
+
+
+        mauSacEntity.setMa(mauSacDto.getMa() != null ? mauSacDto.getMa() : generateMa());
+
+
+        mauSacEntity.setTrangThai(mauSacDto.getTrangThai() != null ? mauSacDto.getTrangThai() : 1);
+
+
+        mauSacEntity.setTen(mauSacDto.getTen().trim());
+
+
+        return mauSacRepository.save(mauSacEntity);}
+    private String generateMa() {
+        return "MS" + System.currentTimeMillis();
+    }
+
+    @Override
     public MauSacEntity update(MauSacUpdateDto mauSacUpdateDto) {
         Optional<MauSacEntity> optional = mauSacRepository.findById(mauSacUpdateDto.getId());
         return optional.map(o ->{
@@ -62,6 +87,16 @@ public class MauSacServiceImpl implements MauSacService {
         return optional.map(o ->{
             mauSacRepository.delete(o);
             return o;
+        }).orElse(null);
+    }
+
+    @Override
+    public MauSacEntity toggleTrangThai(MauSacUpdateDto mauSacUpdateDto) {
+        Optional<MauSacEntity> optional = mauSacRepository.findById(mauSacUpdateDto.getId());
+        return optional.map(mauSacEntity -> {
+
+            mauSacEntity.setTrangThai(mauSacEntity.getTrangThai() == 1 ? 0 : 1);
+            return mauSacRepository.save(mauSacEntity);
         }).orElse(null);
     }
 

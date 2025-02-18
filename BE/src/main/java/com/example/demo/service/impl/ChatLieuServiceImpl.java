@@ -4,6 +4,7 @@ import com.example.demo.dto.request.ChatLieuDto;
 import com.example.demo.dto.request.ChatLieuUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.ChatLieuEntity;
+import com.example.demo.entity.KichCoEntity;
 import com.example.demo.repository.ChatLieuRepository;
 import com.example.demo.service.ChatLieuService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -40,6 +41,34 @@ public class ChatLieuServiceImpl implements ChatLieuService {
     }
 
     @Override
+    public ChatLieuEntity addNhanh(ChatLieuDto chatLieuDto) {
+
+        if (chatLieuDto.getTen() == null || chatLieuDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("Tên chất liệu không được để trống.");
+        }
+
+
+        ChatLieuEntity chatLieuEntity = new ChatLieuEntity();
+
+
+        chatLieuEntity.setMa(chatLieuDto.getMa() != null ? chatLieuDto.getMa() : generateMa());
+
+
+        chatLieuEntity.setTrangThai(chatLieuDto.getTrangThai() != null ? chatLieuDto.getTrangThai() : 1);
+
+
+        chatLieuEntity.setTen(chatLieuDto.getTen().trim());
+
+
+        return chatLieuRepository.save(chatLieuEntity);
+    }
+
+
+    private String generateMa() {
+        return "CL" + System.currentTimeMillis();
+    }
+
+    @Override
     public ChatLieuEntity update(ChatLieuUpdateDto chatLieuUpdateDto) {
         Optional<ChatLieuEntity> optional = chatLieuRepository.findById(chatLieuUpdateDto.getId());
         return optional.map(o ->{
@@ -62,6 +91,16 @@ public class ChatLieuServiceImpl implements ChatLieuService {
         return optional.map(o ->{
             chatLieuRepository.delete(o);
             return o;
+        }).orElse(null);
+    }
+
+    @Override
+    public ChatLieuEntity toggleTrangThai(ChatLieuUpdateDto chatLieuUpdateDto) {
+        Optional<ChatLieuEntity> optional = chatLieuRepository.findById(chatLieuUpdateDto.getId());
+        return optional.map(chatLieuEntity -> {
+
+            chatLieuEntity.setTrangThai(chatLieuEntity.getTrangThai() == 1 ? 0 : 1);
+            return chatLieuRepository.save(chatLieuEntity);
         }).orElse(null);
     }
 

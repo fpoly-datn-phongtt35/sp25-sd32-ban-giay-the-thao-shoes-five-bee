@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -21,11 +22,10 @@ public class DanhMucEntity {
     private UUID id;
     @Column(name = "MA")
     private String ma;
-    @Column(name = "TEN")
+    @Column(name = "TEN", columnDefinition = "NVARCHAR(255)")
     private String ten;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
-    @ManyToOne
-    @JoinColumn(name = "ID_GIAY")
-    private GiayEntity giayEntity;
+    @OneToMany(mappedBy = "danhMuc", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    private List<GiayEntity> giayEntities;
 }

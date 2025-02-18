@@ -32,7 +32,7 @@ public class GioHangEntity {
     @Column(name = "NGAY_CAP_NHAT")
     private Date ngayCapNhat;
 
-    @Column(name = "GHI_CHU")
+    @Column(name = "GHI_CHU",columnDefinition = "NVARCHAR(255)")
     private String ghiChu;
 
     @Column(name = "TRANG_THAI")

@@ -26,10 +26,10 @@ public class GiayEntity {
     @Column(name = "MA")
     private String ma;
 
-    @Column(name = "TEN")
+    @Column(name = "TEN",columnDefinition = "NVARCHAR(255)")
     private String ten;
 
-    @Column(name = "MO_TA")
+    @Column(name = "MO_TA",columnDefinition = "NVARCHAR(255)")
     private String moTa;
 
     @Column(name = "GIA_NHAP")
@@ -63,6 +63,12 @@ public class GiayEntity {
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_KIEU_DANG",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private KieuDangEntity kieuDang;
+
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ID_DANH_MUC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    private DanhMucEntity danhMuc;
+
+
 
     @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AnhGiayEntity> anhGiayEntities;

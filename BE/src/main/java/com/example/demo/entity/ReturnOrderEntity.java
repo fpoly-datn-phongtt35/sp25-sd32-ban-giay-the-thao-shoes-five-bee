@@ -30,7 +30,7 @@ public class ReturnOrderEntity {
     @Column(name = "STATUS")
     private int status;
 
-    @Column(name = "REASON")
+    @Column(name = "REASON",columnDefinition = "NVARCHAR(255)")
     private String reason;
 
     @Column(name = "IMAGE")
