@@ -91,16 +91,6 @@ public class MauSacServiceImpl implements MauSacService {
     }
 
     @Override
-    public MauSacEntity toggleTrangThai(MauSacUpdateDto mauSacUpdateDto) {
-        Optional<MauSacEntity> optional = mauSacRepository.findById(mauSacUpdateDto.getId());
-        return optional.map(mauSacEntity -> {
-
-            mauSacEntity.setTrangThai(mauSacEntity.getTrangThai() == 1 ? 0 : 1);
-            return mauSacRepository.save(mauSacEntity);
-        }).orElse(null);
-    }
-
-    @Override
     public PageResponse<MauSacEntity> findByPagingCriteria(MauSacDto mauSacDto, Pageable pageable) {
         Page<MauSacEntity> page = mauSacRepository.findAll(new Specification<MauSacEntity>() {
             @Override

@@ -19,6 +19,5 @@ public interface KieuDangService {
     KieuDangEntity update(KieuDangUpdateDto kieuDangUpdateDto);
     KieuDangEntity detail(KieuDangUpdateDto kieuDangUpdateDto);
     KieuDangEntity delete(KieuDangUpdateDto kieuDangUpdateDto);
-    KieuDangEntity toggleTrangThai(KieuDangUpdateDto kieuDangUpdateDto);
     PageResponse<KieuDangEntity> findByPagingCriteria(KieuDangDto kieuDangDto, Pageable pageable);
 }

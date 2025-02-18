@@ -6,7 +6,6 @@ import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.DeGiayEntity;
 import com.example.demo.entity.KichCoEntity;
 import com.example.demo.entity.MauSacEntity;
-import com.example.demo.entity.ThuongHieuEntity;
 import com.example.demo.repository.KichCoRepository;
 import com.example.demo.service.KichCoService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -92,16 +91,6 @@ public class KichCoServiceImpl implements KichCoService {
         return optional.map(o ->{
             kichCoRepository.delete(o);
             return o;
-        }).orElse(null);
-    }
-
-    @Override
-    public KichCoEntity toggleKichCo(KichCoUpdateDto kichCoUpdateDto) {
-        Optional<KichCoEntity> optional = kichCoRepository.findById(kichCoUpdateDto.getId());
-        return optional.map(kichCoEntity -> {
-
-            kichCoEntity .setTrangThai(kichCoEntity.getTrangThai() == 1 ? 0 : 1);
-            return kichCoRepository.save(kichCoEntity );
         }).orElse(null);
     }
 

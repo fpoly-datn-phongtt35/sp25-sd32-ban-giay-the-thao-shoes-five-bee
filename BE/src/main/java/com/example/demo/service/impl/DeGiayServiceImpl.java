@@ -6,7 +6,6 @@ import com.example.demo.dto.response.PageResponse;
 
 import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.DeGiayEntity;
-import com.example.demo.entity.MauSacEntity;
 import com.example.demo.repository.DeGiayRepository;
 import com.example.demo.service.DeGiayService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -91,16 +90,6 @@ public class DeGiayServiceImpl implements DeGiayService {
         return optional.map(o ->{
             deGiayRepository.delete(o);
             return o;
-        }).orElse(null);
-    }
-
-    @Override
-    public DeGiayEntity toggleTrangThai(DeGiayUpdateDto deGiayUpdateDto) {
-        Optional<DeGiayEntity> optional = deGiayRepository.findById(deGiayUpdateDto.getId());
-        return optional.map(deGiayEntity -> {
-
-            deGiayEntity.setTrangThai(deGiayEntity.getTrangThai() == 1 ? 0 : 1);
-            return deGiayRepository.save(deGiayEntity);
         }).orElse(null);
     }
 

@@ -5,8 +5,6 @@ import com.example.demo.dto.request.DanhMucUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.DanhMucEntity;
-import com.example.demo.entity.KieuDangEntity;
-import com.example.demo.entity.MauSacEntity;
 import com.example.demo.repository.DanhMucRepository;
 import com.example.demo.service.DanhMucService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -42,30 +40,6 @@ public class DanhMucServiceImpl implements DanhMucService {
     }
 
     @Override
-    public DanhMucEntity addNhanh(DanhMucDto danhMucDto) {
-        if (danhMucDto.getTen() == null || danhMucDto.getTen().trim().isEmpty()) {
-            throw new IllegalArgumentException("Danh muc khong duoc de trong.");
-        }
-
-
-        DanhMucEntity danhMucEntity = new DanhMucEntity();
-
-
-        danhMucEntity.setMa(danhMucDto.getMa() != null ? danhMucDto.getMa() : generateMa());
-
-
-        danhMucEntity.setTrangThai(danhMucDto.getTrangThai() != null ? danhMucDto.getTrangThai() : 1);
-
-
-        danhMucEntity.setTen(danhMucDto.getTen().trim());
-
-
-        return danhMucRepository.save(danhMucEntity);}
-    private String generateMa() {
-        return "DM" + System.currentTimeMillis();
-    }
-
-    @Override
     public DanhMucEntity update(DanhMucUpdateDto danhMucUpdateDto) {
         Optional<DanhMucEntity> optional = danhMucRepository.findById(danhMucUpdateDto.getId());
         return optional.map(o->{
@@ -88,16 +62,6 @@ public class DanhMucServiceImpl implements DanhMucService {
         return optional.map(o->{
             danhMucRepository.delete(o);
             return o;
-        }).orElse(null);
-    }
-
-    @Override
-    public DanhMucEntity toggleTrangThai(DanhMucUpdateDto danhMucUpdateDto) {
-        Optional<DanhMucEntity> optional = danhMucRepository.findById(danhMucUpdateDto.getId());
-        return optional.map(danhMucEntity -> {
-
-            danhMucEntity.setTrangThai(danhMucEntity.getTrangThai() == 1 ? 0 : 1);
-            return danhMucRepository.save(danhMucEntity);
         }).orElse(null);
     }
 

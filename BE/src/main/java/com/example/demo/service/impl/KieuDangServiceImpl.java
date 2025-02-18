@@ -92,16 +92,6 @@ public class KieuDangServiceImpl implements KieuDangService {
     }
 
     @Override
-    public KieuDangEntity toggleTrangThai(KieuDangUpdateDto kieuDangUpdateDto) {
-        Optional<KieuDangEntity> optional = kieuDangRepository.findById(kieuDangUpdateDto.getId());
-        return optional.map(kieuDangEntity -> {
-
-            kieuDangEntity.setTrangThai(kieuDangEntity.getTrangThai() == 1 ? 0 : 1);
-            return kieuDangRepository.save(kieuDangEntity);
-        }).orElse(null);
-    }
-
-    @Override
     public PageResponse<KieuDangEntity> findByPagingCriteria(KieuDangDto kieuDangDto, Pageable pageable) {
         Page<KieuDangEntity> page = kieuDangRepository.findAll(new Specification<KieuDangEntity>() {
             @Override
