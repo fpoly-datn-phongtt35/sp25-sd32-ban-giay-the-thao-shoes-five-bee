@@ -3,11 +3,14 @@ package com.example.demo.dto.request;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+
+import com.fasterxml.jackson.databind.deser.std.UUIDDeserializer;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 
 @AllArgsConstructor
 @NoArgsConstructor
@@ -15,7 +18,7 @@ import lombok.experimental.SuperBuilder;
 @Getter
 @Setter
 public class GiayDto extends PageDto {
-
+  @JsonDeserialize(using = UUIDDeserializer.class)
   private UUID id;
 
   private String ma;
@@ -32,6 +35,8 @@ public class GiayDto extends PageDto {
 
   private Integer trangThai;
 
+  private  DanhMucUpdateDto danhMucDto;
+
   private ThuongHieuUpdateDto thuongHieuDto;
 
   private ChatLieuUpdateDto chatLieuDto;
@@ -42,5 +47,7 @@ public class GiayDto extends PageDto {
 
   private KieuDangUpdateDto kieuDangDto;
 
-  private List<AnhGiayDto> anhGiayDtos;
+  private AnhGiayDto anhGiayDtos;
+
 }
+

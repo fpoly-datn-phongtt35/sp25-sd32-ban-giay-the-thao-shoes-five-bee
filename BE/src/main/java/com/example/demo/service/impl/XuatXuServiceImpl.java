@@ -3,6 +3,7 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.request.XuatXuDto;
 import com.example.demo.dto.request.XuatXuUpdateDto;
 import com.example.demo.dto.response.PageResponse;
+import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.ThuongHieuEntity;
 import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.repository.XuatXuRepository;
@@ -40,6 +41,33 @@ public class XuatXuServiceImpl implements XuatXuService {
     }
 
     @Override
+    public XuatXuEntity addNhanh(XuatXuDto xuatXuDto) {
+        if (xuatXuDto.getTen() == null || xuatXuDto.getTen().trim().isEmpty()) {
+            throw new IllegalArgumentException("xuất xứ không được để trống.");
+        }
+
+
+      XuatXuEntity xuatXuEntity = new XuatXuEntity();
+
+
+        xuatXuEntity.setMa(xuatXuDto.getMa() != null ? xuatXuDto.getMa() : generateMa());
+
+
+        xuatXuEntity.setTrangThai(xuatXuDto.getTrangThai() != null ? xuatXuDto.getTrangThai() : 1);
+
+
+        xuatXuEntity.setTen(xuatXuDto.getTen().trim());
+
+
+        return xuatXuRepository.save(xuatXuEntity);
+    }
+
+
+    private String generateMa() {
+        return "XX" + System.currentTimeMillis();
+    }
+
+    @Override
     public XuatXuEntity update(XuatXuUpdateDto xuatXuUpdateDto) {
         Optional<XuatXuEntity> optional = xuatXuRepository.findById(xuatXuUpdateDto.getId());
         return optional.map(o->{
@@ -62,6 +90,16 @@ public class XuatXuServiceImpl implements XuatXuService {
         return optional.map(o->{
             xuatXuRepository.delete(o);
             return o;
+        }).orElse(null);
+    }
+
+    @Override
+    public XuatXuEntity toggleTrangThai(XuatXuUpdateDto xuatXuUpdateDto) {
+        Optional<XuatXuEntity> optional = xuatXuRepository.findById(xuatXuUpdateDto.getId());
+        return optional.map(xuatXuEntity -> {
+
+            xuatXuEntity.setTrangThai(xuatXuEntity.getTrangThai() == 1 ? 0 : 1);
+            return xuatXuRepository.save(xuatXuEntity);
         }).orElse(null);
     }
 

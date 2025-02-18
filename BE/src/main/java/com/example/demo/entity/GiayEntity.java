@@ -64,6 +64,12 @@ public class GiayEntity {
     @JoinColumn(name = "ID_KIEU_DANG",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private KieuDangEntity kieuDang;
 
+    @ManyToOne(fetch = FetchType.EAGER)
+    @JoinColumn(name = "ID_DANH_MUC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    private DanhMucEntity danhMuc;
+
+
+
     @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AnhGiayEntity> anhGiayEntities;
 

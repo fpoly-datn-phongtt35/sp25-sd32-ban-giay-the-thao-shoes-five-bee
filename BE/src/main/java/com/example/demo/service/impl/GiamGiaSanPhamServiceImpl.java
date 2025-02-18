@@ -1,17 +1,25 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.request.GiamGiaChiTietSanPhamRequest;
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
 import com.example.demo.dto.response.PageResponse;
+import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
 import com.example.demo.entity.GiamGiaSanPhamEntity;
+import com.example.demo.entity.GiayChiTietEntity;
+import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
 import com.example.demo.repository.GiamGiaSanPhamRepository;
+import com.example.demo.repository.GiayChiTietRepository;
 import com.example.demo.service.GiamGiaSanPhamService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -22,6 +30,67 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   private final GiamGiaSanPhamRepository giamGiaSanPhamRepository;
+  private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
+  private final GiayChiTietRepository giayChiTietRepository;
+
+  @Override
+  public GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
+      GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
+
+    if (giamGiaChiTietSanPhamRequest.getIdGiay() == null
+        && giamGiaChiTietSanPhamRequest.getIdMauSac() == null
+        && giamGiaChiTietSanPhamRequest.getIdThuongHieu() == null) {
+      throw new IllegalArgumentException("Vui lòng truyền vào điều kiện để tạo giảm giá.");
+    }
+
+    GiamGiaSanPhamEntity giamGiaSanPham =
+        GiamGiaSanPhamEntity.builder()
+            .ma(giamGiaChiTietSanPhamRequest.getMa())
+            .ten(giamGiaChiTietSanPhamRequest.getTen())
+            .phanTramGiam(giamGiaChiTietSanPhamRequest.getPhanTramGiam())
+            .ngayBatDau(giamGiaChiTietSanPhamRequest.getNgayBatDau())
+            .ngayKetThuc(giamGiaChiTietSanPhamRequest.getNgayKetThuc())
+            .trangThai(1)
+            .build();
+    giamGiaSanPhamRepository.save(giamGiaSanPham);
+
+    List<GiayChiTietEntity> danhSachSanPham;
+
+    if (giamGiaChiTietSanPhamRequest.getIdGiay() != null && giamGiaChiTietSanPhamRequest.getIdMauSac() != null) {
+      danhSachSanPham = giayChiTietRepository.findByGiayEntityIdAndMauSacEntityId(
+              giamGiaChiTietSanPhamRequest.getIdGiay(), giamGiaChiTietSanPhamRequest.getIdMauSac()
+      );
+    } else if (giamGiaChiTietSanPhamRequest.getIdThuongHieu() != null && giamGiaChiTietSanPhamRequest.getIdMauSac() != null) {
+      danhSachSanPham = giayChiTietRepository.findByGiayEntityThuongHieuIdAndMauSacEntityId(
+              giamGiaChiTietSanPhamRequest.getIdThuongHieu(), giamGiaChiTietSanPhamRequest.getIdMauSac()
+      );
+    } else if (giamGiaChiTietSanPhamRequest.getIdThuongHieu() != null) {
+      danhSachSanPham = giayChiTietRepository.findByGiayEntityThuongHieuId(giamGiaChiTietSanPhamRequest.getIdThuongHieu());
+    }else if(giamGiaChiTietSanPhamRequest.getIdGiay() != null){
+      danhSachSanPham = giayChiTietRepository.findByGiayEntityId(giamGiaChiTietSanPhamRequest.getIdGiay());
+    }else {
+      danhSachSanPham = giayChiTietRepository.findByMauSacEntityId(giamGiaChiTietSanPhamRequest.getIdMauSac());
+    }
+
+    // Áp dụng giảm giá
+    danhSachSanPham.forEach(sanPham -> {
+      BigDecimal soTienDaGiam = sanPham.getGiaBan()
+              .multiply(BigDecimal.valueOf(giamGiaChiTietSanPhamRequest.getPhanTramGiam()))
+              .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+
+      GiamGiaChiTietSanPhamEntity chiTietGiamGia = GiamGiaChiTietSanPhamEntity.builder()
+              .soTienDaGiam(soTienDaGiam)
+              .trangThai(1)
+              .giay(sanPham.getGiayEntity())
+              .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
+              .build();
+
+      giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
+    });
+
+    return giamGiaSanPham;
+  }
+
 
   @Override
   public List<GiamGiaSanPhamEntity> getAll() {
