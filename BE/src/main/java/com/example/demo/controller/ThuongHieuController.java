@@ -30,7 +30,7 @@ public class ThuongHieuController {
         Pageable pageable = PageRequest.of(thuongHieuDto.getPage(),thuongHieuDto.getSize());
         return ResponseEntity.ok(thuongHieuService.findByPagingCriteria(thuongHieuDto,pageable));
     }
-
+ 
     @PostMapping("/add")
     public ResponseEntity<?> add(@RequestBody ThuongHieuDto thuongHieuDto){
         return ResponseEntity.ok(thuongHieuService.add(thuongHieuDto));
