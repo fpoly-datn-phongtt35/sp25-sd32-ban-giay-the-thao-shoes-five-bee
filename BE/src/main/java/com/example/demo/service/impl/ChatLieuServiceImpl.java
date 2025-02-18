@@ -4,6 +4,7 @@ import com.example.demo.dto.request.ChatLieuDto;
 import com.example.demo.dto.request.ChatLieuUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.ChatLieuEntity;
+import com.example.demo.entity.KichCoEntity;
 import com.example.demo.repository.ChatLieuRepository;
 import com.example.demo.service.ChatLieuService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -90,6 +91,16 @@ public class ChatLieuServiceImpl implements ChatLieuService {
         return optional.map(o ->{
             chatLieuRepository.delete(o);
             return o;
+        }).orElse(null);
+    }
+
+    @Override
+    public ChatLieuEntity toggleTrangThai(ChatLieuUpdateDto chatLieuUpdateDto) {
+        Optional<ChatLieuEntity> optional = chatLieuRepository.findById(chatLieuUpdateDto.getId());
+        return optional.map(chatLieuEntity -> {
+
+            chatLieuEntity.setTrangThai(chatLieuEntity.getTrangThai() == 1 ? 0 : 1);
+            return chatLieuRepository.save(chatLieuEntity);
         }).orElse(null);
     }
 

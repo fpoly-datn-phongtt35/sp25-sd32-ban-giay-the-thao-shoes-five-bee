@@ -18,5 +18,6 @@ public interface MauSacService {
     MauSacEntity update(MauSacUpdateDto mauSacUpdateDto);
     MauSacEntity detail(MauSacUpdateDto mauSacUpdateDto);
     MauSacEntity delete(MauSacUpdateDto mauSacUpdateDto);
+    MauSacEntity toggleTrangThai (MauSacUpdateDto mauSacUpdateDto);
     PageResponse<MauSacEntity> findByPagingCriteria(MauSacDto mauSacDto, Pageable pageable);
 }

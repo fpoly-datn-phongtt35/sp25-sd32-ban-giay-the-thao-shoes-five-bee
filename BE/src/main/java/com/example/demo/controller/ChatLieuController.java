@@ -2,7 +2,9 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.ChatLieuDto;
 import com.example.demo.dto.request.ChatLieuUpdateDto;
+import com.example.demo.dto.request.XuatXuUpdateDto;
 import com.example.demo.entity.ChatLieuEntity;
+import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.service.ChatLieuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.PageRequest;
@@ -57,5 +59,9 @@ public class ChatLieuController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @PostMapping("/toggle-trangthai")
+    public ChatLieuEntity toggleTrangThai(@RequestBody ChatLieuUpdateDto chatLieuUpdateDto) {
+        return chatLieuService.toggleTrangThai(chatLieuUpdateDto);
     }
 }

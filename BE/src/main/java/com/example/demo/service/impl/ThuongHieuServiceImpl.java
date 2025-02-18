@@ -91,6 +91,16 @@ public class ThuongHieuServiceImpl implements ThuongHieuService {
     }
 
     @Override
+    public ThuongHieuEntity toggleTrangThai(ThuongHieuUpdateDto thuongHieuUpdateDto) {
+        Optional<ThuongHieuEntity> optional = thuongHieuRepository.findById(thuongHieuUpdateDto.getId());
+        return optional.map(thuongHieuEntity -> {
+
+            thuongHieuEntity.setTrangThai(thuongHieuEntity.getTrangThai() == 1 ? 0 : 1);
+            return thuongHieuRepository.save(thuongHieuEntity);
+        }).orElse(null);
+    }
+
+    @Override
     public PageResponse<ThuongHieuEntity> findByPagingCriteria(ThuongHieuDto thuongHieuDto, Pageable pageable) {
         Page<ThuongHieuEntity> page = thuongHieuRepository.findAll(new Specification<ThuongHieuEntity>() {
             @Override
