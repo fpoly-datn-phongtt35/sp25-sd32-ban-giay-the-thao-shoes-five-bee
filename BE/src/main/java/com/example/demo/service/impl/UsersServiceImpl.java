@@ -4,6 +4,8 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.demo.dto.request.DiaChiDto;
 import com.example.demo.dto.request.UserDto;
+import com.example.demo.dto.request.UserDtoSearch;
+import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.DiaChiEntity;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.entity.UserRoleEntity;
@@ -12,26 +14,36 @@ import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.UserRoleRepository;
 import com.example.demo.service.UsersService;
+import jakarta.persistence.criteria.CriteriaBuilder;
+import jakarta.persistence.criteria.CriteriaQuery;
+import jakarta.persistence.criteria.Predicate;
+import jakarta.persistence.criteria.Root;
+import lombok.extern.slf4j.Slf4j;
+import org.apache.commons.lang3.StringUtils;
+import org.apache.poi.ss.usermodel.*;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
+import org.springframework.data.jpa.domain.Specification;
+import org.springframework.security.crypto.password.PasswordEncoder;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+import org.springframework.web.multipart.MultipartFile;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.text.ParseException;
+import java.text.SimpleDateFormat;
+import java.util.*;
 import java.util.stream.Collectors;
-import lombok.extern.slf4j.Slf4j;
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
-import org.springframework.security.crypto.password.PasswordEncoder;
-import org.springframework.stereotype.Service;
-import org.springframework.transaction.annotation.Transactional;
-import org.springframework.web.multipart.MultipartFile;
+
 
 @Service
 @Slf4j
@@ -258,4 +270,276 @@ public class UsersServiceImpl implements UsersService {
     Optional<UserEntity> optional = userRepository.findById(userDto.getId());
     return optional.orElse(null);
   }
+
+
+    @Override
+    public PageResponse<UserEntity> findByPagingCriteria(UserDtoSearch userDtoSearch, Pageable pageable) {
+        Page<UserEntity> page = userRepository.findAll(new Specification<UserEntity>() {
+            @Override
+            public Predicate toPredicate(Root<UserEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+                if (userDtoSearch != null){
+                    if(userDtoSearch.getHoTen() != null && !userDtoSearch.getHoTen().isEmpty()){
+                        predicates.add(criteriaBuilder.like(root.get("hoTen"),"%" + userDtoSearch.getHoTen() + "%"));
+                    }
+                    if(userDtoSearch.getEmail() != null && !userDtoSearch.getEmail().isEmpty()){
+                        predicates.add(criteriaBuilder.like(root.get("email"),"%" + userDtoSearch.getEmail()+"%"));
+                    }
+                    if(userDtoSearch.getSoDienThoai() != null && !userDtoSearch.getSoDienThoai().isEmpty()){
+                        predicates.add(criteriaBuilder.like(root.get("soDienThoai"),"%"+ userDtoSearch.getSoDienThoai()+"%"));
+                    }
+                    if(userDtoSearch.getNgaySinh() != null){
+                        predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("ngaySinh"),userDtoSearch.getNgaySinh()));
+                    }
+                    if (userDtoSearch.getKhoangNgaySinh() != null){
+                        predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("ngaySinh"),userDtoSearch.getKhoangNgaySinh()));
+                    }
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            }
+        },pageable);
+        PageResponse<UserEntity> pageResponse = new PageResponse<>();
+        pageResponse.setTotalElements((int) page.getTotalElements());
+        pageResponse.setTotalPages(page.getTotalPages());
+        pageResponse.setSize(page.getSize());
+        pageResponse.setPage(page.getNumber() +1);
+        pageResponse.setContent(page.getContent());
+        return pageResponse;
+    }
+
+    @Override
+    public List<UserEntity> exportExcelByFindJpa(UserDtoSearch userDtoSearch) {
+        return userRepository.findAll(new Specification<UserEntity>() {
+            @Override
+            public Predicate toPredicate(Root<UserEntity> root, CriteriaQuery<?> query, CriteriaBuilder criteriaBuilder) {
+                List<Predicate> predicates = new ArrayList<>();
+                if (userDtoSearch != null){
+                    if(userDtoSearch.getHoTen() != null && !userDtoSearch.getHoTen().isEmpty()){
+                        predicates.add(criteriaBuilder.like(root.get("hoTen"),"%" + userDtoSearch.getHoTen() + "%"));
+                    }
+                    if(userDtoSearch.getEmail() != null && !userDtoSearch.getEmail().isEmpty()){
+                        predicates.add(criteriaBuilder.like(root.get("email"),"%" + userDtoSearch.getEmail()+"%"));
+                    }
+                    if(userDtoSearch.getSoDienThoai() != null && !userDtoSearch.getSoDienThoai().isEmpty()){
+                        predicates.add(criteriaBuilder.like(root.get("soDienThoai"),"%"+ userDtoSearch.getSoDienThoai()+"%"));
+                    }
+                    if(userDtoSearch.getNgaySinh() != null){
+                        predicates.add(criteriaBuilder.greaterThanOrEqualTo(root.get("ngaySinh"),userDtoSearch.getNgaySinh()));
+                    }
+                    if (userDtoSearch.getKhoangNgaySinh() != null){
+                        predicates.add(criteriaBuilder.lessThanOrEqualTo(root.get("ngaySinh"),userDtoSearch.getKhoangNgaySinh()));
+                    }
+
+                }
+                return criteriaBuilder.and(predicates.toArray(new Predicate[0]));
+            }
+        });
+    }
+
+    @Override
+    public List<UserDto> importExcel(MultipartFile file) throws IOException {
+        List<UserDto> userDtos = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+
+        for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+            Row row = sheet.getRow(rowIndex);
+            if (row != null) {
+                try {
+                    UserDto userDto = new UserDto();
+
+                    String hoTen = dataFormatter.formatCellValue(row.getCell(0));
+                    if (hoTen == null || hoTen.trim().isEmpty()) {
+                        errors.add("họ tên không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setHoTen(hoTen.trim());
+
+                    Cell ngaySinhCell = row.getCell(1);
+                    if (ngaySinhCell != null) {
+                        if (ngaySinhCell.getCellType() == CellType.NUMERIC) {
+                            java.util.Date utilDate = DateUtil.getJavaDate(ngaySinhCell.getNumericCellValue());
+                            userDto.setNgaySinh(new java.sql.Date(utilDate.getTime()));
+                        } else if (ngaySinhCell.getCellType() == CellType.STRING) {
+                            try {
+                                String ngaySinhStr = ngaySinhCell.getStringCellValue().trim();
+                                SimpleDateFormat sdf;
+                                if (ngaySinhStr.contains("-")) {
+                                    sdf = new SimpleDateFormat("dd-MM-yyyy");
+                                } else {
+                                    sdf = new SimpleDateFormat("dd/MM/yyyy");
+                                }
+                                java.util.Date utilDate = sdf.parse(ngaySinhStr);
+                                userDto.setNgaySinh(new java.sql.Date(utilDate.getTime()));
+                            } catch (ParseException e) {
+                                errors.add("ngày sinh không hợp lệ : " + (rowIndex + 1));
+                                continue;
+                            }
+                        } else {
+                            errors.add("ngày sinh sai định dạng : " + (rowIndex + 1));
+                            continue;
+                        }
+                    } else {
+                        errors.add("ngày sinh không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+
+                    Cell soDienThoaiCell = row.getCell(2);
+                    if (soDienThoaiCell == null || soDienThoaiCell.getCellType() != CellType.STRING) {
+                        errors.add("số điện thoại không hợp lệ : " + (rowIndex + 1));
+                        continue;
+                    }
+                    String soDienThoai = soDienThoaiCell.getStringCellValue().trim();
+                    if (!soDienThoai.matches("\\d{10}")) {
+                        errors.add("số điện thoại phải có 10 chữ số : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setSoDienThoai(soDienThoai);
+
+                    String email = dataFormatter.formatCellValue(row.getCell(3));
+                    if (email == null || email.trim().isEmpty()) {
+                        errors.add("email không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setEmail(email.trim());
+
+                    String matKhau = dataFormatter.formatCellValue(row.getCell(4));
+                    if (matKhau == null || matKhau.trim().isEmpty()) {
+                        errors.add("mật khẩu không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setMatKhau(matKhau.trim());
+
+//                    String roleNamesStr = dataFormatter.formatCellValue(row.getCell(5));
+//                    if (roleNamesStr != null && !roleNamesStr.trim().isEmpty()) {
+//                        List<String> roleNames = Arrays.asList(roleNamesStr.split(","));
+//                        userDto.setRoleNames(roleNames);
+//                    }
+                    List<UserEntity> userEntities = userRepository.findByEmailAndMatKhau(email,matKhau);
+                    if (!userEntities.isEmpty()){
+                        errors.add("email \"" + email + "\" với mật khẩu \"" + matKhau + "\" đã tồn tại !");
+                    }else {
+                        userDtos.add(userDto);
+                    }
+
+                } catch (Exception e) {
+                    errors.add("lỗi không xác định : " + (rowIndex + 1));
+                }
+            }
+        }
+        workbook.close();
+        if (!errors.isEmpty()) {
+            throw new RuntimeException("lỗi khi nhập dữ liệu từ Excel: " + String.join(", ", errors));
+        }
+        List<UserEntity> userEntities = new ArrayList<>();
+        for (UserDto userDto : userDtos){
+            UserEntity userEntity = new UserEntity();
+            userEntity.setHoTen(userDto.getHoTen());
+            userEntity.setNgaySinh(userDto.getNgaySinh());
+            userEntity.setSoDienThoai(userDto.getSoDienThoai());
+            userEntity.setEmail(userDto.getEmail());
+            userEntity.setMatKhau(userDto.getMatKhau());
+            userEntities.add(userEntity);
+        }
+        userRepository.saveAll(userEntities);
+        return userDtos;
+    }
+
+    @Override
+    public List<UserDto> importExcelCheckDuplicate(MultipartFile file) throws IOException {
+        List<UserDto> userDtos = new ArrayList<>();
+        List<String> errors = new ArrayList<>();
+        Workbook workbook = new XSSFWorkbook(file.getInputStream());
+        Sheet sheet = workbook.getSheetAt(0);
+        DataFormatter dataFormatter = new DataFormatter();
+
+        for (int rowIndex = 1; rowIndex <= sheet.getLastRowNum(); rowIndex++) {
+            Row row = sheet.getRow(rowIndex);
+            if (row != null) {
+                try {
+                    UserDto userDto = new UserDto();
+
+                    String hoTen = dataFormatter.formatCellValue(row.getCell(0));
+                    if (hoTen == null || hoTen.trim().isEmpty()) {
+                        errors.add("họ tên không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setHoTen(hoTen.trim());
+
+                    Cell ngaySinhCell = row.getCell(1);
+                    if (ngaySinhCell != null) {
+                        if (ngaySinhCell.getCellType() == CellType.NUMERIC) {
+                            java.util.Date utilDate = DateUtil.getJavaDate(ngaySinhCell.getNumericCellValue());
+                            userDto.setNgaySinh(new java.sql.Date(utilDate.getTime()));
+                        } else if (ngaySinhCell.getCellType() == CellType.STRING) {
+                            try {
+                                SimpleDateFormat sdf = new SimpleDateFormat("dd/MM/yyyy");
+                                java.util.Date utilDate = sdf.parse(ngaySinhCell.getStringCellValue());
+                                userDto.setNgaySinh(new java.sql.Date(utilDate.getTime()));
+                            } catch (ParseException e) {
+                                errors.add("ngày sinh không hợp lệ : " + (rowIndex + 1));
+                                continue;
+                            }
+                        } else {
+                            errors.add("ngày sinh sai định dạng : " + (rowIndex + 1));
+                            continue;
+                        }
+                    } else {
+                        errors.add("ngày sinh không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+
+                    Cell soDienThoaiCell = row.getCell(2);
+                    if (soDienThoaiCell == null || soDienThoaiCell.getCellType() != CellType.STRING) {
+                        errors.add("số điện thoại không hợp lệ : " + (rowIndex + 1));
+                        continue;
+                    }
+                    String soDienThoai = soDienThoaiCell.getStringCellValue().trim();
+                    if (!soDienThoai.matches("\\d{10}")) {
+                        errors.add("số điện thoại phải có 10 chữ số : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setSoDienThoai(soDienThoai);
+
+                    String email = dataFormatter.formatCellValue(row.getCell(3));
+                    if (email == null || email.trim().isEmpty()) {
+                        errors.add("email không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setEmail(email.trim());
+
+                    String matKhau = dataFormatter.formatCellValue(row.getCell(4));
+                    if (matKhau == null || matKhau.trim().isEmpty()) {
+                        errors.add("mật khẩu không được để trống : " + (rowIndex + 1));
+                        continue;
+                    }
+                    userDto.setMatKhau(matKhau.trim());
+
+
+                    userDtos.add(userDto);
+                } catch (Exception e) {
+                    errors.add("lỗi không xác định : " + (rowIndex + 1));
+                }
+            }
+        }
+        workbook.close();
+        if (!errors.isEmpty()) {
+            throw new RuntimeException("lỗi khi nhập dữ liệu từ Excel: " + String.join(", ", errors));
+        }
+        List<UserEntity> userEntities = new ArrayList<>();
+        for (UserDto userDto : userDtos){
+            UserEntity userEntity = new UserEntity();
+            userEntity.setHoTen(userDto.getHoTen());
+            userEntity.setNgaySinh(userDto.getNgaySinh());
+            userEntity.setSoDienThoai(userDto.getSoDienThoai());
+            userEntity.setEmail(userDto.getEmail());
+            userEntity.setMatKhau(userDto.getMatKhau());
+
+            userEntities.add(userEntity);
+        }
+        userRepository.saveAll(userEntities);
+        return userDtos;
+    }
 }
