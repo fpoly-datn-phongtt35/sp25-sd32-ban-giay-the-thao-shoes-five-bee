@@ -49,20 +49,33 @@ const KieuDang = () => {
     };
 
     const creatKieuDang = async () => {
-        if ( !ten) {
-            message.error("Không được để trống mã và tên");
+        if (!ten) {
+            message.error("Không được để trống tên kiểu dáng");
+            return;
         }
+
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên kiểu dáng không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên kiểu dáng phải là chữ cái  và không được chứa số!");
+            return;
+        }
+
         const newTrangThai = value === 1 ? 0 : 1;
+
         const newKieuDang = {
-           
             ten: ten,
             trangThai: newTrangThai,
         };
         try {
             await addKieuDang(newKieuDang);
-            message.success("Thêm mới kiểu dáng thành công");
+            message.success("Thêm kiểu dáng thành công");
             getAllKieuDang();
-          
             setTen("");
             setValue(0);
         } catch (error) {
@@ -85,9 +98,26 @@ const KieuDang = () => {
     };
 
     const editingKieuDangButton = async () => {
+        if (!ten) {
+            message.error("Không được để trống tên kiểu dáng");
+            return;
+        }
+
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên kiểu dáng không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên kiểu dáng phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
+            return;
+        }
+
         const newTrangThai = value === 1 ? 0 : 1;
+
         const editKieuDang = {
-   
             ten: ten,
             trangThai: newTrangThai
         };
@@ -96,7 +126,6 @@ const KieuDang = () => {
             message.success("Cập nhật kiểu dáng thành công");
             getAllKieuDang();
             setIsModalVisible(false);
-  
             setTen("");
         } catch (error) {
             message.error("Không thể cập nhật kiểu dáng của giày");
