@@ -130,9 +130,9 @@ export const ProductAll = () => {
   return (
     <div className="productAll_container">
       <Header />
-      <div className="banner_productAll">
+      {/* <div className="banner_productAll">
         <img src="banner_3.jpg" alt="" />
-      </div>
+      </div> */}
       <div className="aside_container">
         <div className="aside_left">
           {/* Danh mục sản phẩm */}
@@ -288,7 +288,7 @@ export const ProductAll = () => {
                   <p className="product_price">
                     {item.GIABAN.toLocaleString()} VND
                   </p>
-                 */}
+                 
                   <button
                     className="add_to_cart_button"
                     onClick={(e) => {
