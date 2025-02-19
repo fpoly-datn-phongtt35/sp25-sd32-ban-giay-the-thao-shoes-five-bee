@@ -23,7 +23,7 @@ public class GioHangChiTietEntity {
     @Column(name = "SO_LUONG")
     private Integer soLuong;
 
-    @Column(name = "GHI_CHU")
+    @Column(name = "GHI_CHU",columnDefinition = "NVARCHAR(255)")
     private String ghiChu;
 
     @Column(name = "TRANG_THAI")

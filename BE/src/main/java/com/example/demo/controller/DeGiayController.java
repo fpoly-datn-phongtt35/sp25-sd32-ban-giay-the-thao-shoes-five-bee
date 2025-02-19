@@ -3,6 +3,7 @@ package com.example.demo.controller;
 import com.example.demo.dto.request.*;
 import com.example.demo.entity.ChatLieuEntity;
 import com.example.demo.entity.DeGiayEntity;
+import com.example.demo.entity.XuatXuEntity;
 import com.example.demo.service.DeGiayService;
 import com.example.demo.service.MauSacService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -58,5 +59,9 @@ public class DeGiayController {
         } catch (IllegalArgumentException e) {
             return ResponseEntity.badRequest().body(e.getMessage());
         }
+    }
+    @PostMapping("/toggle-trangthai")
+    public DeGiayEntity toggleTrangThai(@RequestBody DeGiayUpdateDto deGiayUpdateDto) {
+        return deGiayService.toggleTrangThai(deGiayUpdateDto);
     }
 }

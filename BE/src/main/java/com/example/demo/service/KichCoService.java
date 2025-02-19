@@ -18,5 +18,6 @@ public interface KichCoService {
     KichCoEntity update(KichCoUpdateDto kichCoUpdateDto);
     KichCoEntity detail(KichCoUpdateDto kichCoUpdateDto);
     KichCoEntity delete(KichCoUpdateDto kichCoUpdateDto);
+    KichCoEntity toggleKichCo(KichCoUpdateDto kichCoUpdateDto);
     PageResponse<KichCoEntity> findByPagingCriteria(KichCoDto kichCoDto, Pageable pageable);
 }

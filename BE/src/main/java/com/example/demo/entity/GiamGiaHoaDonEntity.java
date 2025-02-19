@@ -25,7 +25,7 @@ public class GiamGiaHoaDonEntity {
     private UUID id;
     @Column(name = "MA")
     private String ma;
-    @Column(name = "TEN")
+    @Column(name = "TEN",columnDefinition = "NVARCHAR(255)")
     private String ten;
     @Column(name = "DIEU_KIEN")
     private BigDecimal dieuKien;

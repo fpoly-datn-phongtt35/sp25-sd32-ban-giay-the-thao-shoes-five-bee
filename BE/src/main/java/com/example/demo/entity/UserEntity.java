@@ -24,28 +24,18 @@ public class UserEntity {
     private String ma;
     @Column(name = "ANH")
     private String anh;
-    @Column(name = "HO_TEN")
+    @Column(name = "HO_TEN",columnDefinition = "NVARCHAR(255)")
     private String hoTen;
     @Column(name = "NGAY_SINH")
     private Date ngaySinh;
     @Column(name = "DIA_CHI")
     private String diaChi;
-    @Column(name = "XA")
-    private String xa;
-    @Column(name = "HUYEN")
-    private String huyen;
-    @Column(name = "THANH_PHO")
-    private String thanhPho;
     @Column(name = "SO_DIEN_THOAI")
     private String soDienThoai;
     @Column(name = "EMAIL")
     private String email;
     @Column(name = "MAT_KHAU")
     private String matKhau;
-    @Column(name = "NGAY_VAO_LAM")
-    private Date ngayLamViec;
-    @Column(name = "NGAY_NGHI_VIEC")
-    private Date ngayNghiViec;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
     @Column(name = "IS_ENABLED")
