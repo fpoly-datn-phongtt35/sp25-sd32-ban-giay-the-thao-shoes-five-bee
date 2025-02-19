@@ -34,7 +34,6 @@ const MauSac = () => {
             const mauSacData = result.data.map((item, index) => ({
                 key: index,
                 ID: item.id,
-
                 TEN: item.ten,
                 TRANG_THAI: item.trangThai,
             }));
@@ -47,13 +46,26 @@ const MauSac = () => {
     };
 
     const createMauSac = async () => {
-        if ( !ten) {
-            message.error("Không được để trống tên và mã");
+        if (!ten) {
+            message.error("Không được để trống tên màu sắc");
             return;
         }
+
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên màu sắc không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên màu sắc phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
+            return;
+        }
+
         const newTrangThai = value === 1 ? 0 : 1;
+
         const newMauSac = {
-           
             ten: ten,
             trangThai: newTrangThai,
         };
@@ -61,7 +73,6 @@ const MauSac = () => {
             await addMauSac(newMauSac);
             message.success("Thêm màu sắc thành công");
             getAllMauSac();
-            
             setTen("");
             setValue(1);
         } catch (error) {
@@ -84,10 +95,26 @@ const MauSac = () => {
     };
 
     const editMauSacButton = async () => {
+        if (!ten) {
+            message.error("Không được để trống tên màu sắc");
+            return;
+        }
+
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên màu sắc không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên màu sắc phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
+            return;
+        }
+
         const updateTrangThai = value === 1 ? 0 : 1;
 
         const editNewMauSac = {
-            
             ten: ten,
             trangThai: updateTrangThai,
         };
@@ -96,11 +123,10 @@ const MauSac = () => {
             message.success("Update màu sắc thành công !");
             getAllMauSac();
             setIsModalVisible(false);
-            
             setTen("");
             setValue(null);
         } catch (error) {
-            message.error("Update màu sắc thất bại");
+            message.error("Cập nhật màu sắc thất bại");
         }
     };
     return (

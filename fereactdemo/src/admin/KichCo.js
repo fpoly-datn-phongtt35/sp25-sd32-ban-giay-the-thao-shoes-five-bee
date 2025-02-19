@@ -41,14 +41,22 @@ const KichCo = () => {
 
     const handleAdd = async () => {
         if (!ten) {
-            message.error('Mã và Tên kích cỡ không được bỏ trống!');
+            message.error('Tên kích cỡ không được bỏ trống!');
+            return;
+        }
+        const sizeValue = parseInt(ten, 10);
+        if (isNaN(sizeValue)) {
+            message.error('Kích cỡ phải là một số!');
+            return;
+        }
+        if (sizeValue < 3 || sizeValue > 50) {
+            message.error('Kích cỡ phải là một số trong khoảng từ 3 đến 50!');
             return;
         }
 
         const newTrangThai = value === 1 ? 0 : 1;
 
         const newSize = {
-
             ten: ten,
             trangThai: newTrangThai
         };
@@ -81,11 +89,19 @@ const KichCo = () => {
             message.error("Mã và tên không được để trống");
             return;
         }
+        const sizeValue = parseInt(ten, 10);
+        if (isNaN(sizeValue)) {
+            message.error('Kích cỡ phải là một số!');
+            return;
+        }
+        if (sizeValue < 3 || sizeValue > 50) {
+            message.error('Kích cỡ phải là một số trong khoảng từ 3 đến 50!');
+            return;
+        }
 
         const updatedTrangThai = value === 1 ? 0 : 1;
 
         const updatedSize = {
-
             ten: ten,
             trangThai: updatedTrangThai
         };
