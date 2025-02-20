@@ -227,7 +227,12 @@ public class GiayServiceImpl implements GiayService {
 
         return baos;
     }
+
+    @Override
+    public List<GiayEntity> findByTen(String ten) {
+        return giayRepository.findByTenContainingIgnoreCase(ten);
     }
+}
 
 
 
