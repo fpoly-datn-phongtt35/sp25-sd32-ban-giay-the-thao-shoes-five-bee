@@ -6,6 +6,8 @@ import com.example.demo.entity.GiayEntity;
 import lombok.NonNull;
 import org.springframework.data.domain.Pageable;
 
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -23,4 +25,5 @@ public interface GiayService {
   PageResponse<GiayEntity> findByPagingCriteria(GiayDto giayDto, Pageable pageable);
 
   GiayEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds);
+  ByteArrayOutputStream exportExcel() throws IOException;
 }

@@ -7,9 +7,12 @@ import com.example.demo.service.GiayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,5 +59,17 @@ public class GiayController {
   @PostMapping("/{id}/anhGiay")
   public ResponseEntity<?> anhGiay(@PathVariable("id") UUID id, @RequestBody List<UUID> anhGiayIds) {
     return ResponseEntity.ok(giayService.assignAnhGiay(id,anhGiayIds));
+  }
+  @GetMapping("/export-excel")
+  public ResponseEntity<byte[]> exportExcel() throws IOException {
+    // Lấy dữ liệu từ service và chuyển thành mảng byte
+    byte[] excelFile = giayService.exportExcel().toByteArray();
+
+    // Cấu hình header để trình duyệt tải file
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Disposition", "attachment; filename=giay.xlsx");
+
+    // Trả về file Excel dưới dạng ResponseEntity
+    return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
   }
 }

@@ -11,6 +11,9 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -18,6 +21,11 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -41,6 +49,7 @@ public class GiayServiceImpl implements GiayService {
   public List<GiayEntity> getAll() {
     return giayRepository.findAll();
   }
+
 
   @Override
   public GiayEntity add(GiayDto giayDto) {
@@ -187,5 +196,38 @@ public class GiayServiceImpl implements GiayService {
 
     }
 
+    @Override
+    public ByteArrayOutputStream exportExcel() throws IOException {
+        List<GiayEntity> giayList = giayRepository.findAll();
+        Workbook workbook = new XSSFWorkbook();
+        Sheet sheet = workbook.createSheet("Giay");
+        Row headerRow = sheet.createRow(0);
+        String[] columns = {"ID", "Mã Giày", "Tên Giày", "Mô Tả", "Giá Nhập", "Giá Bán", "Số Lượng Tồn", "Trạng Thái"};
+        for (int i = 0; i < columns.length; i++) {
+            Cell cell = headerRow.createCell(i);
+            cell.setCellValue(columns[i]);
+        }
+        int rowNum = 1;
+        for (GiayEntity giay : giayList) {
+            Row row = sheet.createRow(rowNum++);
+            row.createCell(0).setCellValue(giay.getId().toString());
+            row.createCell(1).setCellValue(giay.getMa());
+            row.createCell(2).setCellValue(giay.getTen());
+            row.createCell(3).setCellValue(giay.getMoTa());
+            row.createCell(4).setCellValue(giay.getGiaNhap().doubleValue());
+            row.createCell(5).setCellValue(giay.getGiaBan().doubleValue());
+            row.createCell(6).setCellValue(giay.getSoLuongTon());
+            row.createCell(7).setCellValue(giay.getTrangThai());
+        }
 
-}
+
+        ByteArrayOutputStream baos = new ByteArrayOutputStream();
+        workbook.write(baos);
+        workbook.close();
+
+        return baos;
+    }
+    }
+
+
+
