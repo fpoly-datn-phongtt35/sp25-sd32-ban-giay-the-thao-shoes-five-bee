@@ -26,4 +26,6 @@ public interface GiayService {
 
   GiayEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds);
   ByteArrayOutputStream exportExcel() throws IOException;
+  List<GiayEntity> findByTen(String ten);
+
 }

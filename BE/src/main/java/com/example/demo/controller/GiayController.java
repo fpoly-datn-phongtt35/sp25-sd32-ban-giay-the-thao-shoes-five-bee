@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
 import com.example.demo.dto.request.GiayDto;
+import com.example.demo.entity.GiayEntity;
 import com.example.demo.service.GiamGiaSanPhamService;
 import com.example.demo.service.GiayService;
 import lombok.RequiredArgsConstructor;
@@ -60,14 +61,14 @@ public class GiayController {
   }
   @GetMapping("/export-excel")
   public ResponseEntity<byte[]> exportExcel() throws IOException {
-    // Lấy dữ liệu từ service và chuyển thành mảng byte
     byte[] excelFile = giayService.exportExcel().toByteArray();
-
-    // Cấu hình header để trình duyệt tải file
     HttpHeaders headers = new HttpHeaders();
     headers.add("Content-Disposition", "attachment; filename=giay.xlsx");
-
-    // Trả về file Excel dưới dạng ResponseEntity
     return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
+  }
+  @GetMapping("/search-ten")
+  public ResponseEntity<List<GiayEntity>> searchGiayByName(@RequestParam String ten) {
+    List<GiayEntity> result = giayService.findByTen(ten);
+    return ResponseEntity.ok(result);
   }
 }
