@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.ThongKeDoanhThuService;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
@@ -13,6 +14,7 @@ import java.util.Optional;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class ThongKeDoanhThuServiceImpl implements ThongKeDoanhThuService {
     @Autowired
     private HoaDonRepository hoaDonRepository;
