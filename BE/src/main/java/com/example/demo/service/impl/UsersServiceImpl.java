@@ -154,6 +154,7 @@ public class UsersServiceImpl implements UsersService {
     return new String[] {originalName, ""};
   }
 
+  @Transactional
   @Override
   public UserEntity add(UserDto userDto, MultipartFile file) throws IOException {
     UserEntity userEntity = new UserEntity();
@@ -165,7 +166,7 @@ public class UsersServiceImpl implements UsersService {
     userEntity.setNgaySinh(userDto.getNgaySinh());
     userEntity.setSoDienThoai(userDto.getSoDienThoai());
     userEntity.setEmail(userDto.getEmail());
-    userEntity.setMatKhau(userDto.getMatKhau());
+    userEntity.setMatKhau(passwordEncoder.encode(userDto.getMatKhau()));
     userEntity.setIsEnabled(userDto.getIsEnabled());
     UserEntity savedUser = userRepository.save(userEntity);
     // them role vao user
@@ -542,4 +543,8 @@ public class UsersServiceImpl implements UsersService {
         userRepository.saveAll(userEntities);
         return userDtos;
     }
+
+
+
+
 }

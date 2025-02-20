@@ -29,8 +29,6 @@ public class UserEntity {
     private String hoTen;
     @Column(name = "NGAY_SINH")
     private Date ngaySinh;
-    @Column(name = "DIA_CHI")
-    private String diaChi;
     @Column(name = "SO_DIEN_THOAI")
     private String soDienThoai;
     @Column(name = "EMAIL")
@@ -45,10 +43,11 @@ public class UserEntity {
     private String otpCode;
     @Column(name = "OTP_GENERATED_TIME")
     private LocalDateTime otpGeneratedTime;
-    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<DiaChiEntity> diaChiEntities;
 
-    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, fetch = FetchType.EAGER)
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     @JsonIgnore
     private List<UserRoleEntity> userRoleEntities;
 }
