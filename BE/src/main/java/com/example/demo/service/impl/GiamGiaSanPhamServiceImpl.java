@@ -6,6 +6,7 @@ import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
 import com.example.demo.entity.GiamGiaSanPhamEntity;
 import com.example.demo.entity.GiayChiTietEntity;
+import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
 import com.example.demo.repository.GiamGiaSanPhamRepository;
 import com.example.demo.repository.GiayChiTietRepository;
@@ -14,13 +15,20 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
-import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
+import org.apache.poi.ss.usermodel.Cell;
+import org.apache.poi.ss.usermodel.Row;
+import org.apache.poi.ss.usermodel.Sheet;
+import org.apache.poi.ss.usermodel.Workbook;
+import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
@@ -216,4 +224,41 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
     return pageResponse;
   }
+
+  @Override
+  public ByteArrayOutputStream exportExcel() throws IOException {
+    List<GiamGiaSanPhamEntity> giamGiaSanPhamList = giamGiaSanPhamRepository.findAll();
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("ChuongTrinhGiamGia");
+
+    Row headerRow = sheet.createRow(0);
+    String[] columns = {"ID", "Mã", "Tên", "Phần Trăm Giảm", "Ngày Bắt Đầu", "Ngày Kết Thúc", "Trạng Thái"};
+    for (int i = 0; i < columns.length; i++) {
+      Cell cell = headerRow.createCell(i);
+      cell.setCellValue(columns[i]);
+    }
+
+    int rowNum = 1;
+    for (GiamGiaSanPhamEntity entity : giamGiaSanPhamList) {
+      Row row = sheet.createRow(rowNum++);
+      row.createCell(0).setCellValue(entity.getId().toString());
+      row.createCell(1).setCellValue(entity.getMa());
+      row.createCell(2).setCellValue(entity.getTen());
+      row.createCell(3).setCellValue(entity.getPhanTramGiam());
+      row.createCell(4).setCellValue(entity.getNgayBatDau().toString());
+      row.createCell(5).setCellValue(entity.getNgayKetThuc().toString());
+      row.createCell(6).setCellValue(entity.getTrangThai());
+    }
+
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    workbook.write(baos);
+    workbook.close();
+    return baos;
+  }
+
+  @Override
+  public List<GiamGiaSanPhamEntity> findByTen(String ten) {
+    return giamGiaSanPhamRepository.findByTenContainingIgnoreCase(ten);
+  }
 }
+

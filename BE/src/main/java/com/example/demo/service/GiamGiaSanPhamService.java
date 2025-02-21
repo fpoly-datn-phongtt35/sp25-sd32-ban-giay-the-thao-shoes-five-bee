@@ -4,7 +4,12 @@ import com.example.demo.dto.request.GiamGiaChiTietSanPhamRequest;
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaSanPhamEntity;
+
+import java.io.ByteArrayOutputStream;
+import java.io.IOException;
 import java.util.List;
+
+import com.example.demo.entity.GiayEntity;
 import org.springframework.data.domain.Pageable;
 
 public interface GiamGiaSanPhamService {
@@ -23,4 +28,6 @@ public interface GiamGiaSanPhamService {
 
   PageResponse<GiamGiaSanPhamEntity> findByPagingCriteria(
       GiamGiaSanPhamDto giamGiaSanPhamDto, Pageable pageable);
+  ByteArrayOutputStream exportExcel() throws IOException;
+  List<GiamGiaSanPhamEntity> findByTen(String ten);
 }
