@@ -2,14 +2,18 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
 import com.example.demo.dto.request.GiayDto;
+import com.example.demo.entity.GiayEntity;
 import com.example.demo.service.GiamGiaSanPhamService;
 import com.example.demo.service.GiayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
@@ -56,5 +60,17 @@ public class GiayController {
   @PostMapping("/{id}/anhGiay")
   public ResponseEntity<?> anhGiay(@PathVariable("id") UUID id, @RequestBody List<UUID> anhGiayIds) {
     return ResponseEntity.ok(giayService.assignAnhGiay(id,anhGiayIds));
+  }
+  @GetMapping("/export-excel")
+  public ResponseEntity<byte[]> exportExcel() throws IOException {
+    byte[] excelFile = giayService.exportExcel().toByteArray();
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Disposition", "attachment; filename=giay.xlsx");
+    return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
+  }
+  @GetMapping("/search-ten")
+  public ResponseEntity<List<GiayEntity>> searchGiayByName(@RequestParam String ten) {
+    List<GiayEntity> result = giayService.findByTen(ten);
+    return ResponseEntity.ok(result);
   }
 }

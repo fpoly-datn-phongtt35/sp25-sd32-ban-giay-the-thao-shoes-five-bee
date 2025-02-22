@@ -5,6 +5,7 @@ import com.example.demo.entity.UserRoleEntity;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.UserRoleRepository;
 import com.example.demo.security.CustomUserDetail;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
@@ -15,6 +16,7 @@ import java.util.List;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class UserServiceImpl implements UserDetailsService {
     @Autowired
     private UserRepository userRepository;
