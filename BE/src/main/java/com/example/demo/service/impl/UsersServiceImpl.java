@@ -350,7 +350,6 @@ public class UsersServiceImpl implements UsersService {
             if (row != null) {
                 try {
                     UserDto userDto = new UserDto();
-
                     String hoTen = dataFormatter.formatCellValue(row.getCell(0));
                     if (hoTen == null || hoTen.trim().isEmpty()) {
                         errors.add("họ tên không được để trống : " + (rowIndex + 1));
@@ -413,11 +412,6 @@ public class UsersServiceImpl implements UsersService {
                     }
                     userDto.setMatKhau(matKhau.trim());
 
-//                    String roleNamesStr = dataFormatter.formatCellValue(row.getCell(5));
-//                    if (roleNamesStr != null && !roleNamesStr.trim().isEmpty()) {
-//                        List<String> roleNames = Arrays.asList(roleNamesStr.split(","));
-//                        userDto.setRoleNames(roleNames);
-//                    }
                     List<UserEntity> userEntities = userRepository.findByEmailAndMatKhau(email,matKhau);
                     if (!userEntities.isEmpty()){
                         errors.add("email \"" + email + "\" với mật khẩu \"" + matKhau + "\" đã tồn tại !");
