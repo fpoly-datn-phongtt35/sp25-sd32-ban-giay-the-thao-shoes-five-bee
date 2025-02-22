@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.ChatLieuDto;
+import com.example.demo.dto.request.RoleDto;
 import com.example.demo.dto.request.UserDto;
 import com.example.demo.dto.request.UserDtoSearch;
 import com.example.demo.entity.UserEntity;
@@ -20,6 +21,7 @@ import java.io.IOException;
 import java.io.OutputStream;
 import java.util.Collections;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -27,7 +29,7 @@ public class UsersController {
     @Autowired
     private UsersService usersService;
 
-    @PostMapping("/getAll")
+    @GetMapping("/getAll")
     public ResponseEntity<?> getAll(){
         return ResponseEntity.ok(usersService.getAll());
     }
@@ -138,8 +140,10 @@ public class UsersController {
         return ResponseEntity.ok(Collections.singletonMap("message","delete success"));
     }
 
-    @PostMapping("/detail")
-    public ResponseEntity<?> detail(@RequestBody UserDto userDto){
+    @GetMapping("/detail/{id}")
+    public ResponseEntity<?> detail(@PathVariable UUID id){
+        UserDto userDto = new UserDto();
+        userDto.setId(id);
         return ResponseEntity.ok(usersService.detail(userDto));
     }
 }

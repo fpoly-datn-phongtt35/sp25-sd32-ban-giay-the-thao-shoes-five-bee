@@ -10,14 +10,14 @@ const NhanVien = () => {
     const [value, setValue] = useState(1);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [selectedChucVu, setSelectedChucVu] = useState(null);
-    const [ma, setMa] = useState("");
     const [hoTen, setHoTen] = useState("");
     const [matKhau, setMatKhau] = useState("");
     const [email, setEmail] = useState("");
     const [isModalVisible, setIsModalVisible] = useState(null);
     const [editingNhanVien, setEditingNhanVien] = useState(null);
-    const [activeChatLieu, setActiveChatLieu] = useState([]);
-    const getActiveChatLieu = () => {
+    const [activeNhanVien, setActiveNhanVien] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const getActiveNhanVien = () => {
         return nhanVien.filter(item => item.TRANG_THAI === 0);
     }
     const onSelectChange = (newSelectedRowKeys) => {
@@ -53,45 +53,39 @@ const NhanVien = () => {
         const loadTable = result.data.map((item, index) => ({
             key: index,
             ID: item.id,
-            MA: item.ma,
             HOTEN: item.hoTen,
-            MATKHAU: item.matKhau,
             EMAIL: item.email,
-            CHUCVU: item.chucVu ? item.chucVu.ten : null,
-            TRANG_THAI: item.trangThai,
+            ANH: item.anh,
+            ROLENAMES: item.roleNames[0],
+            TRANG_THAI: item.isEnabled ? 0 : 1,
         }));
-        const activeChatLieuData = loadTable.filter(item => item.TRANG_THAI === 0);
-        setActiveChatLieu(activeChatLieuData);
         setNhanVien(loadTable);
+        const activeNhanVienData = loadTable.filter(item => item.TRANG_THAI === 0);
+        setActiveNhanVien(activeNhanVienData);
     };
 
     const createNhanVien = async () => {
-        if (!ma || !hoTen) {
-            message.error("Không được để trống ");
+        if (!hoTen) {
+            message.error("Không được để trống họ tên");
             return;
-        };
+        }
+
         const salt = bcrypt.genSaltSync(10);
         const hashedPassword = bcrypt.hashSync(matKhau, salt);
 
-        const newTrangThai = value === 1 ? 0 : 1;
-        const newData = {
-            ma: ma,
+        const userData = {
             hoTen: hoTen,
-            matKhau: hashedPassword,
             email: email,
-            trangThai: newTrangThai,
-            chucVu: selectedChucVu ? { id: selectedChucVu } : null,
+            matKhau: hashedPassword,
+            isEnabled: value === 1,
+            roleNames: selectedChucVu ,
         };
+
         try {
-            await addNhanVien(newData);
+            await addNhanVien(userData, selectedFile);
             message.success("Thêm nhân viên thành công !");
             getNhanVien();
-            setHoTen("");
-            setMa("");
-            setMatKhau("");
-            setEmail("");
-            setSelectedChucVu(null);
-            setValue(1);
+            resetForm();
         } catch (error) {
             message.error("Lỗi khi thêm nhân viên");
         }
@@ -109,32 +103,30 @@ const NhanVien = () => {
             const response = await detailNhanVien(record.ID);
             const nhanVien = response.data;
             setEditingNhanVien(nhanVien);
-            setMa(nhanVien.ma);
             setHoTen(nhanVien.hoTen);
             setEmail(nhanVien.email);
             setMatKhau(nhanVien.matKhau);
-            setValue(nhanVien.trangThai === 0 ? 1 : 2);
-            setSelectedChucVu(nhanVien.chucVu ? nhanVien.chucVu.id : null);
+            setValue(nhanVien.isEnabled ? 1 : 2);
+            setSelectedChucVu(nhanVien.roleNames ? nhanVien.roleNames[0] : null);
             setIsModalVisible(true);
         } catch (error) {
             message.error("Lỗi khi lấy chi tiết nhân viên");
         }
     };
     const editNhanVienButton = async () => {
-        if (!ma || !hoTen || !email || !matKhau) {
+        if (!hoTen || !email || !matKhau) {
             message.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
         const newDataNhanVien = {
-            ma: ma,
             hoTen: hoTen,
             email: email,
             matKhau: matKhau,
-            chucVu: selectedChucVu ? { id: selectedChucVu } : null,
-            trangThai: value === 1 ? 0 : 1,
+            isEnabled: value === 1,
+            roleNames: selectedChucVu
         };
         try {
-            await updateNhanVien(editingNhanVien.id, newDataNhanVien);
+            await updateNhanVien(editingNhanVien.id, newDataNhanVien, selectedFile);
             message.success("Cập nhật nhân viên thành công");
             getNhanVien();
             setIsModalVisible(false);
@@ -146,26 +138,34 @@ const NhanVien = () => {
     };
 
     const resetForm = () => {
-        setMa("");
         setHoTen("");
         setEmail("");
         setMatKhau("");
         setValue(1);
         setSelectedChucVu(null);
         setEditingNhanVien(null);
+        setSelectedFile(null);
     };
+
+    const handleFileChange = (e) => {
+        setSelectedFile(e.target.files[0]);
+    };
+
     return (
         <div style={{ display: 'flex' }}>
             <div style={{ width: '60%', marginLeft: '200px', overflow: 'auto' }}>
-                <Select placeholder='Chọn Chức Vụ' value={selectedChucVu} onChange={handleChucVuChange}>
+                <Select 
+                    placeholder='Chọn Chức Vụ' 
+                    value={selectedChucVu} 
+                    onChange={handleChucVuChange}
+                    style={{ width: '100%' }}
+                >
                     {Array.isArray(chucVuList) && chucVuList.map(cv => (
-                        <Option key={cv.id} value={cv.id}>
+                        <Option key={cv.id} value={cv.ten}>
                             {cv.ten}
                         </Option>
                     ))}
                 </Select>
-                <br /><br />
-                <Input placeholder='Mã Nhân Viên' value={ma} onChange={(e) => setMa(e.target.value)} />
                 <br /><br />
                 <Input placeholder='Tên Nhân Viên' value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                 <br /><br />
@@ -173,6 +173,20 @@ const NhanVien = () => {
                 <br /><br />
                 <Input placeholder='Email@...' value={email} onChange={(e) => setEmail(e.target.value)} />
                 <br /><br />
+                <input 
+                    type="file" 
+                    onChange={handleFileChange}
+                    accept="image/*"
+                    style={{ marginBottom: '16px' }}
+                />
+                {selectedFile && (
+                    <img
+                        src={URL.createObjectURL(selectedFile)}
+                        alt="Preview"
+                        style={{ width: '100px', height: '100px', objectFit: 'cover', marginBottom: '16px' }}
+                    />
+                )}
+                <br />
                 <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Còn</Radio>
                     <Radio value={2}>Hết</Radio>
@@ -182,49 +196,60 @@ const NhanVien = () => {
                     Add
                 </Button>
                 <br /><br />
-                <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
-                    {
-                        title: 'MA',
-                        dataIndex: 'MA',
-                    },
-                    {
-                        title: 'HOTEN',
-                        dataIndex: 'HOTEN',
-                    },
-                    {
-                        title: 'EMAIL',
-                        dataIndex: 'EMAIL',
-                    },
-                    {
-                        title: 'MATKHAU',
-                        dataIndex: 'MATKHAU',
-                    },
-                    {
-                        title: 'CHUCVU',
-                        dataIndex: 'CHUCVU',
-                    },
-                    {
-                        title: 'TRANG THAI',
-                        dataIndex: 'trang_thai',
-                        render: (text, record) => trangThai(record.TRANG_THAI)
-                    },
-                    {
-                        title: 'ACTION',
-                        key: 'action',
-                        render: (text, record) => (
-                            <Space size="middle">
-                                <Button onClick={() => detail(record)}>Detail</Button>
-                                <Button onClick={() => removeNhanVien(record)}>Delete</Button>
-                            </Space>
-                        ),
-                    },
-                ]} dataSource={nhanVien} />
+                <Table 
+                    pagination={{ pageSize: 5, defaultPageSize: 5 }} 
+                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }} 
+                    columns={[
+                        {
+                            title: 'HỌ TÊN',
+                            dataIndex: 'HOTEN',
+                            key: 'HOTEN'
+                        },
+                        {
+                            title: 'EMAIL',
+                            dataIndex: 'EMAIL',
+                            key: 'EMAIL'
+                        },
+                        {
+                            title: 'ẢNH',
+                            dataIndex: 'ANH',
+                            key: 'ANH',
+                            render: (text, record) => (
+                                <img
+                                    src={text}
+                                    alt="Ảnh đại diện"
+                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                />
+                            ),
+                        },
+                        {
+                            title: 'CHỨC VỤ',
+                            dataIndex: 'ROLENAMES',
+                            key: 'ROLENAMES',
+                            render: (text) => text?.replace('ROLE_', '') // Xóa prefix ROLE_
+                        },
+                        {
+                            title: 'TRẠNG THÁI',
+                            dataIndex: 'TRANG_THAI',
+                            key: 'TRANG_THAI',
+                            render: (text) => trangThai(text)
+                        },
+                        {
+                            title: 'THAO TÁC',
+                            key: 'action',
+                            render: (text, record) => (
+                                <Space size="middle">
+                                    <Button onClick={() => detail(record)}>Chi tiết</Button>
+                                    <Button onClick={() => removeNhanVien(record)}>Xóa</Button>
+                                </Space>
+                            ),
+                        },
+                    ]} 
+                    dataSource={nhanVien} 
+                />
             </div>
             <Modal title="Cập nhật Nhân Viên" onOk={editNhanVienButton} open={isModalVisible} onCancel={() => setIsModalVisible(false)}>
                 <Form>
-                    <Form.Item label="Mã Nhân Viên">
-                        <Input value={ma} onChange={(e) => setMa(e.target.value)} />
-                    </Form.Item>
                     <Form.Item label="Tên Nhân Viên">
                         <Input value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                     </Form.Item>
@@ -233,6 +258,27 @@ const NhanVien = () => {
                     </Form.Item>
                     <Form.Item label="Mật Khẩu">
                         <Input.Password value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item label="Ảnh đại diện">
+                        <input 
+                            type="file" 
+                            onChange={handleFileChange}
+                            accept="image/*"
+                        />
+                        {selectedFile && (
+                            <img
+                                src={URL.createObjectURL(selectedFile)}
+                                alt="Preview"
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px' }}
+                            />
+                        )}
+                        {editingNhanVien?.anh && !selectedFile && (
+                            <img
+                                src={editingNhanVien.anh}
+                                alt="Current"
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px' }}
+                            />
+                        )}
                     </Form.Item>
                     <Form.Item label="Chức Vụ">
                         <Select placeholder='Chọn Chức Vụ' value={selectedChucVu} onChange={handleChucVuChange}>

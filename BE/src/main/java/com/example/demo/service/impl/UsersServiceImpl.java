@@ -267,10 +267,46 @@ public class UsersServiceImpl implements UsersService {
   }
 
   @Override
-  public UserEntity detail(UserDto userDto) {
+public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thành UserDto
     Optional<UserEntity> optional = userRepository.findById(userDto.getId());
-    return optional.orElse(null);
-  }
+    return optional.map(user -> {
+        // Tạo mới UserDto để trả về
+        UserDto responseDto = new UserDto();
+        
+        // Copy các thông tin cơ bản
+        responseDto.setId(user.getId());
+        responseDto.setAnh(user.getAnh());
+        responseDto.setHoTen(user.getHoTen());
+        responseDto.setNgaySinh(user.getNgaySinh());
+        responseDto.setSoDienThoai(user.getSoDienThoai());
+        responseDto.setEmail(user.getEmail());
+        responseDto.setMatKhau(user.getMatKhau());
+        responseDto.setIsEnabled(user.getIsEnabled());
+        
+        // Map roles
+        List<String> roleNames = user.getUserRoleEntities().stream()
+            .map(userRole -> userRole.getRoleEntity().getTen())
+            .collect(Collectors.toList());
+        responseDto.setRoleNames(roleNames);
+        
+        // Map địa chỉ
+        List<DiaChiDto> diaChiDtos = user.getDiaChiEntities().stream()
+            .map(diaChi -> new DiaChiDto(
+                diaChi.getId(),
+                diaChi.getXa(),
+                diaChi.getHuyen(), 
+                diaChi.getThanhPho(),
+                diaChi.getTenNguoiNhan(),
+                diaChi.getTenDiaChi(),
+                diaChi.getSdtNguoiNhan(),
+                diaChi.getTrangThai(),
+                null  // Set null cho userEntity để tránh circular reference
+            )).collect(Collectors.toList());
+        responseDto.setDiaChi(diaChiDtos);
+        
+        return responseDto;
+    }).orElse(null);
+}
 
 
     @Override
