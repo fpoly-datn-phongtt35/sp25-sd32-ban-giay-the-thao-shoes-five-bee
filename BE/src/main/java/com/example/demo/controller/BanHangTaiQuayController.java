@@ -1,10 +1,15 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.HoaDonRequest;
+import com.example.demo.entity.HoaDonEntity;
+import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.BanHangTaiQuayService;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
@@ -14,13 +19,24 @@ import org.springframework.web.bind.annotation.*;
 public class BanHangTaiQuayController {
 
   private final BanHangTaiQuayService banHangTaiQuayService;
+  @Autowired
+  private HoaDonRepository hoaDonRepository;
 
   @PostMapping("/thanh-toan/{idHoaDon}")
-  public ResponseEntity<?> thanhToanTaiQuay(
-      @PathVariable("idHoaDon") UUID idHoaDon, @RequestBody HoaDonRequest hoaDonRequest) {
+  public ResponseEntity<String> thanhToan(@PathVariable UUID idHoaDon, @RequestBody HoaDonRequest hoaDonRequest) {
+
     banHangTaiQuayService.thanhToanTaiQuay(idHoaDon, hoaDonRequest);
-    return ResponseEntity.ok("Thanh toán thành công");
+
+    HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon)
+            .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+
+    BigDecimal soTienKhachDua = hoaDonRequest.getSoTienKhachDua();
+    BigDecimal tienThua = soTienKhachDua.subtract(hoaDon.getTongTien());
+
+    return ResponseEntity.ok("Thanh toán thành công! Tiền thừa của khách là: " + tienThua + " VND");
   }
+
+
 
   @PostMapping("/create")
   public ResponseEntity<?> createHoaDonBanHangTaiQuay() {

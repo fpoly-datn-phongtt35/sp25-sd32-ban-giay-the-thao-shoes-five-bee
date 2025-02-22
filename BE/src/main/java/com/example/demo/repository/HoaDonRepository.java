@@ -7,6 +7,7 @@ import org.springframework.data.jpa.repository.Query;
 import org.springframework.stereotype.Repository;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Repository
@@ -14,4 +15,6 @@ public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, Jpa
 
     @Query("select h from HoaDonEntity h where h.trangThai = 1 and h.hinhThucMua=1 order by h.ngayTao")
     List<HoaDonEntity> getListByTrangThai();
+    Optional<HoaDonEntity> findById(UUID id);
+
 }

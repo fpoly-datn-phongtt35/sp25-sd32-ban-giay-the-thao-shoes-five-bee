@@ -31,42 +31,39 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
   @Override
   public void thanhToanTaiQuay(UUID idHoaDon, HoaDonRequest hoaDonRequest) {
-    HoaDonEntity hoaDon =
-        hoaDonRepository
-            .findById(idHoaDon)
+    HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon)
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
 
-    // Kiểm tra trạng thái hóa đơn
     if (hoaDon.getTrangThai() != 1) {
       throw new IllegalArgumentException("Hóa đơn đã được thanh toán hoặc không hợp lệ");
     }
 
-    // Lấy danh sách sản phẩm trong hóa đơn
     List<HoaDonChiTietEntity> danhSachSanPham = hoaDonChiTietRepository.findByHoaDon(hoaDon);
     if (danhSachSanPham.isEmpty()) {
       throw new IllegalArgumentException("Không thể thanh toán hóa đơn trống");
     }
 
-    BigDecimal tongTienSanPhamKhiGiam =
-        danhSachSanPham.stream()
-            .map(
-                hoaDonChiTiet ->
-                    hoaDonChiTiet
-                        .getDonGia()
-                        .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
+    // Tính tổng tiền
+    BigDecimal tongTienSanPhamKhiGiam = danhSachSanPham.stream()
+            .map(hdct -> hdct.getDonGia().multiply(BigDecimal.valueOf(hdct.getSoLuong())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    BigDecimal tongTienSanPhamGoc =
-        danhSachSanPham.stream()
-            .map(
-                hoaDonChiTiet ->
-                    hoaDonChiTiet
-                        .getGiaBan()
-                        .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
+    BigDecimal tongTienSanPhamGoc = danhSachSanPham.stream()
+            .map(hdct -> hdct.getGiaBan().multiply(BigDecimal.valueOf(hdct.getSoLuong())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     BigDecimal soTienGiam = tongTienSanPhamGoc.subtract(tongTienSanPhamKhiGiam);
 
+    // Nhận số tiền khách đưa
+    BigDecimal soTienKhachDua = hoaDonRequest.getSoTienKhachDua();
+    if (soTienKhachDua == null || soTienKhachDua.compareTo(tongTienSanPhamKhiGiam) < 0) {
+      throw new IllegalArgumentException("Số tiền khách đưa không đủ để thanh toán");
+    }
+
+    // Tính tiền thừa
+    BigDecimal tienThua = soTienKhachDua.subtract(tongTienSanPhamKhiGiam);
+
+    // Cập nhật thông tin hóa đơn
     hoaDon.setMa(hoaDonRequest.getMa());
     hoaDon.setNgayThanhToan(new Date());
     hoaDon.setMoTa(hoaDonRequest.getMoTa());
@@ -79,7 +76,11 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setTrangThai(2);
 
     hoaDonRepository.save(hoaDon);
+
+    // In tiền thừa ra log hoặc console (hoặc xử lý trả về qua controller)
+    System.out.println("Tiền thừa: " + tienThua + " VND");
   }
+
 
   @Override
   public HoaDonEntity createHoaDonBanHangTaiQuay() {
