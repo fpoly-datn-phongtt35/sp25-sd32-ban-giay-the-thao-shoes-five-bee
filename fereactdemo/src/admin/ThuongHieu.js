@@ -125,6 +125,7 @@ const ThuongHieu = () => {
             message.error("Cập nhật thương hiệu không thành công");
         }
     };
+    
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>

@@ -5,11 +5,13 @@ import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
+import lombok.experimental.SuperBuilder;
 
 import java.util.UUID;
 
 @Table(name = "GIO_HANG_CHI_TIET")
 @Entity
+@SuperBuilder(toBuilder = true)
 @AllArgsConstructor
 @NoArgsConstructor
 @Getter
@@ -23,7 +25,7 @@ public class GioHangChiTietEntity {
     @Column(name = "SO_LUONG")
     private Integer soLuong;
 
-    @Column(name = "GHI_CHU")
+    @Column(name = "GHI_CHU",columnDefinition = "NVARCHAR(255)")
     private String ghiChu;
 
     @Column(name = "TRANG_THAI")

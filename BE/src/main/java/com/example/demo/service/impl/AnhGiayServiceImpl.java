@@ -20,6 +20,7 @@ import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @Service
@@ -93,6 +94,33 @@ public class AnhGiayServiceImpl implements AnhGiayService {
     @Override
     public List<AnhGiayEntity> getAll() {
         return anhGiayRepository.findAll();
+    }
+
+    @Override
+    public AnhGiayEntity detail(AnhGiayDto anhGiayDto) {
+        Optional<AnhGiayEntity> optional = anhGiayRepository.findById(anhGiayDto.getId());
+        return optional.orElse(null);
+    }
+
+
+    @Override
+    public AnhGiayEntity update(AnhGiayDto anhGiayDto) {
+        Optional<AnhGiayEntity> optional = anhGiayRepository.findById(anhGiayDto.getId());
+        return optional.map(o->{
+            o.setTenUrl(anhGiayDto.getTenUrl());
+            o.setTrangThai(anhGiayDto.getTrangThai());
+            o.setGiayEntity(anhGiayDto.getGiayEntity());
+            return anhGiayRepository.save(o);
+        }).orElse(null);
+    }
+
+    @Override
+    public AnhGiayEntity delete(AnhGiayDto anhGiayDto) {
+        Optional<AnhGiayEntity> optional = anhGiayRepository.findById(anhGiayDto.getId());
+        return optional.map(o->{
+            anhGiayRepository.delete(o);
+            return o;
+        }).orElse(null);
     }
 }
 

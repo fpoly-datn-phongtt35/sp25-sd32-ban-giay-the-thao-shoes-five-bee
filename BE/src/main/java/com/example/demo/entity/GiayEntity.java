@@ -26,10 +26,10 @@ public class GiayEntity {
     @Column(name = "MA")
     private String ma;
 
-    @Column(name = "TEN")
+    @Column(name = "TEN",columnDefinition = "NVARCHAR(255)")
     private String ten;
 
-    @Column(name = "MO_TA")
+    @Column(name = "MO_TA",columnDefinition = "NVARCHAR(255)")
     private String moTa;
 
     @Column(name = "GIA_NHAP")

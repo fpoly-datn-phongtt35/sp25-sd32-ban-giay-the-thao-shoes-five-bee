@@ -7,6 +7,7 @@ import lombok.RequiredArgsConstructor;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,8 +26,23 @@ public class AnhGiayController {
         String uploadImage = anhGiayService.uploadImage(file);
         return anhGiayService.add(anhGiayDto,uploadImage);
     }
-    @GetMapping("/getAll")
+    @PostMapping("/getAll")
     public List<AnhGiayEntity> getAll() {
         return anhGiayService.getAll();
+    }
+
+    @PostMapping("/update")
+    public ResponseEntity<?> update(@RequestBody AnhGiayDto anhGiayDto){
+        return ResponseEntity.ok(anhGiayService.update(anhGiayDto));
+    }
+
+    @PostMapping("/delete")
+    public ResponseEntity<?> delete(@RequestBody AnhGiayDto anhGiayDto){
+        return ResponseEntity.ok(anhGiayService.delete(anhGiayDto));
+    }
+
+    @PostMapping("/detail")
+    public ResponseEntity<?> detail(@RequestBody AnhGiayDto anhGiayDto){
+        return ResponseEntity.ok(anhGiayService.detail(anhGiayDto));
     }
 }

@@ -8,8 +8,7 @@ export const addChucVu = (chucVu) =>
   axios.post(`${REST_API_BASE_URL}/add`, chucVu);
 
 export const deleteChucVu = (id) =>
-  axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
-
+  axios.post(`${REST_API_BASE_URL}/delete`, { id });
 export const updateChucVu = (id, chucVu) =>
   axios.put(`${REST_API_BASE_URL}/update/${id}`, chucVu);
 

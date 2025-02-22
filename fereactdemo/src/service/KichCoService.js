@@ -8,7 +8,7 @@ export const createSize = (size) =>
   axios.post(`${REST_API_BASE_URL}/add`, size);
 
 export const deleteSize = (id) =>
-  axios.post(`${REST_API_BASE_URL}/delete/${id}`);
+  axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
 export const updateSize = (id, size) =>
   axios.post(`${REST_API_BASE_URL}/update/${id}`, size);
