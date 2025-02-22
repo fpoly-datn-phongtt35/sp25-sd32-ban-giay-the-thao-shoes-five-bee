@@ -108,7 +108,7 @@ export const Header = () => {
 
           <div className="logo evo-flexitem evo-flexitem-fill">
             <a
-              href="/"
+              href="/home"
               className="logo-wrapper"
               title="Be Classy - Giày Da Nam, Giày Tây Nam Sang Trọng"
             >
@@ -146,12 +146,12 @@ export const Header = () => {
               </a>
               <ul>
                 <li>
-                  <a rel="nofollow" href="/account/login" title="Đăng nhập">
+                  <a rel="nofollow" href="/login" title="Đăng nhập">
                     Đăng nhập
                   </a>
                 </li>
                 <li>
-                  <a rel="nofollow" href="/account/register" title="Đăng ký">
+                  <a rel="nofollow" href="/register" title="Đăng ký">
                     Đăng ký
                   </a>
                 </li>

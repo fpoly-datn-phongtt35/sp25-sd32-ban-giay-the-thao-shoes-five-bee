@@ -47,7 +47,7 @@ public class GiayDto extends PageDto {
 
   private KieuDangUpdateDto kieuDangDto;
 
-  private AnhGiayDto anhGiayDtos;
+  private List<AnhGiayDto>  anhGiayDtos;
 
 }
 

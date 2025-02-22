@@ -39,7 +39,7 @@ const AnhSanPham = () => {
   };
 
   const trangThai = (status) => {
-    return status === 0 ? "Đang sử dụng" : "Không sử dụng";
+    return status === 0 ? "Không sử dụng" : "Đang sử dụng";
   };
 
   // hàm này được gọi khi file thay đổi để cập nhật trong state 'file'
@@ -163,13 +163,16 @@ const AnhSanPham = () => {
             {
               title: "Ảnh",
               dataIndex: "TENURL",
-              render: (TENURL) => (
-                <img
-                  src={`http://localhost:5000/upload/${TENURL}`}
-                  alt={TENURL}
-                  style={{ maxWidth: "100px" }}
-                />
-              ),
+              render: (tenUrl) =>
+                tenUrl ? (
+                  <img
+                    src={tenUrl} // ✅ Dùng trực tiếp tenUrl
+                    alt="Ảnh giày"
+                    style={{ maxWidth: "100px", height: "auto", borderRadius: "5px" }}
+                  />
+                ) : (
+                  "Không có ảnh"
+                ),
             },
             {
               title: "TRANG THAI",

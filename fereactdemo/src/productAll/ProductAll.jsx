@@ -30,6 +30,7 @@ export const ProductAll = () => {
   const fetchData = async () => {
     const resultGiay = await getGiay();
     const resultGiayChiTiet = await getAllGiayChiTiet();
+    console.log("giay san pham", resultGiay);
 
     const dataGiay = resultGiay.data.map((item) => ({
       ID: item.id,
@@ -39,7 +40,11 @@ export const ProductAll = () => {
       GIANHAP: item.giaNhap,
       GIABAN: item.giaBan,
       GIASAUKHUYENMAI: item.giaSauKhuyenMai,
-      ANH_GIAY: item.anhGiay ? item.anhGiay.tenUrl : null,
+      ANH_GIAY:
+        item.anhGiayEntities?.length > 0
+          ? item.anhGiayEntities[0].tenUrl
+          : null,
+
       // Gán giá trị mặc định cho soLuongTon
       soLuongTon: 0,
     }));
@@ -265,9 +270,7 @@ export const ProductAll = () => {
                 Từ 3 triệu - 4 triệu
               </div>
             </div>
-
-            </div>
-
+          </div>
         </div>
 
         <div className="aside_right">
@@ -284,11 +287,11 @@ export const ProductAll = () => {
                     alt="product"
                     className="product_image"
                   />
-                  <h3 className="product_name">{item.TEN}</h3>
                   <p className="product_price">
                     {item.GIABAN.toLocaleString()} VND
                   </p>
-                 
+                  <h3 className="product_name">{item.TEN}</h3>
+
                   <button
                     className="add_to_cart_button"
                     onClick={(e) => {
@@ -296,7 +299,7 @@ export const ProductAll = () => {
                       addToCart({ ...item, giayId: item.ID });
                     }}
                   >
-                    Thêm 
+                    Thêm
                   </button>
                 </div>
               ))}
