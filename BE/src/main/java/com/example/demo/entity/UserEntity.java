@@ -6,6 +6,7 @@ import lombok.*;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -48,6 +49,5 @@ public class UserEntity {
     private List<DiaChiEntity> diaChiEntities;
 
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
-    @JsonIgnore
-    private List<UserRoleEntity> userRoleEntities;
+    private List<UserRoleEntity> userRoleEntities = new ArrayList<>();
 }

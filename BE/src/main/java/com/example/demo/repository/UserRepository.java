@@ -16,6 +16,4 @@ public interface UserRepository extends JpaRepository<UserEntity, UUID>, JpaSpec
 
     boolean existsByEmail(String email);
 
-    @Query(value = "SELECT * FROM userEntity WHERE email = :email AND matKhau = :matKhau ",nativeQuery = true)
-    List<UserEntity> findByEmailAndMatKhau(String email,String matKhau);
 }
