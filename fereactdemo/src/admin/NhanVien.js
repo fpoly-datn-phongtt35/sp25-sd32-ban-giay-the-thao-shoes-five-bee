@@ -1,9 +1,11 @@
 import React, { useEffect, useState } from 'react'
 import { getChucVu } from '../service/ChucVuService';
 import { addNhanVien, deleteNhanVien, detailNhanVien, getAllNhanVien, updateNhanVien } from '../service/NhanVienService';
-import { Button, Form, Input, message, Modal, Radio, Select, Space, Table } from 'antd';
+import { Button, Form, Input, message, Modal, Radio, Select, Space, Table, DatePicker } from 'antd';
 import { Option } from 'antd/es/mentions';
 import bcrypt from 'bcryptjs';
+import moment from 'moment';
+
 const NhanVien = () => {
     const [nhanVien, setNhanVien] = useState([]);
     const [chucVuList, setChucVuList] = useState([]);
@@ -17,6 +19,9 @@ const NhanVien = () => {
     const [editingNhanVien, setEditingNhanVien] = useState(null);
     const [activeNhanVien, setActiveNhanVien] = useState([]);
     const [selectedFile, setSelectedFile] = useState(null);
+    const [ngaySinh, setNgaySinh] = useState(null);
+    const [soDienThoai, setSoDienThoai] = useState("");
+
     const getActiveNhanVien = () => {
         return nhanVien.filter(item => item.TRANG_THAI === 0);
     }
@@ -58,6 +63,8 @@ const NhanVien = () => {
             ANH: item.anh,
             ROLENAMES: item.roleNames[0],
             TRANG_THAI: item.isEnabled ? 0 : 1,
+            NGAYSINH: item.ngaySinh,
+            SODIENTHOAI: item.soDienThoai,
         }));
         setNhanVien(loadTable);
         const activeNhanVienData = loadTable.filter(item => item.TRANG_THAI === 0);
@@ -78,7 +85,9 @@ const NhanVien = () => {
             email: email,
             matKhau: hashedPassword,
             isEnabled: value === 1,
-            roleNames: selectedChucVu ,
+            roleNames: selectedChucVu ? [`${selectedChucVu}`] : ['ROLE_USER'],
+            ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
+            soDienThoai: soDienThoai,
         };
 
         try {
@@ -109,24 +118,28 @@ const NhanVien = () => {
             setValue(nhanVien.isEnabled ? 1 : 2);
             setSelectedChucVu(nhanVien.roleNames ? nhanVien.roleNames[0] : null);
             setIsModalVisible(true);
+            setNgaySinh(nhanVien.ngaySinh ? moment(nhanVien.ngaySinh) : null);
+            setSoDienThoai(nhanVien.soDienThoai || "");
         } catch (error) {
             message.error("Lỗi khi lấy chi tiết nhân viên");
         }
     };
     const editNhanVienButton = async () => {
-        if (!hoTen || !email || !matKhau) {
+        if (!hoTen || !email) {
             message.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
         const newDataNhanVien = {
+            id: editingNhanVien.id,
             hoTen: hoTen,
             email: email,
-            matKhau: matKhau,
             isEnabled: value === 1,
-            roleNames: selectedChucVu
+            roleNames: selectedChucVu ? [`${selectedChucVu}`] : ['ROLE_USER'],
+            ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
+            soDienThoai: soDienThoai,
         };
         try {
-            await updateNhanVien(editingNhanVien.id, newDataNhanVien, selectedFile);
+            await updateNhanVien(newDataNhanVien, selectedFile);
             message.success("Cập nhật nhân viên thành công");
             getNhanVien();
             setIsModalVisible(false);
@@ -145,6 +158,8 @@ const NhanVien = () => {
         setSelectedChucVu(null);
         setEditingNhanVien(null);
         setSelectedFile(null);
+        setNgaySinh(null);
+        setSoDienThoai("");
     };
 
     const handleFileChange = (e) => {
@@ -169,9 +184,16 @@ const NhanVien = () => {
                 <br /><br />
                 <Input placeholder='Tên Nhân Viên' value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                 <br /><br />
-                <Input.Password placeholder='Mật Khẩu' value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
-                <br /><br />
                 <Input placeholder='Email@...' value={email} onChange={(e) => setEmail(e.target.value)} />
+                <br /><br />
+                <Input placeholder='Số Điện Thoại' value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
+                <br /><br />
+                <DatePicker 
+                    placeholder='Ngày Sinh' 
+                    value={ngaySinh} 
+                    onChange={(date) => setNgaySinh(date)}
+                    style={{ width: '100%' }}
+                />
                 <br /><br />
                 <input 
                     type="file" 
@@ -195,6 +217,9 @@ const NhanVien = () => {
                 <Button type="primary" onClick={createNhanVien}>
                     Add
                 </Button>
+                <Button type="default" href="/excel/Import_User.xlsx" download style={{ marginLeft: '8px', textDecoration: 'none' }}>
+                    Tải xuống mẫu Excel
+                </Button>
                 <br /><br />
                 <Table 
                     pagination={{ pageSize: 5, defaultPageSize: 5 }} 
@@ -209,6 +234,17 @@ const NhanVien = () => {
                             title: 'EMAIL',
                             dataIndex: 'EMAIL',
                             key: 'EMAIL'
+                        },
+                        {
+                            title: 'SỐ ĐIỆN THOẠI',
+                            dataIndex: 'SODIENTHOAI',
+                            key: 'SODIENTHOAI'
+                        },
+                        {
+                            title: 'NGÀY SINH',
+                            dataIndex: 'NGAYSINH',
+                            key: 'NGAYSINH',
+                            render: (text) => text ? moment(text).format('DD/MM/YYYY') : 'Chưa có'
                         },
                         {
                             title: 'ẢNH',
@@ -226,7 +262,7 @@ const NhanVien = () => {
                             title: 'CHỨC VỤ',
                             dataIndex: 'ROLENAMES',
                             key: 'ROLENAMES',
-                            render: (text) => text?.replace('ROLE_', '') // Xóa prefix ROLE_
+                            render: (text) => text?.replace('ROLE_', '')
                         },
                         {
                             title: 'TRẠNG THÁI',
@@ -256,8 +292,14 @@ const NhanVien = () => {
                     <Form.Item label="Email">
                         <Input value={email} onChange={(e) => setEmail(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Mật Khẩu">
-                        <Input.Password value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
+                    <Form.Item label="Số Điện Thoại">
+                        <Input value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item label="Ngày Sinh">
+                        <DatePicker 
+                            value={ngaySinh} 
+                            onChange={(date) => setNgaySinh(date)}
+                        />
                     </Form.Item>
                     <Form.Item label="Ảnh đại diện">
                         <input 
@@ -283,7 +325,7 @@ const NhanVien = () => {
                     <Form.Item label="Chức Vụ">
                         <Select placeholder='Chọn Chức Vụ' value={selectedChucVu} onChange={handleChucVuChange}>
                             {Array.isArray(chucVuList) && chucVuList.map(cv => (
-                                <Option key={cv.id} value={cv.id}>
+                                <Option key={cv.id} value={cv.ten}>
                                     {cv.ten}
                                 </Option>
                             ))}

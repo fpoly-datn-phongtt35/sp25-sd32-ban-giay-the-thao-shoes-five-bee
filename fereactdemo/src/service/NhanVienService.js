@@ -24,7 +24,7 @@ export const addNhanVien = (userData, file) => {
 export const deleteNhanVien = (id) =>
   axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
 
-export const updateNhanVien = (id, nhanVien, file) => {
+export const updateNhanVien = ( nhanVien, file) => {
   const formData = new FormData();
   formData.append('userDto', new Blob([JSON.stringify(nhanVien)], {
     type: 'application/json'
@@ -34,7 +34,7 @@ export const updateNhanVien = (id, nhanVien, file) => {
     formData.append('file', file);
   }
   
-  return axios.put(`${REST_API_BASE_URL}/update/${id}`, formData, {
+  return axios.put(`${REST_API_BASE_URL}/update`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }

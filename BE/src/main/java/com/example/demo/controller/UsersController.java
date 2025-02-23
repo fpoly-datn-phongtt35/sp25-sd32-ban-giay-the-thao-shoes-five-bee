@@ -126,7 +126,7 @@ public class UsersController {
         }
     }
 
-    @PostMapping("/update")
+    @PutMapping("/update")
     public ResponseEntity<?> update(@RequestPart("userDto") UserDto userDto, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException{
         usersService.update(userDto,file);
         return ResponseEntity.ok(Collections.singletonMap("message","update success"));
