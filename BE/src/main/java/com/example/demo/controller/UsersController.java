@@ -66,7 +66,6 @@ public class UsersController {
             headerRow.createCell(1).setCellValue("EMAIL");
             headerRow.createCell(2).setCellValue("NGAY SINH");
             headerRow.createCell(3).setCellValue("SO DIEN THOAI");
-
             int rowIndex= 1;
             for (UserEntity userEntity : userEntities){
                 Row row = sheet.createRow(rowIndex++);
@@ -87,7 +86,6 @@ public class UsersController {
         }
     }
 
-
     @PostMapping("/import-excel")
     public ResponseEntity<?> importUserFormExcel(@RequestParam("file")MultipartFile file) throws IOException{
         if (file.isEmpty()){
@@ -98,7 +96,7 @@ public class UsersController {
             return ResponseEntity.badRequest().body("file must be an excel file");
         }
         try {
-            List<UserDto> userDtos = usersService.importExcel(file);
+            List<UserEntity> userDtos = usersService.importExcel(file);
             return ResponseEntity.ok().body(userDtos);
         }catch (RuntimeException e){
             return ResponseEntity.badRequest().body("import errors :" +e.getMessage());

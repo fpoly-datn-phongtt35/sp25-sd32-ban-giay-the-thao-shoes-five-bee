@@ -1,8 +1,11 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -25,4 +28,10 @@ public class RoleEntity {
     private String moTa;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
+    @OneToMany(mappedBy = "roleEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @JsonIgnore
+    private List<UserRoleEntity> userRoleEntities = new ArrayList<>();
+
 }
+
+

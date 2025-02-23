@@ -23,7 +23,6 @@ public class UserDto {
     private String matKhau;
     private Boolean isEnabled = true;
     private List<String> roleNames;
-
     private List<DiaChiDto> diaChi;
 
 }

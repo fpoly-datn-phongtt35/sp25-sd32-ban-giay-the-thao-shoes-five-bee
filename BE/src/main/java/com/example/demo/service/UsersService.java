@@ -27,7 +27,7 @@ public interface UsersService {
 
   List<UserEntity> exportExcelByFindJpa(UserDtoSearch userDtoSearch);
 
-  List<UserDto> importExcel(MultipartFile file) throws IOException;
+  List<UserEntity> importExcel(MultipartFile file) throws IOException;
 
   List<UserDto> importExcelCheckDuplicate(MultipartFile file) throws IOException;
 }

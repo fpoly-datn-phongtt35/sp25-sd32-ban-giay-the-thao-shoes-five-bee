@@ -7,6 +7,7 @@ import com.example.demo.dto.request.UserDto;
 import com.example.demo.dto.request.UserDtoSearch;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.DiaChiEntity;
+import com.example.demo.entity.RoleEntity;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.entity.UserRoleEntity;
 import com.example.demo.repository.DiaChiRepository;
@@ -374,7 +375,7 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
     }
 
     @Override
-    public List<UserDto> importExcel(MultipartFile file) throws IOException {
+    public List<UserEntity> importExcel(MultipartFile file) throws IOException {
         List<UserDto> userDtos = new ArrayList<>();
         List<String> errors = new ArrayList<>();
         Workbook workbook = new XSSFWorkbook(file.getInputStream());
@@ -386,7 +387,6 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
             if (row != null) {
                 try {
                     UserDto userDto = new UserDto();
-
                     String hoTen = dataFormatter.formatCellValue(row.getCell(0));
                     if (hoTen == null || hoTen.trim().isEmpty()) {
                         errors.add("họ tên không được để trống : " + (rowIndex + 1));
@@ -394,7 +394,7 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
                     }
                     userDto.setHoTen(hoTen.trim());
 
-                    Cell ngaySinhCell = row.getCell(1);
+                    Cell ngaySinhCell = row.getCell(2);
                     if (ngaySinhCell != null) {
                         if (ngaySinhCell.getCellType() == CellType.NUMERIC) {
                             java.util.Date utilDate = DateUtil.getJavaDate(ngaySinhCell.getNumericCellValue());
@@ -423,7 +423,7 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
                         continue;
                     }
 
-                    Cell soDienThoaiCell = row.getCell(2);
+                    Cell soDienThoaiCell = row.getCell(3);
                     if (soDienThoaiCell == null || soDienThoaiCell.getCellType() != CellType.STRING) {
                         errors.add("số điện thoại không hợp lệ : " + (rowIndex + 1));
                         continue;
@@ -435,7 +435,7 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
                     }
                     userDto.setSoDienThoai(soDienThoai);
 
-                    String email = dataFormatter.formatCellValue(row.getCell(3));
+                    String email = dataFormatter.formatCellValue(row.getCell(1));
                     if (email == null || email.trim().isEmpty()) {
                         errors.add("email không được để trống : " + (rowIndex + 1));
                         continue;
@@ -449,14 +449,9 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
                     }
                     userDto.setMatKhau(matKhau.trim());
 
-//                    String roleNamesStr = dataFormatter.formatCellValue(row.getCell(5));
-//                    if (roleNamesStr != null && !roleNamesStr.trim().isEmpty()) {
-//                        List<String> roleNames = Arrays.asList(roleNamesStr.split(","));
-//                        userDto.setRoleNames(roleNames);
-//                    }
-                    List<UserEntity> userEntities = userRepository.findByEmailAndMatKhau(email,matKhau);
-                    if (!userEntities.isEmpty()){
-                        errors.add("email \"" + email + "\" với mật khẩu \"" + matKhau + "\" đã tồn tại !");
+                    Optional<UserEntity> userEntities = userRepository.findByEmail(email);
+                    if (userEntities.isPresent()){
+                        errors.add("email \"" + email + "\" đã tồn tại !");
                     }else {
                         userDtos.add(userDto);
                     }
@@ -478,10 +473,20 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
             userEntity.setSoDienThoai(userDto.getSoDienThoai());
             userEntity.setEmail(userDto.getEmail());
             userEntity.setMatKhau(userDto.getMatKhau());
+            userRepository.save(userEntity);
+            RoleEntity roleEntity = roleRepository.findByName("ROLE_USER");
+            UserRoleEntity userRoleEntity = new UserRoleEntity();
+            userRoleEntity.setUserEntity(userEntity);
+            userRoleEntity.setRoleEntity(roleEntity);
+            userRoleRepository.save(userRoleEntity);
+            roleEntity.getUserRoleEntities().add(userRoleEntity);
+            roleRepository.save(roleEntity);
+            userEntity.getUserRoleEntities().add(userRoleEntity);
             userEntities.add(userEntity);
+            userRepository.save(userEntity);
         }
         userRepository.saveAll(userEntities);
-        return userDtos;
+        return userEntities;
     }
 
     @Override
