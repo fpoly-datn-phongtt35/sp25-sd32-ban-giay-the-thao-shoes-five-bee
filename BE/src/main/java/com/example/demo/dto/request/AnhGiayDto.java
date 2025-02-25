@@ -1,5 +1,6 @@
 package com.example.demo.dto.request;
 
+import com.example.demo.entity.GiayEntity;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 public class AnhGiayDto {
     private Integer trangThai;
-
-    private UUID giayId;
+    private String tenUrl;
+    private UUID id;
+    private GiayEntity giayEntity;
 }
