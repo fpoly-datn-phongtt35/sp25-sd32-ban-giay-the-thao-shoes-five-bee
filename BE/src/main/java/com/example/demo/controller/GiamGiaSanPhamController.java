@@ -2,15 +2,18 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.GiamGiaChiTietSanPhamRequest;
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
+import com.example.demo.entity.GiamGiaSanPhamEntity;
+import com.example.demo.entity.GiayEntity;
 import com.example.demo.service.GiamGiaSanPhamService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
+import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.io.IOException;
+import java.util.List;
 
 @RestController
 @RequestMapping("/giam-gia-san-pham")
@@ -53,5 +56,17 @@ public class GiamGiaSanPhamController {
   @PostMapping("/delete")
   public ResponseEntity<?> delete(@RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
     return ResponseEntity.ok(giamGiaSanPhamService.delete(giamGiaSanPhamDto));
+  }
+  @GetMapping("/export-excel")
+  public ResponseEntity<byte[]> exportExcel() throws IOException {
+    byte[] excelFile = giamGiaSanPhamService.exportExcel().toByteArray();
+    HttpHeaders headers = new HttpHeaders();
+    headers.add("Content-Disposition", "attachment; filename=chuongtrinhgiamgia.xlsx");
+    return ResponseEntity.ok().headers(headers).body(excelFile);
+  }
+  @GetMapping("/search-ten")
+  public ResponseEntity<List<GiamGiaSanPhamEntity>> searchGiamGiaByName(@RequestParam String ten) {
+    List<GiamGiaSanPhamEntity> result = giamGiaSanPhamService.findByTen(ten);
+    return ResponseEntity.ok(result);
   }
 }
