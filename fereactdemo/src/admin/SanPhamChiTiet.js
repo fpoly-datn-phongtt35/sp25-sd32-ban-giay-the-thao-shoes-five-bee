@@ -25,6 +25,8 @@ import e from "cors";
 import "./sanphamchitiet.css";
 const SanPhamChiTiet = () => {
   const [giayChiTiet, setGiayChiTiet] = useState([]);
+  const [danhSachGiayChiTiet, setDanhSachGiayChiTiet] = useState([]);
+
   const [giayList, setGiayList] = useState([]);
   const [value, setValue] = useState(1);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -79,11 +81,12 @@ const SanPhamChiTiet = () => {
       ID: item.id,
       GIABAN: item.giaBan,
       SOLUONGTON: item.soLuongTon,
-      GIAY: item.giayEntity ? item.giay.ten : null,
+      GIAY: item.giayEntity ? item.giayEntity.ten : null, // Sửa lỗi
       TRANG_THAI: item.trangThai,
-      MAUSAC: item.mauSacEntity ? item.mauSacDto.ten : null,
-      KICHCO: item.kichCoEntity ? item.kichCoDto.ten : null,
+      MAUSAC: item.mauSacEntity ? item.mauSacEntity.ten : null, // Sửa lỗi
+      KICHCO: item.kichCoEntity ? item.kichCoEntity.ten : null, // Sửa lỗi
     }));
+
     const activeChatLieuData = dataGiayChiTiet.filter(
       (item) => item.TRANG_THAI === 0
     );
@@ -123,134 +126,116 @@ const SanPhamChiTiet = () => {
 
   const creatGiayChiTiet = async () => {
     const newTrangThai1 = value === 1 ? 0 : 1;
-    const newTrangThai2 = value === 1 ? 0 : 1;
 
     const checkGiayChiTiet = async (data) => {
-      if (
-        !data ||
-        !data.giay ||
-        !data.giay.id ||
-        !data.mauSacDto ||
-        !data.mauSacDto.id ||
-        !data.kichCoDto ||
-        !data.kichCoDto.id
-      ) {
-        throw new Error("Dữ liệu không hợp lệ: Một số thuộc tính bị thiếu.");
-      }
+      try {
+        if (
+          !data ||
+          !data.giay ||
+          !data.giay.id ||
+          !data.mauSacDto ||
+          !data.mauSacDto.id ||
+          !data.kichCoDto ||
+          !data.kichCoDto.id
+        ) {
+          throw new Error("Dữ liệu không hợp lệ: Một số thuộc tính bị thiếu.");
+        }
 
-      console.log("Dữ liệu truyền vào checkGiayChiTiet:", data);
+        console.log("Dữ liệu truyền vào checkGiayChiTiet:", data);
 
-      const latestData = await getAllGiayChiTiet();
-      const existingGiay = latestData?.data?.find(
-        (item) =>
-          item.giay?.id === data.giay.id &&
-          item.mauSacDto?.id === data.mauSacDto.id &&
-          item.kichCoDto?.id === data.kichCoDto.id
-      );
-
-      const giayInfo = await getGiay();
-      const currentGiay = giayInfo?.data?.find((g) => g.id === data.giay.id);
-
-      if (!currentGiay) {
-        throw new Error("Không tìm thấy thông tin giày");
-      }
-      if (parseFloat(data.giaBan) < parseFloat(currentGiay.giaBan)) {
-        throw new Error(
-          `Giá bán (${data.giaBan}) phải >= giá sản phẩm (${currentGiay.giaBan})`
+        const latestData = await getAllGiayChiTiet();
+        const existingGiay = latestData?.data?.find(
+          (item) =>
+            item.giay?.id === data.giay.id &&
+            item.mauSacDto?.id === data.mauSacDto.id &&
+            item.kichCoDto?.id === data.kichCoDto.id
         );
+
+        const giayInfo = await getGiay();
+        const currentGiay = giayInfo?.data?.find((g) => g.id === data.giay.id);
+
+        if (!currentGiay) {
+          throw new Error("Không tìm thấy thông tin giày");
+        }
+        if (parseFloat(data.giaBan) < parseFloat(currentGiay.giaBan)) {
+          throw new Error(
+            `Giá bán (${data.giaBan}) phải >= giá sản phẩm (${currentGiay.giaBan})`
+          );
+        }
+
+        if (existingGiay) {
+          const updateData = {
+            ...existingGiay,
+            soLuongTon: existingGiay.soLuongTon + parseInt(data.soLuongTon),
+            giaBan: data.giaBan,
+            trangThai: data.trangThai,
+          };
+
+          await updateGiayChiTiet(existingGiay.id, updateData);
+          message.success("Cập nhật số lượng thành công");
+        } else {
+          await addGiayChiTiet(data);
+          message.success("Thêm sản phẩm chi tiết mới thành công!");
+        }
+
+        const allGiayChiTiet = await getAllGiayChiTiet();
+        const relatedItems = allGiayChiTiet?.data?.filter(
+          (item) => item.giay?.id === data.giay.id
+        );
+        const totalSoLuongTon = relatedItems.reduce(
+          (sum, item) => sum + item.soLuongTon,
+          0
+        );
+
+        await updateGiay(data.giay.id, {
+          ...currentGiay,
+          soLuongTon: totalSoLuongTon,
+        });
+      } catch (error) {
+        console.error("Lỗi trong checkGiayChiTiet:", error);
+        throw error;
       }
-
-      if (existingGiay) {
-        const updateData = {
-          ...existingGiay,
-          soLuongTon: existingGiay.soLuongTon + parseInt(data.soLuongTon),
-          giaBan: data.giaBan,
-          trangThai: data.trangThai,
-        };
-        await updateGiayChiTiet(existingGiay.id, updateData);
-        message.success("Cập nhật số lượng thành công");
-      } else {
-        await addGiayChiTiet(data);
-        message.success("Thêm sản phẩm chi tiết mới thành công!");
-      }
-
-      const allGiayChiTiet = await getAllGiayChiTiet();
-      const relatedItems = allGiayChiTiet?.data?.filter(
-        (item) => item.giay?.id === data.giay.id
-      );
-      const totalSoLuongTon = relatedItems.reduce(
-        (sum, item) => sum + item.soLuongTon,
-        0
-      );
-
-      await updateGiay(data.giay.id, {
-        ...currentGiay,
-        soLuongTon: totalSoLuongTon,
-      });
     };
 
     try {
-      const updatedGiayIds = new Set();
-      if (soLuongTon1 && selectedGiay1 && selectedMauSac1 && selectedKichCo1) {
-        console.log("Thêm giày chi tiết 1:", {
-          selectedGiay1,
-          selectedMauSac1,
-          selectedKichCo1,
-          soLuongTon1,
-          giaBan1,
-        });
-
-        await checkGiayChiTiet({
-          soLuongTon: soLuongTon1,
-          giaBan: giaBan1,
-          giay: { id: selectedGiay1 },
-          mauSacDto: { id: selectedMauSac1 },
-          kichCoDto: { id: selectedKichCo1 },
-          trangThai: newTrangThai1,
-        });
-
-        updatedGiayIds.add(selectedGiay1);
+      if (
+        !soLuongTon1 ||
+        !selectedGiay1 ||
+        !selectedMauSac1 ||
+        !selectedKichCo1
+      ) {
+        message.error("Vui lòng nhập đầy đủ thông tin trước khi thêm!");
+        return;
       }
 
-      if (soLuongTon2 && selectedGiay2 && selectedMauSac2 && selectedKichCo2) {
-        console.log("Thêm giày chi tiết 2:", {
-          selectedGiay2,
-          selectedMauSac2,
-          selectedKichCo2,
-          soLuongTon2,
-          giaBan2,
-        });
+      console.log("Dữ liệu gửi lên BE:", {
+        soLuongTon1,
+        giaBan1,
+        selectedGiay1,
+        selectedMauSac1,
+        selectedKichCo1,
+      });
 
-        await checkGiayChiTiet({
-          soLuongTon: soLuongTon2,
-          giaBan: giaBan2,
-          giay: { id: selectedGiay2 },
-          mauSacDto: { id: selectedMauSac2 },
-          kichCoDto: { id: selectedKichCo2 },
-          trangThai: newTrangThai2,
-        });
+      await checkGiayChiTiet({
+        soLuongTon: soLuongTon1,
+        giaBan: giaBan1,
+        giay: { id: selectedGiay1 },
+        mauSacDto: { id: selectedMauSac1 },
+        kichCoDto: { id: selectedKichCo1 },
+        trangThai: newTrangThai1,
+      });
 
-        updatedGiayIds.add(selectedGiay2);
-      }
-
-      for (const giayId of updatedGiayIds) {
-        console.log("Cập nhật tổng số lượng tồn cho giày ID:", giayId);
-        await updateGiayTotalQuantity(giayId);
-      }
+      console.log("Cập nhật tổng số lượng tồn cho giày ID:", selectedGiay1);
+      await updateGiayTotalQuantity(selectedGiay1);
 
       await getDataGiayChiTiet();
       message.success("Thao tác thành công!");
 
       setSoLuongTon1("");
-      setSoLuongTon2("");
       setGiaBan1("");
-      setGiaBan2("");
       setSelectedMauSac1(null);
-      setSelectedMauSac2(null);
       setSelectedKichCo1(null);
-      setSelectedKichCo2(null);
       setSelectedGiay1(null);
-      setSelectedGiay2(null);
       setValue(1);
     } catch (error) {
       console.error("Lỗi khi thêm giày chi tiết:", error);
@@ -260,6 +245,7 @@ const SanPhamChiTiet = () => {
     setIsModalVisible1(false);
   };
 
+  
   const deleteGiayChiTiet = async (record) => {
     try {
       await removeGiayChiTiet(record.ID);
@@ -430,67 +416,6 @@ const SanPhamChiTiet = () => {
                   placeholder="Giá Bán 1"
                   value={giaBan1}
                   onChange={(e) => setGiaBan1(e.target.value)}
-                />
-                <br />
-                <br />
-              </div>
-
-              <div className="modalContent_product">
-                <h6>Chọn sản phẩm 2</h6>
-                <Select
-                  placeholder="Chọn Tên Giày 2"
-                  value={selectedGiay2}
-                  onChange={setSelectedGiay2}
-                >
-                  {Array.isArray(giayList) &&
-                    giayList.map((ag) => (
-                      <Option key={ag.id} value={ag.id}>
-                        {ag.ten}
-                      </Option>
-                    ))}
-                </Select>
-                <br />
-                <br />
-
-                <Select
-                  placeholder="Chọn Màu Sắc 2"
-                  value={selectedMauSac2}
-                  onChange={setSelectedMauSac2}
-                >
-                  {Array.isArray(mauSacList) &&
-                    mauSacList.map((ms) => (
-                      <Option key={ms.id} value={ms.id}>
-                        {ms.ten}
-                      </Option>
-                    ))}
-                </Select>
-                <br />
-                <br />
-                <Select
-                  placeholder="Chọn Kích Cỡ 2"
-                  value={selectedKichCo2}
-                  onChange={setSelectedKichCo2}
-                >
-                  {Array.isArray(kichCoList) &&
-                    kichCoList.map((kc) => (
-                      <Option key={kc.id} value={kc.id}>
-                        {kc.ten}
-                      </Option>
-                    ))}
-                </Select>
-                <br />
-                <br />
-                <Input
-                  placeholder="Số Lượng Tồn 2"
-                  value={soLuongTon2}
-                  onChange={(e) => setSoLuongTon2(e.target.value)}
-                />
-                <br />
-                <br />
-                <Input
-                  placeholder="Giá Bán 2"
-                  value={giaBan2}
-                  onChange={(e) => setGiaBan2(e.target.value)}
                 />
                 <br />
                 <br />

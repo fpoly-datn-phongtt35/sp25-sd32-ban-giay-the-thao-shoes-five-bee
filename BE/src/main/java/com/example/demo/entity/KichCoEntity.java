@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -31,5 +32,6 @@ public class KichCoEntity {
     private Integer trangThai;
 
     @OneToMany(mappedBy = "kichCoEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
     private List<GiayChiTietEntity> giayChiTietEntities;
 }

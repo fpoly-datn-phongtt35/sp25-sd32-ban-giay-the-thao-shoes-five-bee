@@ -19,6 +19,7 @@ import {
   message,
 } from "antd";
 import "./Sanpham.css";
+import { validate as isUuid } from "uuid";
 import { getThuongHieu } from "../service/ThuongHieuService";
 import { getChatLieu } from "../service/ChatLieuService";
 import { getDeGiay } from "../service/DeGiayService";
@@ -85,14 +86,14 @@ const SanPham = () => {
   const getAllGiay = async () => {
     try {
       const result = await getGiay();
-      console.log("API Response:", result);
+   
 
       if (!result || !result.data) {
         console.error("Error: result.data is undefined or null");
         return;
       }
 
-      console.log("Dữ liệu API:", result.data);
+      
 
       if (!Array.isArray(result.data)) {
         console.error("Error: result.data is not an array", result.data);
@@ -121,7 +122,7 @@ const SanPham = () => {
         KICH_CO: item.kichCo ? item.kichCo.ten : null,
       }));
 
-      console.log("Dữ liệu frontend:", dataGiay);
+    
       setGiay(dataGiay);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -263,7 +264,7 @@ const SanPham = () => {
   };
 
   const detailGiay = async (record) => {
-    console.log("Thông tin giày là:", record);
+
 
     // Tạo đối tượng GiayDto từ thông tin của giày mà bạn có
     const giayDto = {
@@ -292,7 +293,6 @@ const SanPham = () => {
       // Gửi DTO qua API để lấy chi tiết giày
       const response = await getGiayDetail(giayDto);
       const giay = response.data;
-      console.log("Dữ liệu nhận được từ API:", giay);
 
       // Cập nhật state với dữ liệu nhận được
       setEditingGiay(giay);
@@ -311,38 +311,57 @@ const SanPham = () => {
       setSelectedAnhGiay(giay.anhGiay ? giay.anhGiay.id : null);
       setIsModalVisible(true);
 
-      console.log(giay);
+ 
     } catch (error) {
       message.error("Lỗi khi lấy chi tiết giày: " + error.message);
     }
   };
 
+
   const editGiayButton = async () => {
-    console.log("ID của editingGiay:", editingGiay.id);
+    // console.log("🔍 ID của sản phẩm cần cập nhật:", editingGiay.id);
+
+    // if (!editingGiay.id) {
+    //   message.error(" Lỗi: Không có ID sản phẩm cần cập nhật!");
+    //   return;
+    // }
 
     const newTrangThai = value === 1 ? 1 : 0;
     const newDataGiay = {
+      id: isUuid(editingGiay.id) ? editingGiay.id : null,
       ten: ten,
       moTa: moTa,
       giaBan: parseFloat(giaBan),
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
-      thuongHieu: selectedThuongHieu ? { id: selectedThuongHieu } : null,
-      chatLieu: selectedChatLieu ? { id: selectedChatLieu } : null,
-      deGiay: selectedDeGiay ? { id: selectedDeGiay } : null,
-      xuatXu: selectedXuatXu ? { id: selectedXuatXu } : null,
-      kieuDang: selectedKieuDang ? { id: selectedKieuDang } : null,
-      mauSac: selectedMauSac ? { id: selectedMauSac } : null,
-      kichCo: selectdKichCo ? { id: selectdKichCo } : null,
-      anhGiay: selectedAnhGiay ? { id: selectedAnhGiay } : null,
+      thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
+      chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
+      deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
+      xuatXuDto: selectedXuatXu ? { id: selectedXuatXu } : null,
+      kieuDangDto: selectedKieuDang ? { id: selectedKieuDang } : null,
+
+    
+      // ...(selectedMauSac && { mauSacDto: { id: selectedMauSac } }),
+      // ...(selectdKichCo && { kichCoDto: { id: selectdKichCo } }),
+
+      
+      anhGiayDtos: selectedAnhGiay ? selectedAnhGiay.map((id) => ({ id })) : [],
     };
+    console.log("du lieu update", newDataGiay);
+    
+
     try {
-      await updateGiay(editingGiay.id, newDataGiay);
-      message.success("Cập nhật sản phẩm thành công!");
-      getAllGiay();
+      await updateGiay( newDataGiay);
+      message.success("ập nhật sản phẩm thành công!");
+
+      getAllGiay(); // Cập nhật danh sách sau khi sửa
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
+      console.error(
+        "Lỗi cập nhật sản phẩm:",
+        error.response?.data || error.message
+      );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
           (error.response?.data?.message || error.message)
@@ -475,13 +494,12 @@ const SanPham = () => {
                     src={ag.tenUrl}
                     alt="Ảnh giày"
                     style={{
-                      width: '80%',
+                      width: "80%",
                       height: 150,
                       marginLeft: 30,
-                     
                     }}
                   />
-                {ag.tenUrl}
+                  {ag.tenUrl}
                 </Option>
               ))}
           </Select>

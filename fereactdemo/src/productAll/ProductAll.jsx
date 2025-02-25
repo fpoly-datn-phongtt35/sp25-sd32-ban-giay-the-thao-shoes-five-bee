@@ -30,7 +30,7 @@ export const ProductAll = () => {
   const fetchData = async () => {
     const resultGiay = await getGiay();
     const resultGiayChiTiet = await getAllGiayChiTiet();
-    console.log("giay san pham", resultGiay);
+    // console.log("giay san pham", resultGiay);
 
     const dataGiay = resultGiay.data.map((item) => ({
       ID: item.id,

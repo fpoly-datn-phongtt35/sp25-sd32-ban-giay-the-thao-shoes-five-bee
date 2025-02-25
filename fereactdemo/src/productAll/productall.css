@@ -193,8 +193,8 @@
     cursor: pointer;
     opacity: 0.2; /* Không hoàn toàn ẩn, tránh nhấp nháy */
     transition:
-      bottom 1.8s ease-out,  /* Di chuyển chậm dần */
-      opacity 1.8s ease-out; /* Mượt hơn */
+      bottom 0.8s ease-out,  /* Di chuyển chậm dần */
+      opacity 0.8s ease-out; /* Mượt hơn */
   }
   
   /* Khi hover, nút trượt lên chậm rãi */
