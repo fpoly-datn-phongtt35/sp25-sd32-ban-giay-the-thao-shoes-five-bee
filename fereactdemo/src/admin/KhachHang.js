@@ -1,24 +1,28 @@
 import React, { useEffect, useState } from 'react'
-import { addKhachHang, deleteKhachHang, detailKhachHang, getAllKhachHang, updateKhachHang } from '../service/KhachHangService';
-import { getAllHangKhachHang } from '../service/HangKhachHangService'; // Correct import
-import { Button, Form, Input, message, Modal, Radio, Select, Space, Table } from 'antd';
+import { addKhachHang, deleteKhachHang, detailKhachHang, getAllKhachHang, updateKhachHang, importExcel } from '../service/KhachHangService';
+import { Button, Form, Input, message, Modal, Radio, Select, Space, Table, DatePicker, Drawer } from 'antd';
 import bcrypt from 'bcryptjs';
+import moment from 'moment';
+import { DownloadOutlined, UploadOutlined, PlusOutlined } from '@ant-design/icons';
 
 const { Option } = Select;
 
 const KhachHang = () => {
     const [khachHang, setKhachHang] = useState([]);
-    const [hangKhachHangList, setHangKhachHangList] = useState([]);
     const [value, setValue] = useState(1);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [selectedHangKhachHang, setSelectedHangKhachHang] = useState(null);
-    const [ma, setMa] = useState("");
     const [hoTen, setHoTen] = useState("");
     const [matKhau, setMatKhau] = useState("");
     const [email, setEmail] = useState("");
     const [isModalVisible, setIsModalVisible] = useState(false); // Adjusted default state
     const [editingKhachHang, setEditingKhachHang] = useState(null);
     const [activeChatLieu, setActiveChatLieu] = useState([]);
+    const [selectedFile, setSelectedFile] = useState(null);
+    const [ngaySinh, setNgaySinh] = useState(null);
+    const [soDienThoai, setSoDienThoai] = useState("");
+    const [importFile, setImportFile] = useState(null);
+    const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+
     const getActiveChatLieu = () => {
         return khachHang.filter(item => item.TRANG_THAI === 0);
     }
@@ -36,35 +40,30 @@ const KhachHang = () => {
         return status === 0 ? "Đang sử dụng" : "Không sử dụng";
     };
 
-    const handleKhachHangChange = (value) => {
-        console.log(value);
-        setSelectedHangKhachHang(value);
-    }
 
     useEffect(() => {
-        getAllHangKhachHangData();
         getKhachHangData();
     }, []);
 
-    const getAllHangKhachHangData = async () => {
-        const result = await getAllHangKhachHang();
-        const activeGiay = result.data.filter(item => item.trangThai === 0);
-        setHangKhachHangList(activeGiay);
-    };
 
     const getKhachHangData = async () => {
         try {
             const result = await getAllKhachHang();
-            const loadTable = result.data.map((item, index) => ({
-                key: index,
-                ID: item.id,
-                MA: item.ma,
-                HOTEN: item.hoTen,
-                MATKHAU: item.matKhau,
-                EMAIL: item.email,
-                HANGKHACHHANG: item.hangKhachHang ? item.hangKhachHang.ten : null,
-                TRANG_THAI: item.trangThai,
-            }));
+            const loadTable = result.data
+                .filter(item => item.roleNames.includes('ROLE_USER')) // Filter only ROLE_USER
+                .map((item, index) => ({
+                    key: index,
+                    ID: item.id,
+                    MA: item.ma,
+                    HOTEN: item.hoTen,
+                    MATKHAU: item.matKhau,
+                    EMAIL: item.email,
+                    HANGKHACHHANG: item.hangKhachHang ? item.hangKhachHang.ten : null,
+                    TRANG_THAI: item.trangThai,
+                    SODIENTHOAI: item.soDienThoai,
+                    NGAYSINH: item.ngaySinh,
+                    ANH: item.anh
+                }));
             const activeChatLieuData = loadTable.filter(item => item.TRANG_THAI === 0);
             setActiveChatLieu(activeChatLieuData);
             setKhachHang(loadTable);
@@ -74,7 +73,7 @@ const KhachHang = () => {
     };
 
     const createKhachHang = async () => {
-        if (!ma || !hoTen || !matKhau || !email || !selectedHangKhachHang) {
+        if (!hoTen || !matKhau || !email) {
             message.error("Không được để trống các trường bắt buộc");
             return;
         }
@@ -83,16 +82,17 @@ const KhachHang = () => {
         const hashedPassword = bcrypt.hashSync(matKhau, salt);
         const newTrangThai = value === 1 ? 0 : 1;
         const newData = {
-            ma,
             hoTen,
             matKhau: hashedPassword,
             email,
             trangThai: newTrangThai,
-            hangKhachHang: { id: selectedHangKhachHang },
+            roleNames: ['ROLE_USER'],
+            ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
+            soDienThoai,
         };
 
         try {
-            await addKhachHang(newData);
+            await addKhachHang(newData, selectedFile);
             message.success("Thêm khách hàng thành công!");
             getKhachHangData();
             resetForm();
@@ -112,17 +112,17 @@ const KhachHang = () => {
     };
 
     const detail = async (record) => {
-        console.log(record.ID);
         try {
             const response = await detailKhachHang(record.ID);
             const khachHang = response.data;
             setEditingKhachHang(khachHang);
-            setMa(khachHang.ma);
             setHoTen(khachHang.hoTen);
             setEmail(khachHang.email);
             setMatKhau(khachHang.matKhau);
             setValue(khachHang.trangThai === 0 ? 1 : 2);
-            setSelectedHangKhachHang(khachHang.hangKhachHang ? khachHang.hangKhachHang.id : null);
+            setNgaySinh(khachHang.ngaySinh ? moment(khachHang.ngaySinh) : null);
+            setSoDienThoai(khachHang.soDienThoai || "");
+            
             setIsModalVisible(true);
         } catch (error) {
             message.error("Lỗi khi lấy chi tiết khách hàng");
@@ -130,22 +130,22 @@ const KhachHang = () => {
     };
 
     const editKhachHangButton = async () => {
-        if (!ma || !hoTen || !email || !matKhau || !selectedHangKhachHang) {
+        if (!hoTen || !email || !matKhau) {
             message.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
 
         const newDataKhachHang = {
-            ma,
+            id: editingKhachHang.id,
             hoTen,
             email,
             matKhau,
-            hangKhachHang: { id: selectedHangKhachHang },
             trangThai: value === 1 ? 0 : 1,
+            roleNames: ['ROLE_USER'],
         };
 
         try {
-            await updateKhachHang(editingKhachHang.id, newDataKhachHang);
+            await updateKhachHang( newDataKhachHang);
             message.success("Cập nhật khách hàng thành công");
             getKhachHangData();
             setIsModalVisible(false);
@@ -156,86 +156,243 @@ const KhachHang = () => {
     };
 
     const resetForm = () => {
-        setMa("");
         setHoTen("");
         setEmail("");
         setMatKhau("");
         setValue(1);
-        setSelectedHangKhachHang(null);
+
         setEditingKhachHang(null);
+        setSelectedFile(null);
+        setNgaySinh(null);
+        setSoDienThoai("");
+    };
+
+    const handleFileChange = (e) => {
+        setSelectedFile(e.target.files[0]);
+    };
+
+    const handleImportFileChange = (e) => {
+        setImportFile(e.target.files[0]);
+    };
+
+    const handleImportExcel = async () => {
+        if (!importFile) {
+            message.error("Vui lòng chọn file Excel để import");
+            return;
+        }
+
+        if (!importFile.name.endsWith('.xlsx') && !importFile.name.endsWith('.xls')) {
+            message.error("File phải có định dạng Excel (.xlsx hoặc .xls)");
+            return;
+        }
+
+        try {
+            await importExcel(importFile);
+            message.success("Import dữ liệu thành công!");
+            getKhachHangData(); // Refresh data
+            setImportFile(null); // Reset file input
+        } catch (error) {
+            message.error("Lỗi khi import dữ liệu: " + (error.response?.data || "Đã xảy ra lỗi"));
+        }
+    };
+
+    const showDrawer = () => {
+        setIsDrawerVisible(true);
+        resetForm();
+    };
+
+    const closeDrawer = () => {
+        setIsDrawerVisible(false);
+        resetForm();
     };
 
     return (
-        <div style={{ display: 'flex' }}>
-            <div style={{ width: '60%', marginLeft: '200px', overflow: 'auto' }}>
-                <Select placeholder='Chọn Hạng Khách Hàng' value={selectedHangKhachHang} onChange={handleKhachHangChange}>
-                    {Array.isArray(hangKhachHangList) && hangKhachHangList.map(hkh => (
-                        <Option key={hkh.id} value={hkh.id}>
-                            {hkh.ten}
-                        </Option>
-                    ))}
-                </Select>
-                <br /><br />
-                <Input placeholder='Mã Khách Hàng' value={ma} onChange={(e) => setMa(e.target.value)} />
-                <br /><br />
-                <Input placeholder='Tên Khách Hàng' value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
-                <br /><br />
-                <Input.Password placeholder='Mật Khẩu' value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
-                <br /><br />
-                <Input placeholder='Email' value={email} onChange={(e) => setEmail(e.target.value)} />
-                <br /><br />
-                <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Đang sử dụng</Radio>
-                    <Radio value={0}>Không sử dụng</Radio>
-                </Radio.Group>
-                <br /><br />
-                <Button type="primary" onClick={createKhachHang}>
-                    Add
+        <div style={{ padding: '20px' }}>
+            {/* Header Actions */}
+            <div style={{ 
+                display: 'flex', 
+                gap: '20px', 
+                marginBottom: '20px',
+                backgroundColor: '#fff',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}>
+                {/* Left side - Add Customer Button */}
+                <Button 
+                    type="primary" 
+                    icon={<PlusOutlined />}
+                    onClick={showDrawer}
+                >
+                    Thêm Khách Hàng
                 </Button>
-                <br /><br />
-                <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
-                    {
-                        title: 'MA',
-                        dataIndex: 'MA',
-                    },
-                    {
-                        title: 'HOTEN',
-                        dataIndex: 'HOTEN',
-                    },
-                    {
-                        title: 'EMAIL',
-                        dataIndex: 'EMAIL',
-                    },
-                    {
-                        title: 'MATKHAU',
-                        dataIndex: 'MATKHAU',
-                    },
-                    {
-                        title: 'HANGKHACHHANG',
-                        dataIndex: 'HANGKHACHHANG',
-                    },
-                    {
-                        title: 'TRANG THAI',
-                        dataIndex: 'trang_thai',
-                        render: (text, record) => trangThai(record.TRANG_THAI)
-                    },
-                    {
-                        title: 'ACTION',
-                        key: 'action',
-                        render: (text, record) => (
-                            <Space size="middle">
-                                <Button onClick={() => detail(record)}>Detail</Button>
-                                <Button onClick={() => removeKhachHang(record)}>Delete</Button>
-                            </Space>
-                        ),
-                    },
-                ]} dataSource={khachHang} />
+
+                {/* Right side - Import Excel */}
+                <Space style={{ flex: 1 }}>
+                    <Button 
+                        icon={<DownloadOutlined />}
+                        href="/public/excel/Import_User.xlsx" 
+                        download
+                    >
+                        Tải File Mẫu Excel
+                    </Button>
+                    <input
+                        type="file"
+                        onChange={handleImportFileChange}
+                        accept=".xlsx,.xls"
+                        style={{ 
+                            padding: '4px',
+                            border: '1px solid #d9d9d9',
+                            borderRadius: '4px'
+                        }}
+                    />
+                    <Button 
+                        type="primary"
+                        onClick={handleImportExcel}
+                        disabled={!importFile}
+                        icon={<UploadOutlined />}
+                    >
+                        Import Excel
+                    </Button>
+                </Space>
             </div>
-            <Modal title="Cập nhật Khách Hàng" onOk={editKhachHangButton} open={isModalVisible} onCancel={() => setIsModalVisible(false)}>
-                <Form>
-                    <Form.Item label="Mã Khách Hàng">
-                        <Input value={ma} onChange={(e) => setMa(e.target.value)} />
+
+            {/* Table Section */}
+            <div style={{ 
+                backgroundColor: '#fff',
+                padding: '20px',
+                borderRadius: '8px',
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+            }}>
+                <h2 style={{ marginBottom: '20px' }}>Danh sách khách hàng</h2>
+                <Table 
+                    pagination={{ pageSize: 5, defaultPageSize: 5 }} 
+                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }} 
+                    columns={[
+                        {
+                            title: 'HOTEN',
+                            dataIndex: 'HOTEN',
+                        },
+                        {
+                            title: 'EMAIL',
+                            dataIndex: 'EMAIL',
+                        },
+                        {
+                            title: 'TRANG THAI',
+                            dataIndex: 'TRANG_THAI',
+                            render: (text, record) => trangThai(record.TRANG_THAI)
+                        },
+                        {
+                            title: 'SỐ ĐIỆN THOẠI',
+                            dataIndex: 'SODIENTHOAI',
+                            key: 'SODIENTHOAI'
+                        },
+                        {
+                            title: 'NGÀY SINH',
+                            dataIndex: 'NGAYSINH',
+                            key: 'NGAYSINH',
+                            render: (text) => text ? moment(text).format('DD/MM/YYYY') : 'Chưa có'
+                        },
+                        {
+                            title: 'ẢNH',
+                            dataIndex: 'ANH',
+                            key: 'ANH',
+                            render: (text) => text ? (
+                                <img
+                                    src={text}
+                                    alt="Ảnh đại diện"
+                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
+                                />
+                            ) : null
+                        },
+                        {
+                            title: 'ACTION',
+                            key: 'action',
+                            render: (text, record) => (
+                                <Space size="middle">
+                                    <Button onClick={() => detail(record)}>Detail</Button>
+                                    <Button onClick={() => removeKhachHang(record)}>Delete</Button>
+                                </Space>
+                            ),
+                        },
+                    ]} 
+                    dataSource={khachHang}
+                />
+            </div>
+
+            {/* Add Customer Drawer */}
+            <Drawer
+                title="Thêm Khách Hàng Mới"
+                placement="right"
+                width={520}
+                onClose={closeDrawer}
+                open={isDrawerVisible}
+                extra={
+                    <Space>
+                        <Button onClick={closeDrawer}>Hủy</Button>
+                        <Button type="primary" onClick={createKhachHang}>
+                            Thêm
+                        </Button>
+                    </Space>
+                }
+            >
+                <Form layout="vertical">
+                    <Form.Item label="Tên Khách Hàng" required>
+                        <Input value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                     </Form.Item>
+                    <Form.Item label="Mật Khẩu" required>
+                        <Input.Password value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item label="Email" required>
+                        <Input value={email} onChange={(e) => setEmail(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item label="Số Điện Thoại">
+                        <Input value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item label="Ngày Sinh">
+                        <DatePicker 
+                            value={ngaySinh} 
+                            onChange={(date) => setNgaySinh(date)}
+                            style={{ width: '100%' }}
+                        />
+                    </Form.Item>
+                    <Form.Item label="Ảnh đại diện">
+                        <input 
+                            type="file" 
+                            onChange={handleFileChange}
+                            accept="image/*"
+                        />
+                        {selectedFile && (
+                            <img
+                                src={URL.createObjectURL(selectedFile)}
+                                alt="Preview"
+                                style={{ 
+                                    width: '100px', 
+                                    height: '100px', 
+                                    objectFit: 'cover', 
+                                    marginTop: '10px',
+                                    borderRadius: '4px'
+                                }}
+                            />
+                        )}
+                    </Form.Item>
+                    <Form.Item label="Trạng thái">
+                        <Radio.Group onChange={onChange} value={value}>
+                            <Radio value={1}>Đang sử dụng</Radio>
+                            <Radio value={0}>Không sử dụng</Radio>
+                        </Radio.Group>
+                    </Form.Item>
+                </Form>
+            </Drawer>
+
+            {/* Edit Modal remains unchanged */}
+            <Modal 
+                title="Cập nhật Khách Hàng" 
+                open={isModalVisible} 
+                onOk={editKhachHangButton} 
+                onCancel={() => setIsModalVisible(false)}
+            >
+                <Form>
                     <Form.Item label="Tên Khách Hàng">
                         <Input value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                     </Form.Item>
@@ -245,20 +402,41 @@ const KhachHang = () => {
                     <Form.Item label="Mật Khẩu">
                         <Input.Password value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Hạng Khách Hàng">
-                        <Select placeholder='Chọn Hạng Khách Hàng' value={selectedHangKhachHang} onChange={handleKhachHangChange}>
-                            {Array.isArray(hangKhachHangList) && hangKhachHangList.map(hkh => (
-                                <Option key={hkh.id} value={hkh.id}>
-                                    {hkh.ten}
-                                </Option>
-                            ))}
-                        </Select>
-                    </Form.Item>
                     <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
                             <Radio value={1}>Đang sử dụng</Radio>
                             <Radio value={2}>Không sử dụng</Radio>
                         </Radio.Group>
+                    </Form.Item>
+                    <Form.Item label="Số Điện Thoại">
+                        <Input value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
+                    </Form.Item>
+                    <Form.Item label="Ngày Sinh">
+                        <DatePicker 
+                            value={ngaySinh} 
+                            onChange={(date) => setNgaySinh(date)}
+                        />
+                    </Form.Item>
+                    <Form.Item label="Ảnh đại diện">
+                        <input 
+                            type="file" 
+                            onChange={handleFileChange}
+                            accept="image/*"
+                        />
+                        {selectedFile && (
+                            <img
+                                src={URL.createObjectURL(selectedFile)}
+                                alt="Preview"
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px' }}
+                            />
+                        )}
+                        {editingKhachHang?.anh && !selectedFile && (
+                            <img
+                                src={editingKhachHang.anh}
+                                alt="Current"
+                                style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px' }}
+                            />
+                        )}
                     </Form.Item>
                 </Form>
             </Modal>

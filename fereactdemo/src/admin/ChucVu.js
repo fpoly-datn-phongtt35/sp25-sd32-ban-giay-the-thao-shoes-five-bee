@@ -8,9 +8,10 @@ const ChucVu = () => {
   const [value, setValue] = useState(1);
   const [ma, setMa] = useState('');
   const [ten, setTen] = useState('');
+  const [moTa, setMoTa] = useState('');
   const [updatingChucVu, setUpdatingChucVu] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
-  const [activeChatLieu, setActiveChatLieu] = useState([]);
+  const [activeChucVu, setActiveChucVu] = useState([]);
   const getActiveChatLieu = () => {
     return chucVu.filter(item => item.TRANG_THAI === 0);
   }
@@ -41,9 +42,10 @@ const ChucVu = () => {
         MA: item.ma,
         TEN: item.ten,
         TRANG_THAI: item.trangThai,
+        MO_TA: item.moTa,
       }));
-      const activeChatLieuData = chucVuData.filter(item => item.TRANG_THAI === 0);
-      setActiveChatLieu(activeChatLieuData);
+      const activeChucVuData = chucVuData.filter(item => item.TRANG_THAI === 0);
+      setActiveChucVu(activeChucVuData);
       setChucVu(chucVuData);
     } catch (error) {
       message.error("Lỗi khi tải dữ liệu chức vụ", error);
@@ -60,6 +62,7 @@ const ChucVu = () => {
       ma: ma,
       ten: ten,
       trangThai: newTrangThai,
+      moTa: moTa,
     };
     try {
       await addChucVu(newData);
@@ -68,6 +71,7 @@ const ChucVu = () => {
       setMa("");
       setTen("");
       setValue(1);
+      setMoTa("");
     } catch (error) {
       message.error("Lỗi khi thêm chức vụ");
     }
@@ -91,6 +95,7 @@ const ChucVu = () => {
       setUpdatingChucVu(chucVu);
       setMa(chucVu.ma);
       setTen(chucVu.ten);
+      setMoTa(chucVu.moTa);
       setValue(chucVu.trangThai === 0 ? 1 : 2);
       setIsModalVisible(true);
     } catch (error) {
@@ -105,13 +110,15 @@ const ChucVu = () => {
     }
 
     const newDataChucVu = {
+      id: updatingChucVu.id,
       ma: ma,
       ten: ten,
       trangThai: value === 1 ? 0 : 1,
+      moTa: moTa,
     };
 
     try {
-      await updateChucVu(updatingChucVu.id, newDataChucVu);
+      await updateChucVu( newDataChucVu);
       message.success("Cập nhật chức vụ thành công");
       getAllChucVu();
       setIsModalVisible(false);
@@ -126,6 +133,7 @@ const ChucVu = () => {
     setTen("");
     setValue(1);
     setUpdatingChucVu(null);
+    setMoTa("");
   };
 
   return (
@@ -134,6 +142,8 @@ const ChucVu = () => {
         <Input placeholder='Mã Chức Vụ' value={ma} onChange={(e) => setMa(e.target.value)} />
         <br /><br />
         <Input placeholder='Tên Chức Vụ' value={ten} onChange={(e) => setTen(e.target.value)} />
+        <br /><br />
+        <Input placeholder='Mô Tả' value={moTa} onChange={(e) => setMoTa(e.target.value)} />
         <br /><br />
         <Radio.Group onChange={onChange} value={value}>
           <Radio value={1}>Còn</Radio>
@@ -156,6 +166,10 @@ const ChucVu = () => {
           {
             title: 'TEN',
             dataIndex: 'TEN',
+          },
+          {
+            title: 'MÔ TẢ',
+            dataIndex: 'MO_TA',
           },
           {
             title: 'TRANG THAI',
@@ -181,6 +195,9 @@ const ChucVu = () => {
           </Form.Item>
           <Form.Item label="Tên Chức Vụ">
             <Input value={ten} onChange={(e) => setTen(e.target.value)} />
+          </Form.Item>
+          <Form.Item label="Mô Tả">
+            <Input value={moTa} onChange={(e) => setMoTa(e.target.value)} />
           </Form.Item>
           <Form.Item label="Trạng Thái">
             <Radio.Group onChange={onChange} value={value}>
