@@ -16,6 +16,7 @@ import com.example.demo.security.OtpUtil;
 import com.example.demo.service.AuthService;
 import com.example.demo.service.SendMailService;
 import io.jsonwebtoken.ExpiredJwtException;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -34,6 +35,7 @@ import java.util.Map;
 import java.util.stream.Collectors;
 
 @Service
+@RequiredArgsConstructor
 public class AuthServiceImpl implements AuthService {
     @Autowired
     private AuthenticationManager authenticationManager;

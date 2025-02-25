@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -8,7 +9,7 @@ import lombok.Setter;
 
 import java.util.List;
 import java.util.UUID;
-
+import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 @Table(name = "MAU_SAC")
 @Entity
 @AllArgsConstructor
@@ -29,7 +30,7 @@ public class MauSacEntity {
 
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
-
+    @JsonIgnore
     @OneToMany(mappedBy = "mauSacEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GiayChiTietEntity> giayChiTietEntities;
 }

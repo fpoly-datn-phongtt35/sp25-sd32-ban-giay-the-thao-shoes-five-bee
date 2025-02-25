@@ -21,3 +21,10 @@ export const getGiayDetail = (giayDto) => {
     },
   });
 };
+
+
+export const assignAnhGiay = (giayId, anhGiayIds) => {
+  return axios.post(`/giay/${giayId}/anhGiay`, anhGiayIds);
+};
+
+
