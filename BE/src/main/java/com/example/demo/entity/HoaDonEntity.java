@@ -34,16 +34,16 @@ public class HoaDonEntity {
     @Column(name = "NGAY_THANH_TOAN")
     private Date ngayThanhToan;
 
-    @Column(name = "MO_TA")
+    @Column(name = "MO_TA",columnDefinition = "NVARCHAR(255)")
     private String moTa;
 
-    @Column(name = "TEN_NGUOI_NHAN")
+    @Column(name = "TEN_NGUOI_NHAN",columnDefinition = "NVARCHAR(255)")
     private String tenNguoiNhan;
 
     @Column(name = "SO_DIEN_THOAI_NGUOI_NHAN")
     private String sdtNguoiNhan;
 
-    @Column(name = "DIA_CHI")
+    @Column(name = "DIA_CHI",columnDefinition = "NVARCHAR(255)")
     private String diaChi;
 
     @Column(name = "TONG_TIEN")

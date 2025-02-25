@@ -8,7 +8,7 @@ export const addDeGiay = (deGiay) =>
   axios.post(`${REST_API_BASE_URL}/add`, deGiay);
 
 export const deleteDeGiay = (id) =>
-  axios.post(`${REST_API_BASE_URL}/delete/${id}`, id);
+  axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
 export const updateDeGiay = (id, deGiay) =>
   axios.post(`${REST_API_BASE_URL}/update/${id}`, deGiay);

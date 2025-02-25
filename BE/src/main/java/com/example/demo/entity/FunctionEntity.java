@@ -26,9 +26,9 @@ public class FunctionEntity {
     private String ma;
     @Column(name = "NAME_URL")
     private String nameUrl;
-    @Column(name = "TEN")
+    @Column(name = "TEN",columnDefinition = "NVARCHAR(255)")
     private String ten;
-    @Column(name = "MO_TA")
+    @Column(name = "MO_TA",columnDefinition = "NVARCHAR(255)")
     private String moTa;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;

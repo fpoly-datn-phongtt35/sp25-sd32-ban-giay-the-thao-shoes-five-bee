@@ -50,18 +50,31 @@ const DeGiay = () => {
 
     const createDeGiay = async () => {
         if (!ten) {
-            message.error("Không được để trống mã hoặc tên");
+            message.error("Không được để trống tên đế giày");
             return;
-        };
-        const newTrangThai = value === 1 ? 0 : 1;
-        const newDeGiay = {
+        }
 
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên đế giày không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên đế giày phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
+            return;
+        }
+
+        const newTrangThai = value === 1 ? 0 : 1;
+
+        const newDeGiay = {
             ten: ten,
             trangThai: newTrangThai,
         };
         try {
             await addDeGiay(newDeGiay);
-            message.success("Thêm đế giày mới thành công");
+            message.success("Thêm đế giày thành công");
             getAllDeGiay();
             setTen("");
             setValue(1);
@@ -89,19 +102,37 @@ const DeGiay = () => {
     };
 
     const handleUpdateDeGiayButton = async () => {
+        if (!ten) {
+            message.error("Không được để trống tên đế giày");
+            return;
+        }
+
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên đế giày không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên đế giày phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
+            return;
+        }
+
         const newTrangThai = value === 1 ? 0 : 1;
+
         const editingDeGiay = {
             ten: ten,
             trangThai: newTrangThai,
         };
         try {
             await updateDeGiay(updattingDeGiay.ID, editingDeGiay);
-            message.success("Cập nhật thành công");
+            message.success("Cập nhật đế giày thành công");
             getAllDeGiay();
             setIsModalVisible(false);
             setTen("");
         } catch (error) {
-            message.error("Cập nhật đế giày lỗi");
+            message.error("Lỗi khi cập nhật đế giày");
         }
     };
 

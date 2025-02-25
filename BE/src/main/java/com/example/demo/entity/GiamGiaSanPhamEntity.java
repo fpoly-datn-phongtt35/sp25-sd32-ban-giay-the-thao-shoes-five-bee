@@ -24,7 +24,7 @@ public class GiamGiaSanPhamEntity {
     private UUID id;
     @Column(name = "MA")
     private String ma;
-    @Column(name = "TEN")
+    @Column(name = "TEN",columnDefinition = "NVARCHAR(255)")
     private String ten;
     @Column(name = "PHAN_TRAM_GIAM")
     private Integer phanTramGiam;

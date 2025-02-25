@@ -43,13 +43,26 @@ const ThuongHieu = () => {
         setThuongHieu(thuongHieuDaTa);
     };
     const creatThuongHieu = async () => {
-        if ( !ten) {
-            message.error("Không được để trống tên và mã");
+        if (!ten) {
+            message.error("Không được để trống tên thương hiệu");
             return;
         }
+
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên thương hiệu không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên thương hiệu phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
+            return;
+        }
+
         const newTrangThai = value === 1 ? 0 : 1;
+
         const newThuongHieu = {
-          
             ten: ten,
             trangThai: newTrangThai,
         };
@@ -78,22 +91,41 @@ const ThuongHieu = () => {
     };
 
     const editThuongHieuButton = async () => {
+        if (!ten) {
+            message.error("Không được để trống tên thương hiệu");
+            return;
+        }
+
+        // Kiểm tra độ dài tên
+        if (ten.length > 255) {
+            message.error("Tên thương hiệu không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên thương hiệu phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
+            return;
+        }
+
         const updateTrangThai = value === 1 ? 0 : 1;
+
         const updateNewThuongHieu = {
             ten: ten,
             trangThai: updateTrangThai,
         };
         try {
             await updateThuongHieu(edittingThuongHieu.ID, updateNewThuongHieu);
-            message.success("Update thương hiệu thành công ");
+            message.success("Cập nhật thương hiệu thành công");
             getAllThuongHieu();
             setIsModalVisible(false);
             setTen("");
             setValue(null);
         } catch (error) {
-            message.error("Update thương hiệu không thành công");
+            message.error("Cập nhật thương hiệu không thành công");
         }
     };
+    
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>

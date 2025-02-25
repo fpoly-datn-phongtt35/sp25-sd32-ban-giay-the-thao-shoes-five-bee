@@ -20,4 +20,5 @@ public interface DanhMucService {
     DanhMucEntity delete(DanhMucUpdateDto danhMucUpdateDto);
     DanhMucEntity toggleTrangThai (DanhMucUpdateDto danhMucUpdateDto);
     PageResponse<DanhMucEntity> findByPagingCriteria(DanhMucDto danhMucDto, Pageable pageable);
+    //danhmuc
 }

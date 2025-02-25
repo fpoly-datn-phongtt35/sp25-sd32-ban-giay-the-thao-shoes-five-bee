@@ -53,50 +53,75 @@ public class GiayServiceImpl implements GiayService {
 
   @Override
   public GiayEntity add(GiayDto giayDto) {
-    return giayRepository.save(
-        GiayEntity.builder()
-            .ma(giayDto.getMa())
-            .ten(giayDto.getTen())
-            .moTa(giayDto.getMoTa())
-            .giaNhap(giayDto.getGiaNhap())
-            .giaBan(giayDto.getGiaBan())
-            .soLuongTon(giayDto.getSoLuongTon())
-            .trangThai(giayDto.getTrangThai())
-            .thuongHieu(thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null))
-            .chatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null))
-                .danhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null))
-            .deGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null))
-            .xuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null))
-            .kieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null))
-            .build());
+      return giayRepository.save(
+              GiayEntity.builder()
+                      .ma(giayDto.getMa())
+                      .ten(giayDto.getTen())
+                      .moTa(giayDto.getMoTa())
+                      .giaNhap(giayDto.getGiaNhap())
+                      .giaBan(giayDto.getGiaBan())
+                      .soLuongTon(giayDto.getSoLuongTon())
+                      .trangThai(giayDto.getTrangThai())
+                      .thuongHieu(giayDto.getThuongHieuDto() != null ?
+                              thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null) : null)
+                      .chatLieu(giayDto.getChatLieuDto() != null ?
+                              chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null) : null)
+                      .danhMuc(giayDto.getDanhMucDto() != null ?
+                              danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null) : null)
+                      .deGiay(giayDto.getDeGiayDto() != null ?
+                              deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null) : null)
+                      .xuatXu(giayDto.getXuatXuDto() != null ?
+                              xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null) : null)
+                      .kieuDang(giayDto.getKieuDangDto() != null ?
+                              kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null) : null)
+                      .build());
   }
 
-  @Override
-  public GiayEntity update(GiayDto giayDto) {
-    Optional<GiayEntity> optional = giayRepository.findById(giayDto.getId());
-    return optional
-        .map(
-            o -> {
-              o.setMa(giayDto.getMa());
-              o.setTen(giayDto.getTen());
-              o.setMoTa(giayDto.getMoTa());
-              o.setGiaNhap(giayDto.getGiaNhap());
-              o.setGiaBan(giayDto.getGiaBan());
-              o.setSoLuongTon(giayDto.getSoLuongTon());
-              o.setTrangThai(giayDto.getTrangThai());
-              o.setThuongHieu(
-                  thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null));
-              o.setChatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null));
-              o.setDeGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null));
-              o.setDanhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null));
-              o.setXuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null));
-              o.setKieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null));
-              return giayRepository.save(o);
-            })
-        .orElse(null);
-  }
 
-  @Override
+    @Override
+    public GiayEntity update(GiayDto giayDto) {
+        Optional<GiayEntity> optional = giayRepository.findById(giayDto.getId());
+
+        return optional.map(o -> {
+            o.setMa(giayDto.getMa());
+            o.setTen(giayDto.getTen());
+            o.setMoTa(giayDto.getMoTa());
+            o.setGiaNhap(giayDto.getGiaNhap());
+            o.setGiaBan(giayDto.getGiaBan());
+            o.setSoLuongTon(giayDto.getSoLuongTon());
+            o.setTrangThai(giayDto.getTrangThai());
+
+            // ✅ Kiểm tra null trước khi gọi .getId()
+            if (giayDto.getThuongHieuDto() != null) {
+                o.setThuongHieu(thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null));
+            }
+
+            if (giayDto.getChatLieuDto() != null) {
+                o.setChatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null));
+            }
+
+            if (giayDto.getDeGiayDto() != null) {
+                o.setDeGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null));
+            }
+
+            if (giayDto.getDanhMucDto() != null) {
+                o.setDanhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null));
+            }
+
+            if (giayDto.getXuatXuDto() != null) {
+                o.setXuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null));
+            }
+
+            if (giayDto.getKieuDangDto() != null) {
+                o.setKieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null));
+            }
+
+            return giayRepository.save(o);
+        }).orElse(null);
+    }
+
+
+    @Override
   public GiayEntity detail(GiayDto giayDto) {
     Optional<GiayEntity> optional = giayRepository.findById(giayDto.getId());
     return optional.orElse(null);

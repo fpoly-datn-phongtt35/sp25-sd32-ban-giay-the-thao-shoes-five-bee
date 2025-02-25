@@ -180,11 +180,17 @@ const AdminLayout = () => {
                             children: [
                                 {
                                     key: '/admin/phieu-giam-gia',
-                                    label: 'Phiếu Giảm Giá',
+                                    label: 'Giảm Giá Sản Phẩm',
+
+                                },
+                                {
+                                    key: '/admin/giam-gia-hoa-don',
+                                    label: 'Giảm Giá Hóa Đơn',
 
                                 }
                             ]
-                        }
+                        },
+                  
                     ]}
                 />
             </Sider>

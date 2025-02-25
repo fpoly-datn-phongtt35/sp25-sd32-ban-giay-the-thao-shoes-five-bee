@@ -23,7 +23,7 @@ public class ThuongHieuEntity {
     @Column(name = "MA")
     private String ma;
 
-    @Column(name = "TEN")
+    @Column(name = "TEN",columnDefinition = "NVARCHAR(255)")
     private String ten;
 
     @Column(name = "TRANG_THAI")

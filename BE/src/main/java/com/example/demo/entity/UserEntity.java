@@ -24,7 +24,7 @@ public class UserEntity {
     private String ma;
     @Column(name = "ANH")
     private String anh;
-    @Column(name = "HO_TEN")
+    @Column(name = "HO_TEN",columnDefinition = "NVARCHAR(255)")
     private String hoTen;
     @Column(name = "NGAY_SINH")
     private Date ngaySinh;
@@ -36,7 +36,6 @@ public class UserEntity {
     private String email;
     @Column(name = "MAT_KHAU")
     private String matKhau;
-    private Date ngayNghiViec;
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
     @Column(name = "IS_ENABLED")

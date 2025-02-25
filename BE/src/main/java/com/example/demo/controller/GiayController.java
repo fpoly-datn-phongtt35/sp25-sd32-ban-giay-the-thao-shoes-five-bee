@@ -42,8 +42,10 @@ public class GiayController {
 
   @PostMapping("/update")
   public ResponseEntity<?> update(@RequestBody GiayDto giayDto) {
+    System.out.println("Received GiayDto: " + giayDto);
     return ResponseEntity.ok(giayService.update(giayDto));
   }
+
 
   @PostMapping("/detail")
   public ResponseEntity<?> detail(@RequestBody GiayDto giayDto) {

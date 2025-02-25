@@ -54,9 +54,13 @@ const XuatXu = () => {
             return;
         }
 
-        // Kiểm tra xem tên có phải là số hay không
-        if (!/^[a-zA-Z\s]+$/.test(ten)) {
-            message.error("Tên xuất xứ phải là chữ cái tiếng Anh");
+        if (ten.length > 255) {
+            message.error("Tên xuất xứ không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên xuất xứ phải là chữ cái và không được chứa số!");
             return;
         }
 
@@ -91,15 +95,31 @@ const XuatXu = () => {
         setIsModalVisible(true);
     };
     const handleUpdateXuatXuButton = async () => {
+        if (!ten) {
+            message.error("Không được để trống mã và tên xuất xứ");
+            return;
+        }
+
+        if (ten.length > 255) {
+            message.error("Tên xuất xứ không được vượt quá 255 ký tự!");
+            return;
+        }
+
+        if (!/^[\p{L}\s]+$/u.test(ten)) {
+            message.error("Tên xuất xứ phải là chữ cái  và không được chứa số!");
+            return;
+        }
+
         const updatedTrangThai = value === 1 ? 0 : 1;
 
         const editXuatXu = {
             id: editingXuatXu.ID,
-            ma: editingXuatXu.MA,  
+            ma: editingXuatXu.MA,
             ten: ten,
             trangThai: updatedTrangThai,
         };
         try {
+            console.log(editXuatXu);
             await updateXuatXu(editXuatXu);
             message.success("Update xuất xứ thành công");
             getAllXuatXu();

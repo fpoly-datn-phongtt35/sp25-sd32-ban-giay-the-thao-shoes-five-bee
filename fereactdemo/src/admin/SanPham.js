@@ -5,6 +5,7 @@ import {
   getGiay,
   getGiayDetail,
   updateGiay,
+  assignAnhGiay,
 } from "../service/GiayService";
 import {
   Button,
@@ -18,6 +19,7 @@ import {
   message,
 } from "antd";
 import "./Sanpham.css";
+import { validate as isUuid } from "uuid";
 import { getThuongHieu } from "../service/ThuongHieuService";
 import { getChatLieu } from "../service/ChatLieuService";
 import { getDeGiay } from "../service/DeGiayService";
@@ -46,16 +48,17 @@ const SanPham = () => {
   const [xuatXuList, setXuatXuList] = useState([]);
   const [kieuDangList, setKieuDangList] = useState([]);
   const [anhGiayList, setAnhGiayList] = useState([]);
-  const [selectedThuongHieu, setSelectedThuongHieu] = useState(null);
-  const [selectedChatLieu, setSelectedChatLieu] = useState(null);
-  const [selectedDeGiay, setSelectedDeGiay] = useState(null);
-  const [selectedXuatXu, setSelectedXuatXu] = useState(null);
-  const [selectedKieuDang, setSelectedKieuDang] = useState(null);
-  const [selectedMauSac, setSelectedMauSac] = useState(null);
-  const [selectdKichCo, setSelectedKichCo] = useState(null);
-  const [selectedAnhGiay, setSelectedAnhGiay] = useState(null);
-  const [editingGiay, setEditingGiay] = useState(null);
+  const [selectedThuongHieu, setSelectedThuongHieu] = useState();
+  const [selectedChatLieu, setSelectedChatLieu] = useState();
+  const [selectedDeGiay, setSelectedDeGiay] = useState();
+  const [selectedXuatXu, setSelectedXuatXu] = useState();
+  const [selectedKieuDang, setSelectedKieuDang] = useState();
+  const [selectedMauSac, setSelectedMauSac] = useState();
+  const [selectdKichCo, setSelectedKichCo] = useState();
+  const [selectedAnhGiay, setSelectedAnhGiay] = useState();
+  const [editingGiay, setEditingGiay] = useState();
   const [isModalVisible, setIsModalVisible] = useState(false);
+
   const onSelectChange = (newSelectedRowKeys) => {
     console.log("selectedRowKeys changed: ", newSelectedRowKeys);
     setSelectedRowKeys(newSelectedRowKeys);
@@ -81,41 +84,55 @@ const SanPham = () => {
   }, []);
 
   const getAllGiay = async () => {
-    const result = await getGiay();
-    const dataGiay = await Promise.all(
-      result.data.map(async (item) => {
-        const giayChiTietResult = await getAllGiayChiTiet();
-        const relatedItems = giayChiTietResult.data.filter(
-          (gct) => gct.giay && gct.giay.id === item.id
-        );
-        const totalSoLuongTon = relatedItems.reduce(
-          (sum, gct) => sum + (gct.soLuongTon || 0),
-          0
-        );
-        return {
-          ID: item.id,
-          MA: item.ma,
-          TEN: item.ten,
-          MOTA: item.moTa,
-          GIABAN: item.giaBan,
-          SOLUONGTON: item.soLuongTon,
-          TRANG_THAI: item.trangThai,
-          THUONG_HIEU: item.thuongHieu ? item.thuongHieu.ten : null,
-          CHAT_LIEU: item.chatLieu ? item.chatLieu.ten : null,
-          DE_GIAY: item.deGiay ? item.deGiay.ten : null,
-          XUAT_XU: item.xuatXu ? item.xuatXu.ten : null,
-          KIEU_DANG: item.kieuDang ? item.kieuDang.ten : null,
-          MAU_SAC: item.mauSac ? item.mauSac.ten : null,
-          ANH_GIAY: item.anhGiay ? item.anhGiay.tenUrl : null,
-          KICH_CO: item.kichCo ? item.kichCo.ten : null,
-        };
-      })
-    );
-    setGiay(dataGiay);
+    try {
+      const result = await getGiay();
+   
+
+      if (!result || !result.data) {
+        console.error("Error: result.data is undefined or null");
+        return;
+      }
+
+      
+
+      if (!Array.isArray(result.data)) {
+        console.error("Error: result.data is not an array", result.data);
+        return;
+      }
+
+      const dataGiay = result.data.map((item) => ({
+        ID: item.id,
+        MA: item.ma,
+        TEN: item.ten,
+        MOTA: item.moTa,
+        GIABAN: item.giaBan,
+        SOLUONGTON: item.soLuongTon,
+        TRANG_THAI: item.trangThai,
+        THUONG_HIEU: item.thuongHieu ? item.thuongHieu.ten : null,
+        CHAT_LIEU: item.chatLieu ? item.chatLieu.ten : null,
+        DE_GIAY: item.deGiay ? item.deGiay.ten : null,
+        XUAT_XU: item.xuatXu ? item.xuatXu.ten : null,
+        KIEU_DANG: item.kieuDang ? item.kieuDang.ten : null,
+        MAU_SAC: item.mauSac ? item.mauSac.ten : null,
+        ANH_GIAY:
+          item.anhGiayEntities && item.anhGiayEntities.length > 0
+            ? item.anhGiayEntities[0].tenUrl
+            : null, // Lấy ảnh đầu tiên
+        // Nếu muốn lấy toàn bộ ảnh: item.anhGiayEntities ? item.anhGiayEntities.map(img => img.tenUrl) : [],
+        KICH_CO: item.kichCo ? item.kichCo.ten : null,
+      }));
+
+    
+      setGiay(dataGiay);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
   };
+
   //viết hàm get để map lên select
   const getThuongHieuList = async () => {
     const result = await getThuongHieu();
+
     setThuongHieuList(result.data);
   };
 
@@ -175,8 +192,8 @@ const SanPham = () => {
   };
 
   const creatGiay = async () => {
-    if (!ten || !moTa || !giaBan) {
-      message.error("Không được để trống ! ");
+    if (!ten || !giaBan) {
+      message.error("Không được để trống!");
       return;
     }
 
@@ -188,27 +205,34 @@ const SanPham = () => {
       giaBan: parseFloat(giaBan),
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
-      //id được chọn từ danh sách nếu không có giá trị sẽ là null
-      thuongHieu: selectedThuongHieu ? { id: selectedThuongHieu } : null,
-      chatLieu: selectedChatLieu ? { id: selectedChatLieu } : null,
-      deGiay: selectedDeGiay ? { id: selectedDeGiay } : null,
-      xuatXu: selectedXuatXu ? { id: selectedXuatXu } : null,
-      kieuDang: selectedKieuDang ? { id: selectedKieuDang } : null,
-      mauSac: selectedMauSac ? { id: selectedMauSac } : null,
-      kichCo: selectdKichCo ? { id: selectdKichCo } : null,
-      anhGiay: selectedAnhGiay ? { id: selectedAnhGiay } : null,
+      thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
+      chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
+      deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
+      xuatXuDto: selectedXuatXu ? { id: selectedXuatXu } : null,
+      kieuDangDto: selectedKieuDang ? { id: selectedKieuDang } : null,
+      mauSacDto: selectedMauSac ? { id: selectedMauSac } : null,
+      kichCoDto: selectdKichCo ? { id: selectdKichCo } : null,
     };
+
     try {
-      await addGiay(newDataGiay);
-      message.success("Thêm sản phẩm thành công !");
+      // 1️⃣ Gọi API tạo sản phẩm, lấy `id` của sản phẩm vừa tạo
+      const giayResponse = await addGiay(newDataGiay);
+      const giayId = giayResponse.data.id; // Lấy ID sản phẩm mới từ response
+
+      // 2️⃣ Nếu có ảnh, gọi API gán ảnh cho sản phẩm đó
+      if (selectedAnhGiay && selectedAnhGiay.length > 0) {
+        await assignAnhGiay(giayId, selectedAnhGiay);
+        message.success("Đã gán ảnh vào sản phẩm!");
+      }
+
+      message.success("Thêm sản phẩm thành công!");
       getAllGiay();
+
+      // Reset lại form
       setTen("");
       setMoTa("");
       setGiaBan("");
       setSoLuongTon("");
-      setGiaNhap("");
-      setGiaSauKhuyenMai("");
-      setDoHot("");
       setValue(null);
       setSelectedChatLieu(null);
       setSelectedThuongHieu(null);
@@ -218,12 +242,17 @@ const SanPham = () => {
       setSelectedMauSac(null);
       setSelectedKichCo(null);
       setSelectedAnhGiay(null);
+
+      console.log("Sản phẩm mới:", giayResponse.data);
     } catch (error) {
-      message.error("Lỗi thêm sản phẩm " + error.message);
+      message.error(
+        "Lỗi thêm sản phẩm: " + (error.response?.data?.message || error.message)
+      );
     }
 
     setIsModalVisible1(false);
   };
+
   const removeGiay = async (record) => {
     try {
       await deleteGiay(record.ID);
@@ -235,10 +264,37 @@ const SanPham = () => {
   };
 
   const detailGiay = async (record) => {
-    console.log("ID giày là :", record.ID);
+
+
+    // Tạo đối tượng GiayDto từ thông tin của giày mà bạn có
+    const giayDto = {
+      id: record.ID, // Nếu bạn muốn gửi ID cùng với các thông tin khác
+      ten: record.ten,
+      moTa: record.moTa,
+      giaBan: record.giaBan,
+      soLuongTon: record.soLuongTon,
+      trangThai: record.trangThai,
+      thuongHieu: record.thuongHieu ? { id: record.thuongHieu.id } : null,
+      chatLieu: record.chatLieu ? { id: record.chatLieu.id } : null,
+      deGiay: record.deGiay ? { id: record.deGiay.id } : null,
+      kieuDang: record.kieuDang ? { id: record.kieuDang.id } : null,
+      xuatXu: record.xuatXu ? { id: record.xuatXu.id } : null,
+      mauSac: record.mauSac ? { id: record.mauSac.id } : null,
+      kichCo: record.kichCo ? { id: record.kichCo.id } : null,
+      anhGiay: record.anhGiayEntities
+        ? record.anhGiayEntities.map((ag) => ({
+            id: ag.id,
+            tenUrl: ag.tenUrl, // ✅ Thêm đường dẫn ảnh vào object
+          }))
+        : [],
+    };
+
     try {
-      const response = await getGiayDetail(record.ID);
+      // Gửi DTO qua API để lấy chi tiết giày
+      const response = await getGiayDetail(giayDto);
       const giay = response.data;
+
+      // Cập nhật state với dữ liệu nhận được
       setEditingGiay(giay);
       setTen(giay.ten);
       setMoTa(giay.moTa);
@@ -255,38 +311,57 @@ const SanPham = () => {
       setSelectedAnhGiay(giay.anhGiay ? giay.anhGiay.id : null);
       setIsModalVisible(true);
 
-      console.log(giay);
+ 
     } catch (error) {
       message.error("Lỗi khi lấy chi tiết giày: " + error.message);
     }
   };
 
+
   const editGiayButton = async () => {
-    console.log("ID của editingGiay:", editingGiay.id);
+    // console.log("🔍 ID của sản phẩm cần cập nhật:", editingGiay.id);
+
+    // if (!editingGiay.id) {
+    //   message.error(" Lỗi: Không có ID sản phẩm cần cập nhật!");
+    //   return;
+    // }
 
     const newTrangThai = value === 1 ? 1 : 0;
     const newDataGiay = {
+      id: isUuid(editingGiay.id) ? editingGiay.id : null,
       ten: ten,
       moTa: moTa,
       giaBan: parseFloat(giaBan),
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
-      thuongHieu: selectedThuongHieu ? { id: selectedThuongHieu } : null,
-      chatLieu: selectedChatLieu ? { id: selectedChatLieu } : null,
-      deGiay: selectedDeGiay ? { id: selectedDeGiay } : null,
-      xuatXu: selectedXuatXu ? { id: selectedXuatXu } : null,
-      kieuDang: selectedKieuDang ? { id: selectedKieuDang } : null,
-      mauSac: selectedMauSac ? { id: selectedMauSac } : null,
-      kichCo: selectdKichCo ? { id: selectdKichCo } : null,
-      anhGiay: selectedAnhGiay ? { id: selectedAnhGiay } : null,
+      thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
+      chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
+      deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
+      xuatXuDto: selectedXuatXu ? { id: selectedXuatXu } : null,
+      kieuDangDto: selectedKieuDang ? { id: selectedKieuDang } : null,
+
+    
+      // ...(selectedMauSac && { mauSacDto: { id: selectedMauSac } }),
+      // ...(selectdKichCo && { kichCoDto: { id: selectdKichCo } }),
+
+      
+      anhGiayDtos: selectedAnhGiay ? selectedAnhGiay.map((id) => ({ id })) : [],
     };
+    console.log("du lieu update", newDataGiay);
+    
+
     try {
-      await updateGiay(editingGiay.id, newDataGiay);
-      message.success("Cập nhật sản phẩm thành công!");
-      getAllGiay();
+      await updateGiay( newDataGiay);
+      message.success("ập nhật sản phẩm thành công!");
+
+      getAllGiay(); // Cập nhật danh sách sau khi sửa
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
+      console.error(
+        "Lỗi cập nhật sản phẩm:",
+        error.response?.data || error.message
+      );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
           (error.response?.data?.message || error.message)
@@ -325,9 +400,8 @@ const SanPham = () => {
         onCancel={() => setIsModalVisible1(false)}
         okText="Thêm"
         cancelText="Hủy"
-      
       >
-        <div style={{float:"left",width:"45%"}}>
+        <div style={{ float: "left", width: "45%" }}>
           <Select
             style={{ width: "100%" }}
             placeholder="Chọn Thương Hiệu"
@@ -404,9 +478,11 @@ const SanPham = () => {
           <br />
           <br />
         </div>
-        <div style={{float:"right",width:"45%"}}>
+
+        <div style={{ float: "right", width: "45%" }}>
           <Select
-           style={{ width: "100%" }}
+            mode="multiple"
+            style={{ width: "100%" }}
             placeholder="Chọn Ảnh Giày"
             value={selectedAnhGiay}
             onChange={handleAnhGiayChange}
@@ -414,10 +490,20 @@ const SanPham = () => {
             {Array.isArray(anhGiayList) &&
               anhGiayList.map((ag) => (
                 <Option key={ag.id} value={ag.id}>
+                  <img
+                    src={ag.tenUrl}
+                    alt="Ảnh giày"
+                    style={{
+                      width: "80%",
+                      height: 150,
+                      marginLeft: 30,
+                    }}
+                  />
                   {ag.tenUrl}
                 </Option>
               ))}
           </Select>
+
           <br />
           <br />
           <Input
@@ -525,13 +611,20 @@ const SanPham = () => {
             title: "Ảnh",
             dataIndex: "ANH_GIAY",
             width: 150,
-            render: (tenUrl) => (
-              <img
-                src={`http://localhost:5000/upload/${tenUrl}`}
-                alt={tenUrl}
-                style={{ maxWidth: "100px" }}
-              />
-            ),
+            render: (tenUrl) =>
+              tenUrl ? (
+                <img
+                  src={tenUrl} // ✅ Dùng trực tiếp tenUrl
+                  alt="Ảnh giày"
+                  style={{
+                    maxWidth: "100px",
+                    height: "auto",
+                    borderRadius: "5px",
+                  }}
+                />
+              ) : (
+                "Không có ảnh"
+              ),
           },
 
           {
@@ -636,10 +729,20 @@ const SanPham = () => {
             </Select>
           </Form.Item>
           <Form.Item label="Ảnh Giày">
-            <Select value={selectedAnhGiay} onChange={handleAnhGiayChange}>
+            <Select
+              mode="multiple" // Nếu muốn chọn nhiều ảnh
+              value={selectedAnhGiay} // ✅ Bây giờ chứa danh sách `tenUrl`
+              onChange={handleAnhGiayChange}
+              style={{ width: "100%" }}
+            >
               {Array.isArray(anhGiayList) &&
                 anhGiayList.map((ag) => (
-                  <Option key={ag.id} value={ag.id}>
+                  <Option key={ag.id} value={ag.tenUrl}>
+                    <img
+                      src={ag.tenUrl}
+                      alt="Ảnh giày"
+                      style={{ width: 50, height: 50, marginRight: 10 }}
+                    />
                     {ag.tenUrl}
                   </Option>
                 ))}

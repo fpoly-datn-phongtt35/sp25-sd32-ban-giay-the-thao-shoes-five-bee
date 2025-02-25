@@ -150,47 +150,8 @@ export default function Home() {
         </div>
       </div>
 
-     
-      {/* khuyến mãi */}
-      <div className="product_sale">
-        <div className="product_sale_list">
-          <img style={{ width: "70%" }} src="tachnen1.png" alt="" />
-          <div className="product_sale_list_content">
-            <span>500.000d</span>
-            <p>Khuyến mãi</p>
-            <p>Giay nam </p>
-            <button>Xem ngay</button>
-          </div>
-        </div>
-        <div
-          className="product_sale_list"
-          style={{ backgroundColor: "#726b6b" }}
-        >
-          <img style={{ width: "50%" }} src="tachnen2.png" alt="" />
-          <div className="product_sale_list_content">
-            <span>500.000d</span>
-            <p>Khuyến mãi</p>
-            <p>Giay nam </p>
-            <button>Xem ngay</button>
-          </div>
-        </div>
-        <div
-          className="product_sale_list"
-          style={{ backgroundColor: "#c21818" }}
-        >
-          <img
-            style={{ width: "60%", marginTop: "50px" }}
-            src="tachnen3.png"
-            alt=""
-          />
-          <div className="product_sale_list_content">
-            <span>500.000d</span>
-            <p>Khuyến mãi</p>
-            <p>Giay nam </p>
-            <button>Xem ngay</button>
-          </div>
-        </div>
-      </div>
+
+      
       {/* Sản Phẩm */}
       <h3
         style={{
@@ -269,7 +230,7 @@ export default function Home() {
         </div>
       </div>
       {/* feedback tu khach hang */}
-      <div className="feedback">
+      {/* <div className="feedback">
         {feedbacks.map((feedback, index) => (
           <FeedbackCard
             key={index}
@@ -279,9 +240,10 @@ export default function Home() {
             content={feedback.content}
           />
         ))}
-      </div>
+      </div> */}
       {/* footer */}
-      <Footer />
+     
+     
     </div>
   );
 }
