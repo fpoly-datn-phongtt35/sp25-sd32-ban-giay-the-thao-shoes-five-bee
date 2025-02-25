@@ -155,7 +155,157 @@
     margin-right: 5px;
 
 }
-.header_header_right_content a{
+
+.header_header_right_content a {
     text-decoration: none;
-    color:white ;
+    color: white;
 }
+
+.container,
+.container-fluid {
+    padding-left: 10px;
+    padding-right: 10px;
+}
+
+header.header .top-header {
+    border-bottom: 1px solid #f5f5f5;
+    background-color: #fff;
+    padding-top: 10px;
+    padding-bottom: 10px;
+}
+
+
+
+.text {
+    display: flex;
+    align-items: center;
+
+    justify-content: center;
+
+    height: 100%;
+
+    text-align: center;
+    font-size: 15px;
+    gap: 5px;
+}
+
+.last-header {
+    margin-top: 20px;
+    display: flex;
+    align-items: center;
+  
+    justify-content: center;
+
+    height: 100%;
+
+    text-align: center;
+    font-size: 20px;
+    gap: 5px;
+}
+.last-header > ul >li >a{
+    color: #000;
+    font-weight: 500;
+}
+.top-header {
+    display: flex;
+    align-items: center; /* Căn giữa theo chiều dọc */
+    justify-content: space-between; /* Căn giữa theo chiều ngang */
+    padding: 10px 0; /* Tạo khoảng cách trên dưới */
+  }
+
+  .site-nav-account {
+    position: relative;
+  }
+  
+  /* Căn chỉnh danh sách về bên phải */
+.justify-end {
+    display: flex;
+    justify-content: flex-end;
+    align-items: center;
+    gap: 20px; /* Khoảng cách giữa các mục */
+    list-style: none; /* Bỏ dấu chấm */
+    padding: 0;
+    margin: 0;
+  }
+  
+  /* Định dạng các mục trong danh sách */
+  .site-nav-item {
+    position: relative;
+  }
+  
+  /* Định dạng chung cho các thẻ <a> */
+  .site-nav-item a {
+    text-decoration: none; /* Bỏ gạch chân */
+    color: black; /* Màu chữ đen */
+    font-weight: 500;
+    padding: 10px 15px;
+    display: block;
+  }
+  
+  /* Dropdown menu cho "Tài khoản" */
+  .site-nav-account ul {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    list-style: none;
+    padding: 10px 0;
+    margin: 0;
+    min-width: 140px;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    z-index: 1000;
+  }
+  
+  /* Hiện menu khi hover vào "Tài khoản" */
+  .site-nav-account:hover ul {
+    display: block;
+  }
+  
+  /* Định dạng từng item trong dropdown */
+  .site-nav-account ul li {
+    padding: 8px 15px;
+  }
+  
+  .site-nav-account ul li a {
+    display: block;
+    width: 100%;
+  }
+  
+  .site-nav-account ul li a:hover {
+    background-color: #f0f0f0;
+  }
+  
+  /* Định dạng giỏ hàng */
+  .site-nav-cart {
+    position: relative;
+  }
+  
+  .top-cart-content {
+    display: none;
+    position: absolute;
+    top: 100%;
+    right: 0;
+    background: white;
+    box-shadow: 0px 4px 6px rgba(0, 0, 0, 0.1);
+    border-radius: 5px;
+    padding: 10px;
+    min-width: 200px;
+    z-index: 1000;
+  }
+  
+  /* Hiện giỏ hàng khi hover */
+  .site-nav-cart:hover .top-cart-content {
+    display: block;
+  }
+  
+  /* Định dạng nội dung giỏ hàng */
+  .no-item p {
+    margin: 0;
+    padding: 10px;
+    color: #777;
+    text-align: center;
+  }
+  
+  

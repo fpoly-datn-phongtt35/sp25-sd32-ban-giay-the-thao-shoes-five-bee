@@ -1,5 +1,5 @@
 package com.example.demo.entity;
-
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,6 +25,7 @@ public class AnhGiayEntity {
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name = "ID_GIAY")
     private GiayEntity giayEntity;
 

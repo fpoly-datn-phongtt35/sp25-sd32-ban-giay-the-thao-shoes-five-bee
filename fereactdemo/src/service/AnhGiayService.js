@@ -13,7 +13,7 @@ export const addAnhGiay = (formData) => {
 };
 
 export const deleteAnhGiay = (id) =>
-  axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
+  axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
 export const updateAnhGiay = (id, formData) =>
-  axios.put(`${REST_API_BASE_URL}/update/${id}`, formData);
+  axios.post(`${REST_API_BASE_URL}/update/${id}`, formData);

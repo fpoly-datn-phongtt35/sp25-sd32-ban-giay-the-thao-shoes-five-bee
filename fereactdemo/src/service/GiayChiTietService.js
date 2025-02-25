@@ -9,7 +9,7 @@ export const addGiayChiTiet = (giayChiTiet) =>
   axios.post(`${REST_API_BASE_URL}/add`, giayChiTiet);
 
 export const removeGiayChiTiet = (id) =>
-  axios.post(`${REST_API_BASE_URL}/delete/${id}`);
+  axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
 export const detailGiayChiTiet = (id) =>
   axios.post(`${REST_API_BASE_URL}/detail/admin/${id}`);
@@ -25,3 +25,10 @@ export const updateGiayChiTiet = (id, giayChiTiet) =>
 
 export const getGiayChiTiet = (mauSacId, kichCoId) =>
   axios.post(`${REST_API_BASE_URL}/detailSP/${mauSacId}/${kichCoId}`);
+export const getGiayChitietDetail = (giayChiTietDto) => {
+  return axios.post(`${REST_API_BASE_URL}/detail`, giayChiTietDto, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};

@@ -8,7 +8,7 @@ export const addChatLieu = (chatLieu) =>
   axios.post(`${REST_API_BASE_URL}/add`, chatLieu);
 
 export const deleteChatLieu = (id) =>
-  axios.post(`${REST_API_BASE_URL}/delete/${id}`);
+  axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
 export const updateChatLieu = (id, chatLieu) =>
   axios.post(`${REST_API_BASE_URL}/update/${id}`, chatLieu);
