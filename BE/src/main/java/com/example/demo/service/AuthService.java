@@ -14,4 +14,5 @@ public interface AuthService {
     Boolean userEmail(String email);
     ResponseEntity<?> checkOtp(UserOtpDto userOtpDto);
     ResponseEntity<?> sendBackOtp(UserOtpDto userOtpDto);
+    ResponseEntity<?> logout();
 }

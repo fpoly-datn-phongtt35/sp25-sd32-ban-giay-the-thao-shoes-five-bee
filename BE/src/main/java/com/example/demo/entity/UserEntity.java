@@ -1,10 +1,12 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
 import java.sql.Date;
 import java.time.LocalDateTime;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.UUID;
 
@@ -28,8 +30,6 @@ public class UserEntity {
     private String hoTen;
     @Column(name = "NGAY_SINH")
     private Date ngaySinh;
-    @Column(name = "DIA_CHI")
-    private String diaChi;
     @Column(name = "SO_DIEN_THOAI")
     private String soDienThoai;
     @Column(name = "EMAIL")
@@ -44,6 +44,10 @@ public class UserEntity {
     private String otpCode;
     @Column(name = "OTP_GENERATED_TIME")
     private LocalDateTime otpGeneratedTime;
-    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<DiaChiEntity> diaChiEntities;
+
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    private List<UserRoleEntity> userRoleEntities = new ArrayList<>();
 }

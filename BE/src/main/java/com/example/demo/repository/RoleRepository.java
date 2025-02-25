@@ -21,4 +21,6 @@ public interface RoleRepository extends JpaRepository<RoleEntity, UUID> {
             "WHERE r.TEN IN (:roles)",nativeQuery = true)
     List<String> findRoleFunctionAndPermission(List<String> roles);
 
+    @Query("select r from RoleEntity r where r.ten=?1")
+    RoleEntity findByName(String ten);
 }

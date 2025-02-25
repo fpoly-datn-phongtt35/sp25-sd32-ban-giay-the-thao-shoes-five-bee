@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -21,8 +22,14 @@ public class UserRoleEntity {
     private Integer trangThai;
     @ManyToOne
     @JoinColumn(name = "USER_ID")
+    @JsonIgnore
     private UserEntity userEntity;
     @ManyToOne
     @JoinColumn(name = "ROLE_ID")
     private RoleEntity roleEntity;
+
+    public UserRoleEntity(UserEntity userEntity, RoleEntity roleEntity) {
+        this.userEntity = userEntity;
+        this.roleEntity = roleEntity;
+    }
 }
