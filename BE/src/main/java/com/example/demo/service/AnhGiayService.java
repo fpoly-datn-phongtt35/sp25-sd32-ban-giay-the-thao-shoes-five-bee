@@ -20,4 +20,8 @@ public interface AnhGiayService {
     AnhGiayEntity detail (AnhGiayDto anhGiayDto);
     AnhGiayEntity update(AnhGiayDto anhGiayDto);
     AnhGiayEntity delete(AnhGiayDto anhGiayDto);
+    List<AnhGiayEntity> assignToGiayChiTietAndGetAnh(UUID giayChiTietId, List<UUID> anhGiayIds);
+    List<AnhGiayEntity> getAnhByGiayChiTietId(UUID giayChiTietId);
+
+
 }
