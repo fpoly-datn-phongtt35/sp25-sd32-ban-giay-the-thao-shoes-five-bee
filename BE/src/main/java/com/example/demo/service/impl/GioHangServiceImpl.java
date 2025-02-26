@@ -31,13 +31,23 @@ public class GioHangServiceImpl implements GioHangService {
   public List<GioHangChiTietResponse> getCartItems() {
     String email = usersService.getAuthenticatedUserEmail();
 
-    Optional<UserEntity> userEntity = userRepository.findByEmail(email);
-    // Tìm giỏ hàng của user
-    Optional<GioHangEntity> gioHang = gioHangRepository.findByUserEntity(userEntity.get());
+    Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
+    if(userEntityOptional.isEmpty()){
+      throw new RuntimeException("Không tìm thấy user với email :" +email);
+    }
+
+    UserEntity userEntity = userEntityOptional.get();
+    // Tìm giỏ hàng của user nếu chưa có thì tạo mới
+    GioHangEntity gioHang = gioHangRepository.findByUserEntity(userEntity)
+            .orElseGet(()->{
+              GioHangEntity newGioHang = new GioHangEntity();
+              newGioHang.setUserEntity(userEntity);
+              return gioHangRepository.save(newGioHang);
+            });
 
     // Lấy danh sách sản phẩm trong giỏ hàng
     List<GioHangChiTietEntity> chiTietList =
-        gioHangChiTietRepository.findByGioHangEntity(gioHang.get().getId());
+        gioHangChiTietRepository.findByGioHangEntity(gioHang.getId());
 
     // Chuyển đổi sang DTO để trả về frontend
     return chiTietList.stream()

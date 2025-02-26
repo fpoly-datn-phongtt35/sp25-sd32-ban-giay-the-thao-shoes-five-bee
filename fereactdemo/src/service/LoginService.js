@@ -9,9 +9,6 @@ export const loginCustomer = async (email, matKhau) => {
       email,
       matKhau,
     });
-
-
-
     if (response.data && response.data.jwt) {
       // Lưu thông tin vào sessionStorage
       sessionStorage.setItem("token", response.data.jwt);
