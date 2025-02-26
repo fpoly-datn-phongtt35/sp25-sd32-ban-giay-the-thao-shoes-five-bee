@@ -9,13 +9,15 @@ import com.example.demo.repository.GioHangRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.GioHangService;
 import com.example.demo.service.UsersService;
-import java.util.Date;
+
+import java.sql.Date;
+import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 import lombok.RequiredArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,7 +43,12 @@ public class GioHangServiceImpl implements GioHangService {
     GioHangEntity gioHang = gioHangRepository.findByUserEntity(userEntity)
             .orElseGet(()->{
               GioHangEntity newGioHang = new GioHangEntity();
+              newGioHang.setMa(generateUniqueCode());
               newGioHang.setUserEntity(userEntity);
+              newGioHang.setNgayTao(new Date(System.currentTimeMillis()));
+              newGioHang.setNgayCapNhat(new Date(System.currentTimeMillis()));
+              newGioHang.setTrangThai(1);
+              newGioHang.setGhiChu("Giỏ hàng mới tạo");
               return gioHangRepository.save(newGioHang);
             });
 
@@ -63,4 +70,8 @@ public class GioHangServiceImpl implements GioHangService {
                     item.getSoLuong()))
         .collect(Collectors.toList());
   }
+
+    private String generateUniqueCode() {
+        return "GH" + UUID.randomUUID().toString().substring(0,6).toUpperCase();
+    }
 }
