@@ -11,7 +11,7 @@ import com.example.demo.repository.UserRepository;
 import com.example.demo.service.GioHangChiTietService;
 import com.example.demo.service.GioHangService;
 import com.example.demo.service.UsersService;
-import java.util.Date;
+import java.sql.Date;
 import java.util.Optional;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
@@ -54,8 +54,8 @@ public class GioHangChiTietServiceImpl implements GioHangChiTietService {
                   // Nếu user chưa có giỏ hàng, tạo mới
                   GioHangEntity newGioHang = new GioHangEntity();
                   newGioHang.setUserEntity(user.get());
-                  newGioHang.setNgayTao(new Date());
-                  newGioHang.setNgayCapNhat(new Date());
+                  newGioHang.setNgayTao(new Date(System.currentTimeMillis()));
+                  newGioHang.setNgayCapNhat(new Date(System.currentTimeMillis()));
                   newGioHang.setTrangThai(1);
                   return gioHangRepository.save(newGioHang);
                 });
