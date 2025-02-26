@@ -33,5 +33,27 @@ width: 80px!important;
   text-align: center;
   
 }
+/* Đảm bảo trang chiếm toàn bộ chiều cao màn hình */
+html, body {
+  height: 100%;
+  margin: 0;
+  padding: 0;
+}
 
+.app_container {
+  display: flex;
+  flex-direction: column;
+  min-height: 100vh; /* Chiều cao tối thiểu bằng toàn bộ màn hình */
+}
+
+main {
+  flex: 1; /* Giúp phần nội dung chiếm hết không gian trống */
+}
+
+/* 
+footer {
+  position: relative;
+  width: 100%;
+
+} */
 

@@ -134,7 +134,7 @@ export const ProductAll = () => {
 
   return (
     <div className="productAll_container">
-      <Header />
+  
       {/* <div className="banner_productAll">
         <img src="banner_3.jpg" alt="" />
       </div> */}
@@ -269,6 +269,7 @@ export const ProductAll = () => {
                 />
                 Từ 3 triệu - 4 triệu
               </div>
+              
             </div>
           </div>
         </div>
@@ -287,19 +288,17 @@ export const ProductAll = () => {
                     alt="product"
                     className="product_image"
                   />
-                  <p className="product_price">
-                    {item.GIABAN.toLocaleString()} VND
-                  </p>
+
                   <h3 className="product_name">{item.TEN}</h3>
+                  <p className="product_price">
+                    {item.GIABAN.toLocaleString()} <sup>đ</sup>
+                  </p>
 
                   <button
                     className="add_to_cart_button"
-                    onClick={(e) => {
-                      e.stopPropagation();
-                      addToCart({ ...item, giayId: item.ID });
-                    }}
+                    onClick={() => navigate(`/product-detail/${item.ID}`)}
                   >
-                    Thêm
+                    Tùy chọn
                   </button>
                 </div>
               ))}

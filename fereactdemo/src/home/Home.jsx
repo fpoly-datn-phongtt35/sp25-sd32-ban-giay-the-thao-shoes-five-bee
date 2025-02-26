@@ -102,7 +102,7 @@ export default function Home() {
   return (
     <div className="home_container">
       {/* header */}
-      <Header />
+
       <div className="banner">
         <img src="/banner.jpg" alt="Banner" className="banner-img" />
         <div className="slider">

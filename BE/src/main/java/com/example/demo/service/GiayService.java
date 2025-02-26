@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.request.GiayDto;
 import com.example.demo.dto.response.PageResponse;
+import com.example.demo.entity.AnhGiayEntity;
 import com.example.demo.entity.GiayEntity;
 import lombok.NonNull;
 import org.springframework.data.domain.Pageable;
@@ -27,5 +28,6 @@ public interface GiayService {
   GiayEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds);
   ByteArrayOutputStream exportExcel() throws IOException;
   List<GiayEntity> findByTen(String ten);
+
 
 }
