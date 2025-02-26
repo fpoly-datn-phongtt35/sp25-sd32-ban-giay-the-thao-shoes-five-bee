@@ -55,5 +55,9 @@ public class GiayChiTietController {
   public ResponseEntity<?> anhGiay(@PathVariable("id") UUID id, @RequestBody List<UUID> anhGiayIds) {
     return ResponseEntity.ok(giayChiTietService.assignAnhGiay(id,anhGiayIds));
   }
-
+  @GetMapping("/getAll/{giayId}")
+  public ResponseEntity<List<GiayChiTietEntity>> getGiayChiTietByGiayId(@PathVariable UUID giayId) {
+    List<GiayChiTietEntity> chiTietList = giayChiTietService.getAllGiayChiTietByGiayId(giayId);
+    return ResponseEntity.ok(chiTietList);
+  }
 }

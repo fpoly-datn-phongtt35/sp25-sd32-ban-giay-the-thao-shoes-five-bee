@@ -158,5 +158,10 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         return giayChiTietRepository.findById(id).orElse(null);
     }
 
+    @Override
+    public List<GiayChiTietEntity> getAllGiayChiTietByGiayId(UUID giayId) {
+        return giayChiTietRepository.findByGiayEntityId(giayId);
+    }
+
 
 }

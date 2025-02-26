@@ -25,4 +25,5 @@ public interface GiayChiTietService {
     PageResponse<GiayChiTietEntity> findByPagingCriteria(
             GiayChiTietDto giayChiTietDto, Pageable pageable);
     GiayChiTietEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds);
+    List<GiayChiTietEntity> getAllGiayChiTietByGiayId(UUID giayId);
 }
