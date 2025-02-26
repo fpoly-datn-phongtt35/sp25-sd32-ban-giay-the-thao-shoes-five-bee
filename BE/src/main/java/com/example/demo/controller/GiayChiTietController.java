@@ -6,10 +6,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/giay-chi-tiet")
@@ -39,8 +38,10 @@ public class GiayChiTietController {
     return ResponseEntity.ok(giayChiTietService.update(giayChiTietDto));
   }
 
-  @PostMapping("/detail")
-  public ResponseEntity<?> detail(@RequestBody GiayChiTietDto giayChiTietDto) {
+  @GetMapping("/detail/{id}")
+  public ResponseEntity<?> detail(@PathVariable UUID id) {
+    GiayChiTietDto giayChiTietDto = new GiayChiTietDto();
+    giayChiTietDto.setId(id);
     return ResponseEntity.ok(giayChiTietService.detail(giayChiTietDto));
   }
 

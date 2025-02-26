@@ -26,7 +26,7 @@ public class AnhGiayController {
         String uploadImage = anhGiayService.uploadImage(file);
         return anhGiayService.add(anhGiayDto,uploadImage);
     }
-    @PostMapping("/getAll")
+    @GetMapping("/getAll")
     public List<AnhGiayEntity> getAll() {
         return anhGiayService.getAll();
     }
@@ -41,7 +41,7 @@ public class AnhGiayController {
         return ResponseEntity.ok(anhGiayService.delete(anhGiayDto));
     }
 
-    @PostMapping("/detail")
+    @GetMapping("/detail")
     public ResponseEntity<?> detail(@RequestBody AnhGiayDto anhGiayDto){
         return ResponseEntity.ok(anhGiayService.detail(anhGiayDto));
     }

@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   addGiayChiTiet,
   detailGiayChiTiet,
+  detailGiayChiTiet2,
   getAllGiayChiTiet,
   removeGiayChiTiet,
   updateGiayChiTiet,
@@ -259,7 +260,7 @@ const SanPhamChiTiet = () => {
 
   const detail = async (record) => {
     try {
-      const response = await detailGiayChiTiet(record.ID);
+      const response = await detailGiayChiTiet2(record.ID);
       const giayChiTiet = response.data;
       setEditingGiayChiTiet(giayChiTiet);
       setGiaBan1(giayChiTiet.giaBan);
