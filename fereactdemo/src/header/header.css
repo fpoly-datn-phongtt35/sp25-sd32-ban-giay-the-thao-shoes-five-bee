@@ -1,7 +1,7 @@
 .header {
     width: 100%;
     height: 25vh;
-    background-color: #ffd333;
+    background-color: #ffd333 !important;
 }
 
 .header_content {

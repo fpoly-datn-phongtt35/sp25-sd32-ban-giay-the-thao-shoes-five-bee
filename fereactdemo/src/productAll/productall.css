@@ -1,6 +1,6 @@
 .productAll_container {
     width: 100%;
-
+    min-height: 100vh;
     display: flex;
     flex-direction: column;
 }
@@ -19,6 +19,7 @@
     margin: auto;
     padding-left: 100px;
     margin-top: 30px;
+    
 }
 
 .aside_left {
@@ -28,7 +29,7 @@
 
 .aside_right {
     width: 60%;
-    height: 70vh;
+    min-height: 100vh;
     margin-left: 40px;
 
 }
@@ -137,7 +138,7 @@
 
 
 .product {
-    border: 1px solid #ddd;
+    /* border: 1px solid #ddd; */
     padding: 10px;
     margin: 10px;
     text-align: center;
@@ -146,7 +147,7 @@
 
 .product:hover {
     background-color: #f0f0f0;
-    transform: scale(1.05); 
+    transform: scale(1.05);
 }
 
 .product-link {
@@ -156,60 +157,79 @@
 
 .products_container {
     width: 100%;
+    
     display: flex;
     flex-wrap: wrap;
     gap: 10px;
-  }
-  .product_image {
+   
+}
+
+.product_image {
     width: 100%;
     height: auto;
-  }
-  
-  .product {
+}
+
+.product {
     position: relative;
     width: 30%;
     padding: 10px;
-    border: 1px solid #ddd;
+    /* border: 1px solid #ddd; */
     text-align: center;
     overflow: hidden;
     background: white;
-  }
-  
-  
-  .product_name,
-  .product_price {
+}
+
+
+.product_name,
+.product_price {
     transition: transform 0.6s cubic-bezier(0.25, 1, 0.5, 1), opacity 0.6s ease-in-out;
-  }
-  
-  .add_to_cart_button {
+}
+
+.add_to_cart_button {
     position: absolute;
-    bottom: -70px; /* Ban đầu ẩn bên dưới */
+    bottom: -70px;
+    /* Ban đầu ẩn bên dưới */
     left: 50%;
     transform: translateX(-50%);
-    background-color: #ff6600;
-    color: white;
+
+    color: black;
+    background-color: white;
+    /* Màu nền mặc định */
     border: none;
     padding: 8px 16px;
     cursor: pointer;
-    opacity: 0.2; /* Không hoàn toàn ẩn, tránh nhấp nháy */
+    opacity: 0.2;
+    /* Không hoàn toàn ẩn, tránh nhấp nháy */
     transition:
-      bottom 0.8s ease-out,  /* Di chuyển chậm dần */
-      opacity 0.8s ease-out; /* Mượt hơn */
-  }
-  
-  /* Khi hover, nút trượt lên chậm rãi */
-  .product:hover .add_to_cart_button {
+        bottom 0.8s ease-out,
+        /* Di chuyển chậm dần */
+        opacity 0.8s ease-out,
+        /* Mượt hơn */
+        background-color 0.3s ease-in-out,
+        /* Hiệu ứng màu mượt */
+        color 0.3s ease-in-out;
+}
+
+.add_to_cart_button:hover {
+    background-color: black !important;
+    color: white    !important;
+    /* Đổi màu chữ để dễ nhìn hơn */
+}
+
+/* Khi hover, nút trượt lên chậm rãi */
+.product:hover .add_to_cart_button {
     bottom: 20px;
     opacity: 1;
-    transition-delay: 0.1s; /* Trễ một chút để hiệu ứng tự nhiên hơn */
-  }
-  
-  
-  .product:hover .product_name,
-  .product:hover .product_price {
-    transform: translateY(40px); /* Trượt xuống sâu hơn */
+    transition-delay: 0.1s;
+    background-color: white;
+}
+
+
+.product:hover .product_name,
+.product:hover .product_price {
+    transform: translateY(40px);
+    /* Trượt xuống sâu hơn */
     opacity: 0;
-    transition-delay: 0.05s; /* Delay nhẹ để đồng bộ hiệu ứng */
-  }
-  
-  
+    transition-delay: 0.05s;
+    /* Delay nhẹ để đồng bộ hiệu ứng */
+}

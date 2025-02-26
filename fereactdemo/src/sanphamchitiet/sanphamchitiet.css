@@ -1,169 +1,145 @@
-/* Tổng quan sản phẩm */
-.product-detail {
-  display: flex;
-  flex-direction: row;
-  padding: 20px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 1200px;
-  margin: 0 auto;
-}
+.product-detail{
+  margin-top: 5%;
+  width: 100%;
+  height: auto !important;;
 
-/* Hình ảnh sản phẩm */
-.detail_img {
-  flex: 1;
+}
+.left {
+  width: 50%;
   display: flex;
   justify-content: center;
   align-items: center;
-  padding: 20px;
+  float: left;
 }
 
-.detail_img img {
-  max-width: 100%;
-  max-height: 500px;
-  border-radius: 8px;
-  object-fit: cover;
-  border: 2px solid #ddd;
+.product-images {
+  width: 100%;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: center;
+  align-items: center;
   padding: 10px;
-  background-color: #fff;
 }
 
-/* Thông tin sản phẩm */
-.detail_content {
-  flex: 2;
-  padding: 20px;
+.product-images img {
+  width: 80% !important; /* Ảnh chiếm 80% chiều rộng của container */
+  max-width: 300px;
+  height: 200px;
+  border-radius: 10px;
+  object-fit: cover;
 }
 
-.detail_content h2 {
-  font-size: 28px;
-  font-weight: bold;
-  margin-bottom: 15px;
+
+
+
+.right {
+  width: 50%;
+  float: right;
+  /* max-width: 600px;
+  margin: auto; */
+  font-family: Arial, sans-serif;
+  color: #333;
 }
 
-.detail_content p {
-  font-size: 18px;
-  margin-bottom: 10px;
+.product-info {
+  display: flex;
+  flex-direction: column; 
+  align-items: flex-start; 
+  gap: 5px; 
+  font-family: 'Courier New', Courier, monospace;
 }
 
-.product_price1 {
-  
-  color: #e91e63;
-  font-weight: bold;
+.product-title {
   font-size: 24px;
-}
-
-.product_discount {
-  color: #4caf50;
   font-weight: bold;
-  font-size: 22px;
+  color: black;
 }
 
-/* Tùy chọn sản phẩm */
-.options {
-  margin-top: 20px;
+.product-price {
+  font-size: 20px;
+  font-weight: bold;
+  color: black;
 }
 
-.option-buttons {
+
+.product-price sup {
+  font-size: 14px;
+  position: absolute;
+  top: -5px;
+  margin-left: 2px;
+}
+
+.product-options {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  margin: 10px 0;
+}
+
+.size-options, .color-options {
   display: flex;
   flex-wrap: wrap;
   gap: 10px;
 }
 
-.color-button,
-.size-button {
-  padding: 10px 20px;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  background-color: #fff;
+.size-box, .color-box {
+  border: 1px solid #ccc;
+  padding: 8px 12px;
   cursor: pointer;
   font-size: 16px;
-  transition: background-color 0.3s, border-color 0.3s;
 }
 
-.color-button.selected,
-.size-button.selected {
-  background-color: #2196f3;
-  color: #fff;
-  border-color: #1976d2;
+.size-box.active, .color-box.active {
+  border: 2px solid black;
 }
 
-.color-button:disabled,
-.size-button:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.quantity-control {
+.quantity {
   display: flex;
   align-items: center;
-  margin-top: 20px;
+  gap: 10px;
 }
 
-.quantity-control h3 {
-  margin-right: 10px;
-}
-
-.decrease-btn,
-.increase-btn {
-  padding: 5px 15px;
+.quantity button {
+  background: none;
+  border: 1px solid black;
+  padding: 5px 10px;
+  cursor: pointer;
   font-size: 18px;
-  border: 2px solid #ddd;
-  border-radius: 5px;
-  background-color: #fff;
-  cursor: pointer;
-  transition: background-color 0.3s, border-color 0.3s;
-}
-.quantity{
-  padding: 24px;
 }
 
-.decrease-btn:disabled,
-.increase-btn:disabled {
-  cursor: not-allowed;
-  opacity: 0.5;
-}
-
-.add_to_cart_button {
-  display: block;
-  width: 100%;
-  padding: 15px;
-  margin-top: 20px;
-  background-color: #ff5722;
-  color: #fff;
-  font-size: 20px;
+.buy-button {
+  background: black;
+  color: white;
+  padding: 10px;
   text-align: center;
-  border-radius: 5px;
-  border: none;
+  font-size: 18px;
+  font-weight: bold;
   cursor: pointer;
-  transition: background-color 0.3s;
-}
-
-.add_to_cart_button:hover {
-  background-color: #e64a19;
-}
-
-.out_of_stock_warning {
-  color: red;
   margin-top: 10px;
+}
+
+.buy-button:hover {
+  background: #444;
+}
+
+.store-info {
+  margin-top: 15px;
   font-size: 16px;
 }
-.soluongton{
-  padding-left: 12px;
-  margin-top: 12px;
+
+.policy {
+  margin-top: 20px;
+  font-size: 14px;
 }
-.header1{
-  margin:30px auto;
-  
+
+.policy p {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 16px;
 }
-.chitietsanpham{
-  flex-direction: row;
-  padding: 20px;
-  background-color: #f5f5f5;
-  border: 1px solid #ddd;
-  border-radius: 10px;
-  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-  max-width: 1200px;
-  margin: 20px auto;
+
+.policy img {
+  width: 20px;
 }
