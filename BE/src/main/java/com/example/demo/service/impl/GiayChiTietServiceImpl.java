@@ -2,11 +2,11 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.GiayChiTietDto;
 import com.example.demo.dto.response.PageResponse;
+import com.example.demo.entity.AnhGiayEntity;
 import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.repository.GiayChiTietRepository;
-import com.example.demo.repository.GiayRepository;
-import com.example.demo.repository.KichCoRepository;
-import com.example.demo.repository.MauSacRepository;
+import com.example.demo.entity.GiayEntity;
+import com.example.demo.repository.*;
+import com.example.demo.service.AnhGiayService;
 import com.example.demo.service.GiayChiTietService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -15,6 +15,9 @@ import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+
+import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -29,6 +32,8 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final GiayRepository giayRepository;
   private final MauSacRepository mauSacRepository;
   private final KichCoRepository kichCoRepository;
+  private final AnhGiayRepository anhGiayRepository;
+    private final AnhGiayService anhGiayService;
 
   @Override
   public List<GiayChiTietEntity> getAll() {
@@ -144,4 +149,14 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
 
     return pageResponse;
   }
+
+    @Override
+    public GiayChiTietEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds) {
+
+        anhGiayService.assignToGiayChiTietByAnhGiayIdAndIds(id, anhGiayIds);
+
+        return giayChiTietRepository.findById(id).orElse(null);
+    }
+
+
 }

@@ -7,6 +7,8 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 
+import java.util.ArrayList;
+import java.util.List;
 import java.util.UUID;
 
 @Entity
@@ -28,5 +30,10 @@ public class AnhGiayEntity {
     @JsonIgnore
     @JoinColumn(name = "ID_GIAY")
     private GiayEntity giayEntity;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JsonIgnore
+    @JoinColumn(name = "ID_GIAY_CHI_TIET", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    private GiayChiTietEntity giayChiTietEntity;
 
 }
