@@ -160,8 +160,12 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
 
     @Override
     public List<GiayChiTietEntity> getAllGiayChiTietByGiayId(UUID giayId) {
-        return giayChiTietRepository.findByGiayEntityId(giayId);
+        System.out.println("Fetching giay_chi_tiet with id_giay = " + giayId);
+        List<GiayChiTietEntity> list = giayChiTietRepository.findByGiayEntityId(giayId);
+        System.out.println("Result: " + list.size() + " items found.");
+        return list;
     }
+
 
 
 }

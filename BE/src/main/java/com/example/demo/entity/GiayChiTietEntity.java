@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.ArrayList;
@@ -21,14 +22,17 @@ import lombok.experimental.SuperBuilder;
 public class GiayChiTietEntity {
   @Id
   @GeneratedValue(strategy = GenerationType.AUTO)
+
   @Column(name = "ID")
   private UUID id;
 
   @ManyToOne(fetch = FetchType.EAGER)
+
   @JoinColumn(name = "ID_MAU_SAC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private MauSacEntity mauSacEntity;
 
   @ManyToOne(fetch = FetchType.EAGER)
+  
   @JoinColumn(name = "ID_KICH_CO", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private KichCoEntity kichCoEntity;
 
@@ -45,8 +49,10 @@ public class GiayChiTietEntity {
   private Integer trangThai;
 
   @ManyToOne(fetch = FetchType.EAGER)
+  @JsonIgnore
   @JoinColumn(name = "ID_GIAY", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private GiayEntity giayEntity;
+  @JsonIgnore
   @OneToMany(mappedBy = "giayChiTietEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<AnhGiayEntity> danhSachAnh = new ArrayList<>();
 
