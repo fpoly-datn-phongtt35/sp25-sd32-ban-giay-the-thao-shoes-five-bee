@@ -21,7 +21,7 @@ public interface UsersService {
 
   UserEntity delete(UserDto userDto);
 
-  UserEntity detail(UserDto userDto);
+  UserDto detail(UserDto userDto);
 
   PageResponse<UserEntity> findByPagingCriteria(UserDtoSearch userDtoSearch, Pageable pageable);
 
