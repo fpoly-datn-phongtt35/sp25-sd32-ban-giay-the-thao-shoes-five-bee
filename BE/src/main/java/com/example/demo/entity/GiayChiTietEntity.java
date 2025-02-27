@@ -49,10 +49,10 @@ public class GiayChiTietEntity {
   private Integer trangThai;
 
   @ManyToOne(fetch = FetchType.EAGER)
-  @JsonIgnore
+//  @JsonIgnore
   @JoinColumn(name = "ID_GIAY", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private GiayEntity giayEntity;
-  @JsonIgnore
+  //  @JsonIgnore
   @OneToMany(mappedBy = "giayChiTietEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<AnhGiayEntity> danhSachAnh = new ArrayList<>();
 

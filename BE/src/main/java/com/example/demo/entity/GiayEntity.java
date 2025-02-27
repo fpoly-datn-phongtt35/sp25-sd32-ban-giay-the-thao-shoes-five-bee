@@ -76,7 +76,7 @@ public class GiayEntity {
     private DanhMucEntity danhMuc;
 
 
-    @JsonIgnore
+//    @JsonIgnore
     @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AnhGiayEntity> anhGiayEntities;
     @JsonIgnore

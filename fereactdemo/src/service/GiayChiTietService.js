@@ -32,3 +32,6 @@ export const getGiayChitietDetail = (giayChiTietDto) => {
     },
   });
 };
+export const getGiayChitietDetail1 = (id) => {
+  return axios.get(`${REST_API_BASE_URL}/getAll/${id}`);
+};

@@ -22,13 +22,13 @@
   padding: 10px;
 }
 
-.product-images img {
-  width: 80% !important; /* Ảnh chiếm 80% chiều rộng của container */
+/* .product-images img {
+  width: 80% !important; 
   max-width: 300px;
   height: 200px;
   border-radius: 10px;
   object-fit: cover;
-}
+} */
 
 
 
