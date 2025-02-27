@@ -10,5 +10,9 @@ export const addDeGiay = (deGiay) =>
 export const deleteDeGiay = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const updateDeGiay = (id, deGiay) =>
-  axios.post(`${REST_API_BASE_URL}/update/${id}`, deGiay);
+export const updateDeGiay = (deGiay) =>
+  axios.post(`${REST_API_BASE_URL}/update`, deGiay, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });

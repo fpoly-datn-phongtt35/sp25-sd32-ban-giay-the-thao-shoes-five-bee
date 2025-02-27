@@ -99,36 +99,46 @@ const MauSac = () => {
             message.error("Không được để trống tên màu sắc");
             return;
         }
-
+    
         // Kiểm tra độ dài tên
         if (ten.length > 255) {
             message.error("Tên màu sắc không được vượt quá 255 ký tự!");
             return;
         }
-
+    
         // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
         if (!/^[\p{L}\s]+$/u.test(ten)) {
             message.error("Tên màu sắc phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
             return;
         }
-
+    
         const updateTrangThai = value === 1 ? 0 : 1;
-
+    
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!editingMauSac?.ID) {
+            message.error("Không tìm thấy ID của màu sắc cần cập nhật!");
+            return;
+        }
+    
         const editNewMauSac = {
+            id: editingMauSac.ID, // Thêm ID vào DTO
             ten: ten,
             trangThai: updateTrangThai,
         };
+    
         try {
-            await updateMauSac(editingMauSac.ID, editNewMauSac);
-            message.success("Update màu sắc thành công !");
+            await updateMauSac(editNewMauSac); // Không truyền ID vào URL nữa
+            message.success("Cập nhật màu sắc thành công!");
             getAllMauSac();
             setIsModalVisible(false);
             setTen("");
             setValue(null);
         } catch (error) {
+            console.error("Lỗi cập nhật:", error);
             message.error("Cập nhật màu sắc thất bại");
         }
     };
+    
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
@@ -147,16 +157,16 @@ const MauSac = () => {
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
                     
                     {
-                        title: 'TEN',
+                        title: 'Tên màu',
                         dataIndex: 'TEN',
                     },
+                    // {
+                    //     title: 'TRANG THAI',
+                    //     dataIndex: 'trang_thai',
+                    //     render: (text, record) => trangThai(record.TRANG_THAI)
+                    // },
                     {
-                        title: 'TRANG THAI',
-                        dataIndex: 'trang_thai',
-                        render: (text, record) => trangThai(record.TRANG_THAI)
-                    },
-                    {
-                        title: 'ACTION',
+                        title: '',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
@@ -167,17 +177,17 @@ const MauSac = () => {
                     },
                 ]} dataSource={mauSac} />
             </div>
-            <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={editMauSacButton} onCancel={() => setIsModalVisible(false)}>
+            <Modal title="Update Màu Sắc" open={isModalVisible} onOk={editMauSacButton} onCancel={() => setIsModalVisible(false)}>
                 <Form>
-                    <Form.Item label="Tên Kích Cỡ">
+                    <Form.Item label="Tên Màu Sắc">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Trạng Thái">
+                    {/* <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
                             <Radio value={1}>Còn</Radio>
                             <Radio value={2}>Hết</Radio>
                         </Radio.Group>
-                    </Form.Item>
+                    </Form.Item> */}
                 </Form>
             </Modal>
         </div>

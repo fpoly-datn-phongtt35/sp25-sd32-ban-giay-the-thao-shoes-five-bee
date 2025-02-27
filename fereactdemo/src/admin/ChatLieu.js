@@ -90,39 +90,48 @@ const ChatLieu = () => {
 
     const handleUpdateChatLieuButton = async () => {
         if (!ten) {
-            message.error("Không được để trống mã và tên");
+            message.error("Không được để trống tên chất liệu");
             return;
         }
-
-        const updateTRangThai = value === 1 ? 0 : 1;
-
+    
+        const updateTrangThai = value === 1 ? 0 : 1;
+    
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!updattingChatLieu?.ID) {
+            message.error("Không tìm thấy ID của chất liệu cần cập nhật!");
+            return;
+        }
+    
         const editChatLieu = {
+            id: updattingChatLieu.ID, // Thêm ID vào DTO
             ten: ten,
-            trangThai: updateTRangThai
+            trangThai: updateTrangThai,
         };
+    
         try {
-            await updateChatLieu(updattingChatLieu.ID, editChatLieu);
-            message.success("Cập nhật thành công");
+            await updateChatLieu(editChatLieu); // Không truyền ID vào URL nữa
+            message.success("Cập nhật chất liệu thành công!");
             getAllChatLieu();
             setIsModalVisible(false);
-            setUpdateChatLieu(null);
             setTen("");
-
+            setUpdateChatLieu(null);
+            setValue(null);
         } catch (error) {
-            message.error("Lỗi khi cập nhật chat lieu");
-            console.error("Lỗi khi cập nhật chat lieu", error);
+            console.error("Lỗi khi cập nhật chất liệu:", error);
+            message.error("Lỗi khi cập nhật chất liệu");
         }
-    }
+    };
+    
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
                 <Input placeholder='Tên Chất Liệu' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
-                <Radio.Group onChange={onChange} value={value}>
+                {/* <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Còn</Radio>
                     <Radio value={2}>Hết</Radio>
-                </Radio.Group>
+                </Radio.Group> */}
                 <br /><br />
                 <Button type="primary" onClick={handleAddChatLieu}>
                     Add
@@ -130,16 +139,16 @@ const ChatLieu = () => {
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
                     {
-                        title: 'TEN',
+                        title: 'Tên Chất Liệu',
                         dataIndex: 'TEN',
                     },
+                    // {
+                    //     title: 'TRANG THAI',
+                    //     dataIndex: 'trang_thai',
+                    //     render: (text, record) => trangThai(record.TRANG_THAI)
+                    // },
                     {
-                        title: 'TRANG THAI',
-                        dataIndex: 'trang_thai',
-                        render: (text, record) => trangThai(record.TRANG_THAI)
-                    },
-                    {
-                        title: 'ACTION',
+                        title: '',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
@@ -150,17 +159,17 @@ const ChatLieu = () => {
                     },
                 ]} dataSource={chatLieu} />
             </div>
-            <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={handleUpdateChatLieuButton} onCancel={() => setIsModalVisible(false)}>
+            <Modal title="Update Chất Liệu" open={isModalVisible} onOk={handleUpdateChatLieuButton} onCancel={() => setIsModalVisible(false)}>
                 <Form>
                     <Form.Item label="Tên Chất Liệu">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Trạng Thái">
+                    {/* <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
                             <Radio value={1}>Đang sử dụng</Radio>
                             <Radio value={2}>Không sử dụng</Radio>
                         </Radio.Group>
-                    </Form.Item>
+                    </Form.Item> */}
                 </Form>
             </Modal>
         </div>

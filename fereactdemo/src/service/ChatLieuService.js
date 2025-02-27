@@ -10,5 +10,10 @@ export const addChatLieu = (chatLieu) =>
 export const deleteChatLieu = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const updateChatLieu = (id, chatLieu) =>
-  axios.post(`${REST_API_BASE_URL}/update/${id}`, chatLieu);
+export const updateChatLieu = (chatLieu) =>
+  axios.post(`${REST_API_BASE_URL}/update`, chatLieu, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+

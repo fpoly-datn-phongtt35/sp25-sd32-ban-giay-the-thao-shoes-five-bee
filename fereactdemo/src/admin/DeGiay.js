@@ -106,35 +106,46 @@ const DeGiay = () => {
             message.error("Không được để trống tên đế giày");
             return;
         }
-
+    
         // Kiểm tra độ dài tên
         if (ten.length > 255) {
             message.error("Tên đế giày không được vượt quá 255 ký tự!");
             return;
         }
-
+    
         // Kiểm tra xem tên có phải là số hay không, cho phép ký tự tiếng Việt
         if (!/^[\p{L}\s]+$/u.test(ten)) {
             message.error("Tên đế giày phải là chữ cái (bao gồm cả dấu tiếng Việt) và không được chứa số!");
             return;
         }
-
+    
         const newTrangThai = value === 1 ? 0 : 1;
-
+    
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!updattingDeGiay?.ID) {
+            message.error("Không tìm thấy ID của đế giày cần cập nhật!");
+            return;
+        }
+    
         const editingDeGiay = {
+            id: updattingDeGiay.ID, // Thêm ID vào DTO
             ten: ten,
             trangThai: newTrangThai,
         };
+    
         try {
-            await updateDeGiay(updattingDeGiay.ID, editingDeGiay);
-            message.success("Cập nhật đế giày thành công");
+            await updateDeGiay(editingDeGiay); // Không truyền ID vào URL nữa
+            message.success("Cập nhật đế giày thành công!");
             getAllDeGiay();
             setIsModalVisible(false);
             setTen("");
+            setValue(null);
         } catch (error) {
+            console.error("Lỗi cập nhật:", error);
             message.error("Lỗi khi cập nhật đế giày");
         }
     };
+    
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
@@ -142,10 +153,10 @@ const DeGiay = () => {
 
                 <Input placeholder='Tên Đế Giày' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
-                <Radio.Group onChange={onChange} value={value}>
+                {/* <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Còn</Radio>
                     <Radio value={2}>Hết</Radio>
-                </Radio.Group>
+                </Radio.Group> */}
                 <br /><br />
                 <Button type="primary" onClick={createDeGiay}>
                     Add
@@ -153,16 +164,16 @@ const DeGiay = () => {
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
                     {
-                        title: 'TEN',
+                        title: 'Tên Đế Giày',
                         dataIndex: 'TEN',
                     },
+                    // {
+                    //     title: 'TRANG THAI',
+                    //     dataIndex: 'trang_thai',
+                    //     render: (text, record) => trangThai(record.TRANG_THAI)
+                    // },
                     {
-                        title: 'TRANG THAI',
-                        dataIndex: 'trang_thai',
-                        render: (text, record) => trangThai(record.TRANG_THAI)
-                    },
-                    {
-                        title: 'ACTION',
+                        title: '',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
@@ -173,17 +184,17 @@ const DeGiay = () => {
                     },
                 ]} dataSource={deGiay} />
             </div>
-            <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={handleUpdateDeGiayButton} onCancel={() => setIsModalVisible(false)}>
+            <Modal title="Update Đế Giày" open={isModalVisible} onOk={handleUpdateDeGiayButton} onCancel={() => setIsModalVisible(false)}>
                 <Form>
-                    <Form.Item label="Tên Kích Cỡ">
+                    <Form.Item label="Tên Đế Giày">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Trạng Thái">
+                    {/* <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
                             <Radio value={1}>Đang sử dụng</Radio>
                             <Radio value={2}>Không sử dụng</Radio>
                         </Radio.Group>
-                    </Form.Item>
+                    </Form.Item> */}
                 </Form>
             </Modal>
         </div>

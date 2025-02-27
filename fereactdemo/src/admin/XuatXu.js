@@ -99,47 +99,56 @@ const XuatXu = () => {
             message.error("Không được để trống mã và tên xuất xứ");
             return;
         }
-
+    
         if (ten.length > 255) {
             message.error("Tên xuất xứ không được vượt quá 255 ký tự!");
             return;
         }
-
+    
         if (!/^[\p{L}\s]+$/u.test(ten)) {
-            message.error("Tên xuất xứ phải là chữ cái  và không được chứa số!");
+            message.error("Tên xuất xứ phải là chữ cái và không được chứa số!");
             return;
         }
-
+    
         const updatedTrangThai = value === 1 ? 0 : 1;
-
+    
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!editingXuatXu?.ID) {
+            message.error("Không tìm thấy ID của xuất xứ cần cập nhật!");
+            return;
+        }
+    
         const editXuatXu = {
-            id: editingXuatXu.ID,
-            ma: editingXuatXu.MA,
+            id: editingXuatXu.ID, // Thêm ID vào DTO
+            ma: editingXuatXu.MA, // Giữ nguyên mã
             ten: ten,
             trangThai: updatedTrangThai,
         };
+    
         try {
             console.log(editXuatXu);
-            await updateXuatXu(editXuatXu);
-            message.success("Update xuất xứ thành công");
+            await updateXuatXu(editXuatXu); // Không truyền ID vào URL nữa
+            message.success("Cập nhật xuất xứ thành công!");
             getAllXuatXu();
             setIsModalVisible(false);
-
             setTen("");
+            setValue(null);
         } catch (error) {
+            console.error("Lỗi cập nhật:", error);
             message.error("Lỗi khi cập nhật xuất xứ");
         }
-    }
+    };
+    
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
 
                 <Input placeholder='Tên Xuất Xứ' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
-                <Radio.Group onChange={onChange} value={value}>
+                {/* <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Còn</Radio>
                     <Radio value={2}>Hết</Radio>
-                </Radio.Group>
+                </Radio.Group> */}
                 <br /><br />
                 <Button type="primary" onClick={creatXuatXu}>
                     Add
@@ -148,16 +157,16 @@ const XuatXu = () => {
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
 
                     {
-                        title: 'TEN',
+                        title: 'Tên xuất xứ',
                         dataIndex: 'TEN',
                     },
+                    // {
+                    //     title: 'TRANG THAI',
+                    //     dataIndex: 'trang_thai',
+                    //     render: (text, record) => trangThai(record.TRANG_THAI)
+                    // },
                     {
-                        title: 'TRANG THAI',
-                        dataIndex: 'trang_thai',
-                        render: (text, record) => trangThai(record.TRANG_THAI)
-                    },
-                    {
-                        title: 'ACTION',
+                        title: '',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
@@ -174,12 +183,12 @@ const XuatXu = () => {
                     <Form.Item label="Tên Kích Cỡ">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Trạng Thái">
+                    {/* <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
                             <Radio value={1}>Còn</Radio>
                             <Radio value={2}>Hết</Radio>
                         </Radio.Group>
-                    </Form.Item>
+                    </Form.Item> */}
                 </Form>
             </Modal>
         </div>

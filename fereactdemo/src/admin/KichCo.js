@@ -89,35 +89,45 @@ const KichCo = () => {
             message.error("Mã và tên không được để trống");
             return;
         }
+    
         const sizeValue = parseInt(ten, 10);
         if (isNaN(sizeValue)) {
-            message.error('Kích cỡ phải là một số!');
+            message.error("Kích cỡ phải là một số!");
             return;
         }
         if (sizeValue < 3 || sizeValue > 50) {
-            message.error('Kích cỡ phải là một số trong khoảng từ 3 đến 50!');
+            message.error("Kích cỡ phải là một số trong khoảng từ 3 đến 50!");
             return;
         }
-
+    
         const updatedTrangThai = value === 1 ? 0 : 1;
-
+    
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!editingSize?.ID) {
+            message.error("Không tìm thấy ID của kích cỡ cần cập nhật!");
+            return;
+        }
+    
         const updatedSize = {
-            ten: ten,
-            trangThai: updatedTrangThai
+            id: editingSize.ID, // Thêm ID vào DTO
+            ten: sizeValue, // Chuyển về số thay vì string
+            trangThai: updatedTrangThai,
         };
-
+    
         try {
-            await updateSize(editingSize.ID, updatedSize);
-            message.success("Cập nhật thành công");
+            await updateSize(updatedSize); // Không truyền ID vào URL nữa
+            message.success("Cập nhật kích cỡ thành công!");
             loadSize();
             setIsModalVisible(false);
             setEditingSize(null);
             setTen("");
+            setValue(null);
         } catch (error) {
-            message.error("Lỗi khi cập nhật kích cỡ");
             console.error("Lỗi khi cập nhật kích cỡ:", error);
+            message.error("Lỗi khi cập nhật kích cỡ");
         }
     };
+    
 
     const handleDelete = async (record) => {
         try {
@@ -141,10 +151,10 @@ const KichCo = () => {
 
                 <Input placeholder='Tên Kích Cỡ' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
-                <Radio.Group onChange={onChange} value={value}>
+                {/* <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Còn</Radio>
                     <Radio value={2}>Hết</Radio>
-                </Radio.Group>
+                </Radio.Group> */}
                 <br /><br />
                 <Button type="primary" onClick={handleAdd}>
                     Add
@@ -152,16 +162,16 @@ const KichCo = () => {
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
                     {
-                        title: 'Ten',
+                        title: 'Tên Kích Cỡ',
                         dataIndex: 'TEN',
                     },
+                    // {
+                    //     title: 'TRANG THAI',
+                    //     dataIndex: 'TRANG_THAI',
+                    //     render: (text, record) => convertTrangThai(record.TRANG_THAI),
+                    // },
                     {
-                        title: 'TRANG THAI',
-                        dataIndex: 'TRANG_THAI',
-                        render: (text, record) => convertTrangThai(record.TRANG_THAI),
-                    },
-                    {
-                        title: 'ACTION',
+                        title: '',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
@@ -177,12 +187,12 @@ const KichCo = () => {
                     <Form.Item label="Tên Kích Cỡ">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Trạng Thái">
+                    {/* <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
                             <Radio value={1}>Còn</Radio>
                             <Radio value={2}>Hết</Radio>
                         </Radio.Group>
-                    </Form.Item>
+                    </Form.Item> */}
                 </Form>
             </Modal>
         </div>

@@ -139,16 +139,16 @@ const AnhSanPham = () => {
   };
   return (
     <div style={{ display: "flex", justifyContent: "center" }}>
-      <div style={{ width: "100%", marginLeft: "350px" }}>
+      <div style={{ width: "100%", marginLeft: "150px" }}>
         <Upload onChange={handleUploadChange}>
           <Button icon={<UploadOutlined />}>Click to Upload TENURL</Button>
         </Upload>
         <br />
         <br />
-        <Radio.Group onChange={onChange} value={value}>
+        {/* <Radio.Group onChange={onChange} value={value}>
           <Radio value={1}>Còn</Radio>
           <Radio value={2}>Hết</Radio>
-        </Radio.Group>
+        </Radio.Group> */}
         <br />
         <br />
         <Button type="primary" onClick={creatAnhGiay}>
@@ -158,7 +158,7 @@ const AnhSanPham = () => {
         <br />
         <Table
           pagination={{ pageSize: 5, defaultPageSize: 5 }}
-          rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
+          // rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
           columns={[
             {
               title: "Ảnh",
@@ -168,23 +168,23 @@ const AnhSanPham = () => {
                   <img
                     src={tenUrl} // ✅ Dùng trực tiếp tenUrl
                     alt="Ảnh giày"
-                    style={{ maxWidth: "100px", height: "auto", borderRadius: "5px" }}
+                    style={{ maxWidth: "400px", height: "auto", borderRadius: "5px" }}
                   />
                 ) : (
                   "Không có ảnh"
                 ),
             },
-            {
-              title: "TRANG THAI",
-              dataIndex: "TRANG_THAI",
-              render: (text, record) => trangThai(record.TRANG_THAI),
-            },
+            // {
+            //   title: "TRANG THAI",
+            //   dataIndex: "TRANG_THAI",
+            //   render: (text, record) => trangThai(record.TRANG_THAI),
+            // },
             {
               title: "ACTION",
               key: "action",
               render: (text, record) => (
                 <Space size="middle">
-                  <Button onClick={() => detailAnhGiay(record)}>Update</Button>
+                  {/* <Button onClick={() => detailAnhGiay(record)}>Update</Button> */}
                   <Button onClick={() => removeAnhGiay(record)}>Delete</Button>
                 </Space>
               ),
@@ -193,7 +193,7 @@ const AnhSanPham = () => {
           dataSource={anhGiay}
         />
       </div>
-      <Modal
+      {/* <Modal
         title="Update Ảnh Giày"
         open={isModalVisible}
         onOk={updateAnhGiayButton}
@@ -212,7 +212,7 @@ const AnhSanPham = () => {
             </Radio.Group>
           </Form.Item>
         </Form>
-      </Modal>
+      </Modal> */}
     </div>
   );
 };

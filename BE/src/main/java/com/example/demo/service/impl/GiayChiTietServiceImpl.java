@@ -67,23 +67,32 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
 
 
     @Override
-  public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {
-    Optional<GiayChiTietEntity> optional = giayChiTietRepository.findById(giayChiTietDto.getId());
-    return optional
-        .map(
-            o -> {
-              o.setGiaBan(giayChiTietDto.getGiaBan());
-              o.setSoLuongTon(giayChiTietDto.getSoLuongTon());
-              o.setMauSacEntity(
-                  mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null));
-              o.setKichCoEntity(
-                  kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null));
-              o.setTrangThai(giayChiTietDto.getTrangThai());
-              o.setGiayEntity(giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null));
-              return giayChiTietRepository.save(o);
-            })
-        .orElse(null);
-  }
+    public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {
+        Optional<GiayChiTietEntity> optional = giayChiTietRepository.findById(giayChiTietDto.getId());
+
+        return optional.map(o -> {
+            o.setGiaBan(giayChiTietDto.getGiaBan());
+            o.setSoLuongTon(giayChiTietDto.getSoLuongTon());
+
+            // Kiểm tra null trước khi gọi .getId()
+            if (giayChiTietDto.getMauSacDto() != null) {
+                o.setMauSacEntity(mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null));
+            }
+
+            if (giayChiTietDto.getKichCoDto() != null) {
+                o.setKichCoEntity(kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null));
+            }
+
+            if (giayChiTietDto.getGiayDto() != null) {
+                o.setGiayEntity(giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null));
+            }
+
+            o.setTrangThai(giayChiTietDto.getTrangThai());
+
+            return giayChiTietRepository.save(o);
+        }).orElse(null);
+    }
+
 
   @Override
   public GiayChiTietEntity detail(GiayChiTietDto giayChiTietDto) {

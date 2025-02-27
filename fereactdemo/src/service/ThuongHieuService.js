@@ -10,5 +10,10 @@ export const addThuongHieu = (thuongHieu) =>
 export const deleteThuongHieu = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const updateThuongHieu = (id, thuongHieu) =>
-  axios.put(`${REST_API_BASE_URL}/update/${id}`, thuongHieu);
+export const updateThuongHieu = (thuongHieu) =>
+  axios.post(`${REST_API_BASE_URL}/update`, thuongHieu, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+

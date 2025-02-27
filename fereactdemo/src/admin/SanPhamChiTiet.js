@@ -26,7 +26,6 @@ import "./sanphamchitiet.css";
 const SanPhamChiTiet = () => {
   const [giayChiTiet, setGiayChiTiet] = useState([]);
 
-
   const [giayList, setGiayList] = useState([]);
   const [value, setValue] = useState(1);
   const [ten, setTen] = useState(null);
@@ -136,23 +135,29 @@ const SanPhamChiTiet = () => {
 
   const creatGiayChiTiet = async () => {
     const newTrangThai1 = value === 1 ? 0 : 1;
-  
+
     const checkGiayChiTiet = async (data) => {
       try {
         // 🛠 Kiểm tra dữ liệu đầu vào
-        if (!data?.giayDto?.id || !data?.mauSacDto?.id || !data?.kichCoDto?.id) {
+        if (
+          !data?.giayDto?.id ||
+          !data?.mauSacDto?.id ||
+          !data?.kichCoDto?.id
+        ) {
           throw new Error("Dữ liệu không hợp lệ: Một số thuộc tính bị thiếu.");
         }
-  
+
         const giayInfo = await getGiay();
-        const currentGiay = giayInfo?.data?.find((g) => g.id === data.giayDto.id);
-  
+        const currentGiay = giayInfo?.data?.find(
+          (g) => g.id === data.giayDto.id
+        );
+
         if (!currentGiay) {
           throw new Error("Không tìm thấy thông tin giày.");
         }
-  
+
         console.log("🔹 currentGiay:", currentGiay);
-  
+
         // 🏀 Kiểm tra giá bán
         const giaBanSP = parseFloat(currentGiay?.giaBan || 0);
         if (parseFloat(data.giaBan) < giaBanSP) {
@@ -160,7 +165,7 @@ const SanPhamChiTiet = () => {
             `Giá bán (${data.giaBan}) phải >= giá sản phẩm (${giaBanSP})`
           );
         }
-  
+
         // 🏀 Kiểm tra giày chi tiết đã tồn tại chưa
         const latestData = await getAllGiayChiTiet();
         const existingGiay = latestData?.data?.find(
@@ -169,16 +174,17 @@ const SanPhamChiTiet = () => {
             item.mauSacDto?.id === data.mauSacDto.id &&
             item.kichCoDto?.id === data.kichCoDto.id
         );
-  
+
         if (existingGiay) {
           // ✅ Cập nhật số lượng tồn nếu đã có
           const updateData = {
             ...existingGiay,
-            soLuongTon: parseInt(existingGiay.soLuongTon) + parseInt(data.soLuongTon),
+            soLuongTon:
+              parseInt(existingGiay.soLuongTon) + parseInt(data.soLuongTon),
             giaBan: data.giaBan,
             trangThai: data.trangThai,
           };
-  
+
           await updateGiayChiTiet(existingGiay.id, updateData);
           message.success("Cập nhật số lượng thành công.");
         } else {
@@ -192,7 +198,7 @@ const SanPhamChiTiet = () => {
           });
           message.success("Thêm sản phẩm chi tiết mới thành công!");
         }
-  
+
         console.log("🚀 Dữ liệu gửi lên updateGiay:", {
           id: currentGiay.id,
           ten: currentGiay.ten,
@@ -200,20 +206,24 @@ const SanPhamChiTiet = () => {
           giaBan: giaBanSP,
           trangThai: currentGiay.trangThai ?? 1,
         });
-  
       } catch (error) {
         console.error("❌ Lỗi trong checkGiayChiTiet:", error);
         throw error;
       }
     };
-  
+
     try {
       // 🏀 Kiểm tra dữ liệu đầu vào trước khi gửi
-      if (!soLuongTon1 || !selectedGiay1 || !selectedMauSac1 || !selectedKichCo1) {
+      if (
+        !soLuongTon1 ||
+        !selectedGiay1 ||
+        !selectedMauSac1 ||
+        !selectedKichCo1
+      ) {
         message.error("Vui lòng nhập đầy đủ thông tin trước khi thêm!");
         return;
       }
-  
+
       console.log("📤 Dữ liệu gửi lên BE:", {
         ten,
         soLuongTon1,
@@ -222,7 +232,7 @@ const SanPhamChiTiet = () => {
         selectedMauSac1,
         selectedKichCo1,
       });
-  
+
       // 🏀 Gọi `checkGiayChiTiet` với dữ liệu đầy đủ
       await checkGiayChiTiet({
         soLuongTon: parseInt(soLuongTon1), // Ép kiểu số nguyên
@@ -232,12 +242,12 @@ const SanPhamChiTiet = () => {
         kichCoDto: { id: selectedKichCo1 },
         trangThai: newTrangThai1,
       });
-  
+
       // Cập nhật lại danh sách giày chi tiết
       await getDataGiayChiTiet();
-  
+
       message.success("Thao tác thành công!");
-  
+
       // Reset form
       setSoLuongTon1("");
       setGiaBan1("");
@@ -249,10 +259,9 @@ const SanPhamChiTiet = () => {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error("Lỗi khi thực hiện thao tác: " + error.message);
     }
-  
+
     setIsModalVisible1(false);
   };
-  
 
   const deleteGiayChiTiet = async (record) => {
     try {
@@ -267,19 +276,25 @@ const SanPhamChiTiet = () => {
 
   const detail = async (record) => {
     try {
-      const response = await detailGiayChiTiet(record.ID);
+      const requestData = { id: record.ID }; // Tạo object GiayChiTietDto
+
+      const response = await detailGiayChiTiet(requestData); // Gửi object thay vì chỉ ID
       const giayChiTiet = response.data;
+      console.log("🔍 Chi tiết giày:", giayChiTiet);
+
       setEditingGiayChiTiet(giayChiTiet);
       setGiaBan1(giayChiTiet.giaBan);
       setSoLuongTon1(giayChiTiet.soLuongTon); // Cập nhật số lượng tồn cho sản phẩm 1
       setValue(giayChiTiet.trangThai === 0 ? 1 : 2);
       setSelectedMauSac1(
-        giayChiTiet.mauSacDto ? giayChiTiet.mauSacDto.id : null
+        giayChiTiet.mauSacEntity ? giayChiTiet.mauSacEntity.id : null
       );
       setSelectedKichCo1(
-        giayChiTiet.kichCoDto ? giayChiTiet.kichCoDto.id : null
+        giayChiTiet.kichCoEntity ? giayChiTiet.kichCoEntity.id : null
       );
-      setSelectedGiay1(giayChiTiet.giay ? giayChiTiet.giay.id : null);
+      setSelectedGiay1(
+        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null
+      );
       setIsModalVisible(true);
     } catch (error) {
       message.error("Lỗi khi detail giày chi tiết");
@@ -287,68 +302,52 @@ const SanPhamChiTiet = () => {
   };
 
   const editGiayChiTietButton = async () => {
-    const newTrangThai = value === 1 ? 0 : 1;
-    const newDataGiayChiTiet = {
-      soLuongTon: soLuongTon1,
-      giaBan: giaBan1,
-      giay: selectedGiay1 ? { id: selectedGiay1 } : null,
-      trangThai: newTrangThai,
-      mauSac: selectedMauSac1 ? { id: selectedMauSac1 } : null,
-      kichCo: selectedKichCo1 ? { id: selectedKichCo1 } : null,
-    };
-    try {
-      const latestData = await getAllGiayChiTiet();
-      const existingItems = latestData.data.filter(
-        (item) =>
-          item.giay.id === newDataGiayChiTiet.giay.id &&
-          item.mauSac.id === newDataGiayChiTiet.mauSac.id &&
-          item.kichCo.id === newDataGiayChiTiet.kichCo.id &&
-          item.id !== editingGiayChiTiet.id
-      );
-      if (existingItems.length > 0) {
-        const priceMatches = existingItems.every(
-          (item) =>
-            parseFloat(item.giaBan) === parseFloat(newDataGiayChiTiet.giaBan)
-        );
-
-        if (!priceMatches) {
-          message.error(
-            "Giá bán phải bằng nhau cho các giày chi tiết có cùng giày, màu sắc và kích cỡ."
-          );
-          return;
-        }
-        const existingItem = existingItems[0];
-        const updatedExistingItem = {
-          ...existingItem,
-          soLuongTon:
-            existingItem.soLuongTon + parseInt(newDataGiayChiTiet.soLuongTon),
-          giaBan: newDataGiayChiTiet.giaBan,
-          trangThai: newTrangThai,
-        };
-        await updateGiayChiTiet(existingItem.id, updatedExistingItem);
-        await removeGiayChiTiet(editingGiayChiTiet.id);
-        message.success("Cập nhật và gộp số lượng thành công");
-      } else {
-        await updateGiayChiTiet(editingGiayChiTiet.id, newDataGiayChiTiet);
-        message.success("Cập nhật thành công sản phẩm chi tiết");
-      }
-      await updateGiayTotalQuantity(newDataGiayChiTiet.giay.id);
-      getDataGiayChiTiet();
-      setIsModalVisible(false);
-      setSoLuongTon1("");
-      setGiaBan1("");
-      setSelectedMauSac1(null);
-      setSelectedKichCo1(null);
-      setValue(1);
-      setSelectedGiay1(null);
-      setEditingGiayChiTiet(null);
-    } catch (error) {
-      message.error(
-        "Lỗi cập nhật sản phẩm chi tiết: "(
-          error.response?.data?.message || error.message
-        )
-      );
+    if (!editingGiayChiTiet) {
+        message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
+        return;
     }
+
+    const newDataGiayChiTiet = {
+        id: editingGiayChiTiet?.id || null,
+        soLuongTon: soLuongTon1,
+        giaBan: giaBan1,
+        giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
+        trangThai: value === 1 ? 0 : 1,
+        mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null, 
+        kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
+    };
+
+    console.log("🔍 Dữ liệu cập nhật gửi đi:", newDataGiayChiTiet);
+
+    try {
+        if (!newDataGiayChiTiet.giayDto?.id || 
+            !newDataGiayChiTiet.mauSacDto?.id || 
+            !newDataGiayChiTiet.kichCoDto?.id) {
+            message.error("❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!");
+            return;
+        }
+
+        await updateGiayChiTiet(newDataGiayChiTiet);
+        message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
+
+        await getDataGiayChiTiet(); // Cập nhật danh sách sau khi sửa
+        resetForm();
+        setIsModalVisible(false);
+    } catch (error) {
+        console.error("❌ Lỗi cập nhật sản phẩm chi tiết:", error.response?.data || error.message);
+        message.error("❌ Lỗi cập nhật sản phẩm chi tiết: " + (error.response?.data?.message || error.message));
+    }
+};
+
+
+  const resetForm = () => {
+    setSoLuongTon1("");
+    setGiaBan1("");
+    setSelectedMauSac1(null);
+    setSelectedKichCo1(null);
+    setValue(1);
+    setSelectedGiay1(null);
+    setEditingGiayChiTiet(null);
   };
 
   return (
