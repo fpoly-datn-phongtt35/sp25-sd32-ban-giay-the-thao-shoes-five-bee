@@ -14,7 +14,7 @@ const KichCo = () => {
         return size.filter(item => item.TRANG_THAI === 0);
     }
     const convertTrangThai = (status) => {
-        return status === 0 ? "Còn" : "Hết";
+        return status === 0 ? "Hoạt động" : "Không hoạt động";
     };
 
     useEffect(() => {
@@ -89,7 +89,7 @@ const KichCo = () => {
             message.error("Mã và tên không được để trống");
             return;
         }
-    
+
         const sizeValue = parseInt(ten, 10);
         if (isNaN(sizeValue)) {
             message.error("Kích cỡ phải là một số!");
@@ -99,21 +99,21 @@ const KichCo = () => {
             message.error("Kích cỡ phải là một số trong khoảng từ 3 đến 50!");
             return;
         }
-    
+
         const updatedTrangThai = value === 1 ? 0 : 1;
-    
+
         // Đảm bảo ID tồn tại trước khi gửi request
         if (!editingSize?.ID) {
             message.error("Không tìm thấy ID của kích cỡ cần cập nhật!");
             return;
         }
-    
+
         const updatedSize = {
             id: editingSize.ID, // Thêm ID vào DTO
             ten: sizeValue, // Chuyển về số thay vì string
             trangThai: updatedTrangThai,
         };
-    
+
         try {
             await updateSize(updatedSize); // Không truyền ID vào URL nữa
             message.success("Cập nhật kích cỡ thành công!");
@@ -127,7 +127,7 @@ const KichCo = () => {
             message.error("Lỗi khi cập nhật kích cỡ");
         }
     };
-    
+
 
     const handleDelete = async (record) => {
         try {
@@ -151,10 +151,10 @@ const KichCo = () => {
 
                 <Input placeholder='Tên Kích Cỡ' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
-                {/* <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
-                </Radio.Group> */}
+                <Radio.Group onChange={onChange} value={value}>
+                    <Radio value={1}>Hoạt động</Radio>
+                    <Radio value={2}>Không hoạt động</Radio>
+                </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={handleAdd}>
                     Add
@@ -165,18 +165,18 @@ const KichCo = () => {
                         title: 'Tên Kích Cỡ',
                         dataIndex: 'TEN',
                     },
-                    // {
-                    //     title: 'TRANG THAI',
-                    //     dataIndex: 'TRANG_THAI',
-                    //     render: (text, record) => convertTrangThai(record.TRANG_THAI),
-                    // },
                     {
-                        title: '',
+                        title: 'Trạng thái',
+                        dataIndex: 'TRANG_THAI',
+                        render: (text, record) => convertTrangThai(record.TRANG_THAI),
+                    },
+                    {
+                        title: 'Thao tác',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
-                                <Button onClick={() => handleUpdate(record)}>Update</Button>
-                                <Button onClick={() => handleDelete(record)}>Delete</Button>
+                                <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
+                                <Button onClick={() => handleDelete(record)}>Xóa</Button>
                             </Space>
                         ),
                     },
@@ -187,12 +187,12 @@ const KichCo = () => {
                     <Form.Item label="Tên Kích Cỡ">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    {/* <Form.Item label="Trạng Thái">
+                    <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={1}>Còn</Radio>
-                            <Radio value={2}>Hết</Radio>
+                            <Radio value={1}>Hoạt động</Radio>
+                            <Radio value={2}>Không hoạt động</Radio>
                         </Radio.Group>
-                    </Form.Item> */}
+                    </Form.Item>
                 </Form>
             </Modal>
         </div>

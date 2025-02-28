@@ -274,8 +274,8 @@ const SanPhamChiTiet = () => {
                 <br />
                 <br />
                 <Radio.Group onChange={e => setValue(e.target.value)} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
+                    <Radio value={1}>Hoạt động</Radio>
+                    <Radio value={2}>Không hoạt động</Radio>
                 </Radio.Group>
                 <br />
                 <br />
@@ -315,10 +315,10 @@ const SanPhamChiTiet = () => {
                             title: 'Trạng Thái',
                             dataIndex: 'TRANG_THAI',
                             key: 'TRANG_THAI',
-                            render: (text) => (text === 0 ? 'Còn' : 'Hết'),
+                            render: (text) => (text === 0 ? 'Hoạt động' : 'Không hoạt động'),
                         },
                         {
-                            title: 'Action',
+                            title: 'Thao tác',
                             key: 'action',
                             render: (_, record) => (
                                 <Space size="middle">
