@@ -73,7 +73,7 @@ export const ProfileUser = () => {
 
   return (
     <div className="profile-page">
-      <Header />
+
       <div className="content-wrapper">
         <Sidebar data={customerData} setCurrentPage={setCurrentPage}/>
         <div className="page-content">

@@ -118,7 +118,7 @@ const ChucVu = () => {
     };
 
     try {
-      await updateChucVu( newDataChucVu);
+      await updateChucVu(newDataChucVu);
       message.success("Cập nhật chức vụ thành công");
       getAllChucVu();
       setIsModalVisible(false);
@@ -139,15 +139,15 @@ const ChucVu = () => {
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', marginLeft: '200px' }}>
-        <Input placeholder='Mã Chức Vụ' value={ma} onChange={(e) => setMa(e.target.value)} />
+        {/* <Input placeholder='Mã Chức Vụ' value={ma} onChange={(e) => setMa(e.target.value)} /> */}
         <br /><br />
         <Input placeholder='Tên Chức Vụ' value={ten} onChange={(e) => setTen(e.target.value)} />
         <br /><br />
         <Input placeholder='Mô Tả' value={moTa} onChange={(e) => setMoTa(e.target.value)} />
         <br /><br />
         <Radio.Group onChange={onChange} value={value}>
-          <Radio value={1}>Còn</Radio>
-          <Radio value={2}>Hết</Radio>
+          <Radio value={1}>Sử dụng</Radio>
+          <Radio value={2}>Không còn sử dụng</Radio>
         </Radio.Group>
         <br /><br />
         <Button type="primary" onClick={add}>
@@ -155,34 +155,34 @@ const ChucVu = () => {
         </Button>
         <br /><br />
         <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
+          // {
+          //   title: 'ID',
+          //   dataIndex: 'ID',
+          // },
+          // {
+          //   title: 'MA',
+          //   dataIndex: 'MA',
+          // },
           {
-            title: 'ID',
-            dataIndex: 'ID',
-          },
-          {
-            title: 'MA',
-            dataIndex: 'MA',
-          },
-          {
-            title: 'TEN',
+            title: 'Tên',
             dataIndex: 'TEN',
           },
           {
-            title: 'MÔ TẢ',
+            title: 'Mô tả',
             dataIndex: 'MO_TA',
           },
           {
-            title: 'TRANG THAI',
+            title: 'Trạng thái',
             dataIndex: 'trang_thai',
             render: (text, record) => trangThai(record.TRANG_THAI)
           },
           {
-            title: 'ACTION',
+            title: 'Thao tác',
             key: 'action',
             render: (text, record) => (
               <Space size="middle">
-                <Button onClick={() => detail(record)}>Update</Button>
-                <Button onClick={() => removeChucVu(record)}>Delete</Button>
+                <Button onClick={() => detail(record)}>Cập nhật</Button>
+                <Button onClick={() => removeChucVu(record)}>Xóa</Button>
               </Space>
             ),
           },
@@ -190,9 +190,9 @@ const ChucVu = () => {
       </div>
       <Modal title="Update Chức Vụ" visible={isModalVisible} onCancel={() => setIsModalVisible(false)} onOk={editChucVuButton}>
         <Form>
-          <Form.Item label="Mã Chức Vụ">
+          {/* <Form.Item label="Mã Chức Vụ">
             <Input value={ma} onChange={(e) => setMa(e.target.value)} />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="Tên Chức Vụ">
             <Input value={ten} onChange={(e) => setTen(e.target.value)} />
           </Form.Item>

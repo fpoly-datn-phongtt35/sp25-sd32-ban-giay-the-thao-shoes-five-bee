@@ -11,8 +11,9 @@ export const addGiayChiTiet = (giayChiTiet) =>
 export const removeGiayChiTiet = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const detailGiayChiTiet = (id) =>
-  axios.post(`${REST_API_BASE_URL}/detail/admin/${id}`);
+export const detailGiayChiTiet = (giayChiTietDto) =>
+  axios.post(`${REST_API_BASE_URL}/detail`, giayChiTietDto);
+
 
 export const detailGiayChiTiet1 = (id) =>
   axios.post(`${REST_API_BASE_URL}/detail/user/${id}`);
@@ -20,8 +21,14 @@ export const detailGiayChiTiet1 = (id) =>
 export const detailGiayChiTiet2 = (id) =>
   axios.post(`${REST_API_BASE_URL}/detail/${id}`);
 
-export const updateGiayChiTiet = (id, giayChiTiet) =>
-  axios.post(`${REST_API_BASE_URL}/update/${id}`, giayChiTiet);
+export const updateGiayChiTiet = (giayChiTiet) =>
+  axios.post(`${REST_API_BASE_URL}/update`, giayChiTiet, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+
+
 
 export const getGiayChiTiet = (mauSacId, kichCoId) =>
   axios.post(`${REST_API_BASE_URL}/detailSP/${mauSacId}/${kichCoId}`);
@@ -31,4 +38,7 @@ export const getGiayChitietDetail = (giayChiTietDto) => {
       "Content-Type": "application/json",
     },
   });
+};
+export const getGiayChitietDetail1 = (id) => {
+  return axios.get(`${REST_API_BASE_URL}/getAll/${id}`);
 };

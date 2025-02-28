@@ -23,7 +23,7 @@ const XuatXu = () => {
     };
 
     const trangThai = (status) => {
-        return status === 0 ? "Đang sử dụng" : "Không sử dụng";
+        return status === 0 ? "Hoạt động" : "Không hoạt động";
     }
 
     useEffect(() => {
@@ -106,30 +106,39 @@ const XuatXu = () => {
         }
 
         if (!/^[\p{L}\s]+$/u.test(ten)) {
-            message.error("Tên xuất xứ phải là chữ cái  và không được chứa số!");
+            message.error("Tên xuất xứ phải là chữ cái và không được chứa số!");
             return;
         }
 
         const updatedTrangThai = value === 1 ? 0 : 1;
 
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!editingXuatXu?.ID) {
+            message.error("Không tìm thấy ID của xuất xứ cần cập nhật!");
+            return;
+        }
+
         const editXuatXu = {
-            id: editingXuatXu.ID,
-            ma: editingXuatXu.MA,
+            id: editingXuatXu.ID, // Thêm ID vào DTO
+            ma: editingXuatXu.MA, // Giữ nguyên mã
             ten: ten,
             trangThai: updatedTrangThai,
         };
+
         try {
             console.log(editXuatXu);
-            await updateXuatXu(editXuatXu);
-            message.success("Update xuất xứ thành công");
+            await updateXuatXu(editXuatXu); // Không truyền ID vào URL nữa
+            message.success("Cập nhật xuất xứ thành công!");
             getAllXuatXu();
             setIsModalVisible(false);
-
             setTen("");
+            setValue(null);
         } catch (error) {
+            console.error("Lỗi cập nhật:", error);
             message.error("Lỗi khi cập nhật xuất xứ");
         }
-    }
+    };
+
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
@@ -137,8 +146,8 @@ const XuatXu = () => {
                 <Input placeholder='Tên Xuất Xứ' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
+                    <Radio value={1}>Hoạt động</Radio>
+                    <Radio value={2}>Không hoạt động</Radio>
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={creatXuatXu}>
@@ -148,21 +157,21 @@ const XuatXu = () => {
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
 
                     {
-                        title: 'TEN',
+                        title: 'Tên xuất xứ',
                         dataIndex: 'TEN',
                     },
                     {
-                        title: 'TRANG THAI',
+                        title: 'Trạng thái',
                         dataIndex: 'trang_thai',
                         render: (text, record) => trangThai(record.TRANG_THAI)
                     },
                     {
-                        title: 'ACTION',
+                        title: 'Thao tác',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
-                                <Button onClick={() => handleUpdateXuatXu(record)}>Update</Button>
-                                <Button onClick={() => removeXuatXu(record)} >Delete</Button>
+                                <Button onClick={() => handleUpdateXuatXu(record)}>Cập nhật</Button>
+                                <Button onClick={() => removeXuatXu(record)} >Xóa</Button>
                             </Space>
                         ),
                     },
@@ -176,8 +185,8 @@ const XuatXu = () => {
                     </Form.Item>
                     <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={1}>Còn</Radio>
-                            <Radio value={2}>Hết</Radio>
+                            <Radio value={1}>Hoạt động</Radio>
+                            <Radio value={2}>Không hoạt động</Radio>
                         </Radio.Group>
                     </Form.Item>
                 </Form>

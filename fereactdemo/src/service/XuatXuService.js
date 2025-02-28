@@ -11,4 +11,9 @@ export const deleteXuatXu = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
 export const updateXuatXu = (xuatXu) =>
-  axios.post(`${REST_API_BASE_URL}/update`, xuatXu);
+  axios.post(`${REST_API_BASE_URL}/update`, xuatXu, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+

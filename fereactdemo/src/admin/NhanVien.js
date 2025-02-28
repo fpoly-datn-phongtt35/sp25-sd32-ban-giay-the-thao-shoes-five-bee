@@ -86,7 +86,7 @@ const NhanVien = () => {
             matKhau: hashedPassword,
             isEnabled: value === 1,
             roleNames: selectedChucVu ? [`${selectedChucVu}`] : ['ROLE_USER'],
-            ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
+            ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DD') : null,
             soDienThoai: soDienThoai,
         };
 
@@ -169,9 +169,9 @@ const NhanVien = () => {
     return (
         <div style={{ display: 'flex' }}>
             <div style={{ width: '60%', marginLeft: '200px', overflow: 'auto' }}>
-                <Select 
-                    placeholder='Chọn Chức Vụ' 
-                    value={selectedChucVu} 
+                <Select
+                    placeholder='Chọn Chức Vụ'
+                    value={selectedChucVu}
                     onChange={handleChucVuChange}
                     style={{ width: '100%' }}
                 >
@@ -188,15 +188,15 @@ const NhanVien = () => {
                 <br /><br />
                 <Input placeholder='Số Điện Thoại' value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
                 <br /><br />
-                <DatePicker 
-                    placeholder='Ngày Sinh' 
-                    value={ngaySinh} 
+                <DatePicker
+                    placeholder='Ngày Sinh'
+                    value={ngaySinh}
                     onChange={(date) => setNgaySinh(date)}
                     style={{ width: '100%' }}
                 />
                 <br /><br />
-                <input 
-                    type="file" 
+                <input
+                    type="file"
                     onChange={handleFileChange}
                     accept="image/*"
                     style={{ marginBottom: '16px' }}
@@ -210,8 +210,8 @@ const NhanVien = () => {
                 )}
                 <br />
                 <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
+                    <Radio value={1}>Đang sử dụng</Radio>
+                    <Radio value={2}>Không sử dụng</Radio>
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={createNhanVien}>
@@ -221,58 +221,63 @@ const NhanVien = () => {
                     Tải xuống mẫu Excel
                 </Button>
                 <br /><br />
-                <Table 
-                    pagination={{ pageSize: 5, defaultPageSize: 5 }} 
-                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }} 
+                <Table
+                    pagination={{ pageSize: 5, defaultPageSize: 5 }}
+                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
+                    scroll={{ x: "100%" }}  // ✅ Thêm dòng này để fix lỗi
                     columns={[
                         {
-                            title: 'HỌ TÊN',
+                            title: 'Họ tên',
                             dataIndex: 'HOTEN',
-                            key: 'HOTEN'
+                            key: 'HOTEN',
+                            width: 200, // Điều chỉnh width hợp lý
                         },
                         {
-                            title: 'EMAIL',
+                            title: 'Email',
                             dataIndex: 'EMAIL',
-                            key: 'EMAIL'
+                            key: 'EMAIL',
+                            width: 250, // Cột email thường dài hơn
                         },
                         {
-                            title: 'SỐ ĐIỆN THOẠI',
+                            title: 'Số điện thoại',
                             dataIndex: 'SODIENTHOAI',
-                            key: 'SODIENTHOAI'
+                            key: 'SODIENTHOAI',
+                            width: 180,
                         },
                         {
-                            title: 'NGÀY SINH',
+                            title: 'Ngày sinh',
                             dataIndex: 'NGAYSINH',
                             key: 'NGAYSINH',
+                            width: 150,
                             render: (text) => text ? moment(text).format('DD/MM/YYYY') : 'Chưa có'
                         },
                         {
-                            title: 'ẢNH',
+                            title: 'Ảnh',
                             dataIndex: 'ANH',
                             key: 'ANH',
-                            render: (text, record) => (
-                                <img
-                                    src={text}
-                                    alt="Ảnh đại diện"
-                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                />
+                            width: 100,
+                            render: (text) => (
+                                text ? <img src={text} alt="Ảnh đại diện" style={{ width: 50, height: 50, objectFit: 'cover' }} /> : "Không có"
                             ),
                         },
                         {
-                            title: 'CHỨC VỤ',
+                            title: 'Chức vụ',
                             dataIndex: 'ROLENAMES',
                             key: 'ROLENAMES',
+                            width: 200,
                             render: (text) => text?.replace('ROLE_', '')
                         },
                         {
-                            title: 'TRẠNG THÁI',
+                            title: 'Trạng thái',
                             dataIndex: 'TRANG_THAI',
                             key: 'TRANG_THAI',
+                            width: 150,
                             render: (text) => trangThai(text)
                         },
                         {
-                            title: 'THAO TÁC',
+                            title: 'Thao tác',
                             key: 'action',
+                            width: 200,
                             render: (text, record) => (
                                 <Space size="middle">
                                     <Button onClick={() => detail(record)}>Chi tiết</Button>
@@ -280,9 +285,10 @@ const NhanVien = () => {
                                 </Space>
                             ),
                         },
-                    ]} 
-                    dataSource={nhanVien} 
+                    ]}
+                    dataSource={nhanVien}
                 />
+
             </div>
             <Modal title="Cập nhật Nhân Viên" onOk={editNhanVienButton} open={isModalVisible} onCancel={() => setIsModalVisible(false)}>
                 <Form>
@@ -296,14 +302,14 @@ const NhanVien = () => {
                         <Input value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
                     </Form.Item>
                     <Form.Item label="Ngày Sinh">
-                        <DatePicker 
-                            value={ngaySinh} 
+                        <DatePicker
+                            value={ngaySinh}
                             onChange={(date) => setNgaySinh(date)}
                         />
                     </Form.Item>
                     <Form.Item label="Ảnh đại diện">
-                        <input 
-                            type="file" 
+                        <input
+                            type="file"
                             onChange={handleFileChange}
                             accept="image/*"
                         />
