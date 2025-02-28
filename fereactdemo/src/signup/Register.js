@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import CustomerInput from '../signln/CustomerInput';
 import { Link, useNavigate } from 'react-router-dom';
-import { signupCustomer, verifyOtp,resendOtp } from '../service/RegisterService';
+import { signupCustomer, verifyOtp, resendOtp } from '../service/RegisterService';
 import { message, Modal, Button } from 'antd';
 
 const Register = () => {
@@ -13,8 +13,8 @@ const Register = () => {
         confirmPassword: ''
     });
     const [showOtpPopup, setShowOtpPopup] = useState(false);
-    const [otp, setOtp] = useState('');
-    const [userEmail, setUserEmail] = useState('');
+    const [otpCode, setOtpCode] = useState('');
+    const [email, setEmail] = useState('');
     const navigate = useNavigate();
 
     const handleInputChange = (e) => {
@@ -24,23 +24,14 @@ const Register = () => {
     const handleSubmit = async (e) => {
         e.preventDefault();
 
-        if (!formData.hoTen || !formData.email) {
-            message.error("Mật khẩu và email không được để trống.");
-            return;
-        }
-        if (!formData.soDienThoai) {
-            message.error("Số điện thoại không được để trống.");
-            return;
-        }
-        if (!formData.matKhau || !formData.confirmPassword) {
-            message.error("Mật khẩu và xác nhận mật khẩu không được để trống.");
+        if (!formData.hoTen || !formData.email || !formData.soDienThoai || !formData.matKhau || !formData.confirmPassword) {
+            message.error("Vui lòng điền đầy đủ thông tin.");
             return;
         }
         if (formData.matKhau !== formData.confirmPassword) {
-            message.error("Mật khẩu không trùng. Vui lòng kiểm tra lại.");
+            message.error("Mật khẩu không trùng khớp.");
             return;
         }
-
         try {
             const response = await signupCustomer({
                 hoTen: formData.hoTen,
@@ -48,20 +39,20 @@ const Register = () => {
                 soDienThoai: formData.soDienThoai,
                 matKhau: formData.matKhau,
             });
-            setUserEmail(formData.email); // Lưu email để gửi OTP
-            setShowOtpPopup(true); // Hiển thị popup nhập OTP
+
+            console.log("Đăng ký thành công:", response.data);
+            message.success("Đăng ký thành công! Kiểm tra email để nhập OTP.");
+            setEmail(formData.email);
+            setShowOtpPopup(true);
         } catch (error) {
-            if (error.response && error.response.status === 400) {
-                message.error('Email đã được sử dụng. Vui lòng thử lại với email khác.');
-            } else {
-                message.error('Có lỗi xảy ra. Vui lòng thử lại sau.');
-            }
+            console.error("Lỗi đăng ký:", error.response?.data || error.message);
+            message.error(error.response?.data || "Có lỗi xảy ra. Vui lòng thử lại.");
         }
     };
 
     const handleVerifyOtp = async () => {
         try {
-            await verifyOtp(userEmail, otp); // Gửi OTP lên server để xác thực
+            await verifyOtp(email, otpCode); // Gửi OTP lên server để xác thực
             message.success("Xác minh OTP thành công!");
             setShowOtpPopup(false);
             navigate('/login');
@@ -71,7 +62,7 @@ const Register = () => {
     };
     const handleResendOtp = async () => {
         try {
-            await resendOtp(userEmail); // Gửi lại OTP
+            await resendOtp(email); // Gửi lại OTP
             message.success("OTP đã được gửi lại!");
         } catch (error) {
             message.error("Không thể gửi lại OTP, vui lòng thử lại sau.");
@@ -100,7 +91,7 @@ const Register = () => {
             </div>
             {/* Modal OTP */}
             <Modal title="Nhập mã OTP" visible={showOtpPopup} onOk={handleVerifyOtp} onCancel={() => setShowOtpPopup(false)}>
-                <CustomerInput type="text" label="OTP" i_id="otp" value={otp} onChange={(e) => setOtp(e.target.value)} />
+                <CustomerInput type="text" label="OTP" i_id="otpCode" value={otpCode} onChange={(e) => setOtpCode(e.target.value)} />
                 <Button type="link" onClick={handleResendOtp} style={{ marginTop: 10 }}>
                     Gửi lại OTP
                 </Button>

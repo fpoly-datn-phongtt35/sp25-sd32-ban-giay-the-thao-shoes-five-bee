@@ -3,6 +3,7 @@ import "./header.css";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Dropdown, Menu, Space } from "antd";
 import { BellOutlined, UserOutlined } from "@ant-design/icons";
+import { jwtDecode } from "jwt-decode";
 
 export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
@@ -16,22 +17,19 @@ export const Header = () => {
   };
   useEffect(() => {
     const checkLoginStatus = () => {
-      console.log("Checking login status...");
-      const token = sessionStorage.getItem("token");
-      const userInfo = sessionStorage.getItem("user");
-      console.log("Token:", token);
-      console.log("User info:", userInfo);
-
-      if (token && userInfo) {
-        const parsedUserInfo = JSON.parse(userInfo);
-        console.log("Parsed User Info:", parsedUserInfo);
-        setIsLoggedIn(true);
-        setUser(parsedUserInfo);
-        console.log("User is logged in:", parsedUserInfo);
-      } else {
-        setIsLoggedIn(false);
-        setUser(null);
-        console.log("User is not logged in");
+      const token = localStorage.getItem("token");
+      if(token){
+        try{
+            const tokenData = jwtDecode(token);
+            setUser({
+              email: tokenData.sub,
+              hoTen : tokenData.hoTen,
+              roles: [tokenData.role]
+          });
+          setIsLoggedIn(true);
+        }catch(error){
+          console.error("Error decoding token:", error);
+        }
       }
     };
 
@@ -49,17 +47,17 @@ export const Header = () => {
   }, []);
 
   const handleLogout = () => {
-    sessionStorage.removeItem("token");
-    sessionStorage.removeItem("user");
+    localStorage.removeItem("token");
+    localStorage.removeItem("refreshToken");
     setIsLoggedIn(false);
     setUser(null);
     window.dispatchEvent(new Event("loginChange"));
-    navigate("/"); // Chuyển hướng về trang chủ sau khi đăng xuất
+    navigate("/");
   };
 
   const renderUserName = () => {
-    if (user && user.roles.includes("ROLE_KHACH_HANG")) {
-      return `Khách hàng: ${user.hoTen}`;
+    if (user && user.roles.includes("ROLE_USER")) {
+      return `${user.hoTen}`;
     } else {
       return user?.hoTen || "Guest";
     }
@@ -71,14 +69,15 @@ export const Header = () => {
         <UserOutlined />
         <span>Profile</span>
       </Menu.Item>
-      <Menu.Item key="logout" onClick={handleLogout}>
-        <UserOutlined />
-        <span>Logout</span>
-      </Menu.Item>
       <Menu.Item key="donMua" onClick={handleOrderStatusPage}>
         <UserOutlined />
         <span>Đơn Mua</span>
       </Menu.Item>
+      <Menu.Item key="logout" onClick={handleLogout}>
+        <UserOutlined />
+        <span>Logout</span>
+      </Menu.Item>
+      
     </Menu>
   );
 
@@ -101,10 +100,10 @@ export const Header = () => {
             </a>
           </div>
         </div>
-
+          
         {/* Mobile Header */}
         <div className="col-md-4 col-sm-12 col-xs-12 evo-header-mobile">
-        
+
 
           <div className="logo evo-flexitem evo-flexitem-fill">
             <a
@@ -140,6 +139,14 @@ export const Header = () => {
         {/* Right Header */}
         <div className="col-md-4 col-sm-12 col-xs-12 right-header hidden-sm hidden-xs">
           <ul className="justify-end">
+          {isLoggedIn ? (
+              <Dropdown overlay={menuItems} trigger={["hover"]}>
+                <Space className="user-dropdown">
+                  <Avatar style={{ backgroundColor: "#87d068" }} icon={<UserOutlined />} />
+                  <span>{renderUserName()}</span>
+                </Space>
+              </Dropdown>
+            ) : (
             <li className="site-nav-item site-nav-account">
               <a href="/account" title="Tài khoản" rel="nofollow">
                 Tài khoản
@@ -157,7 +164,7 @@ export const Header = () => {
                 </li>
               </ul>
             </li>
-
+            )}
             <li className="site-nav-item site-nav-cart mini-cart">
               <a href="/cart" title="Giỏ hàng" rel="nofollow">
                 Giỏ hàng <i className="fa fa-cart-arrow-down"></i>
