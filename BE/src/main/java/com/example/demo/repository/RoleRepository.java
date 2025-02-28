@@ -14,10 +14,10 @@ public interface RoleRepository extends JpaRepository<RoleEntity, UUID> {
     Optional<RoleEntity> findByTen(String ten);
 
     @Query(value = "SELECT f.TEN, f.NAME_URL, ua.TEN\n" +
-            "FROM RoleEntity r\n" +
-            "JOIN PermissionRoleEntity uar ON r.ID = uar.ROLE_ID\n" +
-            "JOIN PermissionEntity ua ON ua.ID = uar.PERMISSION_ID\n" +
-            "JOIN FunctionEntity f ON f.ID = ua.FUNCTION_ID\n" +
+            "FROM TBL_ROLE r\n" +
+            "JOIN PERMISSION_ROLE uar ON r.ID = uar.ROLE_ID\n" +
+            "JOIN PERMISSION ua ON ua.ID = uar.PERMISSION_ID\n" +
+            "JOIN TBL_FUNCTION f ON f.ID = ua.FUNCTION_ID\n" +
             "WHERE r.TEN IN (:roles)",nativeQuery = true)
     List<String> findRoleFunctionAndPermission(List<String> roles);
 

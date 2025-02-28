@@ -4,13 +4,11 @@ import com.example.demo.dto.request.ExitEmailDto;
 import com.example.demo.dto.request.LoginRequest;
 import com.example.demo.dto.request.SignupRequest;
 import com.example.demo.dto.request.UserOtpDto;
+import com.example.demo.jwt.JwtTokenProvider;
 import com.example.demo.service.AuthService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.Map;
 
@@ -19,6 +17,9 @@ import java.util.Map;
 public class AuthController {
     @Autowired
     private AuthService authService;
+
+    @Autowired
+    private JwtTokenProvider jwtTokenProvider;
 
     @PostMapping("/signup")
     public ResponseEntity<?> signup(@RequestBody SignupRequest signupRequest){
@@ -46,10 +47,12 @@ public class AuthController {
     public ResponseEntity<?> checkOtp(@RequestBody UserOtpDto userOtpDto){
         return authService.checkOtp(userOtpDto);
     }
+
     @PostMapping("/reload-otp")
     public ResponseEntity<?> sendBackOtp(@RequestBody UserOtpDto userOtpDto){
         return authService.sendBackOtp(userOtpDto);
     }
+
     @PostMapping("/check-email")
     public ResponseEntity<?> checkEmail(@RequestBody ExitEmailDto exitEmailDto) {
         String email = exitEmailDto.getEmail();
@@ -60,4 +63,9 @@ public class AuthController {
         return ResponseEntity.ok(Map.of("exits", exits));
     }
 
+    @GetMapping("/user/id")
+    public ResponseEntity<?>getUserId(@RequestHeader(value = "Authorization",required = false)String token){
+        String userId = jwtTokenProvider.getCustomerIdFromJwt(token.replace("Bearer",""));
+        return ResponseEntity.ok(userId);
+    }
 }
