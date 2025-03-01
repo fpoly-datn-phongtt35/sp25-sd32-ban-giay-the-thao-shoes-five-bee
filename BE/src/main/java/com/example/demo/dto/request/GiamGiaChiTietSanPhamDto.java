@@ -20,6 +20,6 @@ public class GiamGiaChiTietSanPhamDto extends PageDto{
     private UUID id;
     private BigDecimal soTienDaGiam;
     private Integer trangThai;
-    private GiayDto giayDto;
+    private GiayChiTietDto giayDto;
     private GiamGiaSanPhamDto giamGiaSanPhamDto;
 }
