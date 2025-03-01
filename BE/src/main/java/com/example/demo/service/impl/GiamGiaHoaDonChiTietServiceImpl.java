@@ -4,9 +4,11 @@ import com.example.demo.dto.request.GiamGiaHoaDonChiTietDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaHoaDonChiTietEntity;
 import com.example.demo.entity.GiamGiaHoaDonEntity;
+import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonEntity;
 import com.example.demo.repository.GiamGiaHoaDonChiTietRepository;
 import com.example.demo.repository.GiamGiaHoaDonRepository;
+import com.example.demo.repository.HoaDonChiTietRepository;
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.GiamGiaHoaDonChiTietService;
 import jakarta.persistence.criteria.CriteriaBuilder;
@@ -32,63 +34,50 @@ public class GiamGiaHoaDonChiTietServiceImpl implements GiamGiaHoaDonChiTietServ
   private final GiamGiaHoaDonChiTietRepository giamGiaHoaDonChiTietRepository;
   private final HoaDonRepository hoaDonRepository;
   private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
+  private final HoaDonChiTietRepository hoaDonChiTietRepository;
 
+  @Override
+  public BigDecimal apDungPhieuGiamGia(
+      UUID hoaDonId, GiamGiaHoaDonEntity giamGiaHoaDonEntity, BigDecimal tongTienSanPham) {
+    HoaDonEntity hoaDon =
+        hoaDonRepository
+            .findById(hoaDonId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
 
-    @Override
-    public BigDecimal apDungPhieuGiamGia(UUID hoaDonId, String ten) {
-        HoaDonEntity hoaDon =
-                hoaDonRepository
-                        .findById(hoaDonId)
-                        .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
-
-        GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findByTen(ten);
-        if (giamGia == null) {
-            throw new RuntimeException("Mã phiếu giảm giá không hợp lệ!");
-        }
-
-        // Kiểm tra điều kiện áp dụng
-        if (hoaDon.getTongTien().compareTo(giamGia.getDieuKien()) < 0) {
-            throw new RuntimeException("Tổng tiền hóa đơn chưa đủ điều kiện áp dụng phiếu giảm giá!");
-        }
-
-        if (giamGia.getSoLuong() <= 0) {
-            throw new RuntimeException("Phiếu giảm giá đã hết lượt sử dụng!");
-        }
-
-        // Tính số tiền được giảm
-        BigDecimal soTienDaGiam =
-                hoaDon
-                        .getTongTien()
-                        .multiply(BigDecimal.valueOf(giamGia.getPhanTramGiam()))
-                        .divide(BigDecimal.valueOf(100));
-
-        if (soTienDaGiam.compareTo(giamGia.getSoTienGiamMax()) > 0) {
-            soTienDaGiam = giamGia.getSoTienGiamMax();
-        }
-
-
-        // Lưu thông tin giảm giá vào bảng chi tiết
-        GiamGiaHoaDonChiTietEntity chiTietGiamGia = new GiamGiaHoaDonChiTietEntity();
-        chiTietGiamGia.setId(UUID.randomUUID());
-        chiTietGiamGia.setHoaDonEntity(hoaDon);
-        chiTietGiamGia.setChuongTrinhGiamGiaHoaDonEntity(giamGia);
-        chiTietGiamGia.setTongTien(hoaDon.getTongTien());
-        chiTietGiamGia.setSoTienDaGiam(soTienDaGiam);
-      //  chiTietGiamGia.setTongTienThanhToan(tongTienThanhToan);
-        chiTietGiamGia.setTrangThai(1);
-
-        giamGiaHoaDonChiTietRepository.save(chiTietGiamGia);
-
-        // Cập nhật hóa đơn
-        hoaDon.setSoTienGiam(soTienDaGiam);
-        hoaDonRepository.save(hoaDon);
-
-        // Giảm số lượng phiếu giảm giá
-        giamGia.setSoLuong(giamGia.getSoLuong() - 1);
-        giamGiaHoaDonRepository.save(giamGia);
-
-        return soTienDaGiam;
+    // Kiểm tra điều kiện áp dụng
+    BigDecimal soTienDaGiam = BigDecimal.ZERO;
+    if (tongTienSanPham.compareTo(giamGiaHoaDonEntity.getDieuKien()) >= 0) {
+      soTienDaGiam =
+          tongTienSanPham
+              .multiply(BigDecimal.valueOf(giamGiaHoaDonEntity.getPhanTramGiam()))
+              .divide(BigDecimal.valueOf(100));
     }
+
+    if (giamGiaHoaDonEntity.getSoLuong() <= 0) {
+      throw new RuntimeException("Phiếu giảm giá đã hết lượt sử dụng!");
+    }
+
+    if (soTienDaGiam.compareTo(giamGiaHoaDonEntity.getSoTienGiamMax()) > 0) {
+      soTienDaGiam = giamGiaHoaDonEntity.getSoTienGiamMax();
+    }
+
+    // Lưu thông tin giảm giá vào bảng chi tiết
+    GiamGiaHoaDonChiTietEntity chiTietGiamGia = new GiamGiaHoaDonChiTietEntity();
+    chiTietGiamGia.setHoaDonEntity(hoaDon);
+    chiTietGiamGia.setChuongTrinhGiamGiaHoaDonEntity(giamGiaHoaDonEntity);
+    chiTietGiamGia.setTongTien(hoaDon.getTongTien());
+    chiTietGiamGia.setSoTienDaGiam(soTienDaGiam);
+    //  chiTietGiamGia.setTongTienThanhToan(tongTienThanhToan);
+    chiTietGiamGia.setTrangThai(1);
+
+    giamGiaHoaDonChiTietRepository.save(chiTietGiamGia);
+
+    // Giảm số lượng phiếu giảm giá
+    giamGiaHoaDonEntity.setSoLuong(giamGiaHoaDonEntity.getSoLuong() - 1);
+    giamGiaHoaDonRepository.save(giamGiaHoaDonEntity);
+
+    return soTienDaGiam;
+  }
 
   @Override
   public List<GiamGiaHoaDonChiTietEntity> getAll() {
