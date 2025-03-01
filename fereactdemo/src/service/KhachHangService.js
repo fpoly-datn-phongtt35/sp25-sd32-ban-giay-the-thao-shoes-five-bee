@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios from "../axiosConfig";
 
-const REST_API_BASE_URL = "http://localhost:5000/user";
+const REST_API_BASE_URL = "/user";
 
 export const getAllKhachHang = () => axios.get(`${REST_API_BASE_URL}/getAll`);
 

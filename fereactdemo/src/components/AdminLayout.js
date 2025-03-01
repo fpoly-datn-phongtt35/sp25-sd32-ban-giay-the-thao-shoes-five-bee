@@ -178,10 +178,10 @@ const AdminLayout = () => {
                                     key: '/admin/chuc-vu',
                                     label: 'Chức Vụ',
                                 },
-                                {
-                                    key: '/admin/hang-khachHang',
-                                    label: 'Hạng Khách Hàng',
-                                }
+                                // {
+                                //     key: '/admin/hang-khachHang',
+                                //     label: 'Hạng Khách Hàng',
+                                // }
                             ]
                         },
                         {

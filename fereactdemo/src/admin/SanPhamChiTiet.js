@@ -58,7 +58,9 @@ const SanPhamChiTiet = () => {
 
   const getGiayData = async () => {
     const result = await getGiay();
-    const activeGiay = result.data.filter((item) => item.trangThai === 1);
+    const activeGiay = result.data.filter((item) => item.trangThai === 0);
+    console.log("active giay", activeGiay); 
+    
     setGiayList(activeGiay);
   };
 
@@ -76,7 +78,9 @@ const SanPhamChiTiet = () => {
   };
   const getTenGiay = async () => {
     const result = await getGiay();
-    const ten = result.data.map((item) => item.ten); // Lấy tất cả tên giày
+    const ten = result.data.map((item) => item.ten);
+    console.log("ten giay", ten);
+    
     setTen(ten);
   };
 
@@ -249,6 +253,7 @@ const SanPhamChiTiet = () => {
       message.success("Thao tác thành công!");
 
       // Reset form
+      setTen("")
       setSoLuongTon1("");
       setGiaBan1("");
       setSelectedMauSac1(null);
@@ -293,7 +298,8 @@ const SanPhamChiTiet = () => {
         giayChiTiet.kichCoEntity ? giayChiTiet.kichCoEntity.id : null
       );
       setSelectedGiay1(
-        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null
+        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null,
+        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.ten : null
       );
       setIsModalVisible(true);
     } catch (error) {
