@@ -8,10 +8,8 @@ import moment from 'moment';
 
 const NhanVien = () => {
     const [nhanVien, setNhanVien] = useState([]);
-    const [chucVuList, setChucVuList] = useState([]);
     const [value, setValue] = useState(1);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-    const [selectedChucVu, setSelectedChucVu] = useState(null);
     const [hoTen, setHoTen] = useState("");
     const [matKhau, setMatKhau] = useState("");
     const [email, setEmail] = useState("");
@@ -39,33 +37,24 @@ const NhanVien = () => {
         return status === 0 ? "Đang sử dụng" : "Không sử dụng";
     };
 
-    const handleChucVuChange = (value) => {
-        console.log(value);
-        setSelectedChucVu(value);
-    }
     useEffect(() => {
-        getAllChucVu();
         getNhanVien();
     }, []);
-    const getAllChucVu = async () => {
-        const result = await getChucVu();
-        const activeGiay = result.data.filter(item => item.trangThai === 0);
-        setChucVuList(activeGiay);
-    };
 
     const getNhanVien = async () => {
         const result = await getAllNhanVien();
-        const loadTable = result.data.map((item, index) => ({
-            key: index,
-            ID: item.id,
-            HOTEN: item.hoTen,
-            EMAIL: item.email,
-            ANH: item.anh,
-            ROLENAMES: item.roleNames[0],
-            TRANG_THAI: item.isEnabled ? 0 : 1,
-            NGAYSINH: item.ngaySinh,
-            SODIENTHOAI: item.soDienThoai,
-        }));
+        const loadTable = result.data
+            .filter(item => item.roleNames.includes('ROLE_STAFF'))
+            .map((item, index) => ({
+                key: index,
+                ID: item.id,
+                HOTEN: item.hoTen,
+                EMAIL: item.email,
+                ANH: item.anh,
+                TRANG_THAI: item.isEnabled ? 0 : 1,
+                NGAYSINH: item.ngaySinh,
+                SODIENTHOAI: item.soDienThoai,
+            }));
         setNhanVien(loadTable);
         const activeNhanVienData = loadTable.filter(item => item.TRANG_THAI === 0);
         setActiveNhanVien(activeNhanVienData);
@@ -85,7 +74,7 @@ const NhanVien = () => {
             email: email,
             matKhau: hashedPassword,
             isEnabled: value === 1,
-            roleNames: selectedChucVu ? [`${selectedChucVu}`] : ['ROLE_USER'],
+            roleNames: ['ROLE_STAFF'],
             ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
             soDienThoai: soDienThoai,
         };
@@ -116,7 +105,6 @@ const NhanVien = () => {
             setEmail(nhanVien.email);
             setMatKhau(nhanVien.matKhau);
             setValue(nhanVien.isEnabled ? 1 : 2);
-            setSelectedChucVu(nhanVien.roleNames ? nhanVien.roleNames[0] : null);
             setIsModalVisible(true);
             setNgaySinh(nhanVien.ngaySinh ? moment(nhanVien.ngaySinh) : null);
             setSoDienThoai(nhanVien.soDienThoai || "");
@@ -134,7 +122,7 @@ const NhanVien = () => {
             hoTen: hoTen,
             email: email,
             isEnabled: value === 1,
-            roleNames: selectedChucVu ? [`${selectedChucVu}`] : ['ROLE_USER'],
+            roleNames: ['ROLE_STAFF'],
             ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
             soDienThoai: soDienThoai,
         };
@@ -155,7 +143,6 @@ const NhanVien = () => {
         setEmail("");
         setMatKhau("");
         setValue(1);
-        setSelectedChucVu(null);
         setEditingNhanVien(null);
         setSelectedFile(null);
         setNgaySinh(null);
@@ -169,19 +156,6 @@ const NhanVien = () => {
     return (
         <div style={{ display: 'flex' }}>
             <div style={{ width: '60%', marginLeft: '200px', overflow: 'auto' }}>
-                <Select 
-                    placeholder='Chọn Chức Vụ' 
-                    value={selectedChucVu} 
-                    onChange={handleChucVuChange}
-                    style={{ width: '100%' }}
-                >
-                    {Array.isArray(chucVuList) && chucVuList.map(cv => (
-                        <Option key={cv.id} value={cv.ten}>
-                            {cv.ten}
-                        </Option>
-                    ))}
-                </Select>
-                <br /><br />
                 <Input placeholder='Tên Nhân Viên' value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                 <br /><br />
                 <Input placeholder='Email@...' value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -259,12 +233,6 @@ const NhanVien = () => {
                             ),
                         },
                         {
-                            title: 'CHỨC VỤ',
-                            dataIndex: 'ROLENAMES',
-                            key: 'ROLENAMES',
-                            render: (text) => text?.replace('ROLE_', '')
-                        },
-                        {
                             title: 'TRẠNG THÁI',
                             dataIndex: 'TRANG_THAI',
                             key: 'TRANG_THAI',
@@ -321,15 +289,6 @@ const NhanVien = () => {
                                 style={{ width: '100px', height: '100px', objectFit: 'cover', marginTop: '10px' }}
                             />
                         )}
-                    </Form.Item>
-                    <Form.Item label="Chức Vụ">
-                        <Select placeholder='Chọn Chức Vụ' value={selectedChucVu} onChange={handleChucVuChange}>
-                            {Array.isArray(chucVuList) && chucVuList.map(cv => (
-                                <Option key={cv.id} value={cv.ten}>
-                                    {cv.ten}
-                                </Option>
-                            ))}
-                        </Select>
                     </Form.Item>
                     <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
