@@ -9,7 +9,4 @@ import org.springframework.stereotype.Repository;
 @Repository
 public interface GiamGiaHoaDonRepository
     extends JpaRepository<GiamGiaHoaDonEntity, UUID>,
-        JpaSpecificationExecutor<GiamGiaHoaDonEntity> {
-
-  GiamGiaHoaDonEntity findByTen(String ten);
-}
+        JpaSpecificationExecutor<GiamGiaHoaDonEntity> {}

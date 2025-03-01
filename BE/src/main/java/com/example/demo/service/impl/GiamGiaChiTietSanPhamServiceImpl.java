@@ -45,10 +45,8 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
         GiamGiaChiTietSanPhamEntity.builder()
             .soTienDaGiam(giamGiaChiTietSanPhamDto.getSoTienDaGiam())
             .trangThai(giamGiaChiTietSanPhamDto.getTrangThai())
-            .giayChiTiet(
-                giayChiTietRepository
-                    .findById(giamGiaChiTietSanPhamDto.getGiayDto().getId())
-                    .orElse(null))
+            .giay(
+                giayRepository.findById(giamGiaChiTietSanPhamDto.getGiayDto().getId()).orElse(null))
             .chuongTrinhGiamSanPhamEntity(
                 giamGiaSanPhamRepository
                     .findById(giamGiaChiTietSanPhamDto.getGiamGiaSanPhamDto().getId())
@@ -65,8 +63,8 @@ public class GiamGiaChiTietSanPhamServiceImpl implements GiamGiaChiTietSanPhamSe
             o -> {
               o.setSoTienDaGiam(giamGiaChiTietSanPhamDto.getSoTienDaGiam());
               o.setTrangThai(giamGiaChiTietSanPhamDto.getTrangThai());
-              o.setGiayChiTiet(
-                  giayChiTietRepository
+              o.setGiay(
+                  giayRepository
                       .findById(giamGiaChiTietSanPhamDto.getGiayDto().getId())
                       .orElse(null));
               o.setChuongTrinhGiamSanPhamEntity(
