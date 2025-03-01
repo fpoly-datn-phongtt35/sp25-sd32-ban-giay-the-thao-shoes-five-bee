@@ -36,7 +36,7 @@ public class BanHangTaiQuayController {
   }
 
   @GetMapping("/san-pham")
-  public ResponseEntity<?> getSanPhamVaoHoaDon(@PathVariable UUID idHoaDon) {
+  public ResponseEntity<?> getSanPhamTrongHoaDonCho(@PathVariable UUID idHoaDon) {
     return ResponseEntity.ok(banHangTaiQuayService.getSanPhamTrongHoaDon(idHoaDon));
   }
 
