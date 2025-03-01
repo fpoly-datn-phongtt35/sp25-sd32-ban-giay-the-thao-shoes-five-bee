@@ -8,19 +8,21 @@ import java.util.List;
 import java.util.UUID;
 
 public interface BanHangTaiQuayService {
-    void thanhToanTaiQuay(UUID idHoaDon, HoaDonRequest hoaDonRequest);
+  void thanhToanTaiQuay(UUID idHoaDon, String tenPhieuGiamGia, HoaDonRequest hoaDonRequest);
 
-    HoaDonEntity createHoaDonBanHangTaiQuay();
+  HoaDonEntity createHoaDonBanHangTaiQuay();
 
-    HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham);
+  HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham);
 
-    HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease);
+  HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease);
 
-    List<HoaDonEntity> getListHoaDonCho();
+  List<HoaDonEntity> getListHoaDonCho();
 
-    void deleteHoaDonCho(UUID idHoaDon);
+  List<HoaDonChiTietEntity> getSanPhamTrongHoaDon(UUID idHoaDon);
 
-    void deleteAllHoaDonCho(List<UUID> idHoaDons);
+  void deleteHoaDonCho(UUID idHoaDon);
 
-    void deleteHoaDonChiTiet(UUID idHoaDonChiTiet);
+  void deleteAllHoaDonCho(List<UUID> idHoaDons);
+
+  void deleteHoaDonChiTiet(UUID idHoaDonChiTiet);
 }

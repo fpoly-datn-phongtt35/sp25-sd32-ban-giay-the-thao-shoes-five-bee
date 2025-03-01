@@ -11,10 +11,10 @@ import org.springframework.stereotype.Repository;
 import java.util.UUID;
 
 @Repository
-public interface GiamGiaChiTietSanPhamRepository extends JpaRepository<GiamGiaChiTietSanPhamEntity, UUID>, JpaSpecificationExecutor<GiamGiaChiTietSanPhamEntity> {
+public interface GiamGiaChiTietSanPhamRepository
+    extends JpaRepository<GiamGiaChiTietSanPhamEntity, UUID>,
+        JpaSpecificationExecutor<GiamGiaChiTietSanPhamEntity> {
 
-    GiamGiaChiTietSanPhamEntity findByGiay(GiayEntity giayEntity);
-    @Query("SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.giayChiTiet.id = :id")
-    GiamGiaChiTietSanPhamEntity findByGiayChiTiet(@Param("id") UUID id);
-
+  @Query("SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.giayChiTiet.id = :id")
+  GiamGiaChiTietSanPhamEntity findByGiayChiTiet(@Param("id") UUID id);
 }
