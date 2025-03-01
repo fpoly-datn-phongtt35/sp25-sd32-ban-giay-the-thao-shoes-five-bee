@@ -2,7 +2,7 @@ import React from "react";
 import "./banhangtaiquay.css";
 import { getGiay } from "../service/GiayService";
 import { useState, useEffect } from "react";
-import { Button, Input, message, Select } from "antd";
+import { Button, Input, message, Select, Modal } from "antd";
 import {
   addHoaDon,
   deleteHoaDon,
@@ -54,6 +54,7 @@ const BanHangTaiQuay = () => {
   const [hoTen, setHoTen] = useState("");
   const [soDienThoai, setSoDienThoai] = useState("");
   const { Option } = Select;
+  const [isOpen, setIsOpen] = useState(false);
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -281,24 +282,29 @@ const BanHangTaiQuay = () => {
   useEffect(() => {
     updateTotalAmount();
   }, [selectedProducts, selectedPage, soTienGiam]);
+
   const getAllGiay = async () => {
     try {
-      const result = await getAllGiayChiTiet();
-      const dataGiay = result.data
-        .filter((item) => item && item.giay)
-        .map((item, index) => ({
-          key: index,
-          ID: item.id,
-          MA: item.giay?.ma || "N/A",
-          TEN: item.giay?.ten || "N/A",
-          GIABAN: item.giaBan || 0,
-          GIASAUKHUYENMAI: item.giay?.giaSauKhuyenMai || 0,
-          ANH_GIAY: item.giay?.anhGiay?.tenUrl || null,
-          SOLUONG: item.soLuongTon || 0,
-          KICH_CO: item.kichCo?.ten || "N/A",
-          MAU_SAC: item.mauSac?.ten || "N/A",
-        }));
+      const result = await getGiay();
+      if (!Array.isArray(result.data)) {
+        throw new Error("Dữ liệu trả về không phải là mảng");
+      }
+
+      const dataGiay = result.data.map((item, index) => ({
+        key: index,
+        TEN: item.ten ?? "N/A",
+        GIABAN: item.giaBan ?? 0,
+        ANH_GIAY:
+          item.anhGiayEntities?.length > 0
+            ? item.anhGiayEntities[0].tenUrl
+            : null,
+        SOLUONG: item.soLuongTon ?? 0,
+        MO_TA: item.moTa ?? "Không có mô tả",
+        TRANG_THAI: item.trangThai === 1 ? "Đang bán" : "Ngừng bán",
+      }));
+
       setGiay(dataGiay);
+      console.log("Dữ liệu giày:", dataGiay);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu giày:", error);
       message.error("Không thể lấy dữ liệu giày");
@@ -679,13 +685,15 @@ const BanHangTaiQuay = () => {
             ))}
             <Button onClick={handleAddPage}>+</Button>
           </div>
+
+          {/* hiển thị sản phẩm */}
           <div className="selected_products">
             {(Array.isArray(selectedProducts[selectedPage])
               ? selectedProducts[selectedPage]
               : []
             ).map((product) => (
               <div key={product.ID} className="selected_product">
-                <div>{product.TEN}</div>
+                <div>{product.tenUrl}</div>
                 {product.ANH_GIAY && (
                   <img
                     src={`http://localhost:5000/upload/${product.ANH_GIAY}`}
@@ -722,13 +730,13 @@ const BanHangTaiQuay = () => {
           <table className="product_table">
             <thead>
               <tr>
-                <th>Mã</th>
                 <th>Ảnh</th>
+
                 <th>Tên</th>
                 <th>Giá Bán</th>
                 <th>Số Lượng</th>
-                <th>Kích Cỡ</th>
-                <th>Màu Sắc</th>
+                <th>Mô Tả</th>
+                <th>Trạng Thái</th>
               </tr>
             </thead>
             <tbody>
@@ -748,24 +756,28 @@ const BanHangTaiQuay = () => {
                     cursor: item.SOLUONG === 0 ? "not-allowed" : "pointer",
                   }}
                 >
-                  <td>{item.MA}</td>
+                  {/* Cột ảnh giày */}
                   <td>
                     {item.ANH_GIAY ? (
                       <img
-                        src={`http://localhost:5000/upload/${item.ANH_GIAY}`}
+                        src={item.ANH_GIAY}
                         width={50}
                         height={50}
                         alt={item.TEN}
+                        style={{ objectFit: "cover", borderRadius: "5px" }}
                       />
                     ) : (
                       "No Image"
                     )}
                   </td>
+
+                  {/* Các cột dữ liệu khác */}
+
                   <td>{item.TEN}</td>
-                  <td>{item.GIABAN}</td>
+                  <td>{item.GIABAN.toLocaleString("vi-VN")} đ</td>
                   <td>{item.SOLUONG}</td>
-                  <td>{item.KICH_CO}</td>
-                  <td>{item.MAU_SAC}</td>
+                  <td>{item.MO_TA}</td>
+                  <td>{item.TRANG_THAI}</td>
                 </tr>
               ))}
             </tbody>
@@ -773,100 +785,151 @@ const BanHangTaiQuay = () => {
         </div>
       </div>
       <div className="right">
-        <Select
-          placeholder="Chọn Khách Hàng"
-          value={selectedKhachHang}
-          onChange={handleKhachHangChange}
-        >
-          {Array.isArray(khachHangList) &&
-            khachHangList.map((hkh) => (
-              <Option key={hkh.id} value={hkh.id}>
-                {hkh.hoTen}
-              </Option>
-            ))}
-        </Select>
-        <Button type="primary" danger onClick={handleClear}>
-          Clear
-        </Button>
-        <br />
-        Họ Tên Khách Hàng :
-        <Input
-          type="input"
-          value={hoTen}
-          onChange={(e) => setHoTen(e.target.value)}
-          placeholder="Nhập họ tên khách hàng"
-        />
-        Số Điện Thoại :
-        <Input
-          type="input"
-          value={soDienThoai}
-          onChange={(e) => setSoDienThoai(e.target.value)}
-          placeholder="Nhập số điện thoại khách hàng"
-        />
-        <Button
-          type="primary"
-          onClick={handleAddKhachHang}
-          style={{ marginTop: "10px" }}
-          disabled={!hoTen || !soDienThoai}
-        >
-          Thêm Khách Hàng Mới
-        </Button>
-        <br />
-        <br />
-        <Select
-          placeholder="Chọn Chương Trình Giảm Giá"
-          value={selectedGiamGia?.id}
-          onChange={handleSelectGiamGia}
-        >
-          {giamGiaList
-            .filter((gg) => getTotalAmount() >= gg.dieuKien)
-            .map((gg) => (
-              <Option key={gg.id} value={gg.id}>
-                {gg.ten} (Giảm {gg.phanTramGiam}%, tối đa {gg.soTienGiamMax})
-              </Option>
-            ))}
-        </Select>
-        <p>Tiền Khách Phải Trả: {formatCurrency(totalAmount)} VND</p>
-        Tiền khách đưa
-        <Input
-          value={customerMoney}
-          onChange={handleInputChange}
-          placeholder="Nhập số tiền khách đưa"
-        />
-        <hr />
-        <p>Tiền thừa: {formatCurrency(changeAmount)}</p>
-        <hr />
-        <div className="check_tt">
-          <label>
-            <input
-              type="checkbox"
-              value="option1"
-              checked={selectedOption === "option1"}
-              onChange={handleChange}
-            />
-            Tiền mặt
-          </label>
-          <br />
-          <label>
-            <input
-              type="checkbox"
-              value="option3"
-              checked={selectedOption === "option3"}
-              onChange={handleChange}
-            />
-            Chuyển Khoản (VNPay)
-          </label>
-        </div>
-        <p style={{ paddingTop: "10px" }}>
-          Tổng Tiền: {formatCurrency(getTotalAmount())}
-        </p>
-        <button
-          className="btn-tt"
-          onClick={handlePayment}
-          disabled={getTotalAmount() <= 0}
-        >
+        {/* Nút mở popup */}
+        <Button type="primary" onClick={() => setIsOpen(true)}>
           Thanh Toán
-        </button>
+        </Button>
+        {/* Popup Thanh Toán */}
+        <Modal
+  className="fullscreen-modal"
+  open={isOpen}
+  onCancel={() => setIsOpen(false)}
+  footer={null} // Ẩn footer mặc định
+  closable={false} // Ẩn nút đóng mặc định
+>
+  {/* <div className="modal-header">
+    <h2>Đơn Hàng</h2>
+    <Button type="primary" icon="plus" onClick={handleNewOrder}>
+      +
+    </Button>
+  </div> */}
+
+  <div className="modal-content">
+    <div className="customer-section">
+      <Select
+        className="customer-select"
+        placeholder="Chọn Khách Hàng"
+        value={selectedKhachHang}
+        onChange={handleKhachHangChange}
+      >
+        {Array.isArray(khachHangList) &&
+          khachHangList.map((hkh) => (
+            <Option key={hkh.id} value={hkh.id}>
+              {hkh.hoTen}
+            </Option>
+          ))}
+      </Select>
+      <Button type="primary" danger onClick={handleClear}>
+        Clear
+      </Button>
+    </div>
+
+    <div className="input-group">
+      <label>Họ Tên Khách Hàng:</label>
+      <Input
+        value={hoTen}
+        onChange={(e) => setHoTen(e.target.value)}
+        placeholder="Nhập họ tên khách hàng"
+      />
+    </div>
+
+    <div className="input-group">
+      <label>Số Điện Thoại:</label>
+      <Input
+        value={soDienThoai}
+        onChange={(e) => setSoDienThoai(e.target.value)}
+        placeholder="Nhập số điện thoại khách hàng"
+      />
+    </div>
+
+    <Button
+      type="primary"
+      onClick={handleAddKhachHang}
+      disabled={!hoTen || !soDienThoai}
+    >
+      Thêm Khách Hàng Mới
+    </Button>
+
+    <Select
+      className="discount-select"
+      placeholder="Chọn Chương Trình Giảm Giá"
+      value={selectedGiamGia?.id}
+      onChange={handleSelectGiamGia}
+    >
+      {giamGiaList
+        .filter((gg) => getTotalAmount() >= gg.dieuKien)
+        .map((gg) => (
+          <Option key={gg.id} value={gg.id}>
+            {gg.ten} (Giảm {gg.phanTramGiam}%, tối đa {gg.soTienGiamMax})
+          </Option>
+        ))}
+    </Select>
+
+    <p className="amount">
+      <strong>Tiền Khách Phải Trả:</strong> {formatCurrency(totalAmount)} VND
+    </p>
+
+    <div className="input-group">
+      <label>Tiền khách đưa:</label>
+      <Input
+        value={customerMoney}
+        onChange={handleInputChange}
+        placeholder="Nhập số tiền khách đưa"
+      />
+    </div>
+
+    <hr />
+
+    <p className="change-amount">
+      <strong>Tiền thừa:</strong> {formatCurrency(changeAmount)}
+    </p>
+
+    <hr />
+
+    <div className="payment-options">
+      <label>
+        <input
+          type="checkbox"
+          value="option1"
+          checked={selectedOption === "option1"}
+          onChange={handleChange}
+        />
+        Tiền mặt
+      </label>
+      <label>
+        <input
+          type="checkbox"
+          value="option3"
+          checked={selectedOption === "option3"}
+          onChange={handleChange}
+        />
+        Chuyển Khoản (VNPay)
+      </label>
+    </div>
+
+    <p className="total-amount">
+      <strong>Tổng Tiền: {formatCurrency(getTotalAmount())}</strong>
+    </p>
+
+    <div className="button-group">
+      <Button
+        className="cancel-button"
+        onClick={() => setIsOpen(false)}
+      >
+        Cancel
+      </Button>
+      <Button
+        className="pay-button"
+        type="primary"
+        onClick={handlePayment}
+        disabled={getTotalAmount() <= 0}
+      >
+        Thanh Toán (F1)
+      </Button>
+    </div>
+  </div>
+</Modal>
+
       </div>
     </div>
   );
