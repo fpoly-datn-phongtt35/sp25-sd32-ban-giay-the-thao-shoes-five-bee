@@ -46,11 +46,8 @@ public class QRCodeServiceImpl implements QRCodeService {
         }
 
         // 📌 Tìm sản phẩm chi tiết (GiayChiTietEntity) theo mã vạch
-        Optional<GiayChiTietEntity> optionalGiayChiTiet = giayChiTietRepository.findByMaVach(maVach);
-        if (optionalGiayChiTiet.isEmpty()) {
-            return "Sản phẩm không tồn tại!";
-        }
-        GiayChiTietEntity giayChiTiet = optionalGiayChiTiet.get();
+        GiayChiTietEntity giayChiTiet = giayChiTietRepository.findByMaVach(maVach)
+                .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại!"));
 
         // 📌 Lấy giày tổng (GiayEntity)
         GiayEntity giay = giayChiTiet.getGiayEntity();
@@ -72,11 +69,12 @@ public class QRCodeServiceImpl implements QRCodeService {
         HoaDonChiTietEntity hoaDonChiTiet = hoaDonChiTietRepository
                 .findByHoaDonEntityAndGiayChiTietEntity(hoaDonCho, giayChiTiet);
 
+        // 📌 Tính toán giá bán & giảm giá
         BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
         BigDecimal giaSauGiam = giaBanGoc;
 
         GiamGiaChiTietSanPhamEntity giamGiaOpt =
-                giamGiaChiTietSanPhamRepository.findByGiay(giay);
+                giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
 
         if (giamGiaOpt != null) {
             BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
@@ -95,7 +93,7 @@ public class QRCodeServiceImpl implements QRCodeService {
             // 📌 Nếu sản phẩm chưa có, thêm sản phẩm vào hóa đơn mới
             hoaDonChiTiet = HoaDonChiTietEntity.builder()
                     .soLuong(1)
-                    .giaBan(giayChiTiet.getGiaBan())
+                    .giaBan(giaBanGoc)
                     .donGia(giaSauGiam)
                     .trangThai(1)
                     .hoaDonEntity(hoaDonCho)
@@ -115,6 +113,8 @@ public class QRCodeServiceImpl implements QRCodeService {
 
         return "Sản phẩm đã được thêm vào hóa đơn chờ!";
     }
+
+
     private void capNhatSoLuongTongGiay(GiayEntity giay) {
         // 📌 Tính tổng số lượng tồn của tất cả `GiayChiTietEntity` của `GiayEntity` này
         int tongSoLuong = giayChiTietRepository.findByGiayEntity(giay)
