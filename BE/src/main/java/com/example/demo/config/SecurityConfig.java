@@ -1,7 +1,6 @@
 package com.example.demo.config;
 
 import com.example.demo.jwt.JwtAuthFilter;
-import com.example.demo.jwt.JwtAuthFilterAfter;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.security.authentication.AuthenticationManager;
@@ -30,11 +29,6 @@ public class SecurityConfig {
     }
 
     @Bean
-    public JwtAuthFilterAfter jwtAuthFilterAfter(){
-        return new JwtAuthFilterAfter();
-    }
-
-    @Bean
     public PasswordEncoder passwordEncoder(){
         return new BCryptPasswordEncoder();
     }
@@ -56,7 +50,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated())
-                .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(jwtAuthFilter(),UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

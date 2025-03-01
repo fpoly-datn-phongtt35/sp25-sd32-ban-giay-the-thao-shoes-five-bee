@@ -1,6 +1,7 @@
 import axios from "../axiosConfig";
 
-const REST_API_BASE_URL = "/chat-lieu";
+const REST_API_BASE_URL = "http://localhost:5000/chat-lieu";
+
 
 export const getChatLieu = () => axios.post(`${REST_API_BASE_URL}/getAll`);
 

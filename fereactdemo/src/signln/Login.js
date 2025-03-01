@@ -56,7 +56,7 @@ const Login = () => {
 
       window.dispatchEvent(new Event("loginChange"));
       if (response.roles.includes("ROLE_ADMIN") || response.roles.includes("ROLE_STAFF")) {
-        navigate("/admin/ban-hang-tai-quay");
+        navigate("/admin");
       } else if (response.roles.includes("ROLE_USER")) {
         navigate("/home");
       } else {
