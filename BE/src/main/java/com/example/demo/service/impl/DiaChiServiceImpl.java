@@ -42,6 +42,7 @@ public class DiaChiServiceImpl implements DiaChiService {
         diaChiEntity.setHuyen(diaChiDto.getHuyen());
         diaChiEntity.setThanhPho(diaChiDto.getThanhPho());
         diaChiEntity.setTenDiaChi(diaChiDto.getTenDiaChi());
+        diaChiEntity.setDiaChiCuThe(diaChiDto.getDiaChiCuThe());
         diaChiEntity.setSdtNguoiNhan(diaChiDto.getSdtNguoiNhan());
         diaChiEntity.setTenNguoiNhan(diaChiDto.getTenNguoiNhan());
         diaChiEntity.setTrangThai(diaChiDto.getTrangThai());
@@ -57,6 +58,7 @@ public class DiaChiServiceImpl implements DiaChiService {
             o.setHuyen(diaChiDto.getHuyen());
             o.setThanhPho(diaChiDto.getThanhPho());
             o.setTenDiaChi(diaChiDto.getTenDiaChi());
+            o.setDiaChiCuThe(diaChiDto.getDiaChiCuThe());
             o.setTenNguoiNhan(diaChiDto.getTenNguoiNhan());
             o.setSdtNguoiNhan(diaChiDto.getSdtNguoiNhan());
             o.setTrangThai(diaChiDto.getTrangThai());

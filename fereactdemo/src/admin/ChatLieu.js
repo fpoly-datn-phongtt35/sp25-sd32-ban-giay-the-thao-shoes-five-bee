@@ -143,12 +143,12 @@ const ChatLieu = () => {
                         dataIndex: 'TEN',
                     },
                     {
-                        title: 'TRANG THAI',
+                        title: 'Trạng thái',
                         dataIndex: 'trang_thai',
                         render: (text, record) => trangThai(record.TRANG_THAI)
                     },
                     {
-                        title: '',
+                        title: 'Thao tác',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
