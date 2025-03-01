@@ -303,41 +303,41 @@ const SanPhamChiTiet = () => {
 
   const editGiayChiTietButton = async () => {
     if (!editingGiayChiTiet) {
-        message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
-        return;
+      message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
+      return;
     }
 
     const newDataGiayChiTiet = {
-        id: editingGiayChiTiet?.id || null,
-        soLuongTon: soLuongTon1,
-        giaBan: giaBan1,
-        giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
-        trangThai: value === 1 ? 0 : 1,
-        mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null, 
-        kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
+      id: editingGiayChiTiet?.id || null,
+      soLuongTon: soLuongTon1,
+      giaBan: giaBan1,
+      giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
+      trangThai: value === 1 ? 0 : 1,
+      mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null,
+      kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
     };
 
     console.log("🔍 Dữ liệu cập nhật gửi đi:", newDataGiayChiTiet);
 
     try {
-        if (!newDataGiayChiTiet.giayDto?.id || 
-            !newDataGiayChiTiet.mauSacDto?.id || 
-            !newDataGiayChiTiet.kichCoDto?.id) {
-            message.error("❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!");
-            return;
-        }
+      if (!newDataGiayChiTiet.giayDto?.id ||
+        !newDataGiayChiTiet.mauSacDto?.id ||
+        !newDataGiayChiTiet.kichCoDto?.id) {
+        message.error("❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!");
+        return;
+      }
 
-        await updateGiayChiTiet(newDataGiayChiTiet);
-        message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
+      await updateGiayChiTiet(newDataGiayChiTiet);
+      message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
 
-        await getDataGiayChiTiet(); // Cập nhật danh sách sau khi sửa
-        resetForm();
-        setIsModalVisible(false);
+      await getDataGiayChiTiet(); // Cập nhật danh sách sau khi sửa
+      resetForm();
+      setIsModalVisible(false);
     } catch (error) {
-        console.error("❌ Lỗi cập nhật sản phẩm chi tiết:", error.response?.data || error.message);
-        message.error("❌ Lỗi cập nhật sản phẩm chi tiết: " + (error.response?.data?.message || error.message));
+      console.error("❌ Lỗi cập nhật sản phẩm chi tiết:", error.response?.data || error.message);
+      message.error("❌ Lỗi cập nhật sản phẩm chi tiết: " + (error.response?.data?.message || error.message));
     }
-};
+  };
 
 
   const resetForm = () => {
@@ -432,8 +432,8 @@ const SanPhamChiTiet = () => {
               onChange={(e) => setValue(e.target.value)}
               value={value}
             >
-              <Radio value={1}>Còn</Radio>
-              <Radio value={2}>Hết</Radio>
+              <Radio value={1}>Hoạt động</Radio>
+              <Radio value={2}>Không hoạt động</Radio>
             </Radio.Group>
           </div>
         </Modal>
@@ -472,14 +472,14 @@ const SanPhamChiTiet = () => {
               title: "Trạng Thái",
               dataIndex: "TRANG_THAI",
               key: "TRANG_THAI",
-              render: (text) => (text === 0 ? "Còn" : "Hết"),
+              render: (text) => (text === 0 ? "Hoạt động" : "Không hoạt động"),
             },
             {
-              title: "Action",
+              title: "Thao tác",
               key: "action",
               render: (_, record) => (
                 <Space size="middle">
-                  <Button onClick={() => detail(record)}>Sửa</Button>
+                  <Button onClick={() => detail(record)}>Cập nhật</Button>
                   <Button onClick={() => deleteGiayChiTiet(record)} danger>
                     Xóa
                   </Button>
@@ -549,8 +549,8 @@ const SanPhamChiTiet = () => {
                 onChange={(e) => setValue(e.target.value)}
                 value={value}
               >
-                <Radio value={1}>Còn</Radio>
-                <Radio value={2}>Hết</Radio>
+                <Radio value={1}>Hoạt động</Radio>
+                <Radio value={2}>Không hoạt động</Radio>
               </Radio.Group>
             </Form.Item>
           </Form>

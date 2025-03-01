@@ -24,7 +24,7 @@ const ChatLieu = () => {
 
 
     const trangThai = (status) => {
-        return status === 0 ? "Đang sử dụng" : "Không sử dụng";
+        return status === 0 ? "Hoạt động" : "Không hoạt động";
     }
     useEffect(() => {
         getAllChatLieu();
@@ -43,7 +43,7 @@ const ChatLieu = () => {
             setActiveChatLieu(activeChatLieuData);
             setChatLieu(chatLieuData);
         } catch (error) {
-            message.error("Lỗi khi tải dữ liệu chất liệuaa", error);
+            message.error("Lỗi khi tải dữ liệu chất liệu", error);
         }
     };
 
@@ -74,7 +74,7 @@ const ChatLieu = () => {
     const handDeleteChatLieu = async (record) => {
         try {
             await deleteChatLieu(record.ID);
-            message.success("Xoa Chat Lieu thanh cong");
+            message.success("Xóa chất liệu thành công");
             getAllChatLieu();
         } catch (error) {
             message.error("Lỗi khi xóa kích cỡ");
@@ -93,21 +93,21 @@ const ChatLieu = () => {
             message.error("Không được để trống tên chất liệu");
             return;
         }
-    
+
         const updateTrangThai = value === 1 ? 0 : 1;
-    
+
         // Đảm bảo ID tồn tại trước khi gửi request
         if (!updattingChatLieu?.ID) {
             message.error("Không tìm thấy ID của chất liệu cần cập nhật!");
             return;
         }
-    
+
         const editChatLieu = {
             id: updattingChatLieu.ID, // Thêm ID vào DTO
             ten: ten,
             trangThai: updateTrangThai,
         };
-    
+
         try {
             await updateChatLieu(editChatLieu); // Không truyền ID vào URL nữa
             message.success("Cập nhật chất liệu thành công!");
@@ -121,17 +121,17 @@ const ChatLieu = () => {
             message.error("Lỗi khi cập nhật chất liệu");
         }
     };
-    
+
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
                 <Input placeholder='Tên Chất Liệu' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
-                {/* <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
-                </Radio.Group> */}
+                {<Radio.Group onChange={onChange} value={value}>
+                    <Radio value={1}>Hoạt động</Radio>
+                    <Radio value={2}>Không hoạt động</Radio>
+                </Radio.Group>}
                 <br /><br />
                 <Button type="primary" onClick={handleAddChatLieu}>
                     Add
@@ -142,18 +142,18 @@ const ChatLieu = () => {
                         title: 'Tên Chất Liệu',
                         dataIndex: 'TEN',
                     },
-                    // {
-                    //     title: 'TRANG THAI',
-                    //     dataIndex: 'trang_thai',
-                    //     render: (text, record) => trangThai(record.TRANG_THAI)
-                    // },
+                    {
+                        title: 'TRANG THAI',
+                        dataIndex: 'trang_thai',
+                        render: (text, record) => trangThai(record.TRANG_THAI)
+                    },
                     {
                         title: '',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
-                                <Button onClick={() => handleUpdateChatLieu(record)}>Update</Button>
-                                <Button onClick={() => handDeleteChatLieu(record)}>Delete</Button>
+                                <Button onClick={() => handleUpdateChatLieu(record)}>Cập nhật</Button>
+                                <Button onClick={() => handDeleteChatLieu(record)}>Xóa</Button>
                             </Space>
                         ),
                     },
@@ -164,12 +164,12 @@ const ChatLieu = () => {
                     <Form.Item label="Tên Chất Liệu">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    {/* <Form.Item label="Trạng Thái">
+                    {<Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={1}>Đang sử dụng</Radio>
-                            <Radio value={2}>Không sử dụng</Radio>
+                            <Radio value={1}>Hoạt động</Radio>
+                            <Radio value={2}>Không hoạt động</Radio>
                         </Radio.Group>
-                    </Form.Item> */}
+                    </Form.Item>}
                 </Form>
             </Modal>
         </div>

@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.*;
@@ -28,6 +29,7 @@ public class UserEntity {
     private String anh;
     @Column(name = "HO_TEN",columnDefinition = "NVARCHAR(255)")
     private String hoTen;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
     @Column(name = "NGAY_SINH")
     private Date ngaySinh;
     @Column(name = "SO_DIEN_THOAI")

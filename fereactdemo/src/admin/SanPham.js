@@ -70,7 +70,7 @@ const SanPham = () => {
   };
 
   const trangThai = (status) => {
-    return status === 0 ? "Không sử dụng" : "Đang sử dụng";
+    return status === 0 ? "Hoạt động" : "Không hoạt động";
   };
 
   useEffect(() => {
@@ -86,14 +86,14 @@ const SanPham = () => {
   const getAllGiay = async () => {
     try {
       const result = await getGiay();
-   
+
 
       if (!result || !result.data) {
         console.error("Error: result.data is undefined or null");
         return;
       }
 
-      
+
 
       if (!Array.isArray(result.data)) {
         console.error("Error: result.data is not an array", result.data);
@@ -122,7 +122,7 @@ const SanPham = () => {
         KICH_CO: item.kichCo ? item.kichCo.ten : null,
       }));
 
-    
+
       setGiay(dataGiay);
     } catch (error) {
       console.error("Error fetching data:", error);
@@ -132,28 +132,28 @@ const SanPham = () => {
   //viết hàm get để map lên select
   const getThuongHieuList = async () => {
     const result = await getThuongHieu();
-
-    setThuongHieuList(result.data);
+    setThuongHieuList(result.data.filter((item) => item.trangThai === 0));
   };
+
 
   const getChatLieuList = async () => {
     const result = await getChatLieu();
-    setChatLieuList(result.data);
+    setChatLieuList(result.data.filter((item) => item.trangThai === 0));
   };
 
   const getDeGiayList = async () => {
     const result = await getDeGiay();
-    setDeGiayList(result.data);
+    setDeGiayList(result.data.filter((item) => item.trangThai === 0));
   };
 
   const getXuatXuList = async () => {
     const result = await getXuatXu();
-    setXuatXuList(result.data);
+    setXuatXuList(result.data.filter((item) => item.trangThai === 0));
   };
 
   const getKieuDangList = async () => {
     const result = await getKieuDang();
-    setKieuDangList(result.data);
+    setKieuDangList(result.data.filter((item) => item.trangThai === 0));
   };
 
   const getAnhGiayList = async () => {
@@ -283,9 +283,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-            id: ag.id,
-            tenUrl: ag.tenUrl, // ✅ Thêm đường dẫn ảnh vào object
-          }))
+          id: ag.id,
+          tenUrl: ag.tenUrl, // ✅ Thêm đường dẫn ảnh vào object
+        }))
         : [],
     };
 
@@ -311,7 +311,7 @@ const SanPham = () => {
       setSelectedAnhGiay(giay.anhGiay ? giay.anhGiay.id : null);
       setIsModalVisible(true);
 
- 
+
     } catch (error) {
       message.error("Lỗi khi lấy chi tiết giày: " + error.message);
     }
@@ -340,19 +340,19 @@ const SanPham = () => {
       xuatXuDto: selectedXuatXu ? { id: selectedXuatXu } : null,
       kieuDangDto: selectedKieuDang ? { id: selectedKieuDang } : null,
 
-    
+
       // ...(selectedMauSac && { mauSacDto: { id: selectedMauSac } }),
       // ...(selectdKichCo && { kichCoDto: { id: selectdKichCo } }),
 
-      
+
       anhGiayDtos: selectedAnhGiay ? selectedAnhGiay.map((id) => ({ id })) : [],
     };
     console.log("du lieu update", newDataGiay);
-    
+
 
     try {
-      await updateGiay( newDataGiay);
-      message.success("ập nhật sản phẩm thành công!");
+      await updateGiay(newDataGiay);
+      message.success("Cập nhật sản phẩm thành công!");
 
       getAllGiay(); // Cập nhật danh sách sau khi sửa
       resetForm();
@@ -364,7 +364,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -532,8 +532,8 @@ const SanPham = () => {
           <br />
           <br />
           <Radio.Group onChange={onChange} value={value}>
-            <Radio value={1}>Còn</Radio>
-            <Radio value={2}>Hết</Radio>
+            <Radio value={1}>Không hoạt động</Radio>
+            <Radio value={2}>Hoạt động</Radio>
           </Radio.Group>
         </div>
 
@@ -560,7 +560,7 @@ const SanPham = () => {
             width: 150,
           },
           {
-            title: "Giá Bán",
+            title: "Giá bán",
             dataIndex: "GIABAN",
             width: 100,
             render: (text) => {
@@ -628,13 +628,13 @@ const SanPham = () => {
           },
 
           {
-            title: "",
+            title: "Thao tác",
             key: "action",
             width: 150,
             render: (text, record) => (
               <Space size="middle">
-                <Button onClick={() => detailGiay(record)}>Detail</Button>
-                <Button onClick={() => removeGiay(record)}>Delete</Button>
+                <Button onClick={() => detailGiay(record)}>Chi tiết</Button>
+                <Button onClick={() => removeGiay(record)}>Xóa</Button>
               </Space>
             ),
           },
@@ -671,8 +671,8 @@ const SanPham = () => {
 
           <Form.Item label="Trạng Thái">
             <Radio.Group onChange={onChange} value={value}>
-              <Radio value={1}>Còn</Radio>
-              <Radio value={2}>Hết</Radio>
+              <Radio value={1}>Không hoạt động</Radio>
+              <Radio value={2}>Hoạt động</Radio>
             </Radio.Group>
           </Form.Item>
           <Form.Item label="Thương Hiệu">

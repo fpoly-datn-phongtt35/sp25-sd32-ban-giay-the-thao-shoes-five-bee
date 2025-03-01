@@ -6,7 +6,7 @@ import { Footer } from "../footer/Footer";
 
 import { Header } from "../header/Header";
 const images = ["/imgbanner.png", "/slide1.png", "/slide2.png"];
-// ngovan dang code o day
+// ngovan dang code o day 
 export default function Home() {
   const [currentIndex, setCurrentIndex] = useState(0);
   const [startX, setStartX] = useState(0);

@@ -1,12 +1,9 @@
-// import React, { useContext } from "react";
 import "./cart.css";
 import { Header } from "../header/Header";
 import { Link } from "react-router-dom";
-// import { CartContext } from "./CartContext";
 import useCart from "../components/Cart";
 
 export const Cart = () => {
-  // const { cart, increment, decrement, removeProduct } = useContext(CartContext);
   const { cart, increment, decrement, removeProduct } = useCart();
 
   const totalAmount = cart.reduce(
