@@ -20,6 +20,7 @@ public class DiaChiDto {
     private String tenNguoiNhan;
     private String tenDiaChi;
     private String sdtNguoiNhan;
+    private String diaChiCuThe;
     private Integer trangThai;
     private UserEntity userEntity;
 }
