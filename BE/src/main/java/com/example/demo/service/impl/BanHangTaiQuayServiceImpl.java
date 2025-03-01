@@ -1,18 +1,13 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.HoaDonRequest;
-import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
-import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.HoaDonChiTietEntity;
-import com.example.demo.entity.HoaDonEntity;
-import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
-import com.example.demo.repository.GiayChiTietRepository;
-import com.example.demo.repository.HoaDonChiTietRepository;
-import com.example.demo.repository.HoaDonRepository;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
 
@@ -28,6 +23,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   private final HoaDonChiTietRepository hoaDonChiTietRepository;
   private final GiayChiTietRepository giayChiTietRepository;
   private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
+  private final GiayRepository giayRepository;
 
   @Override
   public void thanhToanTaiQuay(UUID idHoaDon, HoaDonRequest hoaDonRequest) {
@@ -102,62 +98,83 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
   @Override
   public HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham) {
-    HoaDonEntity hoaDon =
-        hoaDonRepository
-            .findById(idHoaDon)
+    // 📌 Tìm hóa đơn (hoặc báo lỗi nếu không tồn tại)
+    HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon)
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
 
-    GiayChiTietEntity giayChiTiet =
-        giayChiTietRepository
-            .findById(idSanPham)
+    // 📌 Tìm sản phẩm chi tiết (GiayChiTietEntity) theo ID
+    GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(idSanPham)
             .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
 
-    if (giayChiTiet.getSoLuongTon() <= 0) {
+    // 📌 Lấy `GiayEntity` từ `GiayChiTietEntity`
+    GiayEntity giay = giayChiTiet.getGiayEntity();
+    if (giay == null) {
+      throw new IllegalArgumentException("Giày không hợp lệ!");
+    }
+
+    // 📌 Kiểm tra tồn kho trước khi thêm vào hóa đơn
+    if (!kiemTraTonKho(giayChiTiet, 1)) {
       throw new IllegalArgumentException("Sản phẩm đã hết hàng, không thể thêm vào hóa đơn");
     }
 
-    HoaDonChiTietEntity hoaDonChiTiet =
-        hoaDonChiTietRepository.findByHoaDonEntityAndGiayChiTietEntity(hoaDon, giayChiTiet);
+    // 📌 Kiểm tra xem sản phẩm đã có trong hóa đơn chưa
+    HoaDonChiTietEntity hoaDonChiTiet = hoaDonChiTietRepository
+            .findByHoaDonEntityAndGiayChiTietEntity(hoaDon, giayChiTiet);
+
+    // 📌 Tính toán giá bán & giá sau giảm giá
+    BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
+    BigDecimal giaSauGiam = Optional.ofNullable(
+                    giamGiaChiTietSanPhamRepository.findByGiay(giayChiTiet.getGiayEntity()))
+            .map(GiamGiaChiTietSanPhamEntity::getSoTienDaGiam)
+            .map(giaBanGoc::subtract)
+            .orElse(giaBanGoc);
 
     if (hoaDonChiTiet != null) {
+      // 📌 Nếu sản phẩm đã có, tăng số lượng
       int newSoLuong = hoaDonChiTiet.getSoLuong() + 1;
-
-      if (newSoLuong > giayChiTiet.getSoLuongTon()) {
+      if (!kiemTraTonKho(giayChiTiet, newSoLuong)) {
         throw new IllegalArgumentException("Không đủ hàng để thêm vào hóa đơn");
       }
-
       hoaDonChiTiet.setSoLuong(newSoLuong);
-      giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
-
-      giayChiTietRepository.save(giayChiTiet);
-      return hoaDonChiTietRepository.save(hoaDonChiTiet);
+      hoaDonChiTiet.setDonGia(giaSauGiam); // Cập nhật giá sau giảm
+    } else {
+      // 📌 Nếu sản phẩm chưa có, thêm sản phẩm vào hóa đơn mới
+      hoaDonChiTiet = HoaDonChiTietEntity.builder()
+              .soLuong(1)
+              .giaBan(giaBanGoc)
+              .donGia(giaSauGiam)
+              .trangThai(1)
+              .hoaDonEntity(hoaDon)
+              .giayChiTietEntity(giayChiTiet)
+              .build();
     }
 
-    BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
-    BigDecimal giaSauGiam = giaBanGoc;
-
-    GiamGiaChiTietSanPhamEntity giamGiaOpt =
-        giamGiaChiTietSanPhamRepository.findByGiay(giayChiTiet.getGiayEntity());
-
-    if (giamGiaOpt != null) {
-      BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
-      giaSauGiam = giaBanGoc.subtract(soTienDaGiam);
-    }
-
-    HoaDonChiTietEntity hoaDonChiTietEntity =
-        HoaDonChiTietEntity.builder()
-            .soLuong(1)
-            .giaBan(giayChiTiet.getGiaBan())
-            .donGia(giaSauGiam)
-            .trangThai(1)
-            .hoaDonEntity(hoaDon)
-            .giayChiTietEntity(giayChiTiet)
-            .build();
-
+    // 📌 Cập nhật tồn kho của `GiayChiTietEntity`
     giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
     giayChiTietRepository.save(giayChiTiet);
-    return hoaDonChiTietRepository.save(hoaDonChiTietEntity);
+
+    // 📌 Cập nhật lại tổng `soLuongTon` của `GiayEntity`
+    capNhatSoLuongTongGiay(giay);
+
+    // 📌 Lưu thông tin hóa đơn chi tiết
+    hoaDonChiTietRepository.save(hoaDonChiTiet);
+
+    return hoaDonChiTiet;
   }
+
+
+  private void capNhatSoLuongTongGiay(GiayEntity giay) {
+    int tongSoLuong = giayChiTietRepository.findByGiayEntity(giay)
+            .stream().mapToInt(GiayChiTietEntity::getSoLuongTon).sum();
+
+    giay.setSoLuongTon(tongSoLuong);
+    giayRepository.save(giay);
+  }
+
+  private boolean kiemTraTonKho(GiayChiTietEntity giayChiTiet, int soLuongMuonThem) {
+    return giayChiTiet.getSoLuongTon() >= soLuongMuonThem;
+  }
+
 
   @Override
   public HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease) {

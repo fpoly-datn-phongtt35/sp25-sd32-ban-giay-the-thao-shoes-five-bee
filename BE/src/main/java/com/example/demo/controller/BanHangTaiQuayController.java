@@ -4,6 +4,8 @@ import com.example.demo.dto.request.HoaDonRequest;
 import com.example.demo.service.BanHangTaiQuayService;
 import java.util.List;
 import java.util.UUID;
+
+import com.example.demo.service.QRCodeService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
@@ -14,6 +16,7 @@ import org.springframework.web.bind.annotation.*;
 public class BanHangTaiQuayController {
 
   private final BanHangTaiQuayService banHangTaiQuayService;
+  private final QRCodeService qrCodeService;
 
   @PostMapping("/thanh-toan/{idHoaDon}")
   public ResponseEntity<?> thanhToanTaiQuay(
@@ -61,5 +64,10 @@ public class BanHangTaiQuayController {
   public ResponseEntity<?> deleteHoaDonChiTiet(@PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet) {
     banHangTaiQuayService.deleteHoaDonChiTiet(idHoaDonChiTiet);
     return ResponseEntity.ok("Xóa hóa đơn chi tiết thành công");
+  }
+  @GetMapping("/scan-webcam")
+  public ResponseEntity<?> scanQRCodeFromWebcam() {
+    String result = qrCodeService.scanAndAddToHoaDonChoFromWebcam();
+    return ResponseEntity.ok(result);
   }
 }
