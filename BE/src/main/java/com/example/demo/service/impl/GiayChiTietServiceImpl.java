@@ -115,7 +115,7 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         MatrixToImageWriter.writeToPath(bitMatrix, fileType, path);
 
         System.out.println("QR Code đã được lưu tại: " + filePath);
-    }
+    }// tao QR o o D
 
     @Override
     public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {

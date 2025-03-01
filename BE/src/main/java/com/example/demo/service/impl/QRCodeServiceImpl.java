@@ -28,6 +28,7 @@ public class QRCodeServiceImpl implements QRCodeService {
     private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
     private final GiayRepository giayRepository;
 
+
     @Override
     public String scanAndAddToHoaDonCho(MultipartFile file) throws IOException {
         String maVach = scanQRCodeFromFile(file);
@@ -72,16 +73,9 @@ public class QRCodeServiceImpl implements QRCodeService {
         HoaDonChiTietEntity hoaDonChiTiet = hoaDonChiTietRepository
                 .findByHoaDonEntityAndGiayChiTietEntity(hoaDonCho, giayChiTiet);
 
+        // 📌 Lấy giá bán gốc
         BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
-        BigDecimal giaSauGiam = giaBanGoc;
-
-        GiamGiaChiTietSanPhamEntity giamGiaOpt =
-                giamGiaChiTietSanPhamRepository.findByGiay(giay);
-
-        if (giamGiaOpt != null) {
-            BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
-            giaSauGiam = giaBanGoc.subtract(soTienDaGiam);
-        }
+        BigDecimal giaSauGiam = giaBanGoc; // Tạm thời bỏ qua giảm giá
 
         if (hoaDonChiTiet != null) {
             // 📌 Nếu sản phẩm đã có, tăng số lượng
@@ -90,12 +84,15 @@ public class QRCodeServiceImpl implements QRCodeService {
                 return "Không đủ hàng để thêm!";
             }
             hoaDonChiTiet.setSoLuong(newSoLuong);
-            hoaDonChiTiet.setDonGia(giaSauGiam); // Cập nhật giá sau giảm
+
+            // 📌 Cập nhật giá bán tổng theo số lượng mới
+            hoaDonChiTiet.setGiaBan(giaBanGoc.multiply(BigDecimal.valueOf(newSoLuong)));
+            hoaDonChiTiet.setDonGia(giaSauGiam.multiply(BigDecimal.valueOf(newSoLuong)));
         } else {
             // 📌 Nếu sản phẩm chưa có, thêm sản phẩm vào hóa đơn mới
             hoaDonChiTiet = HoaDonChiTietEntity.builder()
                     .soLuong(1)
-                    .giaBan(giayChiTiet.getGiaBan())
+                    .giaBan(giaBanGoc)
                     .donGia(giaSauGiam)
                     .trangThai(1)
                     .hoaDonEntity(hoaDonCho)
@@ -188,5 +185,6 @@ public class QRCodeServiceImpl implements QRCodeService {
         if (webcam != null && webcam.isOpen()) {
             webcam.close();
         }
-    }
+    }//ok
+
 }

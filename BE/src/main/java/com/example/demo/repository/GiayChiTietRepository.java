@@ -17,7 +17,7 @@ public interface GiayChiTietRepository
     extends JpaRepository<GiayChiTietEntity, UUID>, JpaSpecificationExecutor<GiayChiTietEntity> {
 
     List<GiayChiTietEntity> findByGiayEntity(GiayEntity giay);
-    Optional<GiayChiTietEntity> findByMaVach(String maVach);
+    Optional<GiayChiTietEntity> findByMaVach(String maVach);//ok
 
     // Tìm theo ID giày và ID màu sắc
     @Query("SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId AND g.mauSacEntity.id = :mauSacId")

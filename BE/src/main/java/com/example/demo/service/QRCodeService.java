@@ -7,4 +7,5 @@ import java.io.IOException;
 public interface QRCodeService {
     String scanAndAddToHoaDonCho(MultipartFile file) throws IOException;
     String scanAndAddToHoaDonChoFromWebcam();
+    //ok
 }
