@@ -1,20 +1,55 @@
 import axios from "axios";
 
-const REST_API_BASE_URL = "http://localhost:5000/api/giohangchitiet";
+const REST_API_BASE_URL = "http://localhost:5000/gio-hang-chi-tiet";
 
-export const getByKhachHangId = (khachHangId) =>
-  axios.get(`${REST_API_BASE_URL}/khachhang/${khachHangId}`);
+const REST_API_BASE_URLS = "http://localhost:5000/gio-hang";
 
-export const addByKhachHangId = (khachHangId, gioHangChiTiet) =>
-  axios.post(`${REST_API_BASE_URL}/${khachHangId}`, gioHangChiTiet);
 
-export const updateGioHangChiTiet = (gioHangChiTietId, soLuong) => {
-  const requestBody = { newQuantity: soLuong };
-  return axios.put(
-    `${REST_API_BASE_URL}/update/${gioHangChiTietId}`,
-    requestBody
+export const getByKhachHangId = () => {
+  const token = localStorage.getItem("token");
+  return axios.get(`${REST_API_BASE_URLS}/getAll`, {
+    headers: {
+      Authorization: `Bearer ${token}`,
+    }
+  });
+}
+export const addToCart = (idGiayChiTiet, soLuong) => {
+  const token = localStorage.getItem("token");
+  return axios.post(
+    `${REST_API_BASE_URL}/add-to-cart`,
+    null,
+    {
+      params: { idGiayChiTiet, soLuong },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
   );
 };
 
-export const deleteGioHangChiTiet = (id) =>
-  axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
+export const updateGioHangChiTiet = (idGioHangChiTiet, isIncrease) => {
+  const token = localStorage.getItem("token");
+  return axios.put(
+    `${REST_API_BASE_URL}/update-so-luong`,
+    null,
+    {
+      params: { idGioHangChiTiet, isIncrease: isIncrease > 0 },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
+
+export const deleteGioHangChiTiet = (idGioHangChiTiet) => {
+  const token = localStorage.getItem("token");
+  return axios.delete(
+    `${REST_API_BASE_URL}/delete-giay`,
+    {
+      params: { idGioHangChiTiet },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};

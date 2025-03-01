@@ -64,6 +64,7 @@ public class GioHangServiceImpl implements GioHangService {
                     item.getId(),
                     item.getGiayChiTietEntity().getId(),
                     item.getGiayChiTietEntity().getGiayEntity().getTen(),
+                    item.getGiayChiTietEntity().getGiayEntity().getAnhGiayEntities().get(0).getTenUrl(),
                     item.getGiayChiTietEntity().getMauSacEntity().getTen(),
                     item.getGiayChiTietEntity().getKichCoEntity().getTen(),
                     item.getGiayChiTietEntity().getGiaBan(),

@@ -58,7 +58,7 @@ const SanPhamChiTiet = () => {
 
   const getGiayData = async () => {
     const result = await getGiay();
-    const activeGiay = result.data.filter((item) => item.trangThai === 1);
+    const activeGiay = result.data.filter((item) => item.trangThai === 0);
     setGiayList(activeGiay);
   };
 
@@ -76,7 +76,7 @@ const SanPhamChiTiet = () => {
   };
   const getTenGiay = async () => {
     const result = await getGiay();
-    const ten = result.data.map((item) => item.ten); // Lấy tất cả tên giày
+    const ten = result.data.map((item) => item.ten);
     setTen(ten);
   };
 
@@ -94,7 +94,6 @@ const SanPhamChiTiet = () => {
       MAUSAC: item.mauSacEntity ? item.mauSacEntity.ten : null,
       KICHCO: item.kichCoEntity ? item.kichCoEntity.ten : null,
     }));
-    console.log("data giay chi tiet", dataGiayChiTiet);
 
     const activeChatLieuData = dataGiayChiTiet.filter(
       (item) => item.TRANG_THAI === 0
