@@ -30,8 +30,8 @@ public class GiamGiaChiTietSanPhamEntity {
     private Integer trangThai;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ID_GIAY",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
-    private GiayEntity giay;
+    @JoinColumn(name = "ID_GIAY_CHI_TIET",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    private GiayChiTietEntity giayChiTiet;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_SAN_PHAM",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))

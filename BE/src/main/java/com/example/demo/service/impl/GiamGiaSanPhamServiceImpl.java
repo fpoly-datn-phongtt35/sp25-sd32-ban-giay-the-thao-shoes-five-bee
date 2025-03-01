@@ -45,9 +45,8 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   public GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
       GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
 
-    if (giamGiaChiTietSanPhamRequest.getIdGiay() == null
-        && giamGiaChiTietSanPhamRequest.getIdMauSac() == null
-        && giamGiaChiTietSanPhamRequest.getIdThuongHieu() == null) {
+    if (giamGiaChiTietSanPhamRequest.getIdGiayChiTiet() == null
+        && giamGiaChiTietSanPhamRequest.getIdGiayChiTiet().isEmpty()) {
       throw new IllegalArgumentException("Vui lòng truyền vào điều kiện để tạo giảm giá.");
     }
 
@@ -62,43 +61,32 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
             .build();
     giamGiaSanPhamRepository.save(giamGiaSanPham);
 
-    List<GiayChiTietEntity> danhSachSanPham;
-
-    if (giamGiaChiTietSanPhamRequest.getIdGiay() != null && giamGiaChiTietSanPhamRequest.getIdMauSac() != null) {
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityIdAndMauSacEntityId(
-              giamGiaChiTietSanPhamRequest.getIdGiay(), giamGiaChiTietSanPhamRequest.getIdMauSac()
-      );
-    } else if (giamGiaChiTietSanPhamRequest.getIdThuongHieu() != null && giamGiaChiTietSanPhamRequest.getIdMauSac() != null) {
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityThuongHieuIdAndMauSacEntityId(
-              giamGiaChiTietSanPhamRequest.getIdThuongHieu(), giamGiaChiTietSanPhamRequest.getIdMauSac()
-      );
-    } else if (giamGiaChiTietSanPhamRequest.getIdThuongHieu() != null) {
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityThuongHieuId(giamGiaChiTietSanPhamRequest.getIdThuongHieu());
-    }else if(giamGiaChiTietSanPhamRequest.getIdGiay() != null){
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityId(giamGiaChiTietSanPhamRequest.getIdGiay());
-    }else {
-      danhSachSanPham = giayChiTietRepository.findByMauSacEntityId(giamGiaChiTietSanPhamRequest.getIdMauSac());
-    }
+    List<GiayChiTietEntity> giayChiTietEntities =
+        giayChiTietRepository.findGiayChiTietEntitiesByIds(
+            giamGiaChiTietSanPhamRequest.getIdGiayChiTiet());
 
     // Áp dụng giảm giá
-    danhSachSanPham.forEach(sanPham -> {
-      BigDecimal soTienDaGiam = sanPham.getGiaBan()
-              .multiply(BigDecimal.valueOf(giamGiaChiTietSanPhamRequest.getPhanTramGiam()))
-              .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+    giayChiTietEntities.forEach(
+        sanPham -> {
+          BigDecimal soTienDaGiam =
+              sanPham
+                  .getGiaBan()
+                  .multiply(BigDecimal.valueOf(giamGiaChiTietSanPhamRequest.getPhanTramGiam()))
+                  .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
 
-      GiamGiaChiTietSanPhamEntity chiTietGiamGia = GiamGiaChiTietSanPhamEntity.builder()
-              .soTienDaGiam(soTienDaGiam)
-              .trangThai(1)
-              .giay(sanPham.getGiayEntity())
-              .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
-              .build();
+          GiamGiaChiTietSanPhamEntity chiTietGiamGia =
+              GiamGiaChiTietSanPhamEntity.builder()
+                  .soTienDaGiam(soTienDaGiam)
+                  .trangThai(1)
+                  .giayChiTiet(sanPham)
+                  .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
+                  .build();
 
-      giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
-    });
+          giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
+        });
 
     return giamGiaSanPham;
   }
-
 
   @Override
   public List<GiamGiaSanPhamEntity> getAll() {
@@ -232,7 +220,9 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
     Sheet sheet = workbook.createSheet("ChuongTrinhGiamGia");
 
     Row headerRow = sheet.createRow(0);
-    String[] columns = {"ID", "Mã", "Tên", "Phần Trăm Giảm", "Ngày Bắt Đầu", "Ngày Kết Thúc", "Trạng Thái"};
+    String[] columns = {
+      "ID", "Mã", "Tên", "Phần Trăm Giảm", "Ngày Bắt Đầu", "Ngày Kết Thúc", "Trạng Thái"
+    };
     for (int i = 0; i < columns.length; i++) {
       Cell cell = headerRow.createCell(i);
       cell.setCellValue(columns[i]);
@@ -261,4 +251,3 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
     return giamGiaSanPhamRepository.findByTenContainingIgnoreCase(ten);
   }
 }
-

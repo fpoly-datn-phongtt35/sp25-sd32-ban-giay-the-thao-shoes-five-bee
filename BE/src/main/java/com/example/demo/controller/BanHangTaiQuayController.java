@@ -17,8 +17,10 @@ public class BanHangTaiQuayController {
 
   @PostMapping("/thanh-toan/{idHoaDon}")
   public ResponseEntity<?> thanhToanTaiQuay(
-      @PathVariable("idHoaDon") UUID idHoaDon, @RequestBody HoaDonRequest hoaDonRequest) {
-    banHangTaiQuayService.thanhToanTaiQuay(idHoaDon, hoaDonRequest);
+      @PathVariable("idHoaDon") UUID idHoaDon,
+      @RequestParam String tenPhieuGiamGia,
+      @RequestBody HoaDonRequest hoaDonRequest) {
+    banHangTaiQuayService.thanhToanTaiQuay(idHoaDon, tenPhieuGiamGia, hoaDonRequest);
     return ResponseEntity.ok("Thanh toán thành công");
   }
 
@@ -31,6 +33,11 @@ public class BanHangTaiQuayController {
   public ResponseEntity<?> themSanPhamVaoHoaDon(
       @PathVariable("idHoaDon") UUID idHoaDon, @RequestParam UUID idSanPham) {
     return ResponseEntity.ok(banHangTaiQuayService.themSanPhamVaoHoaDon(idHoaDon, idSanPham));
+  }
+
+  @GetMapping("/san-pham")
+  public ResponseEntity<?> getSanPhamVaoHoaDon(@PathVariable UUID idHoaDon) {
+    return ResponseEntity.ok(banHangTaiQuayService.getSanPhamTrongHoaDon(idHoaDon));
   }
 
   @PutMapping("/update-quantity/{idHoaDonChiTiet}")
@@ -58,7 +65,8 @@ public class BanHangTaiQuayController {
   }
 
   @DeleteMapping("/delete-detail/{idHoaDonChiTiet}")
-  public ResponseEntity<?> deleteHoaDonChiTiet(@PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet) {
+  public ResponseEntity<?> deleteHoaDonChiTiet(
+      @PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet) {
     banHangTaiQuayService.deleteHoaDonChiTiet(idHoaDonChiTiet);
     return ResponseEntity.ok("Xóa hóa đơn chi tiết thành công");
   }
