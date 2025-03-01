@@ -96,6 +96,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     return hoaDonRepository.save(hoaDonEntity);
   }
 
+  @Override
   public HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham) {
     // 📌 Tìm hóa đơn (hoặc báo lỗi nếu không tồn tại)
     HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon)
@@ -105,29 +106,28 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(idSanPham)
             .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
 
-    // 📌 Kiểm tra tồn kho trước khi thêm vào hóa đơn
-    if (!kiemTraTonKho(giayChiTiet, 1)) {
-      throw new IllegalArgumentException("Sản phẩm đã hết hàng, không thể thêm vào hóa đơn");
-    }
-
     // 📌 Lấy `GiayEntity` từ `GiayChiTietEntity`
     GiayEntity giay = giayChiTiet.getGiayEntity();
     if (giay == null) {
       throw new IllegalArgumentException("Giày không hợp lệ!");
     }
 
+    // 📌 Kiểm tra tồn kho trước khi thêm vào hóa đơn
+    if (!kiemTraTonKho(giayChiTiet, 1)) {
+      throw new IllegalArgumentException("Sản phẩm đã hết hàng, không thể thêm vào hóa đơn");
+    }
+
     // 📌 Kiểm tra xem sản phẩm đã có trong hóa đơn chưa
     HoaDonChiTietEntity hoaDonChiTiet = hoaDonChiTietRepository
             .findByHoaDonEntityAndGiayChiTietEntity(hoaDon, giayChiTiet);
 
-    // 📌 Tính toán giá bán & giảm giá
+    // 📌 Tính toán giá bán & giá sau giảm giá
     BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
-    BigDecimal giaSauGiam = giaBanGoc;
-
-    GiamGiaChiTietSanPhamEntity giamGiaOpt = giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
-    if (giamGiaOpt != null) {
-      giaSauGiam = giaBanGoc.subtract(giamGiaOpt.getSoTienDaGiam());
-    }
+    BigDecimal giaSauGiam = Optional.ofNullable(
+                    giamGiaChiTietSanPhamRepository.findByGiay(giayChiTiet.getGiayEntity()))
+            .map(GiamGiaChiTietSanPhamEntity::getSoTienDaGiam)
+            .map(giaBanGoc::subtract)
+            .orElse(giaBanGoc);
 
     if (hoaDonChiTiet != null) {
       // 📌 Nếu sản phẩm đã có, tăng số lượng
@@ -138,7 +138,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       hoaDonChiTiet.setSoLuong(newSoLuong);
       hoaDonChiTiet.setDonGia(giaSauGiam); // Cập nhật giá sau giảm
     } else {
-      // 📌 Nếu sản phẩm chưa có, thêm vào hóa đơn
+      // 📌 Nếu sản phẩm chưa có, thêm sản phẩm vào hóa đơn mới
       hoaDonChiTiet = HoaDonChiTietEntity.builder()
               .soLuong(1)
               .giaBan(giaBanGoc)
@@ -153,13 +153,14 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
     giayChiTietRepository.save(giayChiTiet);
 
-    // 📌 Cập nhật tổng số lượng của `GiayEntity`
+    // 📌 Cập nhật lại tổng `soLuongTon` của `GiayEntity`
     capNhatSoLuongTongGiay(giay);
 
     // 📌 Lưu thông tin hóa đơn chi tiết
-    return hoaDonChiTietRepository.save(hoaDonChiTiet);
-  }
+    hoaDonChiTietRepository.save(hoaDonChiTiet);
 
+    return hoaDonChiTiet;
+  }
 
 
   private void capNhatSoLuongTongGiay(GiayEntity giay) {
