@@ -8,10 +8,20 @@ import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.*;
 import com.example.demo.service.AnhGiayService;
 import com.example.demo.service.GiayChiTietService;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
+
+import java.io.File;
+import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -42,29 +52,70 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
 
   @Override
   public GiayChiTietEntity add(GiayChiTietDto giayChiTietDto) {
-      return giayChiTietRepository.save(
-              GiayChiTietEntity.builder()
-                      .giaBan(giayChiTietDto.getGiaBan())
-                      .soLuongTon(giayChiTietDto.getSoLuongTon())
-                      .mauSacEntity(
-                              giayChiTietDto.getMauSacDto() != null ?
-                                      mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .kichCoEntity(
-                              giayChiTietDto.getKichCoDto() != null ?
-                                      kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .trangThai(giayChiTietDto.getTrangThai())
-                      .giayEntity(
-                              giayChiTietDto.getGiayDto() != null ?
-                                      giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null) :
-                                      null
-                      )
-                      .build());
+      GiayChiTietEntity giayChiTiet = GiayChiTietEntity.builder()
+              .giaBan(giayChiTietDto.getGiaBan())
+              .soLuongTon(giayChiTietDto.getSoLuongTon())
+              .mauSacEntity(
+                      giayChiTietDto.getMauSacDto() != null ?
+                              mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null) :
+                              null
+              )
+              .kichCoEntity(
+                      giayChiTietDto.getKichCoDto() != null ?
+                              kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null) :
+                              null
+              )
+              .trangThai(giayChiTietDto.getTrangThai())
+              .giayEntity(
+                      giayChiTietDto.getGiayDto() != null ?
+                              giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null) :
+                              null
+              )
+              .build();
+
+      // Lưu vào database để lấy ID
+      giayChiTiet = giayChiTietRepository.save(giayChiTiet);
+
+      // Tạo mã QR dựa trên ID và lưu vào maVach
+      String maVach = giayChiTiet.getId().toString();
+      giayChiTiet.setMaVach(maVach);
+
+      // Lưu lại với maVach
+      giayChiTiet = giayChiTietRepository.save(giayChiTiet);
+
+      // Tạo ảnh QR
+      try {
+          generateQRCode(maVach);
+      } catch (WriterException | IOException e) {
+          throw new RuntimeException("Lỗi khi tạo mã QR: " + e.getMessage());
+      }
+
+      return giayChiTiet;
   }
 
+    public void generateQRCode(String maVach) throws WriterException, IOException {
+        int width = 300;
+        int height = 300;
+        String fileType = "png";
+        String folderPath = "D:/QR/"; // Thư mục lưu QR Code
+        String filePath = folderPath + maVach + ".png"; // Đường dẫn file QR
+
+        // Tạo thư mục nếu chưa tồn tại
+        File folder = new File(folderPath);
+        if (!folder.exists()) {
+            boolean isCreated = folder.mkdirs();
+            if (!isCreated) {
+                throw new IOException("Không thể tạo thư mục: " + folderPath);
+            }
+        }
+
+        // Tạo mã QR
+        BitMatrix bitMatrix = new MultiFormatWriter().encode(maVach, BarcodeFormat.QR_CODE, width, height);
+        Path path = FileSystems.getDefault().getPath(filePath);
+        MatrixToImageWriter.writeToPath(bitMatrix, fileType, path);
+
+        System.out.println("QR Code đã được lưu tại: " + filePath);
+    }// tao QR o o D
 
     @Override
     public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {

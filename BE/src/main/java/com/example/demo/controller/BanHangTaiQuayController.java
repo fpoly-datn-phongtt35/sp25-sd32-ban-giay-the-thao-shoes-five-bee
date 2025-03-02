@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 public class BanHangTaiQuayController {
 
   private final BanHangTaiQuayService banHangTaiQuayService;
+  private final QRCodeService qrCodeService;
 
   @PostMapping("/thanh-toan/{idHoaDon}")
   public ResponseEntity<?> thanhToanTaiQuay(
@@ -68,4 +69,14 @@ public class BanHangTaiQuayController {
     banHangTaiQuayService.deleteHoaDonChiTiet(idHoaDonChiTiet);
     return ResponseEntity.ok("Xóa hóa đơn chi tiết thành công");
   }
+  @GetMapping("/scan-webcam")
+  public ResponseEntity<?> scanQRCodeFromWebcam() {
+    String result = qrCodeService.scanAndAddToHoaDonChoFromWebcam();
+    return ResponseEntity.ok(result);
+  }//quet cam
+  @PostMapping("/scan-qr")
+  public ResponseEntity<String> scanQRCodeFromFile(@RequestParam("file") MultipartFile file) throws IOException {
+    String result = qrCodeService.scanAndAddToHoaDonCho(file);
+    return ResponseEntity.ok(result);
+  }//test postman up file anh QR
 }
