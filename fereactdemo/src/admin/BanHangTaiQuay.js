@@ -104,46 +104,34 @@ const BanHangTaiQuay = () => {
       message.warning("Vui lòng tạo hóa đơn chờ trước khi chọn sản phẩm!");
       return;
     }
-
+  
     const selectedPageData = pages.find((page) => page.id === selectedPage);
     if (!selectedPageData || !selectedPageData.hoaDonId) {
       message.warning("Không tìm thấy hóa đơn hợp lệ.");
       return;
     }
-
+  
     const idHoaDon = selectedPageData.hoaDonId;
     const idSanPham = product.ID;
-
+  
     if (!idHoaDon || !idSanPham) {
       message.error("ID hóa đơn hoặc ID sản phẩm không hợp lệ!");
       return;
     }
-
+  
     try {
       await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
-
-      // ✅ Cập nhật lại state `selectedProducts` để tránh lặp
-      setSelectedProducts((prevSelectedProducts) => {
-        const updatedProducts = { ...prevSelectedProducts };
-        const currentPageProducts = updatedProducts[selectedPage] || [];
-
-        // Kiểm tra nếu sản phẩm đã tồn tại thì không thêm nữa
-        if (!currentPageProducts.some((p) => p.id === idSanPham)) {
-          updatedProducts[selectedPage] = [
-            ...currentPageProducts,
-            { ...product, SOLUONG: 1 },
-          ];
-        }
-
-        return updatedProducts;
-      });
-
+  
+      // ✅ Gọi API ngay lập tức để cập nhật danh sách sản phẩm
+      fetchSanPhamTrongHoaDon(idHoaDon, setSelectedProducts);
+  
       message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
     } catch (error) {
       console.error("❌ Lỗi khi thêm sản phẩm vào hóa đơn:", error);
       message.error("Không thể thêm sản phẩm vào hóa đơn.");
     }
   };
+  
 
   const handleRemoveProduct = (productId) => {
     setSelectedProducts((prevSelectedProducts) => {
@@ -269,22 +257,30 @@ const BanHangTaiQuay = () => {
   const fetchHoaDonCho = async () => {
     try {
       const response = await getListHoaDonCho();
-
+  
       const hoaDonPages = response.data.map((hoaDon, index) => ({
         id: index + 1, // Số hóa đơn
         hoaDonId: hoaDon.id, // ID hóa đơn từ API
       }));
-
+  
       setPages(hoaDonPages);
+  
       if (hoaDonPages.length > 0) {
-        setSelectedHoaDonId(hoaDonPages[0].hoaDonId);
-        console.log("ID hóa đơn đầu tiên:", hoaDonPages[0].hoaDonId);
+        const firstHoaDonId = hoaDonPages[0].hoaDonId;
+        setSelectedHoaDonId(firstHoaDonId);
+  
+        console.log("ID hóa đơn đầu tiên:", firstHoaDonId);
+  
+        // ✅ Gọi API lấy sản phẩm ngay lập tức
+        fetchSanPhamTrongHoaDon(firstHoaDonId, setSelectedProducts);
       }
     } catch (error) {
       console.error("Lỗi khi lấy danh sách hóa đơn chờ:", error);
       message.error("Không thể lấy danh sách hóa đơn chờ");
     }
   };
+  
+
   const fetchSanPhamTrongHoaDon = async (idHoaDon) => {
     if (!idHoaDon) {
       message.error("ID hóa đơn không hợp lệ!");
@@ -293,38 +289,42 @@ const BanHangTaiQuay = () => {
 
     try {
       const result = await getSanPhamTrongHoaDon(idHoaDon);
-      console.log("Dữ liệu sản phẩm từ API:", result.data);
+      console.log("Dữ liệu API trả về:", result.data);
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            ID: item.id, 
+            ID: item.id,
             TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
             SOLUONG: item.soLuong,
             GIABAN: item.giaBan,
             ANH_GIAY:
-              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl ||
-              "https://via.placeholder.com/150",
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+                ?.tenUrl || "https://via.placeholder.com/150",
           }))
         : [];
 
-      console.log("Dữ liệu sau khi format:", formattedData);
-
-      setSelectedProducts((prev) => ({
-        ...prev,
-        [selectedPage]: formattedData, // Cập nhật theo `selectedPage`
-      }));
+      setSelectedProducts((prev) => {
+        const updatedProducts = {
+          ...prev,
+          [idHoaDon]: formattedData,
+        };
+        console.log("State sau khi cập nhật:", updatedProducts);
+        return updatedProducts;
+      });
     } catch (error) {
       console.error("Lỗi khi fetch danh sách sản phẩm: ", error);
       message.error("Lỗi khi tải danh sách sản phẩm!");
     }
-};
-
+  };
 
   useEffect(() => {
     getAllGiay();
     getAllKhachHangData();
     getChuongTrinhGiamGia();
     fetchHoaDonCho();
+  }, []);
+
+  useEffect(() => {
     if (selectedHoaDonId) {
       fetchSanPhamTrongHoaDon(selectedHoaDonId, setSelectedProducts);
     }
@@ -762,10 +762,11 @@ const BanHangTaiQuay = () => {
     }
   };
 
-  const handleSelectPage = (pageId) => {
+  const handleSelectPage = (pageId, hoaDonId) => {
     setSelectedPage(pageId);
-  
+    setSelectedHoaDonId(hoaDonId);
   };
+
   const handleClear = () => {
     setSelectedKhachHang(null);
     setHoTen("");
@@ -792,10 +793,11 @@ const BanHangTaiQuay = () => {
                       ? "page_button selected"
                       : "page_button"
                   }
-                  onClick={() => handleSelectPage(page.id)}
+                  onClick={() => handleSelectPage(page.id, page.hoaDonId)}
                 >
                   Hóa Đơn {page.id}
                 </Button>
+
                 <Button
                   onClick={() => handleRemovePage(page.id)}
                   style={{ marginLeft: "5px", color: "red" }}
@@ -809,8 +811,9 @@ const BanHangTaiQuay = () => {
 
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
-            {selectedProducts[selectedPage]?.length > 0 ? (
-              selectedProducts[selectedPage].map((product) => (
+            {selectedProducts[selectedHoaDonId] &&
+            selectedProducts[selectedHoaDonId].length > 0 ? (
+              selectedProducts[selectedHoaDonId].map((product) => (
                 <div key={product.ID} className="selected_product">
                   {product.ANH_GIAY && (
                     <img src={product.ANH_GIAY} alt={product.TEN} />
@@ -841,7 +844,7 @@ const BanHangTaiQuay = () => {
                 </div>
               ))
             ) : (
-              <div className="no_products">Không có sản phẩm nào</div>
+              <div></div>
             )}
           </div>
         </div>

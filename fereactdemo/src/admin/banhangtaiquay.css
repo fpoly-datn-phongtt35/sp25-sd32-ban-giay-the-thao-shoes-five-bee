@@ -13,7 +13,14 @@
 
 .right {
     width: 30%;
+    border-radius: 5px;
+    border: 1px solid #ccc;
+    margin-left: 20px;
 
+}
+.page_button.selected {
+  border: 2px solid blue;
+  font-weight: bold;
 }
 
 .check_tt {
