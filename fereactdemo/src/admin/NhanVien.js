@@ -80,51 +80,43 @@ const NhanVien = () => {
         setActiveNhanVien(activeNhanVienData);
     };
 
+    const handleFileChange = (e) => {
+        setSelectedFile(e.target.files[0]);
+    };
+
     const createNhanVien = async () => {
         if (!hoTen) {
             message.error("Không được để trống họ tên");
             return;
         }
-
-
-  const createNhanVien = async () => {
-    if (!hoTen) {
-      message.error("Không được để trống họ tên");
-      return;
-    }
-
-
+        if (!email) {
+            message.error("Không được để trống email");
+            return;
+        }
+        if (!matKhau) {
+            message.error("Không được để trống mật khẩu");
+            return;
+        }
+        
         const userData = {
             hoTen: hoTen,
             email: email,
-            matKhau: hashedPassword,
+            matKhau: matKhau,
             isEnabled: value === 1,
             roleNames: ['ROLE_STAFF'],
             ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
             soDienThoai: soDienThoai,
         };
 
-
-    const userData = {
-      hoTen: hoTen,
-      email: email,
-      matKhau: hashedPassword,
-      isEnabled: value === 1,
-      roleNames: selectedChucVu ? [`${selectedChucVu}`] : ["ROLE_USER"],
-      ngaySinh: ngaySinh ? ngaySinh.format("YYYY-MM-DDTHH:mm:ss.SSS[Z]") : null,
-      soDienThoai: soDienThoai,
+        try {
+            await addNhanVien(userData, selectedFile);
+            message.success("Thêm nhân viên thành công!");
+            getNhanVien();
+            resetForm();
+        } catch (error) {
+            message.error("Lỗi khi thêm nhân viên: " + (error.response?.data?.message || error.message));
+        }
     };
-
-    try {
-      await addNhanVien(userData, selectedFile);
-      message.success("Thêm nhân viên thành công !");
-      getNhanVien();
-      resetForm();
-    } catch (error) {
-      message.error("Lỗi khi thêm nhân viên");
-    }
-  };
-
 
     const detail = async (record) => {
         console.log(record.ID);
@@ -179,33 +171,16 @@ const NhanVien = () => {
         setNgaySinh(null);
         setSoDienThoai("");
     };
-    try {
-      await updateNhanVien(newDataNhanVien, selectedFile);
-      message.success("Cập nhật nhân viên thành công");
-      getNhanVien();
-      setIsModalVisible(false);
-      resetForm();
-      setValue(null);
-    } catch (error) {
-      message.error(
-        "Lỗi cập nhật nhân viên: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
-  };
 
-  const resetForm = () => {
-    setHoTen("");
-    setEmail("");
-    setMatKhau("");
-    setValue(1);
-    setSelectedChucVu(null);
-    setEditingNhanVien(null);
-    setSelectedFile(null);
-    setNgaySinh(null);
-    setSoDienThoai("");
-  };
-
+    const removeNhanVien = async (record) => {
+        try {
+            await deleteNhanVien(record.ID);
+            message.success("Xóa nhân viên thành công!");
+            getNhanVien();
+        } catch (error) {
+            message.error("Lỗi khi xóa nhân viên: " + (error.response?.data?.message || error.message));
+        }
+    };
 
     return (
         <div style={{ display: 'flex' }}>
@@ -213,6 +188,8 @@ const NhanVien = () => {
                 <Input placeholder='Tên Nhân Viên' value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                 <br /><br />
                 <Input placeholder='Email@...' value={email} onChange={(e) => setEmail(e.target.value)} />
+                <br /><br />
+                <Input.Password placeholder='Mật khẩu' value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
                 <br /><br />
                 <Input placeholder='Số Điện Thoại' value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
                 <br /><br />
