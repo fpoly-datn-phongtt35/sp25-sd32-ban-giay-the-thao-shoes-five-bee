@@ -140,6 +140,8 @@ const KhachHang = () => {
             hoTen,
             email,
             matKhau,
+            soDienThoai,
+            ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
             trangThai: value === 1 ? 0 : 1,
             roleNames: ['ROLE_USER'],
         };

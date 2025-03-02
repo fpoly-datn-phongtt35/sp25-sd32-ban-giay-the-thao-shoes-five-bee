@@ -2,6 +2,7 @@ import React, { useEffect, useState } from "react";
 import {
   addGiayChiTiet,
   detailGiayChiTiet,
+  detailGiayChiTiet2,
   getAllGiayChiTiet,
   removeGiayChiTiet,
   updateGiayChiTiet,
@@ -281,9 +282,9 @@ const SanPhamChiTiet = () => {
 
   const detail = async (record) => {
     try {
-      const requestData = { id: record.ID }; // Tạo object GiayChiTietDto
 
-      const response = await detailGiayChiTiet(requestData); // Gửi object thay vì chỉ ID
+      const response = await detailGiayChiTiet2(record.ID);
+
       const giayChiTiet = response.data;
       console.log("🔍 Chi tiết giày:", giayChiTiet);
 

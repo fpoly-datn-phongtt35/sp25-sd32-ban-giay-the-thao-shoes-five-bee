@@ -9,8 +9,10 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+
 import java.util.List;
 import java.util.Optional;
+
 import java.util.UUID;
 
 @RestController
@@ -41,8 +43,10 @@ public class GiayChiTietController {
     return ResponseEntity.ok(giayChiTietService.update(giayChiTietDto));
   }
 
-  @PostMapping("/detail")
-  public ResponseEntity<?> detail(@RequestBody GiayChiTietDto giayChiTietDto) {
+  @GetMapping("/detail/{id}")
+  public ResponseEntity<?> detail(@PathVariable UUID id) {
+    GiayChiTietDto giayChiTietDto = new GiayChiTietDto();
+    giayChiTietDto.setId(id);
     return ResponseEntity.ok(giayChiTietService.detail(giayChiTietDto));
   }
 
