@@ -2,13 +2,17 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.DiaChiDto;
 import com.example.demo.entity.DiaChiEntity;
+import com.example.demo.entity.UserEntity;
 import com.example.demo.repository.DiaChiRepository;
+import com.example.demo.repository.UserRepository;
 import com.example.demo.service.DiaChiService;
+import com.example.demo.service.UsersService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -16,6 +20,12 @@ public class DiaChiServiceImpl implements DiaChiService {
 
     @Autowired
     private DiaChiRepository diaChiRepository;
+
+    @Autowired
+    private UsersService usersService;
+
+    @Autowired
+    private UserRepository userRepository;
 
     @Override
     public List<DiaChiDto> getAll() {
@@ -30,13 +40,17 @@ public class DiaChiServiceImpl implements DiaChiService {
             diaChiDto.setHuyen(diaChi.getHuyen());
             diaChiDto.setThanhPho(diaChi.getThanhPho());
             diaChiDto.setTrangThai(diaChi.getTrangThai());
-            diaChiDto.setUserEntity(diaChi.getUserEntity());
+            diaChiDto.setIdUser(diaChi.getUserEntity().getId());
             return diaChiDto;
         }).collect(Collectors.toList());
     }
 
     @Override
-    public DiaChiEntity add(DiaChiDto diaChiDto) {
+    public DiaChiEntity add(UUID idUser,DiaChiDto diaChiDto) {
+        UserEntity userEntity = usersService.details(idUser);
+        if(diaChiDto.getTrangThai() == 1){
+            diaChiRepository.updateTrangThaiToZero(idUser);
+        }
         DiaChiEntity diaChiEntity = new DiaChiEntity();
         diaChiEntity.setXa(diaChiDto.getXa());
         diaChiEntity.setHuyen(diaChiDto.getHuyen());
@@ -46,13 +60,13 @@ public class DiaChiServiceImpl implements DiaChiService {
         diaChiEntity.setSdtNguoiNhan(diaChiDto.getSdtNguoiNhan());
         diaChiEntity.setTenNguoiNhan(diaChiDto.getTenNguoiNhan());
         diaChiEntity.setTrangThai(diaChiDto.getTrangThai());
-        diaChiEntity.setUserEntity(diaChiDto.getUserEntity());
+        diaChiEntity.setUserEntity(userEntity);
         return diaChiRepository.save(diaChiEntity);
     }
 
     @Override
-    public DiaChiEntity update(DiaChiDto diaChiDto) {
-        Optional<DiaChiEntity> optional = diaChiRepository.findById(diaChiDto.getId());
+    public DiaChiEntity update(UUID id,DiaChiDto diaChiDto) {
+        Optional<DiaChiEntity> optional = diaChiRepository.findById(id);
         return optional.map(o->{
             o.setXa(diaChiDto.getXa());
             o.setHuyen(diaChiDto.getHuyen());
@@ -62,8 +76,14 @@ public class DiaChiServiceImpl implements DiaChiService {
             o.setTenNguoiNhan(diaChiDto.getTenNguoiNhan());
             o.setSdtNguoiNhan(diaChiDto.getSdtNguoiNhan());
             o.setTrangThai(diaChiDto.getTrangThai());
-            o.setUserEntity(diaChiDto.getUserEntity());
-            return diaChiRepository.save(o);
+            if (diaChiDto.getIdUser() != null) {
+                UserEntity user = userRepository.findById(diaChiDto.getIdUser()).orElse(null);
+                if (user != null) {
+                    o.setUserEntity(user);
+                } else {
+                    System.out.println("Không tìm thấy User với ID: " + diaChiDto.getIdUser());
+                }
+            }            return diaChiRepository.save(o);
         }).orElse(null);
     }
 
@@ -74,11 +94,18 @@ public class DiaChiServiceImpl implements DiaChiService {
     }
 
     @Override
-    public DiaChiEntity delete(DiaChiDto diaChiDto) {
-        Optional<DiaChiEntity> optional = diaChiRepository.findById(diaChiDto.getId());
-        return optional.map(o->{
-            diaChiRepository.delete(o);
-            return o;
-        }).orElse(null);
+    public boolean delete(UUID id) {
+        Optional<DiaChiEntity> optionalDiaChi = diaChiRepository.findById(id);
+        if (optionalDiaChi.isPresent()) {
+            diaChiRepository.delete(optionalDiaChi.get());
+            return true;
+        } else {
+            return false;
+        }
+    }
+
+    @Override
+    public List<DiaChiEntity> getDiaChiByIdUser(UUID idUser) {
+        return diaChiRepository.findByIdUser(idUser);
     }
 }

@@ -33,7 +33,6 @@ export const updateKhachHang = (khachHang, file) => {
   if (file) {
     formData.append('file', file);
   }
-  
   return axios.put(`${REST_API_BASE_URL}/update`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'

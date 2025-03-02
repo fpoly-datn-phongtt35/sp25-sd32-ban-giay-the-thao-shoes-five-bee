@@ -37,12 +37,11 @@ function AddressModal({ onAddAddress }) {
     getCustomerId();
   }, []);
 
-  // Fetch provinces on mount
   useEffect(() => {
     const fetchProvinces = async () => {
       try {
         const response = await getProvinces();
-        setProvinces(response.data); // Giả sử response trả về object data
+        setProvinces(response.data); 
       } catch (error) {
         console.error("Lỗi khi lấy tỉnh/thành phố", error);
       }
@@ -50,13 +49,12 @@ function AddressModal({ onAddAddress }) {
     fetchProvinces();
   }, []);
 
-  // Fetch districts based on selected province
   const handleProvinceChange = async (e) => {
     const selectedOption = e.target.options[e.target.selectedIndex];
     const selectedProvince_id = selectedOption.value;
     const selectedProvince_name = selectedOption.text;
     console.log(selectedProvince_name);
-    
+
     setDiaChi(prevState => ({ ...prevState, thanhPho: selectedProvince_name }));
 
     try {
@@ -73,7 +71,7 @@ function AddressModal({ onAddAddress }) {
     const selectedOption = e.target.options[e.target.selectedIndex];
     const selectedDistrict_id = selectedOption.value;
     const selectedDistrict_name = selectedOption.text;
-    
+
     setDiaChi(prevState => ({ ...prevState, huyen: selectedDistrict_name }));
 
     try {
@@ -101,9 +99,9 @@ function AddressModal({ onAddAddress }) {
     try {
       const response = await addDiaChi(khachHangId, diaChi);
       if (response.data) {
-        onAddAddress(response.data);  // Gọi hàm callback để cập nhật danh sách địa chỉ
+        onAddAddress(response.data); 
       }
-      handleClose();  // Đóng modal sau khi hoàn thành
+      handleClose();
     } catch (error) {
       console.error("Lỗi khi tạo địa chỉ", error);
     }
@@ -190,35 +188,13 @@ function AddressModal({ onAddAddress }) {
               />
             </Form.Group>
 
-            <Form.Group className="mt-3">
-              <Form.Label>Loại địa chỉ</Form.Label>
-              <div>
-                <Form.Check
-                  inline
-                  label="Nhà Riêng"
-                  name="addressType"
-                  type="radio"
-                  id="home"
-                  // onChange={() => setDiaChi(prevState => ({ ...prevState, trangThai: 1 }))}
-                />
-                <Form.Check
-                  inline
-                  label="Văn Phòng"
-                  name="addressType"
-                  type="radio"
-                  id="office"
-                  // onChange={() => setDiaChi(prevState => ({ ...prevState, trangThai: 2 }))}
-                />
-              </div>
-            </Form.Group>
-
             <Form.Group controlId="formDefaultAddress" className="mt-3">
-            <Form.Check
+              <Form.Check
                 checked={diaChi.trangThai === 1} // Hiển thị checkbox đã được chọn nếu trangThai là 1
                 onChange={(e) => setDiaChi(prevState => ({ ...prevState, trangThai: e.target.checked ? 1 : 0 }))}
-                 type="checkbox"
-                 label="Đặt làm địa chỉ mặc định"
-            />
+                type="checkbox"
+                label="Đặt làm địa chỉ mặc định"
+              />
             </Form.Group>
           </Form>
         </Modal.Body>
