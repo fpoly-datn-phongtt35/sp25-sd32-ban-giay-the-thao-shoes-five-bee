@@ -34,6 +34,11 @@ export const updateSoLuongGiay = (idHoaDonChiTiet, isIncrease) => {
 export const getListHoaDonCho = () => {
   return axios.get(`${REST_API_BASE_URL}/list`);
 };
+export const getSanPhamTrongHoaDon = (idHoaDon) => {
+  return axios.get(
+    `${REST_API_BASE_URL}/san-pham/${idHoaDon}`
+  );
+};
 
 export const deleteHoaDonCho = (idHoaDon) => {
   return axios.delete(`${REST_API_BASE_URL}/delete/${idHoaDon}`);

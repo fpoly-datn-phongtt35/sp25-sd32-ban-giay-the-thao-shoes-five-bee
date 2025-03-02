@@ -1,7 +1,7 @@
 import React from "react";
 import "./banhangtaiquay.css";
 import { getGiay } from "../service/GiayService";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useParams } from "react";
 import { Button, Input, message, Select, Modal } from "antd";
 import {
   addHoaDon,
@@ -30,6 +30,7 @@ import {
   getListHoaDonCho,
   deleteHoaDonCho,
   themSanPhamVaoHoaDon,
+  getSanPhamTrongHoaDon,
 } from "../service/BanhangTaiQuayService";
 import WebcamComponent from "./WebcamComponent";
 const BanHangTaiQuay = () => {
@@ -61,6 +62,8 @@ const BanHangTaiQuay = () => {
   const [hoTen, setHoTen] = useState("");
   const [soDienThoai, setSoDienThoai] = useState("");
   const { Option } = Select;
+  const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
+
   const [hoaDonCho, setHoaDonCho] = useState([]);
   const [availablePageNumbers, setAvailablePageNumbers] = useState([
     1, 2, 3, 4, 5,
@@ -101,52 +104,46 @@ const BanHangTaiQuay = () => {
       message.warning("Vui lòng tạo hóa đơn chờ trước khi chọn sản phẩm!");
       return;
     }
-  
+
     const selectedPageData = pages.find((page) => page.id === selectedPage);
     if (!selectedPageData || !selectedPageData.hoaDonId) {
       message.warning("Không tìm thấy hóa đơn hợp lệ.");
       return;
     }
-  
+
     const idHoaDon = selectedPageData.hoaDonId;
-    const idSanPham = product.ID
-  
-    console.log("🛒 ID Hóa đơn:", idHoaDon);
-    console.log("👟 ID Sản phẩm:", idSanPham);
-    console.log("🔍 Product Data:", product);
-  
+    const idSanPham = product.ID;
+
     if (!idHoaDon || !idSanPham) {
       message.error("ID hóa đơn hoặc ID sản phẩm không hợp lệ!");
       return;
     }
-  
+
     try {
       await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
-      
+
       // ✅ Cập nhật lại state `selectedProducts` để tránh lặp
       setSelectedProducts((prevSelectedProducts) => {
         const updatedProducts = { ...prevSelectedProducts };
         const currentPageProducts = updatedProducts[selectedPage] || [];
-  
+
         // Kiểm tra nếu sản phẩm đã tồn tại thì không thêm nữa
         if (!currentPageProducts.some((p) => p.id === idSanPham)) {
-          updatedProducts[selectedPage] = [...currentPageProducts, { ...product, SOLUONG: 1 }];
+          updatedProducts[selectedPage] = [
+            ...currentPageProducts,
+            { ...product, SOLUONG: 1 },
+          ];
         }
-  
-        localStorage.setItem("selectedProducts", JSON.stringify(updatedProducts));
+
         return updatedProducts;
       });
-  
+
       message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
     } catch (error) {
       console.error("❌ Lỗi khi thêm sản phẩm vào hóa đơn:", error);
       message.error("Không thể thêm sản phẩm vào hóa đơn.");
     }
   };
-  
-  
-  
-  
 
   const handleRemoveProduct = (productId) => {
     setSelectedProducts((prevSelectedProducts) => {
@@ -158,7 +155,7 @@ const BanHangTaiQuay = () => {
             (product) => product.ID !== productId
           )
         : [];
-      // localStorage.setItem("selectedProducts", JSON.stringify(updatedProducts));
+
       return updatedProducts;
     });
   };
@@ -196,7 +193,7 @@ const BanHangTaiQuay = () => {
             return p;
           })
         : [];
-      // localStorage.setItem("selectedProducts", JSON.stringify(updatedProducts));
+
       return updatedProducts;
     });
   };
@@ -253,8 +250,6 @@ const BanHangTaiQuay = () => {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
       }
 
-      console.log("Dữ liệu API:", result.data);
-
       // Lọc người dùng có "ROLE_USER"
       const filteredUsers = result.data
         .filter((user) => user.roleNames.includes("ROLE_USER"))
@@ -265,27 +260,75 @@ const BanHangTaiQuay = () => {
           diaChi: user.diaChi.length > 0 ? user.diaChi : ["Không có địa chỉ"],
         }));
 
-      console.log("Danh sách khách hàng ROLE_USER:", filteredUsers);
-
       setKhachHangList(filteredUsers);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách khách hàng:", error);
       message.error("Không thể tải danh sách khách hàng");
     }
   };
+  const fetchHoaDonCho = async () => {
+    try {
+      const response = await getListHoaDonCho();
+
+      const hoaDonPages = response.data.map((hoaDon, index) => ({
+        id: index + 1, // Số hóa đơn
+        hoaDonId: hoaDon.id, // ID hóa đơn từ API
+      }));
+
+      setPages(hoaDonPages);
+      if (hoaDonPages.length > 0) {
+        setSelectedHoaDonId(hoaDonPages[0].hoaDonId);
+        console.log("ID hóa đơn đầu tiên:", hoaDonPages[0].hoaDonId);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách hóa đơn chờ:", error);
+      message.error("Không thể lấy danh sách hóa đơn chờ");
+    }
+  };
+  const fetchSanPhamTrongHoaDon = async (idHoaDon) => {
+    if (!idHoaDon) {
+      message.error("ID hóa đơn không hợp lệ!");
+      return;
+    }
+
+    try {
+      const result = await getSanPhamTrongHoaDon(idHoaDon);
+      console.log("Dữ liệu sản phẩm từ API:", result.data);
+
+      const formattedData = Array.isArray(result.data)
+        ? result.data.map((item) => ({
+            ID: item.id, 
+            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+            SOLUONG: item.soLuong,
+            GIABAN: item.giaBan,
+            ANH_GIAY:
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl ||
+              "https://via.placeholder.com/150",
+          }))
+        : [];
+
+      console.log("Dữ liệu sau khi format:", formattedData);
+
+      setSelectedProducts((prev) => ({
+        ...prev,
+        [selectedPage]: formattedData, // Cập nhật theo `selectedPage`
+      }));
+    } catch (error) {
+      console.error("Lỗi khi fetch danh sách sản phẩm: ", error);
+      message.error("Lỗi khi tải danh sách sản phẩm!");
+    }
+};
+
 
   useEffect(() => {
     getAllGiay();
     getAllKhachHangData();
     getChuongTrinhGiamGia();
     fetchHoaDonCho();
-    // const storedSelectedProducts = JSON.parse(
-    //   localStorage.getItem("selectedProducts")
-    // );
-    // if (storedSelectedProducts) {
-    //   setSelectedProducts(storedSelectedProducts);
-    // }
-  }, []);
+    if (selectedHoaDonId) {
+      fetchSanPhamTrongHoaDon(selectedHoaDonId, setSelectedProducts);
+    }
+  }, [selectedHoaDonId]);
 
   const applyGiamGia = (giamGia) => {
     if (!giamGia) {
@@ -372,7 +415,6 @@ const BanHangTaiQuay = () => {
       }));
 
       setGiay(dataGiay);
-      console.log("Dữ liệu giày:", dataGiay);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu giày:", error);
       message.error(`Lỗi khi lấy dữ liệu: ${error.message}`);
@@ -566,7 +608,6 @@ const BanHangTaiQuay = () => {
     setSelectedGiamGia(null);
     setAppliedGiamGia(null);
     setSoTienGiam(0);
-    // localStorage.removeItem("selectedProducts");
   };
   const addChuongTrinhGiamGiaHoaDonChiTiet = async (
     hoaDonId,
@@ -723,58 +764,17 @@ const BanHangTaiQuay = () => {
 
   const handleSelectPage = (pageId) => {
     setSelectedPage(pageId);
+  
   };
   const handleClear = () => {
     setSelectedKhachHang(null);
     setHoTen("");
     setSoDienThoai("");
   };
-  const fetchHoaDonCho = async () => {
-    try {
-      const response = await getListHoaDonCho();
-    console.log("Danh sách hóa đơn chờ:", response.data);
-    
-      // if (!Array.isArray(response.data)) {
-      //   throw new Error("Dữ liệu trả về không phải là mảng");
-      // }
-
-      // Chuyển đổi dữ liệu API thành format của pages
-      const hoaDonPages = response.data.map((hoaDon, index) => ({
-        id: index + 1, // Số hóa đơn
-        hoaDonId: hoaDon.id, // ID hóa đơn từ API
-      }));
-
-      setPages(hoaDonPages); // Cập nhật danh sách pages
-      console.log("Danh sách hóa đơn chờ:", hoaDonPages);
-    } catch (error) {
-      console.error("Lỗi khi lấy danh sách hóa đơn chờ:", error);
-      message.error("Không thể lấy danh sách hóa đơn chờ");
-    }
-  };
-  const handleAddProductToInvoice = async (idHoaDon, idSanPham) => {
-    try {
-      if (!idHoaDon) {
-        message.warning("Vui lòng chọn hóa đơn trước khi thêm sản phẩm.");
-        return;
-      }
-
-      const response = await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
-
-      if (response && response.data) {
-        message.success("Thêm sản phẩm vào hóa đơn thành công!");
-        // Gọi lại API để cập nhật danh sách sản phẩm trên giao diện nếu cần
-      } else {
-        throw new Error("Dữ liệu trả về không hợp lệ.");
-      }
-    } catch (error) {
-      console.error("Lỗi khi thêm sản phẩm vào hóa đơn:", error);
-      message.error("Không thể thêm sản phẩm vào hóa đơn.");
-    }
-  };
 
   return (
     <div className="quay_container">
-         {/* <div>
+      {/* <div>
       <h1>React Webcam</h1>
       <WebcamComponent />
     </div> */}
@@ -809,39 +809,40 @@ const BanHangTaiQuay = () => {
 
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
-            {(Array.isArray(selectedProducts[selectedPage])
-              ? selectedProducts[selectedPage]
-              : []
-            ).map((product) => (
-              <div key={product.ID} className="selected_product">
-                {product.ANH_GIAY && (
-                  <img src={`${product.ANH_GIAY}`} alt={product.TEN} />
-                )}
-                <div>{product.TEN}</div>
-                <div>{product.GIABAN}</div>
-                <div className="quantity_controls">
+            {selectedProducts[selectedPage]?.length > 0 ? (
+              selectedProducts[selectedPage].map((product) => (
+                <div key={product.ID} className="selected_product">
+                  {product.ANH_GIAY && (
+                    <img src={product.ANH_GIAY} alt={product.TEN} />
+                  )}
+                  <div>{product.TEN}</div>
+                  <div>{product.GIABAN}</div>
+                  <div className="quantity_controls">
+                    <Button
+                      onClick={() => handleQuantityChange(product.ID, -1)}
+                      disabled={product.SOLUONG <= 0}
+                    >
+                      -
+                    </Button>
+                    <span>{product.SOLUONG}</span>
+                    <Button onClick={() => handleQuantityChange(product.ID, 1)}>
+                      +
+                    </Button>
+                  </div>
+                  <div className="total_price">
+                    {formatCurrency(calculateTotal(product))}
+                  </div>
                   <Button
-                    onClick={() => handleQuantityChange(product.ID, -1)}
-                    disabled={product.SOLUONG <= 0}
+                    className="remove_button"
+                    onClick={() => handleRemoveProduct(product.ID)}
                   >
-                    -
-                  </Button>
-                  <span>{product.SOLUONG}</span>
-                  <Button onClick={() => handleQuantityChange(product.ID, 1)}>
-                    +
+                    Xóa
                   </Button>
                 </div>
-                <div className="total_price">
-                  {formatCurrency(calculateTotal(product))}
-                </div>
-                <Button
-                  className="remove_button"
-                  onClick={() => handleRemoveProduct(product.ID)}
-                >
-                  Xóa
-                </Button>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="no_products">Không có sản phẩm nào</div>
+            )}
           </div>
         </div>
         <div className="product_list_tt">
