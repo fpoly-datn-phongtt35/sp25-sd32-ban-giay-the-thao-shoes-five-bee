@@ -14,7 +14,7 @@ import java.util.UUID;
 public interface GiayChiTietRepository
     extends JpaRepository<GiayChiTietEntity, UUID>, JpaSpecificationExecutor<GiayChiTietEntity> {
 
-  @Query("SELECT g FROM GiayChiTietEntity g WHERE g.id = :ids")
+  @Query("SELECT g FROM GiayChiTietEntity g WHERE g.id IN :ids")
   List<GiayChiTietEntity> findGiayChiTietEntitiesByIds(List<UUID> ids);
 
   GiayChiTietEntity findByMaVach(String maVach);
