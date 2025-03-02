@@ -22,18 +22,19 @@ export const CartProvider = ({ children }) => {
     setCart([...cart, { ...item, count: 1 }]);
   };
 
-  const increment = (index) => {
-    const newCart = [...cart];
-    newCart[index].count += 1;
+  const increment = (id) => {
+    const newCart = cart.map((item) =>
+      item.id === id ? { ...item, count: item.count + 1 } : item
+    );
     setCart(newCart);
   };
 
-  const decrement = (index) => {
-    const newCart = [...cart];
-    if (newCart[index].count > 1) {
-      newCart[index].count -= 1;
-      setCart(newCart);
-    }
+
+  const decrement = (id) => {
+    const newCart = cart.map((item) =>
+      item.id === id && item.count > 1 ? { ...item, count: item.count - 1 } : item
+    );
+    setCart(newCart);
   };
 
   const removeProduct = (index) => {

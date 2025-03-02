@@ -5,8 +5,8 @@ import { getDiaChiByKhachHangId } from '../service/DiaChiService.js';
 import AddressModal from '../address/AddressModal.js';
 
 export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
-  //   const [gender, setGender] = useState('male');
   const [customerData, setCustomerData] = useState({
+    khachHangId: '',
     anh: '',
     email: '',
     hoTen: '',
@@ -26,11 +26,11 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
   const [error, setError] = useState(null);
 
   const [isEditing, setIsEditing] = useState(false);
+
   const [newDob, setNewDob] = useState(
     customerData.ngaySinh ? new Date(customerData.ngaySinh).toISOString().split('T')[0] : ''
   );
 
-  // Hàm chuyển đổi từ chuỗi ngày 'Tue Jun 06 00:00:00 ICT 2000' thành 'YYYY-MM-DD'
   const formatDateFromString = (dateString) => {
     const date = new Date(dateString);
 
@@ -50,16 +50,26 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
     const selectedDate = e.target.value;
     console.log("Ngày đã chọn:", selectedDate);
     setNewDob(selectedDate);
+    setCustomerData((prevData) => ({
+      ...prevData,
+      ngaySinh: selectedDate,
+    }));
   };
 
   // Hàm xử lý thay đổi giá trị của input
   const handleChange = (event) => {
     setCustomerData(prevState => ({
       ...prevState,
-      hoTen: event.target.value
+      hoTen: event.target.value,
     }));
   };
 
+  const handleChangeSdt = (event) => {
+    setCustomerData(prevState => ({
+      ...prevState,
+      soDienThoai: event.target.value
+    }));
+  };
   const handleAddAddress = (newAddress) => {
     setDiaChiList([...diaChiList, newAddress]);
   };
@@ -108,26 +118,17 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];
-
     if (file) {
-      // Kiểm tra kích thước file (1MB = 1024 * 1024 bytes)
       if (file.size > 1024 * 1024) {
         alert("Dung lượng file vượt quá 1 MB");
         return;
       }
-
-      // Tạo URL cho file đã chọn để hiển thị
       const fileURL = URL.createObjectURL(file);
       console.log(fileURL);
-
-      // Cập nhật ảnh hiển thị
       setCustomerData(prevState => ({
         ...prevState,
         anh: fileURL
       }));
-
-      // Bạn có thể thêm đoạn mã để tải lên ảnh nếu cần:
-      // uploadImageToServer(file); // Hàm upload ảnh lên server
     }
   };
 
@@ -138,17 +139,14 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
       console.error('Khách hàng ID không tồn tại');
       return;
     }
-
     try {
-      // Gọi API để cập nhật thông tin khách hàng
-      const response = await updateKhachHang(khachHangId, customerData);
+      console.log(customerData);
+      const response = await updateKhachHang(customerData, customerData.anh);
+
       onUpdateProfile(response.data); // Gọi hàm callback để cập nhật khách hàng
       console.log("Thông tin khách hàng đã được cập nhật:", response.data);
       setIsEditing(false);
-      // Nếu thành công, hiển thị thông báo
       setUpdateSuccess(true);
-
-      // Reset thông báo sau 3 giây
       setTimeout(() => setUpdateSuccess(false), 3000);
     } catch (error) {
       console.error("Lỗi khi cập nhật thông tin khách hàng:", error);
@@ -193,8 +191,6 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
                 </div>) : (
                 <div>
                   <small>địa chỉ chưa được thiết lập.</small>
-                  {/* Nút mở modal ở đây */}
-                  <AddressModal onAddAddress={handleAddAddress} />
                 </div>
               )}
               </label>
@@ -202,8 +198,13 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
             </div>
 
             <div className="form-group">
-              <label>Số điện thoại:</label>
-              <span> {customerData.soDienThoai} <a href="/profile">Thay Đổi</a></span>
+              <label htmlFor="soDienThoai">Số điện thoại:</label>
+              <input
+                type="text"
+                id="soDienThoai"
+                value={customerData.soDienThoai || ''}
+                onChange={handleChangeSdt}
+              />
             </div>
 
             <div className="form-group">

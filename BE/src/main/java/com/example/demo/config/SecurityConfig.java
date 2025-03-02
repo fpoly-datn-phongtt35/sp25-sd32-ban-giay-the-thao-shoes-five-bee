@@ -13,6 +13,7 @@ import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
+import org.springframework.security.web.authentication.UsernamePasswordAuthenticationFilter;
 import org.springframework.web.cors.CorsConfiguration;
 
 import java.util.Arrays;
@@ -26,8 +27,6 @@ public class SecurityConfig {
     public JwtAuthFilter jwtAuthFilter(){
         return new JwtAuthFilter();
     }
-
-
 
     @Bean
     public PasswordEncoder passwordEncoder(){
@@ -51,7 +50,8 @@ public class SecurityConfig {
                 .authorizeHttpRequests(request -> request
                         .requestMatchers("/**").permitAll()
                         .anyRequest().authenticated())
-                .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS));
+                .sessionManagement(sesion -> sesion.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
+        .addFilterBefore(jwtAuthFilter(),UsernamePasswordAuthenticationFilter.class);
         return http.build();
     }
 

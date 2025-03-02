@@ -2,7 +2,7 @@ import React, { useEffect, useState } from "react";
 import "./header.css";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Dropdown, Menu, Space } from "antd";
-import { BellOutlined, UserOutlined } from "@ant-design/icons";
+import { BellOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
 import { jwtDecode } from "jwt-decode";
 
 export const Header = () => {
@@ -167,7 +167,7 @@ export const Header = () => {
             )}
             <li className="site-nav-item site-nav-cart mini-cart">
               <a href="/cart" title="Giỏ hàng" rel="nofollow">
-                Giỏ hàng <i className="fa fa-cart-arrow-down"></i>
+              <ShoppingCartOutlined style={{ fontSize: '20px' }} /> 
                 <span className="count_item_pr">0</span>
               </a>
               <div className="top-cart-content">

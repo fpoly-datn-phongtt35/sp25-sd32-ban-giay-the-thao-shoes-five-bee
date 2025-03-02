@@ -7,6 +7,8 @@ import {
 } from "../service/GiayChiTietService";
 import { getGiayDetail } from "../service/GiayService";
 import "./sanphamchitiet.css";
+import { addToCart } from "../service/GioHangChiTietService";
+import { message } from "antd";
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -70,6 +72,31 @@ const ProductDetail = () => {
 
     if (selectedVariant) {
       setCurrentPrice(selectedVariant.giaBan); // Cập nhật giá
+    }
+  };
+
+  const handleAddToCart = async () => {
+    if (!selectedSize || !selectedColor) {
+      message.warning("Vui lòng chọn kích thước và màu sắc!");
+      return;
+    }
+      const selectedVariant = bienTheList.find(
+      (item) =>
+        item.tenMauSac === selectedColor && item.tenKichCo === selectedSize
+    );
+    if (!selectedVariant) {
+      message.error("Không tìm thấy sản phẩm với lựa chọn này!");
+      return;
+    }
+    try {
+      const response = await addToCart(selectedVariant.idGiayChiTiet, quantity);
+      if (response.status === 200) {
+        message.success("Đã thêm vào giỏ hàng thành công!");
+      } else {
+        message.error("Thêm vào giỏ hàng thất bại!");
+      }
+    } catch (error) {
+      message.error("Có lỗi xảy ra khi thêm vào giỏ hàng!");
     }
   };
 
@@ -155,8 +182,8 @@ const ProductDetail = () => {
           </div>
 
           {/* Nút Mua ngay */}
-          <div className="buy-button">
-            MUA NGAY VỚI GIÁ{" "}
+          <div className="buy-button"onClick={handleAddToCart}>
+            MUA NGAY VỚI GIÁ {""}
             {selectedColor
               ? currentPrice.toLocaleString()
               : productGiay?.giaBan?.toLocaleString() || "0"}

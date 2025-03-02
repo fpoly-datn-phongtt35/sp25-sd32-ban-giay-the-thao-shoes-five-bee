@@ -4,7 +4,7 @@ import 'bootstrap/dist/css/bootstrap.min.css';
 import { updateDiaChi } from '../service/DiaChiService.js';
 import { getProvinces, getDistrictsByProvinceId, getWardsByDistrictId } from '../service/Address.js';
 
-function UpdateAddressModal({ addressData,onAddAddress }) {
+function UpdateAddressModal({ addressData, onAddAddress }) {
   const [show, setShow] = useState(false);
   const [provinces, setProvinces] = useState([]);
   const [districts, setDistricts] = useState([]);
@@ -39,7 +39,7 @@ function UpdateAddressModal({ addressData,onAddAddress }) {
     const selectedProvince_id = selectedOption.value;
     const selectedProvince_name = selectedOption.text;
     console.log(selectedProvince_name);
-    
+
     setDiaChi(prevState => ({ ...prevState, thanhPho: selectedProvince_name }));
 
     try {
@@ -56,7 +56,7 @@ function UpdateAddressModal({ addressData,onAddAddress }) {
     const selectedOption = e.target.options[e.target.selectedIndex];
     const selectedDistrict_id = selectedOption.value;
     const selectedDistrict_name = selectedOption.text;
-    
+
     setDiaChi(prevState => ({ ...prevState, huyen: selectedDistrict_name }));
 
     try {
@@ -174,35 +174,13 @@ function UpdateAddressModal({ addressData,onAddAddress }) {
               />
             </Form.Group>
 
-            <Form.Group className="mt-3">
-              <Form.Label>Loại địa chỉ</Form.Label>
-              <div>
-                <Form.Check
-                  inline
-                  label="Nhà Riêng"
-                  name="addressType"
-                  type="radio"
-                  id="home"
-                  // onChange={() => setDiaChi(prevState => ({ ...prevState, trangThai: 1 }))}
-                />
-                <Form.Check
-                  inline
-                  label="Văn Phòng"
-                  name="addressType"
-                  type="radio"
-                  id="office"
-                  // onChange={() => setDiaChi(prevState => ({ ...prevState, trangThai: 2 }))}
-                />
-              </div>
-            </Form.Group>
-
             <Form.Group controlId="formDefaultAddress" className="mt-3">
-            <Form.Check
-                checked={diaChi.trangThai === 1} // Hiển thị checkbox đã được chọn nếu trangThai là 1
+              <Form.Check
+                checked={diaChi.trangThai === 1}
                 onChange={(e) => setDiaChi(prevState => ({ ...prevState, trangThai: e.target.checked ? 1 : 0 }))}
-                 type="checkbox"
-                 label="Đặt làm địa chỉ mặc định"
-            />
+                type="checkbox"
+                label="Đặt làm địa chỉ mặc định"
+              />
             </Form.Group>
           </Form>
         </Modal.Body>
