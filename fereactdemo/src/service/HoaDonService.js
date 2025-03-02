@@ -25,6 +25,8 @@ export const getHoaDon = () => axios.get(REST_API_BASE_URL);
 export const addHoaDon = (hoaDon) =>
   axios.post(`${REST_API_BASE_URL}/add`, hoaDon);
 
+export const addProduct = (hoaDon) =>
+  axios.post(`${REST_API_BASE_URL}/add-product`, hoaDon);
 export const deleteHoaDon = (id) =>
   axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
 

@@ -1,7 +1,7 @@
 import React from "react";
 import "./banhangtaiquay.css";
 import { getGiay } from "../service/GiayService";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useParams } from "react";
 import { Button, Input, message, Select, Modal } from "antd";
 import {
   addHoaDon,
@@ -25,6 +25,14 @@ import {
   addPhieuGiamGiaChiTiet,
   getPhieuGiamGiaChiTiet,
 } from "../service/PhieuGiamGiaChiTietHoaDon";
+import {
+  createHoaDonBanHangTaiQuay,
+  getListHoaDonCho,
+  deleteHoaDonCho,
+  themSanPhamVaoHoaDon,
+  getSanPhamTrongHoaDon,
+} from "../service/BanhangTaiQuayService";
+import WebcamComponent from "./WebcamComponent";
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [customerMoney, setCustomerMoney] = useState("");
@@ -54,6 +62,13 @@ const BanHangTaiQuay = () => {
   const [hoTen, setHoTen] = useState("");
   const [soDienThoai, setSoDienThoai] = useState("");
   const { Option } = Select;
+  const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
+
+  const [hoaDonCho, setHoaDonCho] = useState([]);
+  const [availablePageNumbers, setAvailablePageNumbers] = useState([
+    1, 2, 3, 4, 5,
+  ]);
+
   const [isOpen, setIsOpen] = useState(false);
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
@@ -84,27 +99,50 @@ const BanHangTaiQuay = () => {
     });
   };
 
-  const handleProductClick = (product) => {
+  const handleProductClick = async (product) => {
     if (pages.length === 0) {
-      message.warning("Vui lòng tạo hóa đơn chờ trước khi chọn sản phẩm !");
+      message.warning("Vui lòng tạo hóa đơn chờ trước khi chọn sản phẩm!");
       return;
     }
-    setSelectedProducts((prevSelectedProducts) => {
-      const updatedProducts = { ...prevSelectedProducts };
-      const currentPageProducts = Array.isArray(updatedProducts[selectedPage])
-        ? updatedProducts[selectedPage]
-        : [];
-      const productExists = currentPageProducts.some(
-        (p) => p.ID === product.ID
-      );
 
-      updatedProducts[selectedPage] = productExists
-        ? currentPageProducts.filter((p) => p.ID !== product.ID)
-        : [...currentPageProducts, { ...product, SOLUONG: 1 }];
+    const selectedPageData = pages.find((page) => page.id === selectedPage);
+    if (!selectedPageData || !selectedPageData.hoaDonId) {
+      message.warning("Không tìm thấy hóa đơn hợp lệ.");
+      return;
+    }
 
-      localStorage.setItem("selectedProducts", JSON.stringify(updatedProducts));
-      return updatedProducts;
-    });
+    const idHoaDon = selectedPageData.hoaDonId;
+    const idSanPham = product.ID;
+
+    if (!idHoaDon || !idSanPham) {
+      message.error("ID hóa đơn hoặc ID sản phẩm không hợp lệ!");
+      return;
+    }
+
+    try {
+      await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
+
+      // ✅ Cập nhật lại state `selectedProducts` để tránh lặp
+      setSelectedProducts((prevSelectedProducts) => {
+        const updatedProducts = { ...prevSelectedProducts };
+        const currentPageProducts = updatedProducts[selectedPage] || [];
+
+        // Kiểm tra nếu sản phẩm đã tồn tại thì không thêm nữa
+        if (!currentPageProducts.some((p) => p.id === idSanPham)) {
+          updatedProducts[selectedPage] = [
+            ...currentPageProducts,
+            { ...product, SOLUONG: 1 },
+          ];
+        }
+
+        return updatedProducts;
+      });
+
+      message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
+    } catch (error) {
+      console.error("❌ Lỗi khi thêm sản phẩm vào hóa đơn:", error);
+      message.error("Không thể thêm sản phẩm vào hóa đơn.");
+    }
   };
 
   const handleRemoveProduct = (productId) => {
@@ -117,7 +155,7 @@ const BanHangTaiQuay = () => {
             (product) => product.ID !== productId
           )
         : [];
-      localStorage.setItem("selectedProducts", JSON.stringify(updatedProducts));
+
       return updatedProducts;
     });
   };
@@ -155,7 +193,7 @@ const BanHangTaiQuay = () => {
             return p;
           })
         : [];
-      localStorage.setItem("selectedProducts", JSON.stringify(updatedProducts));
+
       return updatedProducts;
     });
   };
@@ -205,22 +243,92 @@ const BanHangTaiQuay = () => {
     }
   };
   const getAllKhachHangData = async () => {
-    const result = await getAllKhachHang();
-    const activeGiay = result.data.filter((item) => item.trangThai === 0);
-    setKhachHangList(activeGiay);
+    try {
+      const result = await getAllKhachHang();
+
+      if (!result || !Array.isArray(result.data)) {
+        throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
+      }
+
+      // Lọc người dùng có "ROLE_USER"
+      const filteredUsers = result.data
+        .filter((user) => user.roleNames.includes("ROLE_USER"))
+        .map((user) => ({
+          id: user.id,
+          hoTen: user.hoTen ?? "Không có tên",
+          soDienThoai: user.soDienThoai ?? "Không có SĐT",
+          diaChi: user.diaChi.length > 0 ? user.diaChi : ["Không có địa chỉ"],
+        }));
+
+      setKhachHangList(filteredUsers);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách khách hàng:", error);
+      message.error("Không thể tải danh sách khách hàng");
+    }
   };
+  const fetchHoaDonCho = async () => {
+    try {
+      const response = await getListHoaDonCho();
+
+      const hoaDonPages = response.data.map((hoaDon, index) => ({
+        id: index + 1, // Số hóa đơn
+        hoaDonId: hoaDon.id, // ID hóa đơn từ API
+      }));
+
+      setPages(hoaDonPages);
+      if (hoaDonPages.length > 0) {
+        setSelectedHoaDonId(hoaDonPages[0].hoaDonId);
+        console.log("ID hóa đơn đầu tiên:", hoaDonPages[0].hoaDonId);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách hóa đơn chờ:", error);
+      message.error("Không thể lấy danh sách hóa đơn chờ");
+    }
+  };
+  const fetchSanPhamTrongHoaDon = async (idHoaDon) => {
+    if (!idHoaDon) {
+      message.error("ID hóa đơn không hợp lệ!");
+      return;
+    }
+
+    try {
+      const result = await getSanPhamTrongHoaDon(idHoaDon);
+      console.log("Dữ liệu sản phẩm từ API:", result.data);
+
+      const formattedData = Array.isArray(result.data)
+        ? result.data.map((item) => ({
+            ID: item.id, 
+            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+            SOLUONG: item.soLuong,
+            GIABAN: item.giaBan,
+            ANH_GIAY:
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl ||
+              "https://via.placeholder.com/150",
+          }))
+        : [];
+
+      console.log("Dữ liệu sau khi format:", formattedData);
+
+      setSelectedProducts((prev) => ({
+        ...prev,
+        [selectedPage]: formattedData, // Cập nhật theo `selectedPage`
+      }));
+    } catch (error) {
+      console.error("Lỗi khi fetch danh sách sản phẩm: ", error);
+      message.error("Lỗi khi tải danh sách sản phẩm!");
+    }
+};
+
 
   useEffect(() => {
     getAllGiay();
     getAllKhachHangData();
     getChuongTrinhGiamGia();
-    const storedSelectedProducts = JSON.parse(
-      localStorage.getItem("selectedProducts")
-    );
-    if (storedSelectedProducts) {
-      setSelectedProducts(storedSelectedProducts);
+    fetchHoaDonCho();
+    if (selectedHoaDonId) {
+      fetchSanPhamTrongHoaDon(selectedHoaDonId, setSelectedProducts);
     }
-  }, []);
+  }, [selectedHoaDonId]);
 
   const applyGiamGia = (giamGia) => {
     if (!giamGia) {
@@ -285,29 +393,31 @@ const BanHangTaiQuay = () => {
 
   const getAllGiay = async () => {
     try {
-      const result = await getGiay();
-      if (!Array.isArray(result.data)) {
-        throw new Error("Dữ liệu trả về không phải là mảng");
+      const result = await getAllGiayChiTiet();
+
+      if (!result || !Array.isArray(result.data)) {
+        throw new Error("Dữ liệu trả về không hợp lệ");
       }
 
       const dataGiay = result.data.map((item, index) => ({
-        key: index,
-        TEN: item.ten ?? "N/A",
-        GIABAN: item.giaBan ?? 0,
+        ID: item.id ?? index,
+        TEN: item.giayEntity?.ten ?? "N/A", // Lấy tên giày từ giayEntity
         ANH_GIAY:
-          item.anhGiayEntities?.length > 0
-            ? item.anhGiayEntities[0].tenUrl
+          item.giayEntity?.anhGiayEntities?.length > 0
+            ? item.giayEntity.anhGiayEntities[0].tenUrl // Lấy ảnh đầu tiên từ giayEntity
             : null,
+        GIABAN: item.giaBan ?? 0,
         SOLUONG: item.soLuongTon ?? 0,
-        MO_TA: item.moTa ?? "Không có mô tả",
-        TRANG_THAI: item.trangThai === 1 ? "Đang bán" : "Ngừng bán",
+        MO_TA: item.giayEntity?.moTa ?? "Không có mô tả",
+        KiCH_CO: item.kichCoEntity?.ten ?? "N/A",
+        MAU_SAC: item.mauSacEntity?.ten ?? "N/A",
+        TRANG_THAI: item.trangThai === 0 ? "Đang bán" : "Ngừng bán",
       }));
 
       setGiay(dataGiay);
-      console.log("Dữ liệu giày:", dataGiay);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu giày:", error);
-      message.error("Không thể lấy dữ liệu giày");
+      message.error(`Lỗi khi lấy dữ liệu: ${error.message}`);
     }
   };
 
@@ -498,7 +608,6 @@ const BanHangTaiQuay = () => {
     setSelectedGiamGia(null);
     setAppliedGiamGia(null);
     setSoTienGiam(0);
-    localStorage.removeItem("selectedProducts");
   };
   const addChuongTrinhGiamGiaHoaDonChiTiet = async (
     hoaDonId,
@@ -577,24 +686,32 @@ const BanHangTaiQuay = () => {
       message.warning("Tối đa tạo hóa đơn chờ là 5");
       return;
     }
-    try {
-      const newHoaDon = {
-        khachHang: selectedKhachHang,
-        hoTenKhachHang: hoTen,
-        soDienThoaiKhachHang: soDienThoai,
-        trangThai: 0,
-        tongTien: getTotalAmount().toFixed(2),
-        ngayTao: new Date().toISOString(),
-      };
-      const response = await addHoaDon(newHoaDon);
-      const createdHoaDonId = response.data.id;
 
-      const nextPageId = pages.length === 0 ? 1 : pageCounter;
+    try {
+      // Gọi API để tạo hóa đơn bán hàng tại quầy
+      const response = await createHoaDonBanHangTaiQuay();
+
+      if (!response || !response.data || !response.data.id) {
+        throw new Error("Dữ liệu hóa đơn trả về không hợp lệ");
+      }
+
+      const createdHoaDonId = response.data.id;
+      console.log("Hóa đơn mới tạo:", createdHoaDonId);
+
+      // Tìm số thứ tự nhỏ nhất có thể dùng (1 - 5)
+      const usedIds = pages.map((page) => page.id);
+      let nextPageId = 1;
+      for (let i = 1; i <= 5; i++) {
+        if (!usedIds.includes(i)) {
+          nextPageId = i;
+          break;
+        }
+      }
+
       setPages((prevPages) => [
         ...prevPages,
         { id: nextPageId, hoaDonId: createdHoaDonId },
       ]);
-      setPageCounter(nextPageId + 1);
       setSelectedPage(nextPageId);
       message.success("Đã tạo hóa đơn chờ mới");
     } catch (error) {
@@ -607,15 +724,17 @@ const BanHangTaiQuay = () => {
     try {
       const pageToRemove = pages.find((page) => page.id === pageId);
       if (pageToRemove && pageToRemove.hoaDonId) {
-        await deleteHoaDon(pageToRemove.hoaDonId);
+        await deleteHoaDonCho(pageToRemove.hoaDonId);
         message.success("Đã xóa hóa đơn");
       }
 
+      // Cập nhật danh sách trang sau khi xóa
       const remainingPages = pages.filter((page) => page.id !== pageId);
       setPages(remainingPages);
 
       if (remainingPages.length === 0) {
-        setPageCounter(2);
+        // Nếu không còn trang nào, reset counter về 1
+        setPageCounter(1);
         setSelectedPage(1);
         setSelectedProducts({});
         setSelectedKhachHang(null);
@@ -628,26 +747,24 @@ const BanHangTaiQuay = () => {
         setSoTienGiam(0);
         setAppliedGiamGia(null);
         setSelectedOption(null);
-      } else if (selectedPage === pageId) {
-        setSelectedPage(remainingPages[0].id);
+      } else {
+        // Nếu trang bị xóa là trang đang được chọn, chọn trang đầu tiên còn lại
+        if (selectedPage === pageId) {
+          setSelectedPage(remainingPages[0].id);
+        }
       }
 
-      setSelectedProducts((prevSelectedProducts) => {
-        const updatedProducts = { ...prevSelectedProducts };
-        delete updatedProducts[pageId];
-        localStorage.setItem(
-          "selectedProducts",
-          JSON.stringify(updatedProducts)
-        ); // Lưu lại thay đổi vào localStorage
-        return updatedProducts;
-      });
+      // Cập nhật danh sách số thứ tự có thể sử dụng
+      setAvailablePageNumbers((prevNumbers) => [...prevNumbers, pageId].sort());
     } catch (error) {
       console.error("Lỗi khi xóa hóa đơn:", error);
       message.error("Không thể xóa hóa đơn");
     }
   };
+
   const handleSelectPage = (pageId) => {
     setSelectedPage(pageId);
+  
   };
   const handleClear = () => {
     setSelectedKhachHang(null);
@@ -657,6 +774,10 @@ const BanHangTaiQuay = () => {
 
   return (
     <div className="quay_container">
+      {/* <div>
+      <h1>React Webcam</h1>
+      <WebcamComponent />
+    </div> */}
       <div className="left">
         <div className="product_list_hd">
           <div>
@@ -688,42 +809,40 @@ const BanHangTaiQuay = () => {
 
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
-            {(Array.isArray(selectedProducts[selectedPage])
-              ? selectedProducts[selectedPage]
-              : []
-            ).map((product) => (
-              <div key={product.ID} className="selected_product">
-                <div>{product.tenUrl}</div>
-                {product.ANH_GIAY && (
-                  <img
-                    src={`http://localhost:5000/upload/${product.ANH_GIAY}`}
-                    alt={product.TEN}
-                  />
-                )}
-                <div>{product.GIABAN}</div>
-                <div className="quantity_controls">
+            {selectedProducts[selectedPage]?.length > 0 ? (
+              selectedProducts[selectedPage].map((product) => (
+                <div key={product.ID} className="selected_product">
+                  {product.ANH_GIAY && (
+                    <img src={product.ANH_GIAY} alt={product.TEN} />
+                  )}
+                  <div>{product.TEN}</div>
+                  <div>{product.GIABAN}</div>
+                  <div className="quantity_controls">
+                    <Button
+                      onClick={() => handleQuantityChange(product.ID, -1)}
+                      disabled={product.SOLUONG <= 0}
+                    >
+                      -
+                    </Button>
+                    <span>{product.SOLUONG}</span>
+                    <Button onClick={() => handleQuantityChange(product.ID, 1)}>
+                      +
+                    </Button>
+                  </div>
+                  <div className="total_price">
+                    {formatCurrency(calculateTotal(product))}
+                  </div>
                   <Button
-                    onClick={() => handleQuantityChange(product.ID, -1)}
-                    disabled={product.SOLUONG <= 0}
+                    className="remove_button"
+                    onClick={() => handleRemoveProduct(product.ID)}
                   >
-                    -
-                  </Button>
-                  <span>{product.SOLUONG}</span>
-                  <Button onClick={() => handleQuantityChange(product.ID, 1)}>
-                    +
+                    Xóa
                   </Button>
                 </div>
-                <div className="total_price">
-                  {formatCurrency(calculateTotal(product))}
-                </div>
-                <Button
-                  className="remove_button"
-                  onClick={() => handleRemoveProduct(product.ID)}
-                >
-                  Xóa
-                </Button>
-              </div>
-            ))}
+              ))
+            ) : (
+              <div className="no_products">Không có sản phẩm nào</div>
+            )}
           </div>
         </div>
         <div className="product_list_tt">
@@ -731,11 +850,11 @@ const BanHangTaiQuay = () => {
             <thead>
               <tr>
                 <th>Ảnh</th>
-
                 <th>Tên</th>
                 <th>Giá Bán</th>
                 <th>Số Lượng</th>
-                <th>Mô Tả</th>
+                <th>Kích Cỡ</th>
+                <th>Màu Săc</th>
                 <th>Trạng Thái</th>
               </tr>
             </thead>
@@ -772,11 +891,11 @@ const BanHangTaiQuay = () => {
                   </td>
 
                   {/* Các cột dữ liệu khác */}
-
                   <td>{item.TEN}</td>
                   <td>{item.GIABAN.toLocaleString("vi-VN")} đ</td>
                   <td>{item.SOLUONG}</td>
-                  <td>{item.MO_TA}</td>
+                  <td>{item.KiCH_CO}</td>
+                  <td>{item.MAU_SAC}</td>
                   <td>{item.TRANG_THAI}</td>
                 </tr>
               ))}
@@ -785,151 +904,100 @@ const BanHangTaiQuay = () => {
         </div>
       </div>
       <div className="right">
-        {/* Nút mở popup */}
-        <Button type="primary" onClick={() => setIsOpen(true)}>
-          Thanh Toán
+        <Select
+          placeholder="Chọn Khách Hàng"
+          value={selectedKhachHang}
+          onChange={handleKhachHangChange}
+        >
+          {Array.isArray(khachHangList) &&
+            khachHangList.map((hkh) => (
+              <Option key={hkh.id} value={hkh.id}>
+                {hkh.hoTen}
+              </Option>
+            ))}
+        </Select>
+        <Button type="primary" danger onClick={handleClear}>
+          Clear
         </Button>
-        {/* Popup Thanh Toán */}
-        <Modal
-  className="fullscreen-modal"
-  open={isOpen}
-  onCancel={() => setIsOpen(false)}
-  footer={null} // Ẩn footer mặc định
-  closable={false} // Ẩn nút đóng mặc định
->
-  {/* <div className="modal-header">
-    <h2>Đơn Hàng</h2>
-    <Button type="primary" icon="plus" onClick={handleNewOrder}>
-      +
-    </Button>
-  </div> */}
-
-  <div className="modal-content">
-    <div className="customer-section">
-      <Select
-        className="customer-select"
-        placeholder="Chọn Khách Hàng"
-        value={selectedKhachHang}
-        onChange={handleKhachHangChange}
-      >
-        {Array.isArray(khachHangList) &&
-          khachHangList.map((hkh) => (
-            <Option key={hkh.id} value={hkh.id}>
-              {hkh.hoTen}
-            </Option>
-          ))}
-      </Select>
-      <Button type="primary" danger onClick={handleClear}>
-        Clear
-      </Button>
-    </div>
-
-    <div className="input-group">
-      <label>Họ Tên Khách Hàng:</label>
-      <Input
-        value={hoTen}
-        onChange={(e) => setHoTen(e.target.value)}
-        placeholder="Nhập họ tên khách hàng"
-      />
-    </div>
-
-    <div className="input-group">
-      <label>Số Điện Thoại:</label>
-      <Input
-        value={soDienThoai}
-        onChange={(e) => setSoDienThoai(e.target.value)}
-        placeholder="Nhập số điện thoại khách hàng"
-      />
-    </div>
-
-    <Button
-      type="primary"
-      onClick={handleAddKhachHang}
-      disabled={!hoTen || !soDienThoai}
-    >
-      Thêm Khách Hàng Mới
-    </Button>
-
-    <Select
-      className="discount-select"
-      placeholder="Chọn Chương Trình Giảm Giá"
-      value={selectedGiamGia?.id}
-      onChange={handleSelectGiamGia}
-    >
-      {giamGiaList
-        .filter((gg) => getTotalAmount() >= gg.dieuKien)
-        .map((gg) => (
-          <Option key={gg.id} value={gg.id}>
-            {gg.ten} (Giảm {gg.phanTramGiam}%, tối đa {gg.soTienGiamMax})
-          </Option>
-        ))}
-    </Select>
-
-    <p className="amount">
-      <strong>Tiền Khách Phải Trả:</strong> {formatCurrency(totalAmount)} VND
-    </p>
-
-    <div className="input-group">
-      <label>Tiền khách đưa:</label>
-      <Input
-        value={customerMoney}
-        onChange={handleInputChange}
-        placeholder="Nhập số tiền khách đưa"
-      />
-    </div>
-
-    <hr />
-
-    <p className="change-amount">
-      <strong>Tiền thừa:</strong> {formatCurrency(changeAmount)}
-    </p>
-
-    <hr />
-
-    <div className="payment-options">
-      <label>
-        <input
-          type="checkbox"
-          value="option1"
-          checked={selectedOption === "option1"}
-          onChange={handleChange}
+        <br />
+        Họ Tên Khách Hàng :
+        <Input
+          type="input"
+          value={hoTen}
+          onChange={(e) => setHoTen(e.target.value)}
+          placeholder="Nhập họ tên khách hàng"
         />
-        Tiền mặt
-      </label>
-      <label>
-        <input
-          type="checkbox"
-          value="option3"
-          checked={selectedOption === "option3"}
-          onChange={handleChange}
+        Số Điện Thoại :
+        <Input
+          type="input"
+          value={soDienThoai}
+          onChange={(e) => setSoDienThoai(e.target.value)}
+          placeholder="Nhập số điện thoại khách hàng"
         />
-        Chuyển Khoản (VNPay)
-      </label>
-    </div>
-
-    <p className="total-amount">
-      <strong>Tổng Tiền: {formatCurrency(getTotalAmount())}</strong>
-    </p>
-
-    <div className="button-group">
-      <Button
-        className="cancel-button"
-        onClick={() => setIsOpen(false)}
-      >
-        Cancel
-      </Button>
-      <Button
-        className="pay-button"
-        type="primary"
-        onClick={handlePayment}
-        disabled={getTotalAmount() <= 0}
-      >
-        Thanh Toán (F1)
-      </Button>
-    </div>
-  </div>
-</Modal>
-
+        <Button
+          type="primary"
+          onClick={handleAddKhachHang}
+          style={{ marginTop: "10px" }}
+          disabled={!hoTen || !soDienThoai}
+        >
+          Thêm Khách Hàng Mới
+        </Button>
+        <br />
+        <br />
+        <Select
+          placeholder="Chọn Chương Trình Giảm Giá"
+          value={selectedGiamGia?.id}
+          onChange={handleSelectGiamGia}
+        >
+          {giamGiaList
+            .filter((gg) => getTotalAmount() >= gg.dieuKien)
+            .map((gg) => (
+              <Option key={gg.id} value={gg.id}>
+                {gg.ten} (Giảm {gg.phanTramGiam}%, tối đa {gg.soTienGiamMax})
+              </Option>
+            ))}
+        </Select>
+        <p>Tiền Khách Phải Trả: {formatCurrency(totalAmount)} VND</p>
+        Tiền khách đưa
+        <Input
+          value={customerMoney}
+          onChange={handleInputChange}
+          placeholder="Nhập số tiền khách đưa"
+        />
+        <hr />
+        <p>Tiền thừa: {formatCurrency(changeAmount)}</p>
+        <hr />
+        <div className="check_tt">
+          <label>
+            <input
+              type="checkbox"
+              value="option1"
+              checked={selectedOption === "option1"}
+              onChange={handleChange}
+            />
+            Tiền mặt
+          </label>
+          <br />
+          <label>
+            <input
+              type="checkbox"
+              value="option3"
+              checked={selectedOption === "option3"}
+              onChange={handleChange}
+            />
+            Chuyển Khoản (VNPay)
+          </label>
+        </div>
+        <p style={{ paddingTop: "10px" }}>
+          Tổng Tiền: {formatCurrency(getTotalAmount())}
+        </p>
+        <button
+          className="btn-tt"
+          onClick={handlePayment}
+          disabled={getTotalAmount() <= 0}
+        >
+          Thanh Toán
+        </button>
       </div>
     </div>
   );
