@@ -1,14 +1,13 @@
 package com.example.demo.entity;
 
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.math.BigDecimal;
-import java.util.UUID;
 
 @Entity
 @Table(name = "CHUONG_TRINH_GIAM_GIA_CHI_TIET_SAN_PHAM")
@@ -30,8 +29,8 @@ public class GiamGiaChiTietSanPhamEntity {
     private Integer trangThai;
 
     @ManyToOne(fetch = FetchType.EAGER)
-    @JoinColumn(name = "ID_GIAY",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
-    private GiayEntity giay;
+    @JoinColumn(name = "ID_GIAY_CHI_TIET",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    private GiayChiTietEntity giayChiTiet;
 
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_SAN_PHAM",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
