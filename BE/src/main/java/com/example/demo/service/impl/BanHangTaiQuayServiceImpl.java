@@ -83,6 +83,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     }
 
     BigDecimal soTienGiam = tongTienSanPhamGoc.subtract(tongTienSanPhamKhiGiam);
+    BigDecimal phiShip = hoaDonRequest.getIsGiaoHang() ? BigDecimal.valueOf(30000) : BigDecimal.ZERO;
 
     hoaDon.setMa(hoaDonRequest.getMa());
     hoaDon.setNgayThanhToan(new Date());
@@ -93,10 +94,10 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setHuyen(hoaDonRequest.getHuyen());
     hoaDon.setTinh(hoaDonRequest.getTinh());
     hoaDon.setDiaChi(hoaDonRequest.getDiaChi());
-    hoaDon.setTongTien(tongTienSanPhamGoc.subtract(soTienGiamKhiApMa));
+    hoaDon.setTongTien(tongTienSanPhamKhiGiam.subtract(soTienGiamKhiApMa).add(phiShip));
     hoaDon.setHinhThucThanhToan(1);
     hoaDon.setSoTienGiam(soTienGiam.add(soTienGiamKhiApMa));
-    hoaDon.setPhiShip(hoaDonRequest.getIsGiaoHang() ? BigDecimal.valueOf(30000) : BigDecimal.ZERO);
+    hoaDon.setPhiShip(phiShip);
     hoaDon.setHinhThucNhanHang(hoaDonRequest.getIsGiaoHang() ? 1 : 2);
     hoaDon.setTrangThai(2);
     hoaDon.setUserEntity(user);
@@ -205,23 +206,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       hoaDonChiTiet.setSoLuong(soLuongHienTai - 1);
       giayChiTiet.setSoLuongTon(soLuongTon + 1);
     }
-
-    // **Cập nhật giá bán tổng (giá gốc * số lượng)**
-    BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
-    hoaDonChiTiet.setGiaBan(giaBanGoc.multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())));
-
-    // **Tính toán lại giá sau giảm**
-    BigDecimal giaSauGiam = giaBanGoc;
-    GiamGiaChiTietSanPhamEntity giamGiaOpt =
-        giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
-
-    if (giamGiaOpt != null) {
-      BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
-      giaSauGiam = giaBanGoc.subtract(soTienDaGiam);
-    }
-
-    // **Cập nhật đơn giá (giá sau giảm * số lượng)**
-    hoaDonChiTiet.setDonGia(giaSauGiam.multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())));
 
     // **Lưu lại vào database**
     giayChiTietRepository.save(giayChiTiet);
