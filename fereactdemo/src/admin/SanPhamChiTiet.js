@@ -19,28 +19,28 @@ import {
   Table,
   message,
 } from "antd";
-import { Option } from "antd/es/mentions";
+
 import { getMauSac } from "../service/MauSacService";
 import { getSizes } from "../service/KichCoService";
-import e from "cors";
+
 import "./sanphamchitiet.css";
 const SanPhamChiTiet = () => {
   const [giayChiTiet, setGiayChiTiet] = useState([]);
-  const [danhSachGiayChiTiet, setDanhSachGiayChiTiet] = useState([]);
 
   const [giayList, setGiayList] = useState([]);
   const [value, setValue] = useState(1);
-  const [selectedRowKeys, setSelectedRowKeys] = useState([]);
+  const [ten, setTen] = useState(null);
+
   const [soLuongTon1, setSoLuongTon1] = useState(null);
-  const [soLuongTon2, setSoLuongTon2] = useState(null);
+
   const [giaBan1, setGiaBan1] = useState(null);
-  const [giaBan2, setGiaBan2] = useState(null);
+
   const [selectedGiay1, setSelectedGiay1] = useState(null);
-  const [selectedGiay2, setSelectedGiay2] = useState(null);
+
   const [selectedMauSac1, setSelectedMauSac1] = useState(null);
-  const [selectedMauSac2, setSelectedMauSac2] = useState(null);
+
   const [selectedKichCo1, setSelectedKichCo1] = useState(null);
-  const [selectedKichCo2, setSelectedKichCo2] = useState(null);
+
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [editingGiayChiTiet, setEditingGiayChiTiet] = useState(null);
   const [activeChatLieu, setActiveChatLieu] = useState([]);
@@ -54,11 +54,14 @@ const SanPhamChiTiet = () => {
     getDataGiayChiTiet();
     getMauSacList();
     getKichCoList();
+    getTenGiay();
   }, []);
 
   const getGiayData = async () => {
     const result = await getGiay();
-    const activeGiay = result.data.filter((item) => item.trangThai === 1);
+    const activeGiay = result.data.filter((item) => item.trangThai === 0);
+    console.log("active giay", activeGiay); 
+    
     setGiayList(activeGiay);
   };
 
@@ -74,19 +77,29 @@ const SanPhamChiTiet = () => {
     const activeKichCo = result.data.filter((item) => item.trangThai === 0);
     setKichCoList(activeKichCo);
   };
+  const getTenGiay = async () => {
+    const result = await getGiay();
+    const ten = result.data.map((item) => item.ten);
+    console.log("ten giay", ten);
+    
+    setTen(ten);
+  };
 
   const getDataGiayChiTiet = async () => {
     const result = await getAllGiayChiTiet();
+
     const dataGiayChiTiet = result.data.map((item, index) => ({
       key: index,
       ID: item.id,
+      TEN: item.giayEntity ? item.giayEntity.ten : null,
       GIABAN: item.giaBan,
       SOLUONGTON: item.soLuongTon,
-      GIAY: item.giayEntity ? item.giayEntity.ten : null, // Sửa lỗi
+      GIAY: item.selectedGiay1 ? item.selectedGiay1.ten : null,
       TRANG_THAI: item.trangThai,
-      MAUSAC: item.mauSacEntity ? item.mauSacEntity.ten : null, // Sửa lỗi
-      KICHCO: item.kichCoEntity ? item.kichCoEntity.ten : null, // Sửa lỗi
+      MAUSAC: item.mauSacEntity ? item.mauSacEntity.ten : null,
+      KICHCO: item.kichCoEntity ? item.kichCoEntity.ten : null,
     }));
+    console.log("data giay chi tiet", dataGiayChiTiet);
 
     const activeChatLieuData = dataGiayChiTiet.filter(
       (item) => item.TRANG_THAI === 0
@@ -130,75 +143,82 @@ const SanPhamChiTiet = () => {
 
     const checkGiayChiTiet = async (data) => {
       try {
+        // 🛠 Kiểm tra dữ liệu đầu vào
         if (
-          !data ||
-          !data.giay ||
-          !data.giay.id ||
-          !data.mauSacDto ||
-          !data.mauSacDto.id ||
-          !data.kichCoDto ||
-          !data.kichCoDto.id
+          !data?.giayDto?.id ||
+          !data?.mauSacDto?.id ||
+          !data?.kichCoDto?.id
         ) {
           throw new Error("Dữ liệu không hợp lệ: Một số thuộc tính bị thiếu.");
         }
 
-        console.log("Dữ liệu truyền vào checkGiayChiTiet:", data);
+        const giayInfo = await getGiay();
+        const currentGiay = giayInfo?.data?.find(
+          (g) => g.id === data.giayDto.id
+        );
 
+        if (!currentGiay) {
+          throw new Error("Không tìm thấy thông tin giày.");
+        }
+
+        console.log("🔹 currentGiay:", currentGiay);
+
+        // 🏀 Kiểm tra giá bán
+        const giaBanSP = parseFloat(currentGiay?.giaBan || 0);
+        if (parseFloat(data.giaBan) < giaBanSP) {
+          throw new Error(
+            `Giá bán (${data.giaBan}) phải >= giá sản phẩm (${giaBanSP})`
+          );
+        }
+
+        // 🏀 Kiểm tra giày chi tiết đã tồn tại chưa
         const latestData = await getAllGiayChiTiet();
         const existingGiay = latestData?.data?.find(
           (item) =>
-            item.giay?.id === data.giay.id &&
+            item.giay?.id === data.giayDto.id &&
             item.mauSacDto?.id === data.mauSacDto.id &&
             item.kichCoDto?.id === data.kichCoDto.id
         );
 
-        const giayInfo = await getGiay();
-        const currentGiay = giayInfo?.data?.find((g) => g.id === data.giay.id);
-
-        if (!currentGiay) {
-          throw new Error("Không tìm thấy thông tin giày");
-        }
-        if (parseFloat(data.giaBan) < parseFloat(currentGiay.giaBan)) {
-          throw new Error(
-            `Giá bán (${data.giaBan}) phải >= giá sản phẩm (${currentGiay.giaBan})`
-          );
-        }
-
         if (existingGiay) {
+          // ✅ Cập nhật số lượng tồn nếu đã có
           const updateData = {
             ...existingGiay,
-            soLuongTon: existingGiay.soLuongTon + parseInt(data.soLuongTon),
+            soLuongTon:
+              parseInt(existingGiay.soLuongTon) + parseInt(data.soLuongTon),
             giaBan: data.giaBan,
             trangThai: data.trangThai,
           };
 
           await updateGiayChiTiet(existingGiay.id, updateData);
-          message.success("Cập nhật số lượng thành công");
+          message.success("Cập nhật số lượng thành công.");
         } else {
-          await addGiayChiTiet(data);
+          // ✅ Thêm mới nếu chưa có
+          await addGiayChiTiet({
+            ...data,
+            giayDto: {
+              id: currentGiay.id,
+              ten: currentGiay.ten, // 🏀 Thêm tên giày
+            },
+          });
           message.success("Thêm sản phẩm chi tiết mới thành công!");
         }
 
-        const allGiayChiTiet = await getAllGiayChiTiet();
-        const relatedItems = allGiayChiTiet?.data?.filter(
-          (item) => item.giay?.id === data.giay.id
-        );
-        const totalSoLuongTon = relatedItems.reduce(
-          (sum, item) => sum + item.soLuongTon,
-          0
-        );
-
-        await updateGiay(data.giay.id, {
-          ...currentGiay,
-          soLuongTon: totalSoLuongTon,
+        console.log("🚀 Dữ liệu gửi lên updateGiay:", {
+          id: currentGiay.id,
+          ten: currentGiay.ten,
+          soLuongTon: parseInt(data.soLuongTon),
+          giaBan: giaBanSP,
+          trangThai: currentGiay.trangThai ?? 1,
         });
       } catch (error) {
-        console.error("Lỗi trong checkGiayChiTiet:", error);
+        console.error("❌ Lỗi trong checkGiayChiTiet:", error);
         throw error;
       }
     };
 
     try {
+      // 🏀 Kiểm tra dữ liệu đầu vào trước khi gửi
       if (
         !soLuongTon1 ||
         !selectedGiay1 ||
@@ -209,7 +229,8 @@ const SanPhamChiTiet = () => {
         return;
       }
 
-      console.log("Dữ liệu gửi lên BE:", {
+      console.log("📤 Dữ liệu gửi lên BE:", {
+        ten,
         soLuongTon1,
         giaBan1,
         selectedGiay1,
@@ -217,21 +238,23 @@ const SanPhamChiTiet = () => {
         selectedKichCo1,
       });
 
+      // 🏀 Gọi `checkGiayChiTiet` với dữ liệu đầy đủ
       await checkGiayChiTiet({
-        soLuongTon: soLuongTon1,
-        giaBan: giaBan1,
-        giay: { id: selectedGiay1 },
+        soLuongTon: parseInt(soLuongTon1), // Ép kiểu số nguyên
+        giaBan: parseFloat(giaBan1), // Ép kiểu số
+        giayDto: { id: selectedGiay1 },
         mauSacDto: { id: selectedMauSac1 },
         kichCoDto: { id: selectedKichCo1 },
         trangThai: newTrangThai1,
       });
 
-      console.log("Cập nhật tổng số lượng tồn cho giày ID:", selectedGiay1);
-      await updateGiayTotalQuantity(selectedGiay1);
-
+      // Cập nhật lại danh sách giày chi tiết
       await getDataGiayChiTiet();
+
       message.success("Thao tác thành công!");
 
+      // Reset form
+      setTen("")
       setSoLuongTon1("");
       setGiaBan1("");
       setSelectedMauSac1(null);
@@ -239,14 +262,13 @@ const SanPhamChiTiet = () => {
       setSelectedGiay1(null);
       setValue(1);
     } catch (error) {
-      console.error("Lỗi khi thêm giày chi tiết:", error);
+      console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error("Lỗi khi thực hiện thao tác: " + error.message);
     }
 
     setIsModalVisible1(false);
   };
 
-  
   const deleteGiayChiTiet = async (record) => {
     try {
       await removeGiayChiTiet(record.ID);
@@ -260,19 +282,26 @@ const SanPhamChiTiet = () => {
 
   const detail = async (record) => {
     try {
+
       const response = await detailGiayChiTiet2(record.ID);
+
       const giayChiTiet = response.data;
+      console.log("🔍 Chi tiết giày:", giayChiTiet);
+
       setEditingGiayChiTiet(giayChiTiet);
       setGiaBan1(giayChiTiet.giaBan);
       setSoLuongTon1(giayChiTiet.soLuongTon); // Cập nhật số lượng tồn cho sản phẩm 1
       setValue(giayChiTiet.trangThai === 0 ? 1 : 2);
       setSelectedMauSac1(
-        giayChiTiet.mauSacDto ? giayChiTiet.mauSacDto.id : null
+        giayChiTiet.mauSacEntity ? giayChiTiet.mauSacEntity.id : null
       );
       setSelectedKichCo1(
-        giayChiTiet.kichCoDto ? giayChiTiet.kichCoDto.id : null
+        giayChiTiet.kichCoEntity ? giayChiTiet.kichCoEntity.id : null
       );
-      setSelectedGiay1(giayChiTiet.giay ? giayChiTiet.giay.id : null);
+      setSelectedGiay1(
+        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null,
+        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.ten : null
+      );
       setIsModalVisible(true);
     } catch (error) {
       message.error("Lỗi khi detail giày chi tiết");
@@ -280,68 +309,52 @@ const SanPhamChiTiet = () => {
   };
 
   const editGiayChiTietButton = async () => {
-    const newTrangThai = value === 1 ? 0 : 1;
+    if (!editingGiayChiTiet) {
+      message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
+      return;
+    }
+
     const newDataGiayChiTiet = {
+      id: editingGiayChiTiet?.id || null,
       soLuongTon: soLuongTon1,
       giaBan: giaBan1,
-      giay: selectedGiay1 ? { id: selectedGiay1 } : null,
-      trangThai: newTrangThai,
-      mauSac: selectedMauSac1 ? { id: selectedMauSac1 } : null,
-      kichCo: selectedKichCo1 ? { id: selectedKichCo1 } : null,
+      giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
+      trangThai: value === 1 ? 0 : 1,
+      mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null,
+      kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
     };
-    try {
-      const latestData = await getAllGiayChiTiet();
-      const existingItems = latestData.data.filter(
-        (item) =>
-          item.giay.id === newDataGiayChiTiet.giay.id &&
-          item.mauSac.id === newDataGiayChiTiet.mauSac.id &&
-          item.kichCo.id === newDataGiayChiTiet.kichCo.id &&
-          item.id !== editingGiayChiTiet.id
-      );
-      if (existingItems.length > 0) {
-        const priceMatches = existingItems.every(
-          (item) =>
-            parseFloat(item.giaBan) === parseFloat(newDataGiayChiTiet.giaBan)
-        );
 
-        if (!priceMatches) {
-          message.error(
-            "Giá bán phải bằng nhau cho các giày chi tiết có cùng giày, màu sắc và kích cỡ."
-          );
-          return;
-        }
-        const existingItem = existingItems[0];
-        const updatedExistingItem = {
-          ...existingItem,
-          soLuongTon:
-            existingItem.soLuongTon + parseInt(newDataGiayChiTiet.soLuongTon),
-          giaBan: newDataGiayChiTiet.giaBan,
-          trangThai: newTrangThai,
-        };
-        await updateGiayChiTiet(existingItem.id, updatedExistingItem);
-        await removeGiayChiTiet(editingGiayChiTiet.id);
-        message.success("Cập nhật và gộp số lượng thành công");
-      } else {
-        await updateGiayChiTiet(editingGiayChiTiet.id, newDataGiayChiTiet);
-        message.success("Cập nhật thành công sản phẩm chi tiết");
+    console.log("🔍 Dữ liệu cập nhật gửi đi:", newDataGiayChiTiet);
+
+    try {
+      if (!newDataGiayChiTiet.giayDto?.id ||
+        !newDataGiayChiTiet.mauSacDto?.id ||
+        !newDataGiayChiTiet.kichCoDto?.id) {
+        message.error("❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!");
+        return;
       }
-      await updateGiayTotalQuantity(newDataGiayChiTiet.giay.id);
-      getDataGiayChiTiet();
+
+      await updateGiayChiTiet(newDataGiayChiTiet);
+      message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
+
+      await getDataGiayChiTiet(); // Cập nhật danh sách sau khi sửa
+      resetForm();
       setIsModalVisible(false);
-      setSoLuongTon1("");
-      setGiaBan1("");
-      setSelectedMauSac1(null);
-      setSelectedKichCo1(null);
-      setValue(1);
-      setSelectedGiay1(null);
-      setEditingGiayChiTiet(null);
     } catch (error) {
-      message.error(
-        "Lỗi cập nhật sản phẩm chi tiết: "(
-          error.response?.data?.message || error.message
-        )
-      );
+      console.error("❌ Lỗi cập nhật sản phẩm chi tiết:", error.response?.data || error.message);
+      message.error("❌ Lỗi cập nhật sản phẩm chi tiết: " + (error.response?.data?.message || error.message));
     }
+  };
+
+
+  const resetForm = () => {
+    setSoLuongTon1("");
+    setGiaBan1("");
+    setSelectedMauSac1(null);
+    setSelectedKichCo1(null);
+    setValue(1);
+    setSelectedGiay1(null);
+    setEditingGiayChiTiet(null);
   };
 
   return (
@@ -365,7 +378,7 @@ const SanPhamChiTiet = () => {
               <div className="modalContent_product">
                 <h6>Chọn sản phẩm 1</h6>
                 <Select
-                  placeholder="Chọn Tên Giày 1"
+                  placeholder="Chọn Tên Giày"
                   value={selectedGiay1}
                   onChange={setSelectedGiay1}
                 >
@@ -379,7 +392,7 @@ const SanPhamChiTiet = () => {
                 <br />
                 <br />
                 <Select
-                  placeholder="Chọn Màu Sắc 1"
+                  placeholder="Chọn Màu Sắc"
                   value={selectedMauSac1}
                   onChange={setSelectedMauSac1}
                 >
@@ -393,7 +406,7 @@ const SanPhamChiTiet = () => {
                 <br />
                 <br />
                 <Select
-                  placeholder="Chọn Kích Cỡ 1"
+                  placeholder="Chọn Kích Cỡ"
                   value={selectedKichCo1}
                   onChange={setSelectedKichCo1}
                 >
@@ -407,14 +420,14 @@ const SanPhamChiTiet = () => {
                 <br />
                 <br />
                 <Input
-                  placeholder="Số Lượng Tồn 1"
+                  placeholder="Số Lượng Tồn"
                   value={soLuongTon1}
                   onChange={(e) => setSoLuongTon1(e.target.value)}
                 />
                 <br />
                 <br />
                 <Input
-                  placeholder="Giá Bán 1"
+                  placeholder="Giá Bán"
                   value={giaBan1}
                   onChange={(e) => setGiaBan1(e.target.value)}
                 />
@@ -426,8 +439,8 @@ const SanPhamChiTiet = () => {
               onChange={(e) => setValue(e.target.value)}
               value={value}
             >
-              <Radio value={1}>Còn</Radio>
-              <Radio value={2}>Hết</Radio>
+              <Radio value={1}>Hoạt động</Radio>
+              <Radio value={2}>Không hoạt động</Radio>
             </Radio.Group>
           </div>
         </Modal>
@@ -449,7 +462,7 @@ const SanPhamChiTiet = () => {
             },
             {
               title: "Tên Giày",
-              dataIndex: "GIAY",
+              dataIndex: "TEN",
               key: "GIAY",
             },
             {
@@ -466,14 +479,14 @@ const SanPhamChiTiet = () => {
               title: "Trạng Thái",
               dataIndex: "TRANG_THAI",
               key: "TRANG_THAI",
-              render: (text) => (text === 0 ? "Còn" : "Hết"),
+              render: (text) => (text === 0 ? "Hoạt động" : "Không hoạt động"),
             },
             {
-              title: "Action",
+              title: "Thao tác",
               key: "action",
               render: (_, record) => (
                 <Space size="middle">
-                  <Button onClick={() => detail(record)}>Sửa</Button>
+                  <Button onClick={() => detail(record)}>Cập nhật</Button>
                   <Button onClick={() => deleteGiayChiTiet(record)} danger>
                     Xóa
                   </Button>
@@ -490,9 +503,9 @@ const SanPhamChiTiet = () => {
           visible={isModalVisible}
         >
           <Form>
-            <Form.Item label="Giày 1">
+            <Form.Item label="Giày">
               <Select
-                placeholder="Chọn Tên Giày 1"
+                placeholder="Chọn Tên Giày"
                 value={selectedGiay1}
                 onChange={setSelectedGiay1}
               >
@@ -504,7 +517,7 @@ const SanPhamChiTiet = () => {
                   ))}
               </Select>
             </Form.Item>
-            <Form.Item label="Màu Sắc 1">
+            <Form.Item label="Màu Sắc">
               <Select value={selectedMauSac1} onChange={setSelectedMauSac1}>
                 {Array.isArray(mauSacList) &&
                   mauSacList.map((ms) => (
@@ -514,7 +527,7 @@ const SanPhamChiTiet = () => {
                   ))}
               </Select>
             </Form.Item>
-            <Form.Item label="Kích Cỡ 1">
+            <Form.Item label="Kích Cỡ">
               <Select value={selectedKichCo1} onChange={setSelectedKichCo1}>
                 {Array.isArray(kichCoList) &&
                   kichCoList.map((kc) => (
@@ -524,7 +537,7 @@ const SanPhamChiTiet = () => {
                   ))}
               </Select>
             </Form.Item>
-            <Form.Item label="Số Lượng Tồn 1">
+            <Form.Item label="Số Lượng Tồn">
               <Input
                 value={soLuongTon1}
                 onChange={(e) => setSoLuongTon1(e.target.value)}
@@ -543,8 +556,8 @@ const SanPhamChiTiet = () => {
                 onChange={(e) => setValue(e.target.value)}
                 value={value}
               >
-                <Radio value={1}>Còn</Radio>
-                <Radio value={2}>Hết</Radio>
+                <Radio value={1}>Hoạt động</Radio>
+                <Radio value={2}>Không hoạt động</Radio>
               </Radio.Group>
             </Form.Item>
           </Form>

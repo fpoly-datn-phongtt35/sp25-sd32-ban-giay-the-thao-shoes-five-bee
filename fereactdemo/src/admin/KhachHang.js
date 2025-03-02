@@ -122,7 +122,7 @@ const KhachHang = () => {
             setValue(khachHang.trangThai === 0 ? 1 : 2);
             setNgaySinh(khachHang.ngaySinh ? moment(khachHang.ngaySinh) : null);
             setSoDienThoai(khachHang.soDienThoai || "");
-            
+
             setIsModalVisible(true);
         } catch (error) {
             message.error("Lỗi khi lấy chi tiết khách hàng");
@@ -147,7 +147,7 @@ const KhachHang = () => {
         };
 
         try {
-            await updateKhachHang( newDataKhachHang);
+            await updateKhachHang(newDataKhachHang);
             message.success("Cập nhật khách hàng thành công");
             getKhachHangData();
             setIsModalVisible(false);
@@ -211,9 +211,9 @@ const KhachHang = () => {
     return (
         <div style={{ padding: '20px' }}>
             {/* Header Actions */}
-            <div style={{ 
-                display: 'flex', 
-                gap: '20px', 
+            <div style={{
+                display: 'flex',
+                gap: '20px',
                 marginBottom: '20px',
                 backgroundColor: '#fff',
                 padding: '20px',
@@ -221,8 +221,8 @@ const KhachHang = () => {
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
             }}>
                 {/* Left side - Add Customer Button */}
-                <Button 
-                    type="primary" 
+                <Button
+                    type="primary"
                     icon={<PlusOutlined />}
                     onClick={showDrawer}
                 >
@@ -231,9 +231,9 @@ const KhachHang = () => {
 
                 {/* Right side - Import Excel */}
                 <Space style={{ flex: 1 }}>
-                    <Button 
+                    <Button
                         icon={<DownloadOutlined />}
-                        href="/public/excel/Import_User.xlsx" 
+                        href="/public/excel/Export_User.xlsx"
                         download
                     >
                         Tải File Mẫu Excel
@@ -242,13 +242,13 @@ const KhachHang = () => {
                         type="file"
                         onChange={handleImportFileChange}
                         accept=".xlsx,.xls"
-                        style={{ 
+                        style={{
                             padding: '4px',
                             border: '1px solid #d9d9d9',
                             borderRadius: '4px'
                         }}
                     />
-                    <Button 
+                    <Button
                         type="primary"
                         onClick={handleImportExcel}
                         disabled={!importFile}
@@ -260,43 +260,44 @@ const KhachHang = () => {
             </div>
 
             {/* Table Section */}
-            <div style={{ 
+            <div style={{
                 backgroundColor: '#fff',
                 padding: '20px',
                 borderRadius: '8px',
-                boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
+                boxShadow: '0 2px 8px rgba(0,0,0,0.1)',
+                width: '100%'
             }}>
                 <h2 style={{ marginBottom: '20px' }}>Danh sách khách hàng</h2>
-                <Table 
-                    pagination={{ pageSize: 5, defaultPageSize: 5 }} 
-                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }} 
+                <Table
+                    pagination={{ pageSize: 5, defaultPageSize: 5 }}
+                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
                     columns={[
                         {
-                            title: 'HOTEN',
+                            title: 'Họ tên',
                             dataIndex: 'HOTEN',
                         },
                         {
-                            title: 'EMAIL',
+                            title: 'Email',
                             dataIndex: 'EMAIL',
                         },
                         {
-                            title: 'TRANG THAI',
+                            title: 'Trạng thái',
                             dataIndex: 'TRANG_THAI',
                             render: (text, record) => trangThai(record.TRANG_THAI)
                         },
                         {
-                            title: 'SỐ ĐIỆN THOẠI',
+                            title: 'Số điện thoại',
                             dataIndex: 'SODIENTHOAI',
                             key: 'SODIENTHOAI'
                         },
                         {
-                            title: 'NGÀY SINH',
+                            title: 'Ngày sinh',
                             dataIndex: 'NGAYSINH',
                             key: 'NGAYSINH',
                             render: (text) => text ? moment(text).format('DD/MM/YYYY') : 'Chưa có'
                         },
                         {
-                            title: 'ẢNH',
+                            title: 'Ảnh',
                             dataIndex: 'ANH',
                             key: 'ANH',
                             render: (text) => text ? (
@@ -308,16 +309,16 @@ const KhachHang = () => {
                             ) : null
                         },
                         {
-                            title: 'ACTION',
+                            title: 'Thao tác',
                             key: 'action',
                             render: (text, record) => (
                                 <Space size="middle">
-                                    <Button onClick={() => detail(record)}>Detail</Button>
-                                    <Button onClick={() => removeKhachHang(record)}>Delete</Button>
+                                    <Button onClick={() => detail(record)}>Chi tiết</Button>
+                                    <Button onClick={() => removeKhachHang(record)}>Xóa</Button>
                                 </Space>
                             ),
                         },
-                    ]} 
+                    ]}
                     dataSource={khachHang}
                 />
             </div>
@@ -352,15 +353,15 @@ const KhachHang = () => {
                         <Input value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
                     </Form.Item>
                     <Form.Item label="Ngày Sinh">
-                        <DatePicker 
-                            value={ngaySinh} 
+                        <DatePicker
+                            value={ngaySinh}
                             onChange={(date) => setNgaySinh(date)}
                             style={{ width: '100%' }}
                         />
                     </Form.Item>
                     <Form.Item label="Ảnh đại diện">
-                        <input 
-                            type="file" 
+                        <input
+                            type="file"
                             onChange={handleFileChange}
                             accept="image/*"
                         />
@@ -368,10 +369,10 @@ const KhachHang = () => {
                             <img
                                 src={URL.createObjectURL(selectedFile)}
                                 alt="Preview"
-                                style={{ 
-                                    width: '100px', 
-                                    height: '100px', 
-                                    objectFit: 'cover', 
+                                style={{
+                                    width: '100px',
+                                    height: '100px',
+                                    objectFit: 'cover',
                                     marginTop: '10px',
                                     borderRadius: '4px'
                                 }}
@@ -388,10 +389,10 @@ const KhachHang = () => {
             </Drawer>
 
             {/* Edit Modal remains unchanged */}
-            <Modal 
-                title="Cập nhật Khách Hàng" 
-                open={isModalVisible} 
-                onOk={editKhachHangButton} 
+            <Modal
+                title="Cập nhật Khách Hàng"
+                open={isModalVisible}
+                onOk={editKhachHangButton}
                 onCancel={() => setIsModalVisible(false)}
             >
                 <Form>
@@ -414,14 +415,14 @@ const KhachHang = () => {
                         <Input value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
                     </Form.Item>
                     <Form.Item label="Ngày Sinh">
-                        <DatePicker 
-                            value={ngaySinh} 
+                        <DatePicker
+                            value={ngaySinh}
                             onChange={(date) => setNgaySinh(date)}
                         />
                     </Form.Item>
                     <Form.Item label="Ảnh đại diện">
-                        <input 
-                            type="file" 
+                        <input
+                            type="file"
                             onChange={handleFileChange}
                             accept="image/*"
                         />

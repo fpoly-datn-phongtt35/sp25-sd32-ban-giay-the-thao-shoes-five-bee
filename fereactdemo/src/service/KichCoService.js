@@ -10,5 +10,10 @@ export const createSize = (size) =>
 export const deleteSize = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const updateSize = (id, size) =>
-  axios.post(`${REST_API_BASE_URL}/update/${id}`, size);
+export const updateSize = (size) =>
+  axios.post(`${REST_API_BASE_URL}/update`, size, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+

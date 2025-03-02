@@ -1,12 +1,17 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.GiayChiTietDto;
+import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.service.GiayChiTietService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+
+import java.util.List;
+import java.util.Optional;
 
 import java.util.UUID;
 
@@ -48,5 +53,16 @@ public class GiayChiTietController {
   @PostMapping("/delete")
   public ResponseEntity<?> delete(@RequestBody GiayChiTietDto giayChiTietDto) {
     return ResponseEntity.ok(giayChiTietService.delete(giayChiTietDto));
+  }
+
+  @PostMapping("/{id}/anhGiayChiTiet")
+  public ResponseEntity<?> anhGiay(@PathVariable("id") UUID id, @RequestBody List<UUID> anhGiayIds) {
+    return ResponseEntity.ok(giayChiTietService.assignAnhGiay(id,anhGiayIds));
+  }
+  
+  @GetMapping("/getAll/{giayId}")
+  public ResponseEntity<List<GiayChiTietEntity>> getGiayChiTietByGiayId(@PathVariable UUID giayId) {
+    List<GiayChiTietEntity> chiTietList = giayChiTietService.getAllGiayChiTietByGiayId(giayId);
+    return ResponseEntity.ok(chiTietList);
   }
 }

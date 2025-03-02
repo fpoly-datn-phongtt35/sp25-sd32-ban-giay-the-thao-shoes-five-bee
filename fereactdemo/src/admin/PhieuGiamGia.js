@@ -98,7 +98,7 @@ const DotGiamGia = () => {
       ngayBatDau: ngayBatDau,
       ngayKetThuc: ngayKetThuc,
       phanTramGiam: parseFloat(phanTramGiam),
- 
+
       trangThai: updatedTrangThai,
     };
 
@@ -168,8 +168,8 @@ const DotGiamGia = () => {
       key: "action",
       render: (text, record) => (
         <Space size="middle">
-          <Button onClick={() => handleUpdate(record)}>Update</Button>
-          <Button onClick={() => handleDelete(record)}>Delete</Button>
+          <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
+          <Button onClick={() => handleDelete(record)}>Xóa</Button>
         </Space>
       ),
     },
@@ -256,7 +256,7 @@ const DotGiamGia = () => {
 
       {/* Modal Cập Nhật Phiếu Giảm Giá */}
       <Modal
-        title="Cập Nhật Phiếu Giảm Giá"
+        title="Cập nhật phiếu giảm giá"
         visible={isModalVisible}
         onOk={handleUpdateSubmit}
         onCancel={handleModalCancel}

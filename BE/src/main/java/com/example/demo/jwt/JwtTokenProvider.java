@@ -1,5 +1,6 @@
 package com.example.demo.jwt;
 
+import com.example.demo.security.CustomUserDetail;
 import io.jsonwebtoken.*;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.security.core.Authentication;
@@ -9,6 +10,7 @@ import org.springframework.stereotype.Component;
 
 import java.util.Collection;
 import java.util.Date;
+import java.util.List;
 import java.util.stream.Collectors;
 
 @Component
@@ -21,7 +23,7 @@ public class JwtTokenProvider {
     private int JWT_REFRESH_EXPIRATION;
 
     public String getToken(Authentication authentication){
-        UserDetails userDetails = (UserDetails) authentication.getPrincipal();
+        CustomUserDetail userDetails = (CustomUserDetail) authentication.getPrincipal();
         Date now = new Date();
         Date expiryDate = new Date(now.getTime() + JWT_EXPIRATION);
         Collection<? extends GrantedAuthority> authorities = userDetails.getAuthorities();
@@ -30,6 +32,8 @@ public class JwtTokenProvider {
                 .collect(Collectors.joining(","));
         return Jwts.builder()
                 .setSubject(userDetails.getUsername())
+                .claim("userId",userDetails.getId())
+                .claim("hoTen",userDetails.getHoTen())
                 .claim("role",roles)
                 .setIssuedAt(new Date())
                 .setExpiration(expiryDate)
@@ -46,6 +50,15 @@ public class JwtTokenProvider {
                 .signWith(SignatureAlgorithm.HS512,JWT_SECRET)
                 .compact();
     }
+
+    public String getCustomerIdFromJwt(String token){
+        Claims claims = Jwts.parser()
+                .setSigningKey(JWT_SECRET)
+                .parseClaimsJws(token)
+                .getBody();
+        return claims.get("userId",String.class);
+    }
+
     public String getUserNameFormJwt(String token) {
         Claims claims = Jwts.parser().setSigningKey(JWT_SECRET).parseClaimsJws(token).getBody();
         return claims.getSubject();

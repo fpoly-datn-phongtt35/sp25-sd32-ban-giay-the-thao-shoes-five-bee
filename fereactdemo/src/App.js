@@ -1,5 +1,10 @@
 import "./App.css";
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
+import {
+  BrowserRouter as Router,
+  Routes,
+  Route,
+  Outlet,
+} from "react-router-dom";
 import AdminLayout from "./components/AdminLayout";
 import Login from "./signln/Login";
 import Dashbord from "./admin/Dashbord";
@@ -39,63 +44,76 @@ import HoaDonChiTiet from "./admin/HoaDonChiTiet";
 import ThongKe from "./admin/ThongKe";
 import ThongKeSanPham from "./admin/ThongKeSanPham";
 import GiamGiaHoaDon from "./admin/GiamGiaHoaDon";
+import { Header } from "./header/Header";
+import { Footer } from "./footer/Footer";
+const Layout = () => {
+  return (
+    <div className="app_container">
+      <Header />
+
+      <main>
+        <Outlet /> {/* Render các route con */}
+      </main>
+      <footer>
+      <Footer />
+      </footer>
+    </div>
+  );
+};
 function App() {
   return (
     <CartProvider>
       <Router>
-        <Routes>
-          <Route path="/home" element={<Home />} />
-          <Route path="/cart" element={<Cart />} />
-          <Route path="/bill" element={<Bill />} />
-          <Route path="/OrderStatusPage" element={<OrderStatusPage />} />
-          <Route path="/profile" element={<ProfileUser />} />
-          <Route path="/addresslist" element={<AddressList />} />
-          <Route path="/productAll" element={<ProductAll />} />
-          <Route path="/product-detail/:id" element={<ProductDetail />} />
-          <Route path="/login" element={<Login />} />
-          <Route path="/register" element={<Register />} />
-          <Route path="/" element={<Login />} />
-          <Route path="/admin" element={<AdminLayout />}>
-            <Route path="/admin/statistics" element={<Statistics />} />
-            <Route index element={<Dashbord />} />
-            <Route
-              path="/admin/ban-hang-tai-quay"
-              element={<BanHangTaiQuay />}
-            />
-            <Route path="/admin/Thong-Ke" element={<ThongKe />} />
+        <div className="app_container">
+          <Routes>
+            {/* Group các route cần Layout */}
+            <Route element={<Layout />}>
+              <Route path="/home" element={<Home />} />
+              <Route path="/cart" element={<Cart />} />
+              <Route path="/bill" element={<Bill />} />
+              <Route path="/OrderStatusPage" element={<OrderStatusPage />} />
+              <Route path="/profile" element={<ProfileUser />} />
+              <Route path="/addresslist" element={<AddressList />} />
+              <Route path="/productAll" element={<ProductAll />} />
+              <Route path="/product-detail/:id" element={<ProductDetail />} />
+            </Route>
 
-            <Route
-              path="/admin/Thong-Ke-San-Pham"
-              element={<ThongKeSanPham />}
-            />
+            {/* Các route không có Layout */}
+            <Route path="/login" element={<Login />} />
+            <Route path="/register" element={<Register />} />
+            <Route path="/" element={<Login />} />
 
-            <Route path="/admin/hoa-don-chi-tiet" element={<HoaDonChiTiet />} />
-            <Route path="/admin/quan-ly-hoa-don" element={<QuanLyHoaDon />} />
-            <Route path="/admin/tra-hang" element={<ReturnOrderStatusPage />} />
-            <Route path="/admin/san-pham" element={<SanPham />} />
-            <Route path="/admin/thuong-hieu" element={<ThuongHieu />} />
-            <Route
-              path="/admin/san-pham-chi-tiet"
-              element={<SanPhamChiTiet />}
-            />
-            <Route path="/admin/mau-sac" element={<MauSac />} />
-            <Route path="/admin/xuat-xu" element={<XuatXu />} />
-            <Route path="/admin/upload-file" element={<AnhSanPham />} />
-            <Route path="/admin/kieu-dang" element={<KieuDang />} />
-            <Route path="/admin/de-giay" element={<DeGiay />} />
-            <Route path="/admin/chat-lieu" element={<ChatLieu />} />
-            <Route path="/admin/nhan-vien" element={<NhanVien />} />
-            <Route path="/admin/khach-hang" element={<KhachHang />} />
-            <Route path="/admin/chuc-vu" element={<ChucVu />} />
-            <Route path="/admin/hang-khachHang" element={<HangKhachHang />} />
-            <Route path="/admin/phieu-giam-gia" element={<PhieuGiamGia />} />
-            <Route path="/admin/giam-gia-hoa-don" element={<GiamGiaHoaDon />} />
-            <Route path="/admin/kich-co" element={<KichCo />} />
-          </Route>
-        </Routes>
+            {/* Routes dành cho Admin */}
+            <Route path="/admin" element={<AdminLayout />}>
+              <Route path="statistics" element={<Statistics />} />
+              <Route index element={<Dashbord />} />
+              <Route path="ban-hang-tai-quay" element={<BanHangTaiQuay />} />
+              <Route path="Thong-Ke" element={<ThongKe />} />
+              <Route path="Thong-Ke-San-Pham" element={<ThongKeSanPham />} />
+              <Route path="hoa-don-chi-tiet" element={<HoaDonChiTiet />} />
+              <Route path="quan-ly-hoa-don" element={<QuanLyHoaDon />} />
+              <Route path="tra-hang" element={<ReturnOrderStatusPage />} />
+              <Route path="san-pham" element={<SanPham />} />
+              <Route path="thuong-hieu" element={<ThuongHieu />} />
+              <Route path="san-pham-chi-tiet" element={<SanPhamChiTiet />} />
+              <Route path="mau-sac" element={<MauSac />} />
+              <Route path="xuat-xu" element={<XuatXu />} />
+              <Route path="upload-file" element={<AnhSanPham />} />
+              <Route path="kieu-dang" element={<KieuDang />} />
+              <Route path="de-giay" element={<DeGiay />} />
+              <Route path="chat-lieu" element={<ChatLieu />} />
+              <Route path="nhan-vien" element={<NhanVien />} />
+              <Route path="khach-hang" element={<KhachHang />} />
+              <Route path="chuc-vu" element={<ChucVu />} />
+              <Route path="hang-khachHang" element={<HangKhachHang />} />
+              <Route path="phieu-giam-gia" element={<PhieuGiamGia />} />
+              <Route path="giam-gia-hoa-don" element={<GiamGiaHoaDon />} />
+              <Route path="kich-co" element={<KichCo />} />
+            </Route>
+          </Routes>
+        </div>
       </Router>
     </CartProvider>
   );
 }
-
 export default App;

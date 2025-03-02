@@ -37,9 +37,9 @@ export const Footer = () => {
             fontWeight: "700",
           }}
         >
-          Chính Sách:{" "}
+          {/* Chính Sách:{" "} */}
         </p>
-        {list.map((item, index) => (
+        {/* {list.map((item, index) => (
           <div className="footer_content_choice" key={index}>
             <img src={item.imgSrc} alt={item.description} />
             <div style={{ display: "flex", flexDirection: "column" }}>
@@ -47,12 +47,12 @@ export const Footer = () => {
               <p>{item.price}</p>
             </div>
           </div>
-        ))}
+        ))} */}
       </div>
       {/*  noi dung footer */}
       <div className="footer_nd">
         <div className="footer_nd_left">
-          <img src="/home/fivestar.png" alt="" />
+          {/* <img src="/home/fivestar.png" alt="" /> */}
           <p style={{ color: "white" }}>
             Dola Tool là một cửa hàng chuyên cung cấp dụng cụ cơ khí chất lượng
             cao và độ bền vượt trội. Với cam kết mang đến sự hài lòng tuyệt đối

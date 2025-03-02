@@ -1,12 +1,30 @@
-import React, { useEffect, useState } from 'react'
-import { getChucVu } from '../service/ChucVuService';
-import { addNhanVien, deleteNhanVien, detailNhanVien, getAllNhanVien, updateNhanVien } from '../service/NhanVienService';
-import { Button, Form, Input, message, Modal, Radio, Select, Space, Table, DatePicker } from 'antd';
-import { Option } from 'antd/es/mentions';
-import bcrypt from 'bcryptjs';
-import moment from 'moment';
+import React, { useEffect, useState } from "react";
+import { getChucVu } from "../service/ChucVuService";
+import {
+  addNhanVien,
+  deleteNhanVien,
+  detailNhanVien,
+  getAllNhanVien,
+  updateNhanVien,
+} from "../service/NhanVienService";
+import {
+  Button,
+  Form,
+  Input,
+  message,
+  Modal,
+  Radio,
+  Select,
+  Space,
+  Table,
+  DatePicker,
+} from "antd";
+import { Option } from "antd/es/mentions";
+import bcrypt from "bcryptjs";
+import moment from "moment";
 
 const NhanVien = () => {
+
     const [nhanVien, setNhanVien] = useState([]);
     const [value, setValue] = useState(1);
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
@@ -20,22 +38,24 @@ const NhanVien = () => {
     const [ngaySinh, setNgaySinh] = useState(null);
     const [soDienThoai, setSoDienThoai] = useState("");
 
-    const getActiveNhanVien = () => {
-        return nhanVien.filter(item => item.TRANG_THAI === 0);
-    }
-    const onSelectChange = (newSelectedRowKeys) => {
-        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
-        setSelectedRowKeys(newSelectedRowKeys);
-    };
 
-    const onChange = (e) => {
-        console.log('radio checked', e.target.value);
-        setValue(e.target.value);
-    };
+  const getActiveNhanVien = () => {
+    return nhanVien.filter((item) => item.TRANG_THAI === 0);
+  };
+  const onSelectChange = (newSelectedRowKeys) => {
+    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
+    setSelectedRowKeys(newSelectedRowKeys);
+  };
 
-    const trangThai = (status) => {
-        return status === 0 ? "Đang sử dụng" : "Không sử dụng";
-    };
+  const onChange = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue(e.target.value);
+  };
+
+  const trangThai = (status) => {
+    return status === 0 ? "Đang sử dụng" : "Không sử dụng";
+  };
+
 
     useEffect(() => {
         getNhanVien();
@@ -66,8 +86,13 @@ const NhanVien = () => {
             return;
         }
 
-        const salt = bcrypt.genSaltSync(10);
-        const hashedPassword = bcrypt.hashSync(matKhau, salt);
+
+  const createNhanVien = async () => {
+    if (!hoTen) {
+      message.error("Không được để trống họ tên");
+      return;
+    }
+
 
         const userData = {
             hoTen: hoTen,
@@ -79,21 +104,27 @@ const NhanVien = () => {
             soDienThoai: soDienThoai,
         };
 
-        try {
-            await addNhanVien(userData, selectedFile);
-            message.success("Thêm nhân viên thành công !");
-            getNhanVien();
-            resetForm();
-        } catch (error) {
-            message.error("Lỗi khi thêm nhân viên");
-        }
+
+    const userData = {
+      hoTen: hoTen,
+      email: email,
+      matKhau: hashedPassword,
+      isEnabled: value === 1,
+      roleNames: selectedChucVu ? [`${selectedChucVu}`] : ["ROLE_USER"],
+      ngaySinh: ngaySinh ? ngaySinh.format("YYYY-MM-DDTHH:mm:ss.SSS[Z]") : null,
+      soDienThoai: soDienThoai,
     };
 
-    const removeNhanVien = async (record) => {
-        await deleteNhanVien(record.ID);
-        message.success("Xóa thành công !");
-        getNhanVien();
-    };
+    try {
+      await addNhanVien(userData, selectedFile);
+      message.success("Thêm nhân viên thành công !");
+      getNhanVien();
+      resetForm();
+    } catch (error) {
+      message.error("Lỗi khi thêm nhân viên");
+    }
+  };
+
 
     const detail = async (record) => {
         console.log(record.ID);
@@ -148,10 +179,33 @@ const NhanVien = () => {
         setNgaySinh(null);
         setSoDienThoai("");
     };
+    try {
+      await updateNhanVien(newDataNhanVien, selectedFile);
+      message.success("Cập nhật nhân viên thành công");
+      getNhanVien();
+      setIsModalVisible(false);
+      resetForm();
+      setValue(null);
+    } catch (error) {
+      message.error(
+        "Lỗi cập nhật nhân viên: " +
+          (error.response?.data?.message || error.message)
+      );
+    }
+  };
 
-    const handleFileChange = (e) => {
-        setSelectedFile(e.target.files[0]);
-    };
+  const resetForm = () => {
+    setHoTen("");
+    setEmail("");
+    setMatKhau("");
+    setValue(1);
+    setSelectedChucVu(null);
+    setEditingNhanVien(null);
+    setSelectedFile(null);
+    setNgaySinh(null);
+    setSoDienThoai("");
+  };
+
 
     return (
         <div style={{ display: 'flex' }}>
@@ -302,4 +356,5 @@ const NhanVien = () => {
     )
 }
 
-export default NhanVien
+
+export default NhanVien;

@@ -16,6 +16,8 @@ import { Layout, Menu, Button, Row, theme, Dropdown, Space, Avatar, Col } from '
 import { useNavigate } from 'react-router-dom';
 import { Outlet } from 'react-router-dom';
 import logo from '../assets/logo.png';
+import { jwtDecode } from "jwt-decode";
+
 const { Header, Sider, Content } = Layout;
 const AdminLayout = () => {
 
@@ -30,27 +32,36 @@ const AdminLayout = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
     const [user, setUser] = useState(null);
     const handleLogout = () => {
-        sessionStorage.removeItem('token');
-        sessionStorage.removeItem('user');
+        localStorage.removeItem('token');
+        localStorage.removeItem('refreshToken');
         setIsLoggedIn(false);
         setUser(null);
         window.dispatchEvent(new Event('loginChange'));
-        navigate('/'); // Chuyển hướng về trang chủ sau khi đăng xuất
+        navigate('/');
     };
     useEffect(() => {
-        const userData = JSON.parse(sessionStorage.getItem('user'));
-        if (userData) {
-            setUser(userData);
-            setIsLoggedIn(true);
+        const token = localStorage.getItem('token');
+        if (token) {
+            try {
+                const tokenData = jwtDecode(token);
+                setUser({
+                    email: tokenData.sub,
+                    roles: [tokenData.role]
+                });
+                setIsLoggedIn(true);
+            } catch (error) {
+                console.error("Error decoding token:", error);
+            }
         }
     }, []);
+
     const renderUserName = () => {
-        if (user && user.roles.includes('ROLE_QUAN_LY')) {
-            return `Quản lý: ${user.hoTen}`;
-        } else if (user && user.roles.includes('ROLE_NHAN_VIEN')) {
-            return `Nhân viên: ${user.hoTen}`;
+        if (user && user.roles.includes('ROLE_ADMIN')) {
+            return `Quản lý: ${user.email}`;
+        } else if (user && user.roles.includes('ROLE_STAFF')) {
+            return `Nhân viên: ${user.email}`;
         } else {
-            return user?.hoTen || 'Guest';
+            return user?.email || 'Guest';
         }
     };
     const navigate = useNavigate();
@@ -167,10 +178,10 @@ const AdminLayout = () => {
                                     key: '/admin/chuc-vu',
                                     label: 'Chức Vụ',
                                 },
-                                {
-                                    key: '/admin/hang-khachHang',
-                                    label: 'Hạng Khách Hàng',
-                                }
+                                // {
+                                //     key: '/admin/hang-khachHang',
+                                //     label: 'Hạng Khách Hàng',
+                                // }
                             ]
                         },
                         {
@@ -190,7 +201,7 @@ const AdminLayout = () => {
                                 }
                             ]
                         },
-                  
+
                     ]}
                 />
             </Sider>

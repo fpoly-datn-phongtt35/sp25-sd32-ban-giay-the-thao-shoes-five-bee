@@ -92,6 +92,7 @@ public class UsersServiceImpl implements UsersService {
                                   diaChi.getThanhPho(),
                                   diaChi.getTenNguoiNhan(),
                                   diaChi.getTenDiaChi(),
+                                  diaChi.getDiaChiCuThe(),
                                   diaChi.getSdtNguoiNhan(),
                                   diaChi.getTrangThai(),
                                   diaChi.getUserEntity()))
@@ -297,6 +298,7 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
                 diaChi.getXa(),
                 diaChi.getHuyen(), 
                 diaChi.getThanhPho(),
+                diaChi.getDiaChiCuThe(),
                 diaChi.getTenNguoiNhan(),
                 diaChi.getTenDiaChi(),
                 diaChi.getSdtNguoiNhan(),

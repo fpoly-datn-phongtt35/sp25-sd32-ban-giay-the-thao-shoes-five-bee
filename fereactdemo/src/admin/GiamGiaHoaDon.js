@@ -187,12 +187,12 @@ const GiamGiaHoaDon = () => {
       render: (text) => (text === 0 ? "Còn" : text === 1 ? "Hết" : "Đang chờ"),
     },
     {
-      title: "Action",
+      title: "Thao tác",
       key: "action",
       render: (text, record) => (
         <Space size="middle">
-          <Button onClick={() => handleUpdate(record)}>Update</Button>
-          <Button onClick={() => handleDelete(record)}>Delete</Button>
+          <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
+          <Button onClick={() => handleDelete(record)}>Xóa</Button>
         </Space>
       ),
     },

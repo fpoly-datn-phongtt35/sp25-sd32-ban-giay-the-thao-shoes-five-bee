@@ -10,5 +10,9 @@ export const addKieuDang = (kieuDang) =>
 export const deleteKieuDang = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const updateKieuDang = (id, kieuDang) =>
-  axios.put(`${REST_API_BASE_URL}/update/${id}`, kieuDang);
+export const updateKieuDang = (kieuDang) =>
+  axios.post(`${REST_API_BASE_URL}/update`, kieuDang, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });

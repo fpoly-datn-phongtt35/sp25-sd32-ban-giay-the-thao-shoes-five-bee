@@ -35,10 +35,7 @@ export const ProfileUser = () => {
             return <Profile khachHangId={khachHangId} data={customerData} onUpdateProfile={handleUpdateProfile} />;
         case 'addresslist':
             return <AddressList />;
-        // case 'changepassword':
-            // return <ChangePassword />;
-        // case 'orders':
-        //     return <OrderStatusPage />;
+
         default:
             return <Profile khachHangId={khachHangId} data={customerData} onUpdateProfile={handleUpdateProfile} />;
     }
@@ -76,7 +73,7 @@ export const ProfileUser = () => {
 
   return (
     <div className="profile-page">
-      <Header />
+
       <div className="content-wrapper">
         <Sidebar data={customerData} setCurrentPage={setCurrentPage}/>
         <div className="page-content">

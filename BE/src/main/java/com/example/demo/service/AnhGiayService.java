@@ -14,8 +14,14 @@ public interface AnhGiayService {
     AnhGiayEntity add(AnhGiayDto anhGiayDto, String tenUrl) throws IOException;
     void assignToGiayByAnhGiayIdAndIds(
             @NonNull UUID giayId, @NonNull List<UUID> ids);
+    void assignToGiayChiTietByAnhGiayIdAndIds(@NonNull UUID giayId, @NonNull List<UUID> ids);
+
     List<AnhGiayEntity> getAll();
     AnhGiayEntity detail (AnhGiayDto anhGiayDto);
     AnhGiayEntity update(AnhGiayDto anhGiayDto);
     AnhGiayEntity delete(AnhGiayDto anhGiayDto);
+    List<AnhGiayEntity> assignToGiayChiTietAndGetAnh(UUID giayChiTietId, List<UUID> anhGiayIds);
+    List<AnhGiayEntity> getAnhByGiayChiTietId(UUID giayChiTietId);
+
+
 }

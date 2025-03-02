@@ -19,7 +19,6 @@ import java.util.UUID;
 public class GiayDto extends PageDto {
   @JsonDeserialize(using = UUIDDeserializer.class)
   private UUID id;
-
   private String ma;
   private String ten;
   private String moTa;

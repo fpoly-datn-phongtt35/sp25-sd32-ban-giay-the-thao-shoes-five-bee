@@ -4,7 +4,9 @@ import com.cloudinary.Cloudinary;
 import com.cloudinary.utils.ObjectUtils;
 import com.example.demo.dto.request.AnhGiayDto;
 import com.example.demo.entity.AnhGiayEntity;
+import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.repository.AnhGiayRepository;
+import com.example.demo.repository.GiayChiTietRepository;
 import com.example.demo.service.AnhGiayService;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -12,6 +14,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.File;
@@ -29,6 +32,7 @@ import java.util.UUID;
 public class AnhGiayServiceImpl implements AnhGiayService {
     @Autowired
     private AnhGiayRepository anhGiayRepository;
+    private GiayChiTietRepository giayChiTietRepository;
 
     private final Cloudinary cloudinary;
 
@@ -92,6 +96,21 @@ public class AnhGiayServiceImpl implements AnhGiayService {
     }
 
     @Override
+    public void assignToGiayChiTietByAnhGiayIdAndIds(@NonNull UUID giayId, @NonNull List<UUID> ids) {
+
+        if (ids.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách ID ảnh không được rỗng!");
+        }
+
+
+        giayChiTietRepository.findById(giayId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Giày Chi Tiết với ID: " + giayId));
+
+        anhGiayRepository.assignToGiayChiTietByAnhGiayIdAndIds(giayId, ids);
+
+    }
+
+    @Override
     public List<AnhGiayEntity> getAll() {
         return anhGiayRepository.findAll();
     }
@@ -122,6 +141,30 @@ public class AnhGiayServiceImpl implements AnhGiayService {
             return o;
         }).orElse(null);
     }
+    @Override
+    @Transactional
+    public List<AnhGiayEntity> assignToGiayChiTietAndGetAnh(UUID giayChiTietId, List<UUID> anhGiayIds) {
+        if (anhGiayIds.isEmpty()) {
+            throw new IllegalArgumentException("Danh sách ID ảnh không được rỗng!");
+        }
+
+
+        GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(giayChiTietId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy Giày Chi Tiết với ID: " + giayChiTietId));
+
+        // Gán ảnh vào Giày Chi Tiết
+        anhGiayRepository.assignToGiayChiTietByAnhGiayIdAndIds(giayChiTietId, anhGiayIds);
+
+        // Trả về danh sách ảnh sau khi gán
+        return anhGiayRepository.findAnhByGiayChiTietId(giayChiTietId);
+    }
+    @Override
+    public List<AnhGiayEntity> getAnhByGiayChiTietId(UUID giayChiTietId) {
+        return anhGiayRepository.findAnhByGiayChiTietId(giayChiTietId);
+    }
+
+
+
 }
 
 

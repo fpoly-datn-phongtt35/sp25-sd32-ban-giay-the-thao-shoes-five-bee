@@ -23,7 +23,7 @@ const KieuDang = () => {
     };
 
     const trangThai = (status) => {
-        return status === 0 ? "Đang sử dụng" : "Không sử dụng";
+        return status === 0 ? "Hoạt động" : "Không hoạt động";
     }
 
     useEffect(() => {
@@ -91,7 +91,7 @@ const KieuDang = () => {
 
     const editingKieuDang = (record) => {
         setUpdattingDeGiay(record);
-   
+
         setTen(record.TEN);
         setValue(record.TRANG_THAI === 0 ? 1 : 2);
         setIsModalVisible(true);
@@ -117,29 +117,40 @@ const KieuDang = () => {
 
         const newTrangThai = value === 1 ? 0 : 1;
 
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!updattingKieuDang?.ID) {
+            message.error("Không tìm thấy ID của kiểu dáng cần cập nhật!");
+            return;
+        }
+
         const editKieuDang = {
+            id: updattingKieuDang.ID, // Thêm ID vào DTO
             ten: ten,
-            trangThai: newTrangThai
+            trangThai: newTrangThai,
         };
+
         try {
-            await updateKieuDang(updattingKieuDang.ID, editKieuDang);
-            message.success("Cập nhật kiểu dáng thành công");
+            await updateKieuDang(editKieuDang); // Không truyền ID vào URL nữa
+            message.success("Cập nhật kiểu dáng thành công!");
             getAllKieuDang();
             setIsModalVisible(false);
             setTen("");
+            setValue(null);
         } catch (error) {
+            console.error("Lỗi cập nhật:", error);
             message.error("Không thể cập nhật kiểu dáng của giày");
         }
     };
+
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
-                
+
                 <Input placeholder='Tên Kiểu Dáng' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
+                    <Radio value={1}>Hoạt động</Radio>
+                    <Radio value={2}>Không hoạt động</Radio>
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={creatKieuDang}>
@@ -148,36 +159,36 @@ const KieuDang = () => {
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
                     {
-                        title: 'TEN',
+                        title: 'Tên kiểu dáng',
                         dataIndex: 'TEN',
                     },
                     {
-                        title: 'TRANG THAI',
+                        title: 'Trạng thái',
                         dataIndex: 'trang_thai',
                         render: (text, record) => trangThai(record.TRANG_THAI)
                     },
                     {
-                        title: 'ACTION',
+                        title: 'Thao tác',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
-                                <Button onClick={() => editingKieuDang(record)}>Update</Button>
-                                <Button onClick={() => removeKieuDang(record)}>Delete</Button>
+                                <Button onClick={() => editingKieuDang(record)}>Cập nhật</Button>
+                                <Button onClick={() => removeKieuDang(record)}>Xóa</Button>
                             </Space>
                         ),
                     },
                 ]} dataSource={kieuDang} />
             </div>
-            <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={editingKieuDangButton} onCancel={() => setIsModalVisible(false)}>
+            <Modal title="Update Kiểu Dáng" open={isModalVisible} onOk={editingKieuDangButton} onCancel={() => setIsModalVisible(false)}>
                 <Form>
-                   
+
                     <Form.Item label="Tên Kiểu Dáng">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
                     <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={1}>Đang sử dụng</Radio>
-                            <Radio value={2}>Không sử dụng</Radio>
+                            <Radio value={1}>Hoạt động</Radio>
+                            <Radio value={2}>Không hoạt động</Radio>
                         </Radio.Group>
                     </Form.Item>
                 </Form>

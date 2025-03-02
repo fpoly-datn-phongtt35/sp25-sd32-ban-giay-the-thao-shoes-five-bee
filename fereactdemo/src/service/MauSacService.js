@@ -10,5 +10,10 @@ export const addMauSac = (mauSac) =>
 export const deleteMauSac = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const updateMauSac = (id, mauSac) =>
-  axios.post(`${REST_API_BASE_URL}/update/${id}`, mauSac);
+export const updateMauSac = (mauSac) =>
+  axios.post(`${REST_API_BASE_URL}/update`, mauSac, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+

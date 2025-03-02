@@ -23,7 +23,7 @@ const MauSac = () => {
     };
 
     const trangThai = (status) => {
-        return status === 0 ? "Đang sử dụng" : "Không sử dụng";
+        return status === 0 ? "Hoạt động" : "Không hoạt động";
     }
     useEffect(() => {
         getAllMauSac();
@@ -88,7 +88,7 @@ const MauSac = () => {
 
     const editMauSac = (record) => {
         setEditingMauSac(record);
-       
+
         setTen(record.TEN);
         setValue(record.TRANG_THAI === 0 ? 1 : 2);
         setIsModalVisible(true);
@@ -114,30 +114,40 @@ const MauSac = () => {
 
         const updateTrangThai = value === 1 ? 0 : 1;
 
+        // Đảm bảo ID tồn tại trước khi gửi request
+        if (!editingMauSac?.ID) {
+            message.error("Không tìm thấy ID của màu sắc cần cập nhật!");
+            return;
+        }
+
         const editNewMauSac = {
+            id: editingMauSac.ID, // Thêm ID vào DTO
             ten: ten,
             trangThai: updateTrangThai,
         };
+
         try {
-            await updateMauSac(editingMauSac.ID, editNewMauSac);
-            message.success("Update màu sắc thành công !");
+            await updateMauSac(editNewMauSac); // Không truyền ID vào URL nữa
+            message.success("Cập nhật màu sắc thành công!");
             getAllMauSac();
             setIsModalVisible(false);
             setTen("");
             setValue(null);
         } catch (error) {
+            console.error("Lỗi cập nhật:", error);
             message.error("Cập nhật màu sắc thất bại");
         }
     };
+
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
-                
+
                 <Input placeholder='Tên Màu Sắc' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
+                    <Radio value={1}>Hoạt động</Radio>
+                    <Radio value={2}>Không hoạt động</Radio>
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={createMauSac}>
@@ -145,39 +155,39 @@ const MauSac = () => {
                 </Button>
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
-                    
+
                     {
-                        title: 'TEN',
+                        title: 'Tên màu',
                         dataIndex: 'TEN',
                     },
                     {
-                        title: 'TRANG THAI',
+                        title: 'Trạng thái',
                         dataIndex: 'trang_thai',
                         render: (text, record) => trangThai(record.TRANG_THAI)
                     },
                     {
-                        title: 'ACTION',
+                        title: 'Thao tác',
                         key: 'action',
                         render: (text, record) => (
                             <Space size="middle">
-                                <Button onClick={() => editMauSac(record)}>Update</Button>
-                                <Button onClick={() => removeMauSac(record)}>Delete</Button>
+                                <Button onClick={() => editMauSac(record)}>Cập nhật</Button>
+                                <Button onClick={() => removeMauSac(record)}>Xóa</Button>
                             </Space>
                         ),
                     },
                 ]} dataSource={mauSac} />
             </div>
-            <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={editMauSacButton} onCancel={() => setIsModalVisible(false)}>
+            <Modal title="Update Màu Sắc" open={isModalVisible} onOk={editMauSacButton} onCancel={() => setIsModalVisible(false)}>
                 <Form>
-                    <Form.Item label="Tên Kích Cỡ">
+                    <Form.Item label="Tên Màu Sắc">
                         <Input value={ten} onChange={(e) => setTen(e.target.value)} />
                     </Form.Item>
-                    <Form.Item label="Trạng Thái">
+                    {<Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={1}>Còn</Radio>
-                            <Radio value={2}>Hết</Radio>
+                            <Radio value={1}>Hoạt động</Radio>
+                            <Radio value={2}>Không hoạt động</Radio>
                         </Radio.Group>
-                    </Form.Item>
+                    </Form.Item>}
                 </Form>
             </Modal>
         </div>
