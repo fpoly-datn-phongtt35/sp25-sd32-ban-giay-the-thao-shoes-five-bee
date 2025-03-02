@@ -8,7 +8,7 @@ import java.util.List;
 import java.util.UUID;
 
 public interface BanHangTaiQuayService {
-  void thanhToanTaiQuay(UUID idHoaDon, String tenPhieuGiamGia, HoaDonRequest hoaDonRequest);
+  void thanhToanTaiQuay(UUID idHoaDon, HoaDonRequest hoaDonRequest);
 
   HoaDonEntity createHoaDonBanHangTaiQuay();
 

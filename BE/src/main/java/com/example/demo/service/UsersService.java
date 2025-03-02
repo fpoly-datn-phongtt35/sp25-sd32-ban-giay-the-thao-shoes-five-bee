@@ -13,6 +13,8 @@ import java.util.List;
 public interface UsersService {
   String getAuthenticatedUserEmail();
 
+  UserEntity getBySdt(String sdt);
+
   List<UserDto> getAll();
 
   UserEntity add(UserDto userDto, MultipartFile file) throws IOException;

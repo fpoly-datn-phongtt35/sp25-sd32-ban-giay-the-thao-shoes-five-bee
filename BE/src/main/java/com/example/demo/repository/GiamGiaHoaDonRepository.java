@@ -11,5 +11,7 @@ public interface GiamGiaHoaDonRepository
     extends JpaRepository<GiamGiaHoaDonEntity, UUID>,
         JpaSpecificationExecutor<GiamGiaHoaDonEntity> {
 
-  GiamGiaHoaDonEntity findByTen(String ten);
+  GiamGiaHoaDonEntity findByMa(String ten);
+
+  String ma(String ma);
 }

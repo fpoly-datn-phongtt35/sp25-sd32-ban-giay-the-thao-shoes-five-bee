@@ -17,10 +17,8 @@ public class BanHangTaiQuayController {
 
   @PostMapping("/thanh-toan/{idHoaDon}")
   public ResponseEntity<?> thanhToanTaiQuay(
-      @PathVariable("idHoaDon") UUID idHoaDon,
-      @RequestParam String tenPhieuGiamGia,
-      @RequestBody HoaDonRequest hoaDonRequest) {
-    banHangTaiQuayService.thanhToanTaiQuay(idHoaDon, tenPhieuGiamGia, hoaDonRequest);
+      @PathVariable("idHoaDon") UUID idHoaDon, @RequestBody HoaDonRequest hoaDonRequest) {
+    banHangTaiQuayService.thanhToanTaiQuay(idHoaDon, hoaDonRequest);
     return ResponseEntity.ok("Thanh toán thành công");
   }
 

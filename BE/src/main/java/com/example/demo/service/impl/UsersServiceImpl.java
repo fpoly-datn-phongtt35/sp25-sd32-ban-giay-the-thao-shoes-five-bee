@@ -73,6 +73,11 @@ public class UsersServiceImpl implements UsersService {
   }
 
   @Override
+  public UserEntity getBySdt(String sdt){
+      return userRepository.findBySoDienThoai(sdt);
+  }
+
+  @Override
   public List<UserDto> getAll() {
     return userRepository.findAll().stream()
         .map(

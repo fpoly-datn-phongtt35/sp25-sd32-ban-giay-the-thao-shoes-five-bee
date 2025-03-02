@@ -28,7 +28,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
 
   @Override
-  public void thanhToanTaiQuay(UUID idHoaDon, String tenGiamGia, HoaDonRequest hoaDonRequest) {
+  public void thanhToanTaiQuay(UUID idHoaDon, HoaDonRequest hoaDonRequest) {
     HoaDonEntity hoaDon =
         hoaDonRepository
             .findById(idHoaDon)
@@ -36,18 +36,10 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
     // Kiểm tra người dùng đã mua hàng chưa
     UserEntity user = userRepository.findBySoDienThoai(hoaDonRequest.getSdtNguoiNhan());
-    if (user == null) {
-      throw new IllegalArgumentException("Người nhận không tồn tại");
-    }
 
     // Kiểm tra trạng thái hóa đơn
     if (hoaDon.getTrangThai() != 1) {
       throw new IllegalArgumentException("Hóa đơn đã được thanh toán hoặc không hợp lệ");
-    }
-
-    GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findByTen(tenGiamGia);
-    if (giamGia == null) {
-      throw new RuntimeException("Mã phiếu giảm giá không hợp lệ!");
     }
 
     // Lấy danh sách sản phẩm trong hóa đơn
@@ -76,20 +68,36 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
                         .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    BigDecimal soTienGiamKhiApMa =
-        giamGiaHoaDonChiTietService.apDungPhieuGiamGia(idHoaDon, giamGia, tongTienSanPhamKhiGiam);
+    BigDecimal soTienGiamKhiApMa = BigDecimal.ZERO;
+    if (hoaDonRequest.getMaGiamGia() != null && !hoaDonRequest.getMaGiamGia().isEmpty()) {
+      GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findByMa(hoaDonRequest.getMaGiamGia());
+
+      // Nếu mã giảm giá tồn tại, kiểm tra điều kiện áp dụng
+      if (giamGia != null
+          && giamGia.getSoLuong() > 0
+          && tongTienSanPhamGoc.compareTo(giamGia.getDieuKien()) >= 0) {
+        soTienGiamKhiApMa =
+            giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
+                idHoaDon, giamGia, tongTienSanPhamKhiGiam);
+      }
+    }
 
     BigDecimal soTienGiam = tongTienSanPhamGoc.subtract(tongTienSanPhamKhiGiam);
 
     hoaDon.setMa(hoaDonRequest.getMa());
     hoaDon.setNgayThanhToan(new Date());
     hoaDon.setMoTa(hoaDonRequest.getMoTa());
-    hoaDon.setTenNguoiNhan(hoaDonRequest.getTenNguoiNhan());
+    hoaDon.setTenNguoiNhan(user != null ? hoaDonRequest.getTenNguoiNhan() : "Khách lẻ");
     hoaDon.setSdtNguoiNhan(hoaDonRequest.getSdtNguoiNhan());
+    hoaDon.setXa(hoaDonRequest.getXa());
+    hoaDon.setHuyen(hoaDonRequest.getHuyen());
+    hoaDon.setTinh(hoaDonRequest.getTinh());
     hoaDon.setDiaChi(hoaDonRequest.getDiaChi());
     hoaDon.setTongTien(tongTienSanPhamGoc.subtract(soTienGiamKhiApMa));
     hoaDon.setHinhThucThanhToan(1);
     hoaDon.setSoTienGiam(soTienGiam.add(soTienGiamKhiApMa));
+    hoaDon.setPhiShip(hoaDonRequest.getIsGiaoHang() ? BigDecimal.valueOf(30000) : BigDecimal.ZERO);
+    hoaDon.setHinhThucNhanHang(hoaDonRequest.getIsGiaoHang() ? 1 : 2);
     hoaDon.setTrangThai(2);
     hoaDon.setUserEntity(user);
 
@@ -108,7 +116,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .ngayTao(new Date())
             .hinhThucMua(1)
             .hinhThucNhanHang(1)
-            .phiShip(BigDecimal.valueOf(0.0))
             .trangThai(1)
             .build();
 

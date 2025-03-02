@@ -45,17 +45,10 @@ public class GiamGiaHoaDonChiTietServiceImpl implements GiamGiaHoaDonChiTietServ
             .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn!"));
 
     // Kiểm tra điều kiện áp dụng
-    BigDecimal soTienDaGiam = BigDecimal.ZERO;
-    if (tongTienSanPham.compareTo(giamGiaHoaDonEntity.getDieuKien()) >= 0) {
-      soTienDaGiam =
-          tongTienSanPham
-              .multiply(BigDecimal.valueOf(giamGiaHoaDonEntity.getPhanTramGiam()))
-              .divide(BigDecimal.valueOf(100));
-    }
-
-    if (giamGiaHoaDonEntity.getSoLuong() <= 0) {
-      throw new RuntimeException("Phiếu giảm giá đã hết lượt sử dụng!");
-    }
+    BigDecimal soTienDaGiam =
+        tongTienSanPham
+            .multiply(BigDecimal.valueOf(giamGiaHoaDonEntity.getPhanTramGiam()))
+            .divide(BigDecimal.valueOf(100));
 
     if (soTienDaGiam.compareTo(giamGiaHoaDonEntity.getSoTienGiamMax()) > 0) {
       soTienDaGiam = giamGiaHoaDonEntity.getSoTienGiamMax();

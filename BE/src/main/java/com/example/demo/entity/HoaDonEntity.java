@@ -44,6 +44,15 @@ public class HoaDonEntity {
     @Column(name = "SO_DIEN_THOAI_NGUOI_NHAN")
     private String sdtNguoiNhan;
 
+    @Column(name = "XA")
+    private String xa;
+
+    @Column(name = "HUYEN")
+    private String huyen;
+
+    @Column(name = "TINH")
+    private String tinh;
+
     @Column(name = "DIA_CHI",columnDefinition = "NVARCHAR(255)")
     private String diaChi;
 
