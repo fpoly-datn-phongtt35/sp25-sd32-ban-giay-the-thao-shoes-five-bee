@@ -49,8 +49,10 @@ const KhachHang = () => {
     const getKhachHangData = async () => {
         try {
             const result = await getAllKhachHang();
+            console.log(result);
+            
             const loadTable = result.data
-                .filter(item => item.roleNames.includes('ROLE_USER')) // Filter only ROLE_USER
+                .filter(item => item.userRoleEntities.some(role => role.roleEntity.ten === 'ROLE_USER')) // Lọc ROLE_USER
                 .map((item, index) => ({
                     key: index,
                     ID: item.id,
@@ -58,15 +60,17 @@ const KhachHang = () => {
                     HOTEN: item.hoTen,
                     MATKHAU: item.matKhau,
                     EMAIL: item.email,
-                    HANGKHACHHANG: item.hangKhachHang ? item.hangKhachHang.ten : null,
-                    TRANG_THAI: item.trangThai,
+                    TRANG_THAI: item.trangThai || 0, // Mặc định là 0 nếu null
                     SODIENTHOAI: item.soDienThoai,
                     NGAYSINH: item.ngaySinh,
                     ANH: item.anh
                 }));
+            
+            console.log(loadTable);
             const activeChatLieuData = loadTable.filter(item => item.TRANG_THAI === 0);
             setActiveChatLieu(activeChatLieuData);
             setKhachHang(loadTable);
+            
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu khách hàng");
         }
@@ -130,7 +134,7 @@ const KhachHang = () => {
     };
 
     const editKhachHangButton = async () => {
-        if (!hoTen || !email || !matKhau) {
+        if (!hoTen || !email) {
             message.error("Vui lòng điền đầy đủ thông tin");
             return;
         }
@@ -139,7 +143,6 @@ const KhachHang = () => {
             id: editingKhachHang.id,
             hoTen,
             email,
-            matKhau,
             soDienThoai,
             ngaySinh: ngaySinh ? ngaySinh.format('YYYY-MM-DDTHH:mm:ss.SSS[Z]') : null,
             trangThai: value === 1 ? 0 : 1,
@@ -273,6 +276,40 @@ const KhachHang = () => {
                     rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
                     columns={[
                         {
+                            title: 'Ảnh',
+                            dataIndex: 'ANH',
+                            key: 'ANH',
+                            width: 100,
+                            render: (text) => text ? (
+                                <img
+                                    src={text}
+                                    alt="Ảnh đại diện"
+                                    style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        objectFit: 'cover',
+                                        borderRadius: '50%',
+                                        border: '2px solid #f0f0f0'
+                                    }}
+                                />
+                            ) : (
+                                <div
+                                    style={{
+                                        width: '60px',
+                                        height: '60px',
+                                        borderRadius: '50%',
+                                        backgroundColor: '#f0f0f0',
+                                        display: 'flex',
+                                        alignItems: 'center',
+                                        justifyContent: 'center',
+                                        color: '#999'
+                                    }}
+                                >
+                                    No Image
+                                </div>
+                            )
+                        },
+                        {
                             title: 'Họ tên',
                             dataIndex: 'HOTEN',
                         },
@@ -295,18 +332,6 @@ const KhachHang = () => {
                             dataIndex: 'NGAYSINH',
                             key: 'NGAYSINH',
                             render: (text) => text ? moment(text).format('DD/MM/YYYY') : 'Chưa có'
-                        },
-                        {
-                            title: 'Ảnh',
-                            dataIndex: 'ANH',
-                            key: 'ANH',
-                            render: (text) => text ? (
-                                <img
-                                    src={text}
-                                    alt="Ảnh đại diện"
-                                    style={{ width: '50px', height: '50px', objectFit: 'cover' }}
-                                />
-                            ) : null
                         },
                         {
                             title: 'Thao tác',
@@ -388,7 +413,7 @@ const KhachHang = () => {
                 </Form>
             </Drawer>
 
-            {/* Edit Modal remains unchanged */}
+            {/* Edit Modal */}
             <Modal
                 title="Cập nhật Khách Hàng"
                 open={isModalVisible}
@@ -401,9 +426,6 @@ const KhachHang = () => {
                     </Form.Item>
                     <Form.Item label="Email">
                         <Input value={email} onChange={(e) => setEmail(e.target.value)} />
-                    </Form.Item>
-                    <Form.Item label="Mật Khẩu">
-                        <Input.Password value={matKhau} onChange={(e) => setMatKhau(e.target.value)} />
                     </Form.Item>
                     <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>

@@ -39,7 +39,6 @@ export const getSanPhamTrongHoaDon = (idHoaDon) => {
     `${REST_API_BASE_URL}/san-pham/${idHoaDon}`
   );
 };
-
 export const deleteHoaDonCho = (idHoaDon) => {
   return axios.delete(`${REST_API_BASE_URL}/delete/${idHoaDon}`);
 };
