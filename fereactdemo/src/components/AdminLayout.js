@@ -76,9 +76,9 @@ const AdminLayout = () => {
     return (
         <Layout>
             <Sider trigger={null} collapsible collapsed={collapsed}>
-                <div className="logo" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
+                {/* <div className="logo" style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', padding: '16px' }}>
                     <img src={logo} alt="Logo" style={{ maxWidth: '150px', height: 'auto' }} />
-                </div>
+                </div> */}
                 <Menu
                     theme="dark"
                     mode="inline"
@@ -178,10 +178,10 @@ const AdminLayout = () => {
                                     key: '/admin/chuc-vu',
                                     label: 'Chức Vụ',
                                 },
-                                {
-                                    key: '/admin/hang-khachHang',
-                                    label: 'Hạng Khách Hàng',
-                                }
+                                // {
+                                //     key: '/admin/hang-khachHang',
+                                //     label: 'Hạng Khách Hàng',
+                                // }
                             ]
                         },
                         {

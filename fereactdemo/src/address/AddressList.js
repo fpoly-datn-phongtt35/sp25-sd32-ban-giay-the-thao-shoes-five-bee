@@ -4,7 +4,7 @@ import { Link } from 'react-router-dom';
 import AddressModal from '../address/AddressModal.js';
 import UpdateAddressModal from '../address/UpdateAddressModal.js';
 import { fetchCustomerId } from '../service/LoginService.js';
-import { getDiaChiByKhachHangId,updateDiaChi,deleteDiaChi } from '../service/DiaChiService.js';
+import { getDiaChiByKhachHangId, updateDiaChi, deleteDiaChi } from '../service/DiaChiService.js';
 
 export const AddressList = () => {
   const [khachHangId, setKhachHangId] = useState(null);
@@ -19,21 +19,32 @@ export const AddressList = () => {
 
   const handleSetTrangThaiAddAddress = async (newAddress) => {
     try {
-      // Gọi API để cập nhật địa chỉ đã chọn là mặc định
-      const response=await updateDiaChi(newAddress.id, { ...newAddress, trangThai: 1 });
-      setDiaChiList([...diaChiList, response.data]);
+      // Cập nhật tất cả địa chỉ về trạng thái 0
+      await Promise.all(
+        customerData.map((address) => {
+          if (address.id === newAddress.id) {
+            return updateDiaChi(address.id, { ...address, trangThai: 1 });
+          } else if (address.trangThai === 1) {
+            return updateDiaChi(address.id, { ...address, trangThai: 0 });
+          }
+          return address;
+        })
+      );
+
+      // Lấy lại danh sách địa chỉ mới sau khi cập nhật
+      const response = await getDiaChiByKhachHangId(khachHangId);
+      const data = Array.isArray(response.data) ? response.data : [response.data];
+      setCustomerData(data);
       console.log("Đã thiết lập địa chỉ mặc định:", newAddress.id);
     } catch (error) {
       console.error("Lỗi khi thiết lập địa chỉ mặc định:", error);
     }
   };
-  
+
 
   const removeAddress = async (id) => {
     try {
-      // Gọi API để xóa sản phẩm theo ID
       await deleteDiaChi(id);
-      // Sau khi xóa thành công, cập nhật lại giỏ hàng
       const newData = customerData.filter((item) => item.id !== id);
       setCustomerData(newData);
     } catch (error) {
@@ -54,9 +65,9 @@ export const AddressList = () => {
     getCustomerId();
   }, []);
 
-  // Fetch customer addresses
   useEffect(() => {
     const fetchCustomerData = async () => {
+      if (!khachHangId) return;
       try {
         const response = await getDiaChiByKhachHangId(khachHangId);
         const data = Array.isArray(response.data) ? response.data : [response.data]; // Kiểm tra nếu data không phải là mảng thì chuyển về mảng
@@ -71,13 +82,10 @@ export const AddressList = () => {
     if (khachHangId) {
       fetchCustomerData();
     }
-  }, [khachHangId,diaChiList]);
-
-  // Xử lý hiển thị khi loading hoặc có lỗi
+  }, [khachHangId, diaChiList]);
   if (loading) {
     return <p>Loading...</p>;
   }
-
   if (error) {
     return <p>{error}</p>;
   }
@@ -92,17 +100,21 @@ export const AddressList = () => {
         {customerData.map((item, index) => (
           <li key={index} className="address-item">
             <div className="address-info">
-              <strong>{item.tenNguoiNhan}</strong> 
+              <strong>{item.tenNguoiNhan}</strong>
               <span>{item.sdtNguoiNhan}</span>
-              <p>{`${item.tenDiaChi}, ${item.xa}, ${item.huyen}, ${item.thanhPho}`}</p>
+              <p>{` ${item.xa}, ${item.huyen}, ${item.thanhPho}`}</p>
               {item.trangThai.toLocaleString() === "1" && <span className="default-tag">Mặc định</span>}
             </div>
             <div className="address-actions">
-            <UpdateAddressModal addressData={item} onAddAddress={handleAddAddress} />
-              {item.trangThai.toLocaleString() !== "1" && <Link onClick={() => removeAddress(item.id)}>Xóa</Link>}
-              {item.trangThai.toLocaleString() !== "1" && (
-                <button className="default-button" onClick={() => handleSetTrangThaiAddAddress(item)}>Thiết lập mặc định</button>
+              {/* <UpdateAddressModal addressData={item} onAddAddress={handleAddAddress} /> */}
+
+              {item.trangThai.toString() === "0" && (
+                <button className="default-button" onClick={() => handleSetTrangThaiAddAddress(item)}>
+                  Thiết lập mặc định
+                </button>
               )}
+              {item.trangThai.toLocaleString() !== "1" && <Link onClick={() => removeAddress(item.id)}>Xóa</Link>}
+
             </div>
           </li>
         ))}

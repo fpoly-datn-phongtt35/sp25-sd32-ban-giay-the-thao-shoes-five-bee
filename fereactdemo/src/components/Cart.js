@@ -1,6 +1,7 @@
 import { useState, useEffect } from "react";
 import { fetchCustomerId } from '../service/LoginService.js';
-import { getByKhachHangId, addByKhachHangId, updateGioHangChiTiet, deleteGioHangChiTiet } from '../service/GioHangChiTietService.js';
+import { getByKhachHangId, addToCart, updateGioHangChiTiet, deleteGioHangChiTiet } from '../service/GioHangChiTietService.js';
+import { message } from "antd";
 
 const useCart = () => {
   const [khachHangId, setKhachHangId] = useState(null);
@@ -25,52 +26,62 @@ const useCart = () => {
   }, []);
 
   useEffect(() => {
-    if (khachHangId) {
-      const fetchCart = async () => {
-        try {
-          const response = await getByKhachHangId(khachHangId);
-          const data = Array.isArray(response.data) ? response.data : [response.data];
-          setCart(data);
-        } catch (error) {
-          setError(error.message);
-        } finally {
-          setLoading(false);
+    const fetchCart = async () => {
+      if (!khachHangId) {
+        return;
+      }
+      setLoading(true);
+      try {
+        console.log("Đang lấy giỏ hàng cho ID khách hàng:", khachHangId);
+        const response = await getByKhachHangId(khachHangId);
+        console.log("Phản hồi giỏ hàng:", response);
+
+        let cartItems = [];
+        if (response && response.data) {
+          if (Array.isArray(response.data)) {
+            cartItems = response.data;
+          } else {
+            cartItems = [response.data];
+          }
         }
-      };
-      fetchCart();
-    }
+        const validItems = cartItems.filter(item =>
+          item &&
+          item.giayChiTietId &&
+          item.tenGiay &&
+          item.giaBan &&
+          item.soLuong &&
+          item.anhGiayUrl
+        );
+        console.log("Các mục giỏ hàng hợp lệ:", validItems);
+
+        if (validItems.length === 0) {
+          console.log("Không tìm thấy mục hợp lệ trong phản hồi giỏ hàng");
+        }
+
+        setCart(validItems);
+      } catch (error) {
+        console.error("Lỗi khi lấy giỏ hàng:", error);
+        setError(error.message);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchCart();
   }, [khachHangId]);
 
   useEffect(() => {
     localStorage.setItem("cart", JSON.stringify(cart));
   }, [cart]);
 
-  const addToCart = async (item) => {
-    try {
-      if (khachHangId) {
-        const response = await addByKhachHangId(khachHangId, item);
-        const data = Array.isArray(response.data) ? response.data : [response.data];
-        console.log(data);
-        setCart([...cart, { ...item, count: 1 }]);
-      }
-    } catch (error) {
-      setError(error.message);
-    } finally {
-      setLoading(false);
-    }
-  };
-
   const increment = async (id, currentQuantity) => {
     try {
       const soLuong = currentQuantity + 1;
       console.log(soLuong);
-      // Gọi API để cập nhật số lượng sản phẩm theo ID
-      await updateGioHangChiTiet(id, soLuong);
-      // Sau khi cập nhật thành công, cập nhật lại giỏ hàng
+      await updateGioHangChiTiet(id, true);
       const updatedCart = cart.map((item) =>
         item.id === id ? { ...item, soLuong: soLuong } : item
       );
-
       setCart(updatedCart);
     } catch (error) {
       console.error("Failed to update product quantity:", error);
@@ -82,19 +93,14 @@ const useCart = () => {
       const soLuong = currentQuantity - 1;
 
       if (soLuong < 1) {
-        console.error("Quantity cannot be less than 1");
+        message.error("Số lượng không thể nhỏ hơn 1");
         return;
       }
 
-      // Gọi API để cập nhật số lượng sản phẩm theo ID
-      await updateGioHangChiTiet(id, soLuong);
-
-      // Sau khi cập nhật thành công, cập nhật lại giỏ hàng
+      await updateGioHangChiTiet(id, false);
       const updatedCart = cart.map((item) =>
         item.id === id ? { ...item, soLuong: soLuong } : item
       );
-
-      // Nếu số lượng mới là 0, loại bỏ sản phẩm khỏi giỏ hàng
       const newCart = updatedCart.filter((item) => item.soLuong > 0);
       setCart(newCart);
     } catch (error) {
@@ -104,19 +110,18 @@ const useCart = () => {
 
   const removeProduct = async (id) => {
     try {
-      // Gọi API để xóa sản phẩm theo ID
       await deleteGioHangChiTiet(id);
-
-      // Sau khi xóa thành công, cập nhật lại giỏ hàng
       const newCart = cart.filter((item) => item.id !== id);
       setCart(newCart);
     } catch (error) {
       console.error("Failed to remove product:", error);
     }
   };
-  // if (loading) return <p>Đang tải...</p>;
-  // if (error) return <p>Lỗi: {error}</p>;
-  return { cart, addToCart, increment, decrement, removeProduct };
+
+  const getTotalItems = () => {
+    return cart.reduce((total, item) => total + item.count, 0);
+  };
+  return { cart, addToCart, increment, decrement, removeProduct, getTotalItems };
 };
 
 export default useCart;

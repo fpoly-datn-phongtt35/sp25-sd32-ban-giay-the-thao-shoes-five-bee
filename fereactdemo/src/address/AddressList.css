@@ -94,15 +94,11 @@ Tổng thể container
 }
 
 .default-button {
-  background-color: white;
+  background-color: #ff5722;
   border: 1px solid #ff5722;
-  color: #ff5722;
+  color: white;
   padding: 5px 10px;
   border-radius: 5px;
   cursor: pointer;
 }
 
-.default-button:hover {
-  background-color: #ff5722;
-  color: white;
-}

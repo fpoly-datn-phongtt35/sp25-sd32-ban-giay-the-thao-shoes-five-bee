@@ -73,48 +73,8 @@ public class UsersServiceImpl implements UsersService {
   }
 
   @Override
-  public UserEntity getBySdt(String sdt){
-      return userRepository.findBySoDienThoai(sdt);
-  }
-
-  @Override
-  public List<UserDto> getAll() {
-    return userRepository.findAll().stream()
-        .map(
-            user -> {
-              List<String> roleNames =
-                  user.getUserRoleEntities().stream()
-                      .map(userRole -> userRole.getRoleEntity().getTen())
-                      .collect(Collectors.toList());
-              List<DiaChiDto> diaChiDtos =
-                  user.getDiaChiEntities().stream()
-                      .map(
-                          diaChi ->
-                              new DiaChiDto(
-                                  diaChi.getId(),
-                                  diaChi.getXa(),
-                                  diaChi.getHuyen(),
-                                  diaChi.getThanhPho(),
-                                  diaChi.getTenNguoiNhan(),
-                                  diaChi.getTenDiaChi(),
-                                  diaChi.getDiaChiCuThe(),
-                                  diaChi.getSdtNguoiNhan(),
-                                  diaChi.getTrangThai(),
-                                  diaChi.getUserEntity()))
-                      .collect(Collectors.toList());
-              return new UserDto(
-                  user.getId(),
-                  user.getAnh(),
-                  user.getHoTen(),
-                  user.getNgaySinh(),
-                  user.getSoDienThoai(),
-                  user.getEmail(),
-                  user.getMatKhau(),
-                  user.getIsEnabled(),
-                  roleNames,
-                  diaChiDtos);
-            })
-        .collect(Collectors.toList());
+  public List<UserEntity> getAll() {
+    return userRepository.findAll();
   }
 
   public String uploadUserImage(MultipartFile file) throws IOException {
@@ -245,9 +205,13 @@ public class UsersServiceImpl implements UsersService {
                         .map(
                             diaChiDto -> {
                               DiaChiEntity diaChiEntity = new DiaChiEntity();
+                              diaChiEntity.setTenNguoiNhan(diaChiDto.getTenNguoiNhan());
+                              diaChiEntity.setSdtNguoiNhan(diaChiDto.getSdtNguoiNhan());
                               diaChiEntity.setXa(diaChiDto.getXa());
                               diaChiEntity.setHuyen(diaChiDto.getHuyen());
                               diaChiEntity.setThanhPho(diaChiDto.getThanhPho());
+                              diaChiEntity.setDiaChiCuThe(diaChiDto.getDiaChiCuThe());
+                              diaChiEntity.setTrangThai(diaChiDto.getTrangThai());
                               diaChiEntity.setUserEntity(o);
                               return diaChiEntity;
                             })
@@ -592,7 +556,11 @@ public UserDto detail(UserDto userDto) {  // Thay đổi kiểu trả về thàn
         return userDtos;
     }
 
-
+    @Override
+    public UserEntity details(UUID id) {
+        Optional<UserEntity> userEntityOptional = userRepository.findById(id);
+        return userEntityOptional.orElse(null);
+    }
 
 
 }

@@ -59,7 +59,6 @@ export const ProfileUser = () => {
       try {
         const response = await detailKhachHang(khachHangId);
         setCustomerData(response.data);
-        // console.log(response.data);
       } catch (error) {
         setError(error.message);
       } finally {

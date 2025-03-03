@@ -26,6 +26,7 @@ public class DiaChiEntity {
 
     @Column(name = "TEN_DIA_CHI",columnDefinition = "NVARCHAR(255)")
     private String tenDiaChi;
+
     @Column(name = "DIA_CHI_CU_THE",columnDefinition = "NVARCHAR(255)")
     private String diaChiCuThe;
 

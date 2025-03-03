@@ -31,6 +31,12 @@ public class BanHangTaiQuayController {
     return ResponseEntity.ok("Thanh toán thành công");
   }
 
+  @GetMapping("/san-pham/{idHoaDon}")
+  public ResponseEntity<?> getSanPhamTrongHoaDonCho(@PathVariable UUID idHoaDon) {
+    return ResponseEntity.ok(banHangTaiQuayService.getSanPhamTrongHoaDon(idHoaDon));
+  }
+
+
   @PostMapping("/create")
   public ResponseEntity<?> createHoaDonBanHangTaiQuay() {
     return ResponseEntity.ok(banHangTaiQuayService.createHoaDonBanHangTaiQuay());

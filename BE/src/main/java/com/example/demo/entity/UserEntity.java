@@ -47,9 +47,9 @@ public class UserEntity {
     @Column(name = "OTP_GENERATED_TIME")
     private LocalDateTime otpGeneratedTime;
 
-    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<DiaChiEntity> diaChiEntities;
 
-    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
+    @OneToMany(mappedBy = "userEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserRoleEntity> userRoleEntities = new ArrayList<>();
 }

@@ -1,6 +1,6 @@
-import axios from "axios";
+import axios from "../axiosConfig";
 
-const REST_API_BASE_URL = "http://localhost:5000/user";
+const REST_API_BASE_URL = "/user";
 
 export const getAllKhachHang = () => axios.get(`${REST_API_BASE_URL}/getAll`);
 
@@ -33,7 +33,6 @@ export const updateKhachHang = (khachHang, file) => {
   if (file) {
     formData.append('file', file);
   }
-  
   return axios.put(`${REST_API_BASE_URL}/update`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'

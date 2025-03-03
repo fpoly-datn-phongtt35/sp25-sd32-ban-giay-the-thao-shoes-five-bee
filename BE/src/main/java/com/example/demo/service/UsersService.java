@@ -9,6 +9,7 @@ import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 public interface UsersService {
   String getAuthenticatedUserEmail();
@@ -16,6 +17,7 @@ public interface UsersService {
   UserEntity getBySdt(String sdt);
 
   List<UserDto> getAll();
+  List<UserEntity> getAll();
 
   UserEntity add(UserDto userDto, MultipartFile file) throws IOException;
 
@@ -32,4 +34,6 @@ public interface UsersService {
   List<UserEntity> importExcel(MultipartFile file) throws IOException;
 
   List<UserDto> importExcelCheckDuplicate(MultipartFile file) throws IOException;
+
+  UserEntity details(UUID id);
 }
