@@ -1,22 +1,15 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.HoaDonRequest;
-import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
-import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.HoaDonChiTietEntity;
-import com.example.demo.entity.HoaDonEntity;
-import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
-import com.example.demo.repository.GiayChiTietRepository;
-import com.example.demo.repository.HoaDonChiTietRepository;
-import com.example.demo.repository.HoaDonRepository;
-
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
+import com.example.demo.service.BanHangTaiQuayService;
+import com.example.demo.service.GiamGiaHoaDonChiTietService;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.example.demo.service.BanHangTaiQuayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -24,17 +17,28 @@ import org.springframework.stereotype.Service;
 @RequiredArgsConstructor
 public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
+  private final GiamGiaHoaDonChiTietService giamGiaHoaDonChiTietService;
   private final HoaDonRepository hoaDonRepository;
   private final HoaDonChiTietRepository hoaDonChiTietRepository;
   private final GiayChiTietRepository giayChiTietRepository;
   private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
+  private final UserRepository userRepository;
+  private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
 
   @Override
-  public void thanhToanTaiQuay(UUID idHoaDon, HoaDonRequest hoaDonRequest) {
+  public void thanhToanTaiQuay(
+      UUID idHoaDon,
+      UUID idGiamGia,
+      Integer hinhThucThanhToan,
+      Boolean isGiaoHang,
+      HoaDonRequest hoaDonRequest) {
     HoaDonEntity hoaDon =
         hoaDonRepository
             .findById(idHoaDon)
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+
+    // Kiểm tra người dùng đã mua hàng chưa
+    UserEntity user = userRepository.findBySoDienThoai(hoaDonRequest.getSdtNguoiNhan());
 
     // Kiểm tra trạng thái hóa đơn
     if (hoaDon.getTrangThai() != 1) {
@@ -47,15 +51,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       throw new IllegalArgumentException("Không thể thanh toán hóa đơn trống");
     }
 
-    BigDecimal tongTienSanPhamKhiGiam =
-        danhSachSanPham.stream()
-            .map(
-                hoaDonChiTiet ->
-                    hoaDonChiTiet
-                        .getDonGia()
-                        .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
-
+    // Tổng tiền sản phẩm gốc
     BigDecimal tongTienSanPhamGoc =
         danhSachSanPham.stream()
             .map(
@@ -65,18 +61,52 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
                         .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+    // Tổng tiền saản phẩm có khuyễn mãi sản phẩm
+    BigDecimal tongTienSanPhamKhiGiam =
+        danhSachSanPham.stream()
+            .map(
+                hoaDonChiTiet ->
+                    hoaDonChiTiet
+                        .getDonGia()
+                        .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
+
+    BigDecimal soTienGiamKhiApMa = BigDecimal.ZERO;
+    if (idGiamGia != null) {
+      GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findById(idGiamGia).orElse(null);
+
+      // Nếu mã giảm giá tồn tại, kiểm tra điều kiện áp dụng
+      if (giamGia != null
+          && giamGia.getSoLuong() > 0
+          && tongTienSanPhamGoc.compareTo(giamGia.getDieuKien()) >= 0) {
+        soTienGiamKhiApMa =
+            giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
+                idHoaDon, giamGia, tongTienSanPhamKhiGiam);
+      }
+    }
+
     BigDecimal soTienGiam = tongTienSanPhamGoc.subtract(tongTienSanPhamKhiGiam);
+    BigDecimal phiShip = isGiaoHang ? BigDecimal.valueOf(30000) : BigDecimal.ZERO;
 
     hoaDon.setMa(hoaDonRequest.getMa());
     hoaDon.setNgayThanhToan(new Date());
     hoaDon.setMoTa(hoaDonRequest.getMoTa());
-    hoaDon.setTenNguoiNhan(hoaDonRequest.getTenNguoiNhan());
+    hoaDon.setTenNguoiNhan(
+        (user != null || hoaDonRequest.getTenNguoiNhan() != null)
+            ? hoaDonRequest.getTenNguoiNhan()
+            : "Khách lẻ");
     hoaDon.setSdtNguoiNhan(hoaDonRequest.getSdtNguoiNhan());
+    hoaDon.setXa(hoaDonRequest.getXa());
+    hoaDon.setHuyen(hoaDonRequest.getHuyen());
+    hoaDon.setTinh(hoaDonRequest.getTinh());
     hoaDon.setDiaChi(hoaDonRequest.getDiaChi());
-    hoaDon.setTongTien(tongTienSanPhamKhiGiam);
-    hoaDon.setHinhThucThanhToan(1);
-    hoaDon.setSoTienGiam(soTienGiam);
+    hoaDon.setTongTien(tongTienSanPhamKhiGiam.subtract(soTienGiamKhiApMa).add(phiShip));
+    hoaDon.setHinhThucThanhToan(hinhThucThanhToan);
+    hoaDon.setSoTienGiam(soTienGiam.add(soTienGiamKhiApMa));
+    hoaDon.setPhiShip(phiShip);
+    hoaDon.setHinhThucNhanHang(isGiaoHang ? 1 : 2);
     hoaDon.setTrangThai(2);
+    hoaDon.setUserEntity(user);
 
     hoaDonRepository.save(hoaDon);
   }
@@ -93,7 +123,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .ngayTao(new Date())
             .hinhThucMua(1)
             .hinhThucNhanHang(1)
-            .phiShip(BigDecimal.valueOf(0.0))
             .trangThai(1)
             .build();
 
@@ -137,7 +166,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     BigDecimal giaSauGiam = giaBanGoc;
 
     GiamGiaChiTietSanPhamEntity giamGiaOpt =
-        giamGiaChiTietSanPhamRepository.findByGiay(giayChiTiet.getGiayEntity());
+        giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
 
     if (giamGiaOpt != null) {
       BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
@@ -162,9 +191,9 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   @Override
   public HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease) {
     HoaDonChiTietEntity hoaDonChiTiet =
-            hoaDonChiTietRepository
-                    .findById(idHoaDonChiTiet)
-                    .orElseThrow(() -> new IllegalArgumentException("Hóa đơn chi tiết không tồn tại"));
+        hoaDonChiTietRepository
+            .findById(idHoaDonChiTiet)
+            .orElseThrow(() -> new IllegalArgumentException("Hóa đơn chi tiết không tồn tại"));
 
     GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
     int soLuongHienTai = hoaDonChiTiet.getSoLuong();
@@ -184,33 +213,10 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       giayChiTiet.setSoLuongTon(soLuongTon + 1);
     }
 
-    // **Cập nhật giá bán tổng (giá gốc * số lượng)**
-    BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
-    hoaDonChiTiet.setGiaBan(giaBanGoc.multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())));
-
-    // **Tính toán lại giá sau giảm**
-    BigDecimal giaSauGiam = giaBanGoc;
-    GiamGiaChiTietSanPhamEntity giamGiaOpt =
-            giamGiaChiTietSanPhamRepository.findByGiay(giayChiTiet.getGiayEntity());
-
-    if (giamGiaOpt != null) {
-      BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
-      giaSauGiam = giaBanGoc.subtract(soTienDaGiam);
-    }
-
-    // **Cập nhật đơn giá (giá sau giảm * số lượng)**
-    hoaDonChiTiet.setDonGia(giaSauGiam.multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())));
-
     // **Lưu lại vào database**
     giayChiTietRepository.save(giayChiTiet);
     return hoaDonChiTietRepository.save(hoaDonChiTiet);
   }
-
-
-
-
-
-
 
   @Override
   public List<HoaDonEntity> getListHoaDonCho() {
@@ -224,6 +230,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
                     .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
     return hoaDonChiTietRepository.findByHoaDon(hoaDon);
   }
+
 
   @Override
   public void deleteHoaDonCho(UUID idHoaDon) {

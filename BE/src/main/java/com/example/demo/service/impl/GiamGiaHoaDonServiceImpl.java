@@ -25,6 +25,16 @@ public class GiamGiaHoaDonServiceImpl implements GiamGiaHoaDonService {
   private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
 
   @Override
+  public GiamGiaHoaDonEntity getGiamGia(String ma) {
+    if (ma != null && !ma.isEmpty()) {
+      return giamGiaHoaDonRepository.findByMa(ma);
+    }
+
+    List<GiamGiaHoaDonEntity> dsGiamGia = giamGiaHoaDonRepository.findGiamGiaConSoLuong();
+    return dsGiamGia.isEmpty() ? null : dsGiamGia.get(0);
+  }
+
+  @Override
   public List<GiamGiaHoaDonEntity> getAll() {
     return giamGiaHoaDonRepository.findAll();
   }

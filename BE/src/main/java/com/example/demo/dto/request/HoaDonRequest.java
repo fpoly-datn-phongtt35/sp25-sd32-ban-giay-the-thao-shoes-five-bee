@@ -16,5 +16,9 @@ public class HoaDonRequest {
     private String moTa;
     private String tenNguoiNhan;
     private String sdtNguoiNhan;
+    private String xa;
+    private String huyen;
+    private String tinh;
     private String diaChi;
+
 }

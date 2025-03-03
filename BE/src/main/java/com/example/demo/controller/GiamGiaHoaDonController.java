@@ -6,16 +6,18 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @RequestMapping("/giam-gia-hoa-don")
 @RequiredArgsConstructor
 public class GiamGiaHoaDonController {
   private final GiamGiaHoaDonService giamGiaHoaDonService;
+
+  @GetMapping("/giam-gia")
+  public ResponseEntity<?> getGiamGiaByMa(@RequestParam(required = false) String ma) {
+    return ResponseEntity.ok(giamGiaHoaDonService.getGiamGia(ma));
+  }
 
   @PostMapping("/getAll")
   public ResponseEntity<?> getAll() {
@@ -25,8 +27,7 @@ public class GiamGiaHoaDonController {
   @PostMapping("/search")
   public ResponseEntity<?> findAndPageChatLieu(@RequestBody GiamGiaHoaDonDto giamGiaHoaDonDto) {
     Pageable pageable = PageRequest.of(giamGiaHoaDonDto.getPage(), giamGiaHoaDonDto.getSize());
-    return ResponseEntity.ok(
-            giamGiaHoaDonService.findByPagingCriteria(giamGiaHoaDonDto, pageable));
+    return ResponseEntity.ok(giamGiaHoaDonService.findByPagingCriteria(giamGiaHoaDonDto, pageable));
   }
 
   @PostMapping("/add")
