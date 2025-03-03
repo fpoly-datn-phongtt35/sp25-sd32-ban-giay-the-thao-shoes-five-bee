@@ -48,11 +48,6 @@ public class BanHangTaiQuayController {
     return ResponseEntity.ok(banHangTaiQuayService.themSanPhamVaoHoaDon(idHoaDon, idSanPham));
   }
 
-  @GetMapping("/san-pham/{idHoaDon}")
-  public ResponseEntity<?> getSanPhamTrongHoaDonCho(@PathVariable UUID idHoaDon) {
-    return ResponseEntity.ok(banHangTaiQuayService.getSanPhamTrongHoaDon(idHoaDon));
-  }
-
   @PutMapping("/update-quantity/{idHoaDonChiTiet}")
   public ResponseEntity<?> updateSoLuongGiay(
       @PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet, @RequestParam boolean isIncrease) {

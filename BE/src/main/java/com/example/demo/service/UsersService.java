@@ -16,8 +16,8 @@ public interface UsersService {
 
   UserEntity getBySdt(String sdt);
 
-  List<UserDto> getAll();
   List<UserEntity> getAll();
+
 
   UserEntity add(UserDto userDto, MultipartFile file) throws IOException;
 

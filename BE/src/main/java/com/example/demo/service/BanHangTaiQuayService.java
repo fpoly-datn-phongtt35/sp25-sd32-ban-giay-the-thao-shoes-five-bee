@@ -18,12 +18,11 @@ public interface BanHangTaiQuayService {
 
   HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham);
 
-    HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease);
-    List<HoaDonChiTietEntity> getSanPhamTrongHoaDon(UUID idHoaDon);
-
-  List<HoaDonEntity> getListHoaDonCho();
+  HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease);
 
   List<HoaDonChiTietEntity> getSanPhamTrongHoaDon(UUID idHoaDon);
+
+  List<HoaDonEntity> getListHoaDonCho();
 
   void deleteHoaDonCho(UUID idHoaDon);
 

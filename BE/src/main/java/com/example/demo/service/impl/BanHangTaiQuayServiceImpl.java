@@ -231,14 +231,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     return hoaDonChiTietRepository.findByHoaDon(hoaDon);
   }
 
-  @Override
-  public List<HoaDonChiTietEntity> getSanPhamTrongHoaDon(UUID idHoaDon) {
-    HoaDonEntity hoaDon =
-        hoaDonRepository
-            .findById(idHoaDon)
-            .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
-    return hoaDonChiTietRepository.findByHoaDon(hoaDon);
-  }
 
   @Override
   public void deleteHoaDonCho(UUID idHoaDon) {
