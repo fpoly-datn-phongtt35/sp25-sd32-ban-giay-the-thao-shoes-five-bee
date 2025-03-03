@@ -31,7 +31,7 @@ import {
   deleteHoaDonCho,
   themSanPhamVaoHoaDon,
   getSanPhamTrongHoaDon,
-} from "../service/BanhangTaiQuayService";
+} from "../service/BanHangTaiQuayService";
 import WebcamComponent from "./WebcamComponent";
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
