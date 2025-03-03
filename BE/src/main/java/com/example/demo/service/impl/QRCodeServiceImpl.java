@@ -89,9 +89,6 @@ public class QRCodeServiceImpl implements QRCodeService {
             }
             hoaDonChiTiet.setSoLuong(newSoLuong);
 
-            // 📌 Cập nhật giá bán tổng theo số lượng mới
-            hoaDonChiTiet.setGiaBan(giaBanGoc.multiply(BigDecimal.valueOf(newSoLuong)));
-            hoaDonChiTiet.setDonGia(giaSauGiam.multiply(BigDecimal.valueOf(newSoLuong)));
         } else {
             // 📌 Nếu sản phẩm chưa có, thêm sản phẩm vào hóa đơn mới
             hoaDonChiTiet = HoaDonChiTietEntity.builder()

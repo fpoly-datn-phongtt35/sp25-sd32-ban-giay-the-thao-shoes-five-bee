@@ -20,6 +20,5 @@ public class HoaDonRequest {
     private String huyen;
     private String tinh;
     private String diaChi;
-    private Boolean isGiaoHang;
-    private String maGiamGia;
+
 }

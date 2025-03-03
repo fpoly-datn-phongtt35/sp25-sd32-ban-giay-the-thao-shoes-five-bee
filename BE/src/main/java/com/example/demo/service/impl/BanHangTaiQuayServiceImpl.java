@@ -26,7 +26,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
 
   @Override
-  public void thanhToanTaiQuay(UUID idHoaDon, HoaDonRequest hoaDonRequest) {
+  public void thanhToanTaiQuay(
+      UUID idHoaDon,
+      UUID idGiamGia,
+      Integer hinhThucThanhToan,
+      Boolean isGiaoHang,
+      HoaDonRequest hoaDonRequest) {
     HoaDonEntity hoaDon =
         hoaDonRepository
             .findById(idHoaDon)
@@ -67,8 +72,8 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     BigDecimal soTienGiamKhiApMa = BigDecimal.ZERO;
-    if (hoaDonRequest.getMaGiamGia() != null && !hoaDonRequest.getMaGiamGia().isEmpty()) {
-      GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findByMa(hoaDonRequest.getMaGiamGia());
+    if (idGiamGia != null) {
+      GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findById(idGiamGia).orElse(null);
 
       // Nếu mã giảm giá tồn tại, kiểm tra điều kiện áp dụng
       if (giamGia != null
@@ -81,22 +86,25 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     }
 
     BigDecimal soTienGiam = tongTienSanPhamGoc.subtract(tongTienSanPhamKhiGiam);
-    BigDecimal phiShip = hoaDonRequest.getIsGiaoHang() ? BigDecimal.valueOf(30000) : BigDecimal.ZERO;
+    BigDecimal phiShip = isGiaoHang ? BigDecimal.valueOf(30000) : BigDecimal.ZERO;
 
     hoaDon.setMa(hoaDonRequest.getMa());
     hoaDon.setNgayThanhToan(new Date());
     hoaDon.setMoTa(hoaDonRequest.getMoTa());
-    hoaDon.setTenNguoiNhan(user != null ? hoaDonRequest.getTenNguoiNhan() : "Khách lẻ");
+    hoaDon.setTenNguoiNhan(
+        (user != null || hoaDonRequest.getTenNguoiNhan() != null)
+            ? hoaDonRequest.getTenNguoiNhan()
+            : "Khách lẻ");
     hoaDon.setSdtNguoiNhan(hoaDonRequest.getSdtNguoiNhan());
     hoaDon.setXa(hoaDonRequest.getXa());
     hoaDon.setHuyen(hoaDonRequest.getHuyen());
     hoaDon.setTinh(hoaDonRequest.getTinh());
     hoaDon.setDiaChi(hoaDonRequest.getDiaChi());
     hoaDon.setTongTien(tongTienSanPhamKhiGiam.subtract(soTienGiamKhiApMa).add(phiShip));
-    hoaDon.setHinhThucThanhToan(1);
+    hoaDon.setHinhThucThanhToan(hinhThucThanhToan);
     hoaDon.setSoTienGiam(soTienGiam.add(soTienGiamKhiApMa));
     hoaDon.setPhiShip(phiShip);
-    hoaDon.setHinhThucNhanHang(hoaDonRequest.getIsGiaoHang() ? 1 : 2);
+    hoaDon.setHinhThucNhanHang(isGiaoHang ? 1 : 2);
     hoaDon.setTrangThai(2);
     hoaDon.setUserEntity(user);
 
