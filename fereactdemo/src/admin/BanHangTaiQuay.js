@@ -33,7 +33,8 @@ import {
   getSanPhamTrongHoaDon,
   deleteSanPhamHoaDonChiTiet,
   updateSoLuongGiay,
-} from "../service/BanhangTaiQuayService";
+  thanhToanTaiQuay,
+} from "../service/BanHangTaiQuay";
 import WebcamComponent from "./WebcamComponent";
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -87,21 +88,10 @@ const BanHangTaiQuay = () => {
   const [vnpayUrl, setVnpayUrl] = useState("");
 
   const handleInputChange = (event) => {
-    const inputValue = event.target.value.replace(/\D/g, "");
-    const formattedValue = formatCurrency(inputValue);
-    setCustomerMoney(formattedValue);
-
-    const parsedMoney = parseCurrency(formattedValue);
-    console.log("Tiền khách đưa:", parsedMoney);
-
-    setTotalAmount((prevTotal) => {
-      if (parsedMoney >= prevTotal) {
-        setChangeAmount(parsedMoney - prevTotal);
-      } else {
-        setChangeAmount(0);
-      }
-      return prevTotal;
-    });
+    const rawValue = event.target.value.replace(/\D/g, ""); // Chỉ lấy số
+    const parsedMoney = parseInt(rawValue, 10) || 0; // Chuyển thành số
+    setCustomerMoney(parsedMoney.toLocaleString("vi-VN")); // Format số tiền
+    setChangeAmount(parsedMoney - totalHoaDon);
   };
 
   const handleProductClick = async (product) => {
@@ -172,127 +162,78 @@ const BanHangTaiQuay = () => {
     }
   };
 
-  const handleQuantityChange = async (productId, idHoaDonChiTiet, delta) => {
-    const product = giay.find((p) => p.ID === productId);
-    if (!product) return;
-
-    const currentSelectedProduct = selectedProducts[selectedPage]?.find(
-      (p) => p.ID === productId
-    );
-
-    const currentQuantity = currentSelectedProduct
-      ? currentSelectedProduct.SOLUONG
-      : 0;
-
-    const newQuantity = currentQuantity + delta;
-
-    if (newQuantity < 0) {
-      message.warning("Số lượng không thể âm!");
-      return;
-    }
-
-    if (newQuantity > product.SOLUONG) {
-      message.warning("Số lượng vượt quá tồn kho!");
-      return;
-    }
-
-    try {
-      console.log("🔄 Gọi API cập nhật số lượng:", {
-        idHoaDonChiTiet,
-        isIncrease: delta > 0,
-      });
-      await updateSoLuongGiay(idHoaDonChiTiet, delta > 0);
-      console.log("✅ API cập nhật thành công");
-
-      // ✅ Cập nhật số lượng sản phẩm trong state
-      setSelectedProducts((prevSelectedProducts) => {
-        const updatedProducts = { ...prevSelectedProducts };
-
-        updatedProducts[selectedPage] = Array.isArray(
-          updatedProducts[selectedPage]
-        )
-          ? updatedProducts[selectedPage].map((p) => {
-              if (p.ID === productId) {
-                return { ...p, SOLUONG: newQuantity };
-              }
-              return p;
-            })
-          : [];
-
-        console.log(
-          "📌 Sản phẩm sau khi cập nhật:",
-          updatedProducts[selectedPage]
-        );
-
-        // 🔥 Cập nhật tổng tiền
-        const newTotalAmount = updatedProducts[selectedPage]?.reduce(
-          (total, product) =>
-            total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
-          0
-        );
-
-        setTotalAmount(newTotalAmount);
-        console.log(`💰 Tổng tiền sau khi thay đổi số lượng:`, newTotalAmount);
-
-        return updatedProducts;
-      });
-
-      message.success("Cập nhật số lượng thành công!");
-    } catch (error) {
-      console.error("❌ Lỗi khi cập nhật số lượng:", error);
-      message.error("Không thể cập nhật số lượng sản phẩm!");
-    }
-  };
   const increaseQuantity = async (productId, hoaDonId) => {
     try {
-        console.log(`📈 Tăng số lượng: productId = ${productId}, hoaDonId = ${hoaDonId}`);
-
-        await updateSoLuongGiay(productId, true); // Gọi API cập nhật số lượng
-
-        // Sau khi cập nhật, lấy lại danh sách sản phẩm mới
-        fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
-            setSelectedProducts(updatedProducts);
-
-            // 🔥 Cập nhật tổng tiền
-            const newTotalAmount = updatedProducts.reduce(
-                (total, product) => total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
-                0
-            );
-            setTotalAmount(newTotalAmount);
-            console.log(`💰 Tổng tiền sau khi tăng:`, newTotalAmount);
-        });
-        getAllGiay();
+      const response = await updateSoLuongGiay(productId, true);
+      if (response.status !== 200) {
+        throw new Error("API không cập nhật số lượng thành công!");
+      }
+  
+      await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
+        if (!updatedProducts) {
+          console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
+          return;
+        }
+  
+        setSelectedProducts((prev) => ({
+          ...prev,
+          [hoaDonId]: updatedProducts,
+        }));
+  
+        const newTotalAmount = updatedProducts.reduce(
+          (total, product) => total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
+          0
+        );
+  
+        setTotalAmount(newTotalAmount);
+        setChangeAmount()
+        // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
+        handleInputChange();
+      });
+  
+      getAllGiay();
     } catch (error) {
-        console.error("❌ Lỗi khi tăng số lượng:", error);
-        message.error("Không thể tăng số lượng!");
+      console.error("❌ Lỗi khi tăng số lượng:", error);
+      message.error("Không thể tăng số lượng!");
     }
-};
-
-const decreaseQuantity = async (productId, hoaDonId) => {
+  };
+  
+  const decreaseQuantity = async (productId, hoaDonId) => {
     try {
-        console.log(`📉 Giảm số lượng: productId = ${productId}, hoaDonId = ${hoaDonId}`);
-
-        await updateSoLuongGiay(productId, false); // Gọi API cập nhật số lượng
-
-        // Sau khi cập nhật, lấy lại danh sách sản phẩm mới
-        fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
-            setSelectedProducts(updatedProducts);
-
-            // 🔥 Cập nhật tổng tiền
-            const newTotalAmount = updatedProducts.reduce(
-                (total, product) => total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
-                0
-            );
-            setTotalAmount(newTotalAmount);
-            console.log(`💰 Tổng tiền sau khi giảm:`, newTotalAmount);
-        });
-        getAllGiay();
+      const response = await updateSoLuongGiay(productId, false);
+      if (response.status !== 200) {
+        throw new Error("API không cập nhật số lượng thành công!");
+      }
+  
+      await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
+        if (!updatedProducts) {
+          console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
+          return;
+        }
+  
+        setSelectedProducts((prev) => ({
+          ...prev,
+          [hoaDonId]: updatedProducts,
+        }));
+  
+        const newTotalAmount = updatedProducts.reduce(
+          (total, product) => total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
+          0
+        );
+  
+        setTotalAmount(newTotalAmount);
+  
+        // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
+        handleInputChange({ target: { value: customerMoney } });
+      });
+  
+      getAllGiay();
     } catch (error) {
-        console.error("❌ Lỗi khi giảm số lượng:", error);
-        message.error("Không thể giảm số lượng!");
+      console.error("❌ Lỗi khi giảm số lượng:", error);
+      message.error("Không thể giảm số lượng!");
     }
-};
-
+  };
+  
 
   const calculateTotal = (product) => {
     return product.GIABAN * product.SOLUONG;
@@ -408,13 +349,14 @@ const decreaseQuantity = async (productId, hoaDonId) => {
 
     try {
       const result = await getSanPhamTrongHoaDon(idHoaDon);
+      console.log("Dữ liệu sản phẩm trong hóa đơn:", result.data);
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
             ID: item.id,
             TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
             SOLUONG: item.soLuong,
-            GIABAN: item.giaBan,
+            GIABAN: item.giayChiTietEntity?.giaBan || 0,
             ANH_GIAY:
               item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
                 ?.tenUrl || "https://via.placeholder.com/150",
@@ -603,11 +545,14 @@ const decreaseQuantity = async (productId, hoaDonId) => {
       throw error;
     }
   };
+
   const handlePayment = async () => {
     const totalAmountToPay = getTotalAmount();
     const parsedMoney = parseCurrency(customerMoney);
+
     console.log("Tổng tiền cần thanh toán:", totalAmountToPay);
     console.log("Tiền khách đưa:", parsedMoney);
+
     if (parsedMoney < totalAmountToPay && selectedOption !== "option3") {
       message.error("Tiền khách đưa không đủ!");
       return;
@@ -633,30 +578,27 @@ const decreaseQuantity = async (productId, hoaDonId) => {
         hinhThucMua: 1,
         hinhThucThanhToan: selectedOption === "option3" ? 0 : 1,
       };
-      console.log(totalAmountToPay);
 
       if (selectedOption === "option3") {
+        // Thanh toán qua VNPay
         const response = await addHoaDon(newHoaDon);
         createdHoaDonId = response.data.id;
       } else {
+        // Thanh toán tại quầy
         createdHoaDonId = currentPage.hoaDonId;
         await updateHoaDon(createdHoaDonId, newHoaDon);
+        await thanhToanTaiQuay(createdHoaDonId, newHoaDon); // ✅ Gọi API thanh toán tại quầy
       }
+
       if (appliedGiamGia) {
-        console.log(
-          "Thông tin chương trình giảm giá trước khi thêm:",
-          appliedGiamGia
-        );
-        console.log(
-          "Tổng tiền trước khi thêm chương trình giảm giá:",
-          getTotalAmount()
-        );
+        console.log("Thông tin chương trình giảm giá:", appliedGiamGia);
         await addChuongTrinhGiamGiaHoaDonChiTiet(
           createdHoaDonId,
           appliedGiamGia,
           getTotalAmount()
         );
       }
+
       for (const product of selectedProducts[selectedPage] || []) {
         const currentProduct = giay.find((p) => p.ID === product.ID);
         if (currentProduct) {
@@ -683,15 +625,14 @@ const decreaseQuantity = async (productId, hoaDonId) => {
       await Promise.all(hoaDonChiTietSanPham);
 
       if (selectedOption === "option3") {
+        // Xử lý thanh toán VNPay
         const paymentUrl = await createVNPayUrl(
           Math.round(totalAmountToPay),
           createdHoaDonId
         );
         if (paymentUrl && paymentUrl.startsWith("http")) {
           window.open(paymentUrl, "_blank");
-          message.success(
-            "Đã tạo yêu cầu thanh toán qua VNPay. Vui lòng hoàn tất thanh toán."
-          );
+          message.success("Đã tạo yêu cầu thanh toán qua VNPay.");
 
           const checkPaymentStatus = setInterval(async () => {
             const updatedHoaDonResponse = await getHoaDon(createdHoaDonId);
@@ -721,6 +662,7 @@ const decreaseQuantity = async (productId, hoaDonId) => {
       message.error("Thanh toán thất bại!");
     }
   };
+
   const resetState = () => {
     setSelectedProducts({});
     setCustomerMoney("");
@@ -950,10 +892,21 @@ const decreaseQuantity = async (productId, hoaDonId) => {
                   <div>{product.TEN}</div>
                   <div>{product.GIABAN}</div>
                   <div className="quantity_controls">
-                  <Button onClick={() => decreaseQuantity(product.ID, selectedHoaDonId)}>-</Button>
-                  <span>{product.SOLUONG}</span>
-
-                    <Button onClick={() => increaseQuantity(product.ID, selectedHoaDonId)}>+</Button>
+                    <Button
+                      onClick={() =>
+                        decreaseQuantity(product.ID, selectedHoaDonId)
+                      }
+                    >
+                      -
+                    </Button>
+                    <span>{product.SOLUONG}</span>
+                    <Button
+                      onClick={() =>
+                        increaseQuantity(product.ID, selectedHoaDonId)
+                      }
+                    >
+                      +
+                    </Button>
                   </div>
                   <div className="total_price">
                     {formatCurrency(calculateTotal(product))}
@@ -1091,7 +1044,9 @@ const decreaseQuantity = async (productId, hoaDonId) => {
           placeholder="Nhập số tiền khách đưa"
         />
         <hr />
-        <p>Tiền thừa: {formatCurrency(changeAmount)}</p>
+        <p className={changeAmount < 0 ? "negative-change" : ""}>
+          Tiền thừa: {formatCurrency(changeAmount)}
+        </p>
         <hr />
         <div className="check_tt">
           <label>
