@@ -35,6 +35,7 @@ import {
   updateSoLuongGiay,
   thanhToanTaiQuay,
 } from "../service/BanHangTaiQuay";
+
 import WebcamComponent from "./WebcamComponent";
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
