@@ -48,6 +48,6 @@ export const deleteAllHoaDonCho = (idHoaDons) => {
   return axios.delete(`${REST_API_BASE_URL}/delete-all`, { data: idHoaDons });
 };
 
-export const deleteHoaDonChiTiet = (idHoaDonChiTiet) => {
+export const deleteSanPhamHoaDonChiTiet = (idHoaDonChiTiet) => {
   return axios.delete(`${REST_API_BASE_URL}/delete-detail/${idHoaDonChiTiet}`);
 };
