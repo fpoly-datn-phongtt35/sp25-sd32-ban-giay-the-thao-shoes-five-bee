@@ -3,9 +3,19 @@ import axios from "../axiosConfig";
 const REST_API_BASE_URL = "/api/ban-hang-tai-quay";
 
 export const thanhToanTaiQuay = (idHoaDon, hoaDonRequest) => {
+  // Chỉ thêm idGiamGia vào params nếu nó tồn tại
+  const params = {
+    hinhThucThanhToan: hoaDonRequest.hinhThucThanhToan,
+    isGiaoHang: hoaDonRequest.isGiaoHang || false,
+    idGiamGia: hoaDonRequest.idGiamGia || null // Thêm giá trị mặc định là null
+  };
+
+  console.log("Request params:", params); // Debug log
+
   return axios.post(
     `${REST_API_BASE_URL}/thanh-toan/${idHoaDon}`,
-    hoaDonRequest
+    hoaDonRequest,
+    { params }
   );
 };
 
