@@ -169,72 +169,73 @@ const BanHangTaiQuay = () => {
       if (response.status !== 200) {
         throw new Error("API không cập nhật số lượng thành công!");
       }
-  
+
       await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
         if (!updatedProducts) {
           console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
           return;
         }
-  
+
         setSelectedProducts((prev) => ({
           ...prev,
           [hoaDonId]: updatedProducts,
         }));
-  
+
         const newTotalAmount = updatedProducts.reduce(
-          (total, product) => total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
+          (total, product) =>
+            total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
           0
         );
-  
+
         setTotalAmount(newTotalAmount);
-        setChangeAmount()
+        setChangeAmount();
         // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
         handleInputChange();
       });
-  
+
       getAllGiay();
     } catch (error) {
       console.error("❌ Lỗi khi tăng số lượng:", error);
       message.error("Không thể tăng số lượng!");
     }
   };
-  
+
   const decreaseQuantity = async (productId, hoaDonId) => {
     try {
       const response = await updateSoLuongGiay(productId, false);
       if (response.status !== 200) {
         throw new Error("API không cập nhật số lượng thành công!");
       }
-  
+
       await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
         if (!updatedProducts) {
           console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
           return;
         }
-  
+
         setSelectedProducts((prev) => ({
           ...prev,
           [hoaDonId]: updatedProducts,
         }));
-  
+
         const newTotalAmount = updatedProducts.reduce(
-          (total, product) => total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
+          (total, product) =>
+            total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
           0
         );
-  
+
         setTotalAmount(newTotalAmount);
-  
+
         // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
         handleInputChange({ target: { value: customerMoney } });
       });
-  
+
       getAllGiay();
     } catch (error) {
       console.error("❌ Lỗi khi giảm số lượng:", error);
       message.error("Không thể giảm số lượng!");
     }
   };
-  
 
   const calculateTotal = (product) => {
     return product.GIABAN * product.SOLUONG;
@@ -283,12 +284,11 @@ const BanHangTaiQuay = () => {
   const getAllKhachHangData = async () => {
     try {
       const result = await getAllKhachHang();
+      console.log(result.data);
 
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
       }
-
-      // Lọc người dùng có "ROLE_USER" (đảm bảo userRoleEntities tồn tại)
       const filteredUsers = result.data
         .filter(
           (user) =>
@@ -828,6 +828,7 @@ const BanHangTaiQuay = () => {
 
       // Cập nhật danh sách số thứ tự có thể sử dụng
       setAvailablePageNumbers((prevNumbers) => [...prevNumbers, pageId].sort());
+      getAllGiay();
     } catch (error) {
       console.error("Lỗi khi xóa hóa đơn:", error);
       message.error("Không thể xóa hóa đơn");
@@ -1071,12 +1072,12 @@ const BanHangTaiQuay = () => {
           </label>
         </div>
         <p style={{ paddingTop: "10px" }}>
-          Tổng Tiền: {formatCurrency(getTotalAmount())}
+          Tổng Tiền: {formatCurrency(totalHoaDon)}
         </p>
         <button
           className="btn-tt"
           onClick={handlePayment}
-          disabled={getTotalAmount() <= 0}
+          disabled={totalHoaDon <= 0}
         >
           Thanh Toán
         </button>
