@@ -17,6 +17,15 @@ public class UpdateHoaDonController {
     public HoaDonEntity xacNhanHoaDon(@PathVariable UUID id) {
         return trangThaiHoaDonService.xacNhanHoaDon(id);
     }
+    // 0 cho xac nhan
+    // 1 hoa don cho thanh toan
+    // 2 hoan thanh
+    // 3 da xac nhan
+    // 4 cho van chuyen
+    // 5 dang van chuyen
+    // 6 da giao hang
+    // 7 tra hang
+    // 8 da huy
 
     /**
      * API hủy hóa đơn
