@@ -4,11 +4,12 @@ import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Dropdown, Menu, Space } from "antd";
 import { BellOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
 import { jwtDecode } from "jwt-decode";
-
+import { countProductsInCart } from '../service/GioHangChiTietService';
 export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
   const navigate = useNavigate();
+  const [totalProducts, setTotalProducts] = useState(0);
   const handleOrderStatusPage = () => {
     navigate("/OrderStatusPage");
   };
@@ -49,6 +50,8 @@ export const Header = () => {
   const handleLogout = () => {
     localStorage.removeItem("token");
     localStorage.removeItem("refreshToken");
+    localStorage.removeItem("cart");
+    localStorage.removeItem("idGioHang");
     setIsLoggedIn(false);
     setUser(null);
     window.dispatchEvent(new Event("loginChange"));
@@ -62,20 +65,36 @@ export const Header = () => {
       return user?.hoTen || "Guest";
     }
   };
+  const idGioHang = localStorage.getItem("idGioHang")
+  useEffect(() => {
+    const fetchTotalProducts = async () => {
+      if (idGioHang) {
+        try {
+          console.log("Gọi API với ID giỏ hàng:", idGioHang);
+          const total = await countProductsInCart(idGioHang);
+          console.log("Kết quả trả về từ API:", total);
+          setTotalProducts(total);
+        } catch (error) {
+          console.error("Lỗi khi gọi API:", error);
+        }
+      } else {
+        console.log("Không có ID giỏ hàng!");
+      }
+    };
+
+    fetchTotalProducts();
+  }, [idGioHang]); 
 
   const menuItems = (
     <Menu>
       <Menu.Item key="profile" onClick={handleProfile}>
-        <UserOutlined />
-        <span>Profile</span>
+        <span>Tài Khoản Của Tôi</span>
       </Menu.Item>
       <Menu.Item key="donMua" onClick={handleOrderStatusPage}>
-        <UserOutlined />
         <span>Đơn Mua</span>
       </Menu.Item>
       <Menu.Item key="logout" onClick={handleLogout}>
-        <UserOutlined />
-        <span>Logout</span>
+        <span>Đăng Xuất</span>
       </Menu.Item>
       
     </Menu>
@@ -84,7 +103,6 @@ export const Header = () => {
   return (
     <div className="container">
       <div className="row top-header">
-        {/* Left Header */}
         <div className="col-md-4 col-sm-12 col-xs-12 left-header hidden-sm hidden-xs">
           <div className="text">
             <span>Hotline: </span>
@@ -165,19 +183,25 @@ export const Header = () => {
               </ul>
             </li>
             )}
-            <li className="site-nav-item site-nav-cart mini-cart">
-              <a href="/cart" title="Giỏ hàng" rel="nofollow">
-              <ShoppingCartOutlined style={{ fontSize: '20px' }} /> 
-                <span className="count_item_pr">0</span>
-              </a>
-              <div className="top-cart-content">
-                <ul id="cart-sidebar" className="mini-products-list count_li">
-                  <div className="no-item">
-                    <p>Không có sản phẩm nào trong giỏ hàng.</p>
-                  </div>
-                </ul>
-              </div>
-            </li>
+             <li className="site-nav-item site-nav-cart mini-cart">
+      <a href="/cart" title="Giỏ hàng" rel="nofollow">
+        <ShoppingCartOutlined style={{ fontSize: '20px' }} />
+        <span className="count_item_pr">{totalProducts}</span>
+      </a>
+      <div className="top-cart-content">
+        <ul id="cart-sidebar" className="mini-products-list count_li">
+          {totalProducts > 0 ? (
+            <div className="item-list">
+              <p>Có {totalProducts} sản phẩm trong giỏ hàng.</p>
+            </div>
+          ) : (
+            <div className="no-item">
+              <p>Không có sản phẩm nào trong giỏ hàng.</p>
+            </div>
+          )}
+        </ul>
+      </div>
+    </li>
 
           </ul>
         </div>

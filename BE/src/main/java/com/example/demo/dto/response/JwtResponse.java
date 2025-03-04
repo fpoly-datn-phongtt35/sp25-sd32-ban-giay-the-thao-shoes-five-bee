@@ -1,6 +1,7 @@
 package com.example.demo.dto.response;
 
 import java.util.List;
+import java.util.UUID;
 
 public class JwtResponse {
     private String token;
@@ -9,12 +10,22 @@ public class JwtResponse {
     private String password;
     private List<String> roles;
     private String refreshToken;
-    public JwtResponse(String token, String email, String password, List<String> roles, String refreshToken) {
+    private UUID idGioHang;
+    public JwtResponse(String token, String email, String password, List<String> roles, String refreshToken,UUID idGioHang) {
         this.token = token;
         this.email = email;
         this.password = password;
         this.roles = roles;
         this.refreshToken = refreshToken;
+        this.idGioHang = idGioHang;
+    }
+
+    public UUID getIdGioHang() {
+        return idGioHang;
+    }
+
+    public void setIdGioHang(UUID idGioHang) {
+        this.idGioHang = idGioHang;
     }
 
     public String getToken() {

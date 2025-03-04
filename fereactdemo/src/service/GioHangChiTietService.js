@@ -13,6 +13,17 @@ export const getByKhachHangId = () => {
     }
   });
 }
+
+export const countProductsInCart = async (idGioHang) => {
+  try {
+    const response = await axios.get(`${REST_API_BASE_URLS}/tong-so-luong/${idGioHang}`);
+    console.log(response);
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi lấy tổng số lượng sản phẩm trong giỏ:', error);
+    return 0;
+  }
+};
 export const addToCart = (idGiayChiTiet, soLuong) => {
   const token = localStorage.getItem("token");
   return axios.post(
