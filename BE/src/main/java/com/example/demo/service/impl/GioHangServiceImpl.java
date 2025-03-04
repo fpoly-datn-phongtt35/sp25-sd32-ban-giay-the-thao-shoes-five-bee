@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.response.GioHangChiTietResponse;
+import com.example.demo.dto.response.GioHangResponse;
 import com.example.demo.entity.GioHangChiTietEntity;
 import com.example.demo.entity.GioHangEntity;
 import com.example.demo.entity.UserEntity;
@@ -30,7 +31,7 @@ public class GioHangServiceImpl implements GioHangService {
   private final GioHangChiTietRepository gioHangChiTietRepository;
 
   @Override
-  public List<GioHangChiTietResponse> getCartItems() {
+  public GioHangResponse getCartItems() {
     String email = usersService.getAuthenticatedUserEmail();
 
     Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
@@ -51,13 +52,15 @@ public class GioHangServiceImpl implements GioHangService {
               newGioHang.setGhiChu("Giỏ hàng mới tạo");
               return gioHangRepository.save(newGioHang);
             });
+    GioHangResponse gioHangResponse = new GioHangResponse();
+    gioHangResponse.setIdGioHang(gioHang.getId());
 
     // Lấy danh sách sản phẩm trong giỏ hàng
     List<GioHangChiTietEntity> chiTietList =
         gioHangChiTietRepository.findByGioHangEntity(gioHang.getId());
 
     // Chuyển đổi sang DTO để trả về frontend
-    return chiTietList.stream()
+    List<GioHangChiTietResponse> gioHangChiTietResponseList = chiTietList.stream()
         .map(
             item ->
                 new GioHangChiTietResponse(
@@ -70,6 +73,8 @@ public class GioHangServiceImpl implements GioHangService {
                     item.getGiayChiTietEntity().getGiaBan(),
                     item.getSoLuong()))
         .collect(Collectors.toList());
+    gioHangResponse.setGioHangChiTietResponses(gioHangChiTietResponseList);
+    return gioHangResponse;
   }
 
     private String generateUniqueCode() {

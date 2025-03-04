@@ -152,7 +152,6 @@ function AddressModal({ onAddAddress }) {
                 ))}
               </Form.Control>
             </Form.Group>
-
             <Form.Group controlId="formDistrict" className="mt-3">
               <Form.Label>Quận/Huyện</Form.Label>
               <Form.Control as="select" name="huyen" onChange={handleDistrictChange}>
@@ -164,7 +163,6 @@ function AddressModal({ onAddAddress }) {
                 ))}
               </Form.Control>
             </Form.Group>
-
             <Form.Group controlId="formWard" className="mt-3">
               <Form.Label>Phường/Xã</Form.Label>
               <Form.Control as="select" name="xa" onChange={handleInputChange}>
