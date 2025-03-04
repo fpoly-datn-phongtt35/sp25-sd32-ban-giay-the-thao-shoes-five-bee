@@ -2,11 +2,14 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.HoaDonRequest;
 import com.example.demo.service.BanHangTaiQuayService;
+import com.example.demo.service.QRCodeService;
+import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+import org.springframework.web.multipart.MultipartFile;
 
 @RestController
 @RequestMapping("/api/ban-hang-tai-quay")
@@ -14,11 +17,17 @@ import org.springframework.web.bind.annotation.*;
 public class BanHangTaiQuayController {
 
   private final BanHangTaiQuayService banHangTaiQuayService;
+  private final QRCodeService qrCodeService;
 
   @PostMapping("/thanh-toan/{idHoaDon}")
   public ResponseEntity<?> thanhToanTaiQuay(
-      @PathVariable("idHoaDon") UUID idHoaDon, @RequestBody HoaDonRequest hoaDonRequest) {
-    banHangTaiQuayService.thanhToanTaiQuay(idHoaDon, hoaDonRequest);
+      @PathVariable("idHoaDon") UUID idHoaDon,
+      @RequestParam UUID idGiamGia,
+      @RequestParam Integer hinhThucThanhToan,
+      @RequestParam Boolean isGiaoHang,
+      @RequestBody HoaDonRequest hoaDonRequest) {
+    banHangTaiQuayService.thanhToanTaiQuay(
+        idHoaDon, idGiamGia, hinhThucThanhToan, isGiaoHang, hoaDonRequest);
     return ResponseEntity.ok("Thanh toán thành công");
   }
 
@@ -64,8 +73,22 @@ public class BanHangTaiQuayController {
   }
 
   @DeleteMapping("/delete-detail/{idHoaDonChiTiet}")
-  public ResponseEntity<?> deleteHoaDonChiTiet(@PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet) {
+  public ResponseEntity<?> deleteHoaDonChiTiet(
+      @PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet) {
     banHangTaiQuayService.deleteHoaDonChiTiet(idHoaDonChiTiet);
     return ResponseEntity.ok("Xóa hóa đơn chi tiết thành công");
   }
+
+  @GetMapping("/scan-webcam")
+  public ResponseEntity<?> scanQRCodeFromWebcam() {
+    String result = qrCodeService.scanAndAddToHoaDonChoFromWebcam();
+    return ResponseEntity.ok(result);
+  } // quet cam
+
+  @PostMapping("/scan-qr")
+  public ResponseEntity<String> scanQRCodeFromFile(@RequestParam("file") MultipartFile file)
+      throws IOException {
+    String result = qrCodeService.scanAndAddToHoaDonCho(file);
+    return ResponseEntity.ok(result);
+  } // test postman up file anh QR
 }

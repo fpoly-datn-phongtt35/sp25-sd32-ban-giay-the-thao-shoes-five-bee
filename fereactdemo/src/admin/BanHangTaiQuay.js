@@ -31,7 +31,14 @@ import {
   deleteHoaDonCho,
   themSanPhamVaoHoaDon,
   getSanPhamTrongHoaDon,
-} from "../service/BanhangTaiQuayService";
+  deleteSanPhamHoaDonChiTiet,
+  updateSoLuongGiay,
+  thanhToanTaiQuay,
+} from "../service/BanHangTaiQuay";
+import {
+  detailGiamGiaHoaDon,
+  getGiamGiaHoaDon,
+} from "../service/GiamGiaHoaDonService";
 import WebcamComponent from "./WebcamComponent";
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -39,6 +46,13 @@ const BanHangTaiQuay = () => {
   const [giay, setGiay] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
+  const [totalHoaDon, setTotalHoaDon] = useState(0);
+  const [maGiamGiaList, setMaGiamGiaList] = useState([]); // Thêm state này
+  const [selectedMaGiamGia, setSelectedMaGiamGia] = useState(null); // State cho mã giảm giá được chọn
+  const [giaTriGiam, setGiaTriGiam] = useState(0); // Giá trị giảm
+  const [loaiGiamGia, setLoaiGiamGia] = useState("VNĐ"); // Loại giảm giá (VNĐ hoặc %)
+  const [totalHoaDonGoc, setTotalHoaDonGoc] = useState(totalHoaDon);
+  const [tenMaGiamGia, setTenMaGiamGia] = useState("");
   const [changeAmount, setChangeAmount] = useState(0);
   const [pages, setPages] = useState([]);
   const [pageCounter, setPageCounter] = useState(2);
@@ -63,7 +77,7 @@ const BanHangTaiQuay = () => {
   const [soDienThoai, setSoDienThoai] = useState("");
   const { Option } = Select;
   const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
-
+  const [initialTotalHoaDon, setInitialTotalHoaDon] = useState(totalHoaDon);
   const [hoaDonCho, setHoaDonCho] = useState([]);
   const [availablePageNumbers, setAvailablePageNumbers] = useState([
     1, 2, 3, 4, 5,
@@ -83,20 +97,10 @@ const BanHangTaiQuay = () => {
   const [vnpayUrl, setVnpayUrl] = useState("");
 
   const handleInputChange = (event) => {
-    const inputValue = event.target.value.replace(/\D/g, "");
-    const formattedValue = formatCurrency(inputValue);
-    setCustomerMoney(formattedValue);
-
-    const parsedMoney = parseCurrency(formattedValue);
-    console.log("Tiền khách đưa:", parsedMoney);
-    setTotalAmount((prevTotal) => {
-      if (parsedMoney >= prevTotal) {
-        setChangeAmount(parsedMoney - prevTotal);
-      } else {
-        setChangeAmount(0);
-      }
-      return prevTotal;
-    });
+    const rawValue = event.target.value.replace(/\D/g, ""); // Chỉ lấy số
+    const parsedMoney = parseInt(rawValue, 10) || 0; // Chuyển thành số
+    setCustomerMoney(parsedMoney.toLocaleString("vi-VN")); // Format số tiền
+    setChangeAmount(parsedMoney - totalHoaDon);
   };
 
   const handleProductClick = async (product) => {
@@ -122,22 +126,9 @@ const BanHangTaiQuay = () => {
     try {
       await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
 
-      // ✅ Cập nhật lại state `selectedProducts` để tránh lặp
-      setSelectedProducts((prevSelectedProducts) => {
-        const updatedProducts = { ...prevSelectedProducts };
-        const currentPageProducts = updatedProducts[selectedPage] || [];
-
-        // Kiểm tra nếu sản phẩm đã tồn tại thì không thêm nữa
-        if (!currentPageProducts.some((p) => p.id === idSanPham)) {
-          updatedProducts[selectedPage] = [
-            ...currentPageProducts,
-            { ...product, SOLUONG: 1 },
-          ];
-        }
-
-        return updatedProducts;
-      });
-
+      // ✅ Gọi API ngay lập tức để cập nhật danh sách sản phẩm
+      fetchSanPhamTrongHoaDon(idHoaDon, setSelectedProducts);
+      getAllGiay();
       message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
     } catch (error) {
       console.error("❌ Lỗi khi thêm sản phẩm vào hóa đơn:", error);
@@ -145,76 +136,215 @@ const BanHangTaiQuay = () => {
     }
   };
 
-  const handleRemoveProduct = (productId) => {
-    setSelectedProducts((prevSelectedProducts) => {
-      const updatedProducts = { ...prevSelectedProducts };
-      updatedProducts[selectedPage] = Array.isArray(
-        updatedProducts[selectedPage]
-      )
-        ? updatedProducts[selectedPage].filter(
-            (product) => product.ID !== productId
-          )
-        : [];
+  const handleRemoveProduct = async (productId) => {
+    try {
+      if (!selectedHoaDonId) {
+        message.error("Không tìm thấy ID hóa đơn!");
+        return;
+      }
 
-      return updatedProducts;
-    });
+      const hoaDonId = selectedHoaDonId; // Lấy ID hóa đơn hiện tại
+      console.log("ID hóa đơn:", hoaDonId);
+
+      // Xóa sản phẩm khỏi state ngay lập tức
+      setSelectedProducts((prevSelectedProducts) => {
+        const updatedProducts = { ...prevSelectedProducts };
+
+        if (Array.isArray(updatedProducts[hoaDonId])) {
+          updatedProducts[hoaDonId] = updatedProducts[hoaDonId].filter(
+            (product) => product.ID !== productId
+          );
+        }
+
+        return updatedProducts;
+      });
+
+      // Gọi API xóa sản phẩm
+      await deleteSanPhamHoaDonChiTiet(productId);
+      message.success("Xóa sản phẩm thành công!");
+      getAllGiay();
+      // Load lại sản phẩm trong hóa đơn đó
+      fetchHoaDonCho(hoaDonId);
+    } catch (error) {
+      console.error("Lỗi khi xóa sản phẩm:", error);
+      message.error("Không thể xóa sản phẩm!");
+    }
   };
 
-  const handleQuantityChange = async (productId, delta) => {
-    const product = giay.find((p) => p.ID === productId);
-    if (!product) return;
+  const increaseQuantity = async (productId, hoaDonId) => {
+    try {
+      const response = await updateSoLuongGiay(productId, true);
+      if (response.status !== 200) {
+        throw new Error("API không cập nhật số lượng thành công!");
+      }
 
-    const currentSelectedProduct = selectedProducts[selectedPage]?.find(
-      (p) => p.ID === productId
-    );
-    const currentQuantity = currentSelectedProduct
-      ? currentSelectedProduct.SOLUONG
-      : 0;
-    const newQuantity = currentQuantity + delta;
+      await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
+        if (!updatedProducts) {
+          console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
+          return;
+        }
 
-    if (newQuantity < 0) {
-      message.warning("Số lượng không thể âm!");
-      return;
+        setSelectedProducts((prev) => ({
+          ...prev,
+          [hoaDonId]: updatedProducts,
+        }));
+
+        const newTotalAmount = updatedProducts.reduce(
+          (total, product) =>
+            total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
+          0
+        );
+
+        setTotalAmount(newTotalAmount);
+        setChangeAmount();
+        // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
+        handleInputChange();
+      });
+
+      getAllGiay();
+    } catch (error) {
+      console.error("❌ Lỗi khi tăng số lượng:", error);
+      message.error("Không thể tăng số lượng!");
     }
+  };
 
-    if (newQuantity > product.SOLUONG) {
-      message.warning("Số lượng vượt quá tồn kho!");
-      return;
+  const decreaseQuantity = async (productId, hoaDonId) => {
+    try {
+      const response = await updateSoLuongGiay(productId, false);
+      if (response.status !== 200) {
+        throw new Error("API không cập nhật số lượng thành công!");
+      }
+
+      await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
+        if (!updatedProducts) {
+          console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
+          return;
+        }
+
+        setSelectedProducts((prev) => ({
+          ...prev,
+          [hoaDonId]: updatedProducts,
+        }));
+
+        const newTotalAmount = updatedProducts.reduce(
+          (total, product) =>
+            total + (product.GIABAN ?? 0) * (product.SOLUONG ?? 0),
+          0
+        );
+
+        setTotalAmount(newTotalAmount);
+
+        // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
+        handleInputChange({ target: { value: customerMoney } });
+      });
+
+      getAllGiay();
+    } catch (error) {
+      console.error("❌ Lỗi khi giảm số lượng:", error);
+      message.error("Không thể giảm số lượng!");
     }
-    setSelectedProducts((prevSelectedProducts) => {
-      const updatedProducts = { ...prevSelectedProducts };
-      updatedProducts[selectedPage] = Array.isArray(
-        updatedProducts[selectedPage]
-      )
-        ? updatedProducts[selectedPage].map((p) => {
-            if (p.ID === productId) {
-              return { ...p, SOLUONG: newQuantity };
-            }
-            return p;
-          })
-        : [];
-
-      return updatedProducts;
-    });
   };
 
   const calculateTotal = (product) => {
     return product.GIABAN * product.SOLUONG;
   };
+  const getAllMaGiamGiaData = async () => {
+    try {
+      const result = await getGiamGiaHoaDon(); // Gọi API để lấy danh sách mã giảm giá
+      console.log("API Response (Mã giảm giá):", result.data);
 
-  const handleSelectGiamGia = (giamGiaId) => {
-    const selectedProgram = chuongTrinhGiamGia.find(
-      (ct) => ct.id === giamGiaId
-    );
-    if (selectedProgram) {
-      setSelectedGiamGia(selectedProgram);
-      applyGiamGia(selectedProgram);
-    } else {
-      console.error("Không tìm thấy chương trình giảm giá với id:", giamGiaId);
-      setSelectedGiamGia(null);
-      setAppliedGiamGia(null);
-      setSoTienGiam(0);
-      updateTotalAmount();
+      if (!result || !Array.isArray(result.data)) {
+        throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
+      }
+
+      // Lọc và xử lý dữ liệu mã giảm giá
+      const filteredMaGiamGia = result.data.map((mg) => ({
+        id: mg.id,
+        ten: mg.ten ?? "Không có tên",
+        giaTri: mg.phanTramGiam ?? 0,
+        loai: mg.loai ?? "VNĐ",
+        soluong: mg.soLuong,
+        soTienGiamMax: mg.soTienGiamMax, // Có thể là "PERCENT" hoặc "VNĐ"
+      }));
+
+      console.log("Danh sách mã giảm giá sau khi xử lý:", filteredMaGiamGia);
+      setMaGiamGiaList(filteredMaGiamGia);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách mã giảm giá:", error);
+      message.error("Không thể tải danh sách mã giảm giá");
+    }
+  };
+
+  const handleMaGiamGiaChange = async (value) => {
+    let hoaDonGoc = totalHoaDon + giaTriGiam; // Reset tổng tiền về ban đầu trước khi áp dụng mã mới
+
+    // Nếu đã có mã giảm giá, hủy mã cũ
+    if (tenMaGiamGia) {
+      message.info(`Hủy mã giảm giá cũ: ${tenMaGiamGia}`);
+      setTotalHoaDon(hoaDonGoc);
+      setGiaTriGiam(0);
+      setTenMaGiamGia("");
+    }
+
+    setSelectedMaGiamGia(value);
+
+    try {
+      const response = await detailGiamGiaHoaDon(value);
+      console.log("Chi tiết mã giảm giá:", response.data);
+
+      const maGiamGia = response.data;
+
+      const today = new Date();
+      const startDate = new Date(maGiamGia.ngayBatDau);
+      const endDate = new Date(maGiamGia.ngayKetThuc);
+
+      if (today < startDate) {
+        message.error("Mã giảm giá chưa đến thời gian áp dụng!");
+        return;
+      }
+
+      if (today > endDate) {
+        message.error("Mã giảm giá đã hết hạn!");
+        return;
+      }
+
+      if (maGiamGia.soLuong <= 0) {
+        message.error("Mã giảm giá đã hết số lượng!");
+        return;
+      }
+
+      if (hoaDonGoc < maGiamGia.dieuKien) {
+        message.error(
+          `Đơn hàng cần tối thiểu ${maGiamGia.dieuKien.toLocaleString()} VNĐ để áp dụng mã giảm giá!`
+        );
+        return;
+      }
+
+      // Lấy số tiền giảm tối đa từ API
+      const soTienGiamMax = maGiamGia.soTienGiamMax;
+
+      // Tính số tiền giảm theo phần trăm
+      let soTienGiam = (hoaDonGoc * maGiamGia.phanTramGiam) / 100;
+
+      // Kiểm tra nếu số tiền giảm vượt quá số tiền tối đa
+      if (soTienGiam > soTienGiamMax) {
+        soTienGiam = soTienGiamMax;
+      }
+
+      // Cập nhật tổng tiền sau giảm
+      const sotienHoaDonSaukhigiam = hoaDonGoc - soTienGiam;
+
+      setTotalHoaDon(sotienHoaDonSaukhigiam);
+      setTenMaGiamGia(maGiamGia.ten);
+      setGiaTriGiam(soTienGiam);
+      setLoaiGiamGia("PERCENT");
+
+      message.success(
+        `Áp dụng mã giảm giá thành công! Giảm ${soTienGiam.toLocaleString()} VNĐ`
+      );
+    } catch (error) {
+      console.error("Lỗi khi lấy chi tiết mã giảm giá:", error);
+      message.error("Không thể lấy thông tin mã giảm giá");
     }
   };
 
@@ -245,20 +375,32 @@ const BanHangTaiQuay = () => {
   const getAllKhachHangData = async () => {
     try {
       const result = await getAllKhachHang();
+      console.log("API Response:", result.data);
 
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
       }
 
-      // Lọc người dùng có "ROLE_USER"
+      // Lọc danh sách khách hàng có roleEntity.ten === "ROLE_USER"
       const filteredUsers = result.data
-        .filter((user) => user.roleNames.includes("ROLE_USER"))
+        .filter(
+          (user) =>
+            Array.isArray(user.userRoleEntities) &&
+            user.userRoleEntities.some(
+              (role) => role.roleEntity?.ten === "ROLE_USER"
+            )
+        )
         .map((user) => ({
           id: user.id,
           hoTen: user.hoTen ?? "Không có tên",
           soDienThoai: user.soDienThoai ?? "Không có SĐT",
-          diaChi: user.diaChi.length > 0 ? user.diaChi : ["Không có địa chỉ"],
+          diaChi:
+            Array.isArray(user.diaChiEntities) && user.diaChiEntities.length > 0
+              ? user.diaChiEntities.map((diaChi) => diaChi.diaChi).join(", ")
+              : "Không có địa chỉ",
         }));
+
+      console.log("Danh sách khách hàng sau khi lọc:", filteredUsers);
 
       setKhachHangList(filteredUsers);
     } catch (error) {
@@ -266,7 +408,8 @@ const BanHangTaiQuay = () => {
       message.error("Không thể tải danh sách khách hàng");
     }
   };
-  const fetchHoaDonCho = async () => {
+
+  const fetchHoaDonCho = async (updatedHoaDonId = null) => {
     try {
       const response = await getListHoaDonCho();
 
@@ -276,15 +419,27 @@ const BanHangTaiQuay = () => {
       }));
 
       setPages(hoaDonPages);
-      if (hoaDonPages.length > 0) {
-        setSelectedHoaDonId(hoaDonPages[0].hoaDonId);
-        console.log("ID hóa đơn đầu tiên:", hoaDonPages[0].hoaDonId);
+
+      // Nếu có ID hóa đơn cần cập nhật, giữ nguyên hóa đơn hiện tại
+      if (updatedHoaDonId) {
+        setSelectedHoaDonId(updatedHoaDonId); // Giữ nguyên hóa đơn sau khi cập nhật
+        fetchSanPhamTrongHoaDon(updatedHoaDonId, setSelectedProducts);
+        return;
+      }
+
+      // Nếu chưa có hóa đơn nào được chọn, chọn hóa đơn đầu tiên
+      if (!selectedHoaDonId && hoaDonPages.length > 0) {
+        const firstHoaDonId = hoaDonPages[0].hoaDonId;
+        setSelectedHoaDonId(firstHoaDonId);
+        console.log("ID hóa đơn đầu tiên:", firstHoaDonId);
+        fetchSanPhamTrongHoaDon(firstHoaDonId, setSelectedProducts);
       }
     } catch (error) {
       console.error("Lỗi khi lấy danh sách hóa đơn chờ:", error);
       message.error("Không thể lấy danh sách hóa đơn chờ");
     }
   };
+
   const fetchSanPhamTrongHoaDon = async (idHoaDon) => {
     if (!idHoaDon) {
       message.error("ID hóa đơn không hợp lệ!");
@@ -293,38 +448,53 @@ const BanHangTaiQuay = () => {
 
     try {
       const result = await getSanPhamTrongHoaDon(idHoaDon);
-      console.log("Dữ liệu sản phẩm từ API:", result.data);
+      console.log("Dữ liệu sản phẩm trong hóa đơn:", result.data);
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            ID: item.id, 
+            ID: item.id,
             TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
             SOLUONG: item.soLuong,
-            GIABAN: item.giaBan,
+            GIABAN: item.giayChiTietEntity?.giaBan || 0,
             ANH_GIAY:
-              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl ||
-              "https://via.placeholder.com/150",
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+                ?.tenUrl || "https://via.placeholder.com/150",
           }))
         : [];
 
-      console.log("Dữ liệu sau khi format:", formattedData);
+      setSelectedProducts((prev) => {
+        const updatedProducts = {
+          ...prev,
+          [idHoaDon]: formattedData,
+        };
 
-      setSelectedProducts((prev) => ({
-        ...prev,
-        [selectedPage]: formattedData, // Cập nhật theo `selectedPage`
-      }));
+        // 🔥 Tính tổng tiền ngay sau khi cập nhật sản phẩm
+        const newTotalAmount = formattedData.reduce((total, product) => {
+          const giaBan = product.GIABAN ?? 0;
+          const soLuong = product.SOLUONG ?? 0;
+          return total + giaBan * soLuong;
+        }, 0);
+
+        setTotalHoaDon(newTotalAmount); // ✅ Cập nhật state tổng tiền
+        console.log(`💰 Tổng tiền của hóa đơn ${idHoaDon}:`, newTotalAmount);
+
+        return updatedProducts;
+      });
     } catch (error) {
       console.error("Lỗi khi fetch danh sách sản phẩm: ", error);
       message.error("Lỗi khi tải danh sách sản phẩm!");
     }
-};
-
+  };
 
   useEffect(() => {
     getAllGiay();
     getAllKhachHangData();
     getChuongTrinhGiamGia();
     fetchHoaDonCho();
+    getAllMaGiamGiaData();
+  }, []);
+
+  useEffect(() => {
     if (selectedHoaDonId) {
       fetchSanPhamTrongHoaDon(selectedHoaDonId, setSelectedProducts);
     }
@@ -373,19 +543,20 @@ const BanHangTaiQuay = () => {
     const newTotalAmount = subtotal - soTienGiam;
     setTotalAmount(newTotalAmount > 0 ? newTotalAmount : 0);
   };
-  const getTotalAmount = () => {
-    const currentPageProducts = selectedProducts[selectedPage] || [];
-    const subtotal = currentPageProducts.reduce(
-      (total, product) => total + product.GIABAN * product.SOLUONG,
-      0
-    );
-    const totalAmount = subtotal - soTienGiam;
-    return totalAmount > 0 ? totalAmount : 0;
+
+  const getTotalAmount = (products) => {
+    if (!Array.isArray(products)) return 0; // Nếu products không phải là mảng, trả về 0
+
+    const subtotal = products.reduce((total, product) => {
+      const giaBan = Number.isFinite(product.GIABAN) ? product.GIABAN : 0;
+      const soLuong = Number.isFinite(product.SOLUONG) ? product.SOLUONG : 0;
+      return total + giaBan * soLuong;
+    }, 0);
+
+    const totalAmount = subtotal - (soTienGiam || 0); // Trừ tiền giảm giá (nếu có)
+
+    return Math.max(totalAmount, 0); // Không để tổng tiền âm
   };
-  useEffect(() => {
-    const newTotalAmount = getTotalAmount();
-    setTotalAmount(newTotalAmount);
-  }, [soTienGiam, selectedProducts, selectedPage]);
 
   useEffect(() => {
     updateTotalAmount();
@@ -474,11 +645,14 @@ const BanHangTaiQuay = () => {
       throw error;
     }
   };
+
   const handlePayment = async () => {
     const totalAmountToPay = getTotalAmount();
     const parsedMoney = parseCurrency(customerMoney);
+
     console.log("Tổng tiền cần thanh toán:", totalAmountToPay);
     console.log("Tiền khách đưa:", parsedMoney);
+
     if (parsedMoney < totalAmountToPay && selectedOption !== "option3") {
       message.error("Tiền khách đưa không đủ!");
       return;
@@ -504,30 +678,27 @@ const BanHangTaiQuay = () => {
         hinhThucMua: 1,
         hinhThucThanhToan: selectedOption === "option3" ? 0 : 1,
       };
-      console.log(totalAmountToPay);
 
       if (selectedOption === "option3") {
+        // Thanh toán qua VNPay
         const response = await addHoaDon(newHoaDon);
         createdHoaDonId = response.data.id;
       } else {
+        // Thanh toán tại quầy
         createdHoaDonId = currentPage.hoaDonId;
         await updateHoaDon(createdHoaDonId, newHoaDon);
+        await thanhToanTaiQuay(createdHoaDonId, newHoaDon); // ✅ Gọi API thanh toán tại quầy
       }
+
       if (appliedGiamGia) {
-        console.log(
-          "Thông tin chương trình giảm giá trước khi thêm:",
-          appliedGiamGia
-        );
-        console.log(
-          "Tổng tiền trước khi thêm chương trình giảm giá:",
-          getTotalAmount()
-        );
+        console.log("Thông tin chương trình giảm giá:", appliedGiamGia);
         await addChuongTrinhGiamGiaHoaDonChiTiet(
           createdHoaDonId,
           appliedGiamGia,
           getTotalAmount()
         );
       }
+
       for (const product of selectedProducts[selectedPage] || []) {
         const currentProduct = giay.find((p) => p.ID === product.ID);
         if (currentProduct) {
@@ -554,15 +725,14 @@ const BanHangTaiQuay = () => {
       await Promise.all(hoaDonChiTietSanPham);
 
       if (selectedOption === "option3") {
+        // Xử lý thanh toán VNPay
         const paymentUrl = await createVNPayUrl(
           Math.round(totalAmountToPay),
           createdHoaDonId
         );
         if (paymentUrl && paymentUrl.startsWith("http")) {
           window.open(paymentUrl, "_blank");
-          message.success(
-            "Đã tạo yêu cầu thanh toán qua VNPay. Vui lòng hoàn tất thanh toán."
-          );
+          message.success("Đã tạo yêu cầu thanh toán qua VNPay.");
 
           const checkPaymentStatus = setInterval(async () => {
             const updatedHoaDonResponse = await getHoaDon(createdHoaDonId);
@@ -592,6 +762,7 @@ const BanHangTaiQuay = () => {
       message.error("Thanh toán thất bại!");
     }
   };
+
   const resetState = () => {
     setSelectedProducts({});
     setCustomerMoney("");
@@ -756,16 +927,18 @@ const BanHangTaiQuay = () => {
 
       // Cập nhật danh sách số thứ tự có thể sử dụng
       setAvailablePageNumbers((prevNumbers) => [...prevNumbers, pageId].sort());
+      getAllGiay();
     } catch (error) {
       console.error("Lỗi khi xóa hóa đơn:", error);
       message.error("Không thể xóa hóa đơn");
     }
   };
 
-  const handleSelectPage = (pageId) => {
+  const handleSelectPage = (pageId, hoaDonId) => {
     setSelectedPage(pageId);
-  
+    setSelectedHoaDonId(hoaDonId);
   };
+
   const handleClear = () => {
     setSelectedKhachHang(null);
     setHoTen("");
@@ -792,10 +965,11 @@ const BanHangTaiQuay = () => {
                       ? "page_button selected"
                       : "page_button"
                   }
-                  onClick={() => handleSelectPage(page.id)}
+                  onClick={() => handleSelectPage(page.id, page.hoaDonId)}
                 >
                   Hóa Đơn {page.id}
                 </Button>
+
                 <Button
                   onClick={() => handleRemovePage(page.id)}
                   style={{ marginLeft: "5px", color: "red" }}
@@ -809,8 +983,9 @@ const BanHangTaiQuay = () => {
 
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
-            {selectedProducts[selectedPage]?.length > 0 ? (
-              selectedProducts[selectedPage].map((product) => (
+            {selectedProducts[selectedHoaDonId] &&
+            selectedProducts[selectedHoaDonId].length > 0 ? (
+              selectedProducts[selectedHoaDonId].map((product) => (
                 <div key={product.ID} className="selected_product">
                   {product.ANH_GIAY && (
                     <img src={product.ANH_GIAY} alt={product.TEN} />
@@ -819,13 +994,18 @@ const BanHangTaiQuay = () => {
                   <div>{product.GIABAN}</div>
                   <div className="quantity_controls">
                     <Button
-                      onClick={() => handleQuantityChange(product.ID, -1)}
-                      disabled={product.SOLUONG <= 0}
+                      onClick={() =>
+                        decreaseQuantity(product.ID, selectedHoaDonId)
+                      }
                     >
                       -
                     </Button>
                     <span>{product.SOLUONG}</span>
-                    <Button onClick={() => handleQuantityChange(product.ID, 1)}>
+                    <Button
+                      onClick={() =>
+                        increaseQuantity(product.ID, selectedHoaDonId)
+                      }
+                    >
                       +
                     </Button>
                   </div>
@@ -841,7 +1021,7 @@ const BanHangTaiQuay = () => {
                 </div>
               ))
             ) : (
-              <div className="no_products">Không có sản phẩm nào</div>
+              <div></div>
             )}
           </div>
         </div>
@@ -945,19 +1125,20 @@ const BanHangTaiQuay = () => {
         <br />
         <br />
         <Select
-          placeholder="Chọn Chương Trình Giảm Giá"
-          value={selectedGiamGia?.id}
-          onChange={handleSelectGiamGia}
+          placeholder="Chọn Mã Giảm Giá"
+          value={selectedMaGiamGia || undefined}
+          onChange={handleMaGiamGiaChange}
+          allowClear
+          style={{ width: "100%" }}
         >
-          {giamGiaList
-            .filter((gg) => getTotalAmount() >= gg.dieuKien)
-            .map((gg) => (
-              <Option key={gg.id} value={gg.id}>
-                {gg.ten} (Giảm {gg.phanTramGiam}%, tối đa {gg.soTienGiamMax})
+          {Array.isArray(maGiamGiaList) &&
+            maGiamGiaList.map((mg) => (
+              <Option key={mg.id} value={mg.id}>
+                {mg.ten} - {mg.giaTri} %
               </Option>
             ))}
         </Select>
-        <p>Tiền Khách Phải Trả: {formatCurrency(totalAmount)} VND</p>
+        <p>Tiền Khách Phải Trả: {formatCurrency(totalHoaDon)} VND</p>
         Tiền khách đưa
         <Input
           value={customerMoney}
@@ -965,7 +1146,9 @@ const BanHangTaiQuay = () => {
           placeholder="Nhập số tiền khách đưa"
         />
         <hr />
-        <p>Tiền thừa: {formatCurrency(changeAmount)}</p>
+        <p className={changeAmount < 0 ? "negative-change" : ""}>
+          Tiền thừa: {formatCurrency(changeAmount)}
+        </p>
         <hr />
         <div className="check_tt">
           <label>
@@ -989,12 +1172,12 @@ const BanHangTaiQuay = () => {
           </label>
         </div>
         <p style={{ paddingTop: "10px" }}>
-          Tổng Tiền: {formatCurrency(getTotalAmount())}
+          Tổng Tiền: {formatCurrency(totalHoaDon)}
         </p>
         <button
           className="btn-tt"
           onClick={handlePayment}
-          disabled={getTotalAmount() <= 0}
+          disabled={totalHoaDon <= 0}
         >
           Thanh Toán
         </button>

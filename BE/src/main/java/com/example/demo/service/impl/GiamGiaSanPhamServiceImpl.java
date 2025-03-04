@@ -43,58 +43,47 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
   @Override
   public GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
-      GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
+          GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
 
-    if (giamGiaChiTietSanPhamRequest.getIdGiay() == null
-        && giamGiaChiTietSanPhamRequest.getIdMauSac() == null
-        && giamGiaChiTietSanPhamRequest.getIdThuongHieu() == null) {
+    if (giamGiaChiTietSanPhamRequest.getIdGiayChiTiet() == null
+            && giamGiaChiTietSanPhamRequest.getIdGiayChiTiet().isEmpty()) {
       throw new IllegalArgumentException("Vui lòng truyền vào điều kiện để tạo giảm giá.");
     }
 
     GiamGiaSanPhamEntity giamGiaSanPham =
-        GiamGiaSanPhamEntity.builder()
-            .ma(giamGiaChiTietSanPhamRequest.getMa())
-            .ten(giamGiaChiTietSanPhamRequest.getTen())
-            .phanTramGiam(giamGiaChiTietSanPhamRequest.getPhanTramGiam())
-            .ngayBatDau(giamGiaChiTietSanPhamRequest.getNgayBatDau())
-            .ngayKetThuc(giamGiaChiTietSanPhamRequest.getNgayKetThuc())
-            .trangThai(1)
-            .build();
+            GiamGiaSanPhamEntity.builder()
+                    .ma(giamGiaChiTietSanPhamRequest.getMa())
+                    .ten(giamGiaChiTietSanPhamRequest.getTen())
+                    .phanTramGiam(giamGiaChiTietSanPhamRequest.getPhanTramGiam())
+                    .ngayBatDau(giamGiaChiTietSanPhamRequest.getNgayBatDau())
+                    .ngayKetThuc(giamGiaChiTietSanPhamRequest.getNgayKetThuc())
+                    .trangThai(1)
+                    .build();
     giamGiaSanPhamRepository.save(giamGiaSanPham);
 
-    List<GiayChiTietEntity> danhSachSanPham;
-
-    if (giamGiaChiTietSanPhamRequest.getIdGiay() != null && giamGiaChiTietSanPhamRequest.getIdMauSac() != null) {
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityIdAndMauSacEntityId(
-              giamGiaChiTietSanPhamRequest.getIdGiay(), giamGiaChiTietSanPhamRequest.getIdMauSac()
-      );
-    } else if (giamGiaChiTietSanPhamRequest.getIdThuongHieu() != null && giamGiaChiTietSanPhamRequest.getIdMauSac() != null) {
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityThuongHieuIdAndMauSacEntityId(
-              giamGiaChiTietSanPhamRequest.getIdThuongHieu(), giamGiaChiTietSanPhamRequest.getIdMauSac()
-      );
-    } else if (giamGiaChiTietSanPhamRequest.getIdThuongHieu() != null) {
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityThuongHieuId(giamGiaChiTietSanPhamRequest.getIdThuongHieu());
-    }else if(giamGiaChiTietSanPhamRequest.getIdGiay() != null){
-      danhSachSanPham = giayChiTietRepository.findByGiayEntityId(giamGiaChiTietSanPhamRequest.getIdGiay());
-    }else {
-      danhSachSanPham = giayChiTietRepository.findByMauSacEntityId(giamGiaChiTietSanPhamRequest.getIdMauSac());
-    }
+    List<GiayChiTietEntity> giayChiTietEntities =
+            giayChiTietRepository.findGiayChiTietEntitiesByIds(
+                    giamGiaChiTietSanPhamRequest.getIdGiayChiTiet());
 
     // Áp dụng giảm giá
-    danhSachSanPham.forEach(sanPham -> {
-      BigDecimal soTienDaGiam = sanPham.getGiaBan()
-              .multiply(BigDecimal.valueOf(giamGiaChiTietSanPhamRequest.getPhanTramGiam()))
-              .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+    giayChiTietEntities.forEach(
+            sanPham -> {
+              BigDecimal soTienDaGiam =
+                      sanPham
+                              .getGiaBan()
+                              .multiply(BigDecimal.valueOf(giamGiaChiTietSanPhamRequest.getPhanTramGiam()))
+                              .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
 
-      GiamGiaChiTietSanPhamEntity chiTietGiamGia = GiamGiaChiTietSanPhamEntity.builder()
-              .soTienDaGiam(soTienDaGiam)
-              .trangThai(1)
-              .giay(sanPham.getGiayEntity())
-              .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
-              .build();
+              GiamGiaChiTietSanPhamEntity chiTietGiamGia =
+                      GiamGiaChiTietSanPhamEntity.builder()
+                              .soTienDaGiam(soTienDaGiam)
+                              .trangThai(1)
+                              .giayChiTiet(sanPham)
+                              .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
+                              .build();
 
-      giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
-    });
+              giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
+            });
 
     return giamGiaSanPham;
   }

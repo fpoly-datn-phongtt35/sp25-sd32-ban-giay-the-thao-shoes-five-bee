@@ -26,122 +26,134 @@ import java.util.UUID;
 @RestController
 @RequestMapping("/user")
 public class UsersController {
-    @Autowired
-    private UsersService usersService;
+  @Autowired private UsersService usersService;
 
-    @GetMapping("/getAll")
-    public ResponseEntity<?> getAll(){
-        return ResponseEntity.ok(usersService.getAll());
+  @GetMapping("/getAll")
+  public ResponseEntity<?> getAll() {
+    return ResponseEntity.ok(usersService.getAll());
+  }
+
+  @GetMapping("/get-by-sdt")
+  public ResponseEntity<?> getBySdt(@RequestParam String sdt) {
+    return ResponseEntity.ok(usersService.getBySdt(sdt));
+  }
+
+  @PostMapping("/add")
+  public ResponseEntity<?> add(
+      @RequestPart("userDto") UserDto userDto, @RequestParam("file") MultipartFile file)
+      throws IOException {
+    usersService.add(userDto, file);
+    return ResponseEntity.ok(Collections.singletonMap("message", "add success"));
+  }
+
+  @PostMapping("/search")
+  public ResponseEntity<?> findAndPageChatLieu(@RequestBody UserDtoSearch userDtoSearch) {
+    Pageable pageable = PageRequest.of(userDtoSearch.getPage(), userDtoSearch.getSize());
+    return ResponseEntity.ok(usersService.findByPagingCriteria(userDtoSearch, pageable));
+  }
+
+  @PostMapping("/export-excel")
+  public ResponseEntity<?> exportExcel(
+      @RequestBody UserDtoSearch userDtoSearch, HttpServletResponse httpServletResponse) {
+    try {
+      List<UserEntity> userEntities = usersService.exportExcelByFindJpa(userDtoSearch);
+      httpServletResponse.setContentType("application/octet-stream");
+      String headerKey = "Content-Disposition";
+      String headerValue = "attachment; filename=user.xlsx";
+      httpServletResponse.setHeader(headerKey, headerValue);
+      // tao excel
+      Workbook workbook = new XSSFWorkbook();
+      Sheet sheet = workbook.createSheet("Users");
+      CellStyle cellStyle = workbook.createCellStyle();
+      CreationHelper creationHelper = workbook.getCreationHelper();
+      cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat("dd-MM-yyyy"));
+      // tao ten cot
+      Row headerRow = sheet.createRow(0);
+      headerRow.createCell(0).setCellValue("HO TEN");
+      headerRow.createCell(1).setCellValue("EMAIL");
+      headerRow.createCell(2).setCellValue("NGAY SINH");
+      headerRow.createCell(3).setCellValue("SO DIEN THOAI");
+      int rowIndex = 1;
+      for (UserEntity userEntity : userEntities) {
+        Row row = sheet.createRow(rowIndex++);
+        row.createCell(0).setCellValue(userEntity.getHoTen());
+        row.createCell(1).setCellValue(userEntity.getEmail());
+        row.createCell(3).setCellValue(userEntity.getSoDienThoai());
+        Cell ngaySinhCell = row.createCell(2);
+        ngaySinhCell.setCellValue(userEntity.getNgaySinh());
+        ngaySinhCell.setCellStyle(cellStyle);
+      }
+      OutputStream outputStream = httpServletResponse.getOutputStream();
+      workbook.write(outputStream);
+      workbook.close();
+      return ResponseEntity.ok("file excel đã được xuất thành công");
+    } catch (IOException e) {
+      e.printStackTrace();
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("có lỗi xảy ra");
     }
+  }
 
-    @PostMapping("/add")
-    public ResponseEntity<?> add(@RequestPart("userDto") UserDto userDto, @RequestParam("file")MultipartFile file)throws IOException {
-        usersService.add(userDto,file);
-        return ResponseEntity.ok(Collections.singletonMap("message","add success"));
+  @PostMapping("/import-excel")
+  public ResponseEntity<?> importUserFormExcel(@RequestParam("file") MultipartFile file)
+      throws IOException {
+    if (file.isEmpty()) {
+      return ResponseEntity.badRequest().body("no file uploaded");
     }
-
-    @PostMapping("/search")
-    public ResponseEntity<?> findAndPageChatLieu(@RequestBody UserDtoSearch userDtoSearch){
-        Pageable pageable = PageRequest.of(userDtoSearch.getPage(),userDtoSearch.getSize());
-        return ResponseEntity.ok(usersService.findByPagingCriteria(userDtoSearch,pageable));
+    String fileName = file.getOriginalFilename();
+    if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
+      return ResponseEntity.badRequest().body("file must be an excel file");
     }
-
-    @PostMapping("/export-excel")
-    public ResponseEntity<?> exportExcel(@RequestBody UserDtoSearch userDtoSearch , HttpServletResponse httpServletResponse){
-        try {
-            List<UserEntity> userEntities = usersService.exportExcelByFindJpa(userDtoSearch);
-            httpServletResponse.setContentType("application/octet-stream");
-            String headerKey = "Content-Disposition";
-            String headerValue = "attachment; filename=user.xlsx";
-            httpServletResponse.setHeader(headerKey, headerValue);
-            // tao excel
-            Workbook workbook = new XSSFWorkbook();
-            Sheet sheet = workbook.createSheet("Users");
-            CellStyle cellStyle = workbook.createCellStyle();
-            CreationHelper creationHelper = workbook.getCreationHelper();
-            cellStyle.setDataFormat(creationHelper.createDataFormat().getFormat("dd-MM-yyyy"));
-            // tao ten cot
-            Row headerRow = sheet.createRow(0);
-            headerRow.createCell(0).setCellValue("HO TEN");
-            headerRow.createCell(1).setCellValue("EMAIL");
-            headerRow.createCell(2).setCellValue("NGAY SINH");
-            headerRow.createCell(3).setCellValue("SO DIEN THOAI");
-            int rowIndex= 1;
-            for (UserEntity userEntity : userEntities){
-                Row row = sheet.createRow(rowIndex++);
-                row.createCell(0).setCellValue(userEntity.getHoTen());
-                row.createCell(1).setCellValue(userEntity.getEmail());
-                row.createCell(3).setCellValue(userEntity.getSoDienThoai());
-                Cell ngaySinhCell = row.createCell(2);
-                ngaySinhCell.setCellValue(userEntity.getNgaySinh());
-                ngaySinhCell.setCellStyle(cellStyle);
-            }
-            OutputStream outputStream = httpServletResponse.getOutputStream();
-            workbook.write(outputStream);
-            workbook.close();
-            return ResponseEntity.ok("file excel đã được xuất thành công");
-        }catch (IOException e){
-            e.printStackTrace();
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("có lỗi xảy ra");
-        }
+    try {
+      List<UserEntity> userDtos = usersService.importExcel(file);
+      return ResponseEntity.ok().body(userDtos);
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body("import errors :" + e.getMessage());
+    } catch (IOException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("error processing the file");
     }
+  }
 
-    @PostMapping("/import-excel")
-    public ResponseEntity<?> importUserFormExcel(@RequestParam("file")MultipartFile file) throws IOException{
-        if (file.isEmpty()){
-            return ResponseEntity.badRequest().body("no file uploaded");
-        }
-        String fileName = file.getOriginalFilename();
-        if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")){
-            return ResponseEntity.badRequest().body("file must be an excel file");
-        }
-        try {
-            List<UserEntity> userDtos = usersService.importExcel(file);
-            return ResponseEntity.ok().body(userDtos);
-        }catch (RuntimeException e){
-            return ResponseEntity.badRequest().body("import errors :" +e.getMessage());
-        }catch (IOException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error processing the file");
-        }
+  @PostMapping("/import-excelSkipDuplicate")
+  public ResponseEntity<?> importExcelSkipDuplicate(@RequestParam("file") MultipartFile file)
+      throws IOException {
+    if (file.isEmpty()) {
+      return ResponseEntity.badRequest().body("no file upload");
     }
-
-    @PostMapping("/import-excelSkipDuplicate")
-    public ResponseEntity<?> importExcelSkipDuplicate(@RequestParam("file")MultipartFile file) throws IOException{
-        if (file.isEmpty()){
-            return ResponseEntity.badRequest().body("no file upload");
-        }
-        String fileName = file.getOriginalFilename();
-        if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")){
-            return ResponseEntity.badRequest().body("file must be an excel file");
-        }
-        try {
-            List<UserDto> userDtos = usersService.importExcelCheckDuplicate(file);
-            return ResponseEntity.ok().body(userDtos);
-        }catch (RuntimeException e){
-            return ResponseEntity.badRequest().body("import errors :" +e.getMessage());
-        }catch (IOException e){
-            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("error processing the file");
-
-
-        }
+    String fileName = file.getOriginalFilename();
+    if (!fileName.endsWith(".xlsx") && !fileName.endsWith(".xls")) {
+      return ResponseEntity.badRequest().body("file must be an excel file");
     }
-
-    @PutMapping("/update")
-    public ResponseEntity<?> update(@RequestPart("userDto") UserDto userDto, @RequestParam(value = "file", required = false) MultipartFile file) throws IOException{
-        usersService.update(userDto,file);
-        return ResponseEntity.ok(Collections.singletonMap("message","update success"));
+    try {
+      List<UserDto> userDtos = usersService.importExcelCheckDuplicate(file);
+      return ResponseEntity.ok().body(userDtos);
+    } catch (RuntimeException e) {
+      return ResponseEntity.badRequest().body("import errors :" + e.getMessage());
+    } catch (IOException e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR)
+          .body("error processing the file");
     }
+  }
 
-    @PostMapping("/delete")
-    public ResponseEntity<?> delete(@RequestBody UserDto userDto){
-        usersService.delete(userDto);
-        return ResponseEntity.ok(Collections.singletonMap("message","delete success"));
-    }
+  @PutMapping("/update")
+  public ResponseEntity<?> update(
+      @RequestPart("userDto") UserDto userDto,
+      @RequestParam(value = "file", required = false) MultipartFile file)
+      throws IOException {
+    usersService.update(userDto, file);
+    return ResponseEntity.ok(Collections.singletonMap("message", "update success"));
+  }
 
-    @GetMapping("/detail/{id}")
-    public ResponseEntity<?> detail(@PathVariable UUID id){
-        UserDto userDto = new UserDto();
-        userDto.setId(id);
-        return ResponseEntity.ok(usersService.detail(userDto));
-    }
+  @PostMapping("/delete")
+  public ResponseEntity<?> delete(@RequestBody UserDto userDto) {
+    usersService.delete(userDto);
+    return ResponseEntity.ok(Collections.singletonMap("message", "delete success"));
+  }
+
+  @GetMapping("/detail/{id}")
+  public ResponseEntity<?> detail(@PathVariable UUID id) {
+    UserDto userDto = new UserDto();
+    userDto.setId(id);
+    return ResponseEntity.ok(usersService.detail(userDto));
+  }
 }

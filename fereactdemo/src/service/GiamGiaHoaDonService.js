@@ -10,8 +10,16 @@ export const addGiamGiaHoaDon = (GiamGiaHoaDon) =>
 export const deleteGiamGiaHoaDon = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });
 
-export const updateGiamGiaHoaDon = (id, GiamGiaHoaDon) =>
-  axios.post(`${REST_API_BASE_URL}/update/${id}`, GiamGiaHoaDon);
+export const updateGiamGiaHoaDon = (giamGiaHoaDon) => {
+  return axios.post(`${REST_API_BASE_URL}/update`, giamGiaHoaDon, {
+    headers: {
+      "Content-Type": "application/json",
+    },
+  });
+};
 
 export const detailGiamGiaHoaDon = (id) =>
-  axios.post(`${REST_API_BASE_URL}/detail/${id}`);
+  axios.post(`${REST_API_BASE_URL}/detail`, { id }, {
+    headers: { "Content-Type": "application/json" },
+  });
+
