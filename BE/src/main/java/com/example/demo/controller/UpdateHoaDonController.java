@@ -3,9 +3,11 @@ package com.example.demo.controller;
 import com.example.demo.entity.HoaDonEntity;
 import com.example.demo.service.TrangThaiHoaDonService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 
 @RestController
@@ -37,5 +39,10 @@ public class UpdateHoaDonController {
     @GetMapping
     public List<HoaDonEntity> getAllHoaDon() {
         return trangThaiHoaDonService.getAllHoaDon();
+    }
+    @GetMapping("/{id}")
+    public ResponseEntity<HoaDonEntity> getHoaDonChiTiet(@PathVariable UUID id) {
+        Optional<HoaDonEntity> hoaDon = trangThaiHoaDonService.findById(id);
+        return hoaDon.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
     }
 }

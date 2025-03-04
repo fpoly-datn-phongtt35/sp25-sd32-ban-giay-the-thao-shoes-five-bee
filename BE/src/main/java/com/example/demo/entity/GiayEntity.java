@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
@@ -79,7 +80,7 @@ public class GiayEntity {
 //    @JsonIgnore
     @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<AnhGiayEntity> anhGiayEntities;
-    @JsonIgnore
+    @JsonBackReference
     @OneToMany(mappedBy = "giayEntity", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
     private List<GiayChiTietEntity> giayChiTietEntities;
 
