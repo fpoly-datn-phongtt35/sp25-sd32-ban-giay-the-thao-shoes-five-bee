@@ -51,7 +51,7 @@ const BanHangTaiQuay = () => {
   const [selectedMaGiamGia, setSelectedMaGiamGia] = useState(null); // State cho mã giảm giá được chọn
   const [giaTriGiam, setGiaTriGiam] = useState(0); // Giá trị giảm
   const [loaiGiamGia, setLoaiGiamGia] = useState("VNĐ"); // Loại giảm giá (VNĐ hoặc %)
-
+  const [totalHoaDonGoc, setTotalHoaDonGoc] = useState(totalHoaDon);
   const [tenMaGiamGia, setTenMaGiamGia] = useState("");
   const [changeAmount, setChangeAmount] = useState(0);
   const [pages, setPages] = useState([]);
@@ -77,7 +77,7 @@ const BanHangTaiQuay = () => {
   const [soDienThoai, setSoDienThoai] = useState("");
   const { Option } = Select;
   const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
-
+  const [initialTotalHoaDon, setInitialTotalHoaDon] = useState(totalHoaDon);
   const [hoaDonCho, setHoaDonCho] = useState([]);
   const [availablePageNumbers, setAvailablePageNumbers] = useState([
     1, 2, 3, 4, 5,
@@ -261,8 +261,10 @@ const BanHangTaiQuay = () => {
       const filteredMaGiamGia = result.data.map((mg) => ({
         id: mg.id,
         ten: mg.ten ?? "Không có tên",
-        giaTri: mg.giaTri ?? 0,
-        loai: mg.loai ?? "VNĐ", // Có thể là "PERCENT" hoặc "VNĐ"
+        giaTri: mg.phanTramGiam ?? 0,
+        loai: mg.loai ?? "VNĐ",
+        soluong: mg.soLuong,
+        soTienGiamMax: mg.soTienGiamMax, // Có thể là "PERCENT" hoặc "VNĐ"
       }));
 
       console.log("Danh sách mã giảm giá sau khi xử lý:", filteredMaGiamGia);
@@ -274,61 +276,77 @@ const BanHangTaiQuay = () => {
   };
 
   const handleMaGiamGiaChange = async (value) => {
+    let hoaDonGoc = totalHoaDon + giaTriGiam; // Reset tổng tiền về ban đầu trước khi áp dụng mã mới
+
+    // Nếu đã có mã giảm giá, hủy mã cũ
+    if (tenMaGiamGia) {
+      message.info(`Hủy mã giảm giá cũ: ${tenMaGiamGia}`);
+      setTotalHoaDon(hoaDonGoc);
+      setGiaTriGiam(0);
+      setTenMaGiamGia("");
+    }
+
     setSelectedMaGiamGia(value);
+
     try {
-      const response = await detailGiamGiaHoaDon(value); // Gọi API lấy thông tin mã giảm giá
+      const response = await detailGiamGiaHoaDon(value);
       console.log("Chi tiết mã giảm giá:", response.data);
-  
+
       const maGiamGia = response.data;
-  
-      // Kiểm tra điều kiện áp dụng mã giảm giá
+
       const today = new Date();
       const startDate = new Date(maGiamGia.ngayBatDau);
       const endDate = new Date(maGiamGia.ngayKetThuc);
-  
+
       if (today < startDate) {
         message.error("Mã giảm giá chưa đến thời gian áp dụng!");
-        setGiaTriGiam(0);
         return;
       }
-  
+
       if (today > endDate) {
         message.error("Mã giảm giá đã hết hạn!");
-        setGiaTriGiam(0);
         return;
       }
-  
+
       if (maGiamGia.soLuong <= 0) {
         message.error("Mã giảm giá đã hết số lượng!");
-        setGiaTriGiam(0);
         return;
       }
-  
-      if (totalHoaDon < maGiamGia.dieuKien) {
-        message.error(`Đơn hàng cần tối thiểu ${maGiamGia.dieuKien.toLocaleString()} VNĐ để áp dụng mã giảm giá!`);
-        setGiaTriGiam(0);
+
+      if (hoaDonGoc < maGiamGia.dieuKien) {
+        message.error(
+          `Đơn hàng cần tối thiểu ${maGiamGia.dieuKien.toLocaleString()} VNĐ để áp dụng mã giảm giá!`
+        );
         return;
       }
-  
-      // Tính số tiền được giảm
-      let soTienGiam = (totalHoaDon * maGiamGia.phanTramGiam) / 100;
-  
-      if (soTienGiam > maGiamGia.soTienGiamMax) {
-        soTienGiam = maGiamGia.soTienGiamMax;
+
+      // Lấy số tiền giảm tối đa từ API
+      const soTienGiamMax = maGiamGia.soTienGiamMax;
+
+      // Tính số tiền giảm theo phần trăm
+      let soTienGiam = (hoaDonGoc * maGiamGia.phanTramGiam) / 100;
+
+      // Kiểm tra nếu số tiền giảm vượt quá số tiền tối đa
+      if (soTienGiam > soTienGiamMax) {
+        soTienGiam = soTienGiamMax;
       }
-  
-      // Cập nhật state
+
+      // Cập nhật tổng tiền sau giảm
+      const sotienHoaDonSaukhigiam = hoaDonGoc - soTienGiam;
+
+      setTotalHoaDon(sotienHoaDonSaukhigiam);
       setTenMaGiamGia(maGiamGia.ten);
       setGiaTriGiam(soTienGiam);
-      setLoaiGiamGia("PERCENT"); // Hoặc "FIXED_AMOUNT" nếu là giảm tiền trực tiếp
-  
-      message.success(`Áp dụng mã giảm giá thành công! Giảm ${soTienGiam.toLocaleString()} VNĐ`);
+      setLoaiGiamGia("PERCENT");
+
+      message.success(
+        `Áp dụng mã giảm giá thành công! Giảm ${soTienGiam.toLocaleString()} VNĐ`
+      );
     } catch (error) {
       console.error("Lỗi khi lấy chi tiết mã giảm giá:", error);
       message.error("Không thể lấy thông tin mã giảm giá");
     }
   };
-  
 
   const getChuongTrinhGiamGia = async () => {
     try {
@@ -1116,7 +1134,7 @@ const BanHangTaiQuay = () => {
           {Array.isArray(maGiamGiaList) &&
             maGiamGiaList.map((mg) => (
               <Option key={mg.id} value={mg.id}>
-                {mg.ten} - {mg.giaTri} {mg.loai === "PERCENT" ? "%" : "VNĐ"}
+                {mg.ten} - {mg.giaTri} %
               </Option>
             ))}
         </Select>

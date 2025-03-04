@@ -19,4 +19,7 @@ export const updateGiamGiaHoaDon = (giamGiaHoaDon) => {
 };
 
 export const detailGiamGiaHoaDon = (id) =>
-  axios.post(`${REST_API_BASE_URL}/detail/${id}`);
+  axios.post(`${REST_API_BASE_URL}/detail`, { id }, {
+    headers: { "Content-Type": "application/json" },
+  });
+
