@@ -2,7 +2,6 @@
 import React, { useState } from "react";
 import OrderList from "./OrderList";
 import "./OrderStyle.css";
-import { Header } from "../header/Header";
 
 export const OrderStatusPage = () => {
   const [activeTab, setActiveTab] = useState("all");
@@ -24,7 +23,6 @@ export const OrderStatusPage = () => {
 
   return (
     <div>
-<Header />
 <div className="order-status-page">
       
       <div className="tabs">

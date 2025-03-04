@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -84,7 +85,7 @@ public class HoaDonEntity {
 
 
     @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonIgnore
+    @JsonManagedReference
     private List<HoaDonChiTietEntity> items;
 
     @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
