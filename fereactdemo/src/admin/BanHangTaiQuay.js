@@ -35,7 +35,10 @@ import {
   updateSoLuongGiay,
   thanhToanTaiQuay,
 } from "../service/BanHangTaiQuay";
-
+import {
+  detailGiamGiaHoaDon,
+  getGiamGiaHoaDon,
+} from "../service/GiamGiaHoaDonService";
 import WebcamComponent from "./WebcamComponent";
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -44,7 +47,12 @@ const BanHangTaiQuay = () => {
   const [selectedProducts, setSelectedProducts] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalHoaDon, setTotalHoaDon] = useState(0);
+  const [maGiamGiaList, setMaGiamGiaList] = useState([]); // Thêm state này
+  const [selectedMaGiamGia, setSelectedMaGiamGia] = useState(null); // State cho mã giảm giá được chọn
+  const [giaTriGiam, setGiaTriGiam] = useState(0); // Giá trị giảm
+  const [loaiGiamGia, setLoaiGiamGia] = useState("VNĐ"); // Loại giảm giá (VNĐ hoặc %)
 
+  const [tenMaGiamGia, setTenMaGiamGia] = useState("");
   const [changeAmount, setChangeAmount] = useState(0);
   const [pages, setPages] = useState([]);
   const [pageCounter, setPageCounter] = useState(2);
@@ -240,22 +248,87 @@ const BanHangTaiQuay = () => {
   const calculateTotal = (product) => {
     return product.GIABAN * product.SOLUONG;
   };
+  const getAllMaGiamGiaData = async () => {
+    try {
+      const result = await getGiamGiaHoaDon(); // Gọi API để lấy danh sách mã giảm giá
+      console.log("API Response (Mã giảm giá):", result.data);
 
-  const handleSelectGiamGia = (giamGiaId) => {
-    const selectedProgram = chuongTrinhGiamGia.find(
-      (ct) => ct.id === giamGiaId
-    );
-    if (selectedProgram) {
-      setSelectedGiamGia(selectedProgram);
-      applyGiamGia(selectedProgram);
-    } else {
-      console.error("Không tìm thấy chương trình giảm giá với id:", giamGiaId);
-      setSelectedGiamGia(null);
-      setAppliedGiamGia(null);
-      setSoTienGiam(0);
-      updateTotalAmount();
+      if (!result || !Array.isArray(result.data)) {
+        throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
+      }
+
+      // Lọc và xử lý dữ liệu mã giảm giá
+      const filteredMaGiamGia = result.data.map((mg) => ({
+        id: mg.id,
+        ten: mg.ten ?? "Không có tên",
+        giaTri: mg.giaTri ?? 0,
+        loai: mg.loai ?? "VNĐ", // Có thể là "PERCENT" hoặc "VNĐ"
+      }));
+
+      console.log("Danh sách mã giảm giá sau khi xử lý:", filteredMaGiamGia);
+      setMaGiamGiaList(filteredMaGiamGia);
+    } catch (error) {
+      console.error("Lỗi khi lấy danh sách mã giảm giá:", error);
+      message.error("Không thể tải danh sách mã giảm giá");
     }
   };
+
+  const handleMaGiamGiaChange = async (value) => {
+    setSelectedMaGiamGia(value);
+    try {
+      const response = await detailGiamGiaHoaDon(value); // Gọi API lấy thông tin mã giảm giá
+      console.log("Chi tiết mã giảm giá:", response.data);
+  
+      const maGiamGia = response.data;
+  
+      // Kiểm tra điều kiện áp dụng mã giảm giá
+      const today = new Date();
+      const startDate = new Date(maGiamGia.ngayBatDau);
+      const endDate = new Date(maGiamGia.ngayKetThuc);
+  
+      if (today < startDate) {
+        message.error("Mã giảm giá chưa đến thời gian áp dụng!");
+        setGiaTriGiam(0);
+        return;
+      }
+  
+      if (today > endDate) {
+        message.error("Mã giảm giá đã hết hạn!");
+        setGiaTriGiam(0);
+        return;
+      }
+  
+      if (maGiamGia.soLuong <= 0) {
+        message.error("Mã giảm giá đã hết số lượng!");
+        setGiaTriGiam(0);
+        return;
+      }
+  
+      if (totalHoaDon < maGiamGia.dieuKien) {
+        message.error(`Đơn hàng cần tối thiểu ${maGiamGia.dieuKien.toLocaleString()} VNĐ để áp dụng mã giảm giá!`);
+        setGiaTriGiam(0);
+        return;
+      }
+  
+      // Tính số tiền được giảm
+      let soTienGiam = (totalHoaDon * maGiamGia.phanTramGiam) / 100;
+  
+      if (soTienGiam > maGiamGia.soTienGiamMax) {
+        soTienGiam = maGiamGia.soTienGiamMax;
+      }
+  
+      // Cập nhật state
+      setTenMaGiamGia(maGiamGia.ten);
+      setGiaTriGiam(soTienGiam);
+      setLoaiGiamGia("PERCENT"); // Hoặc "FIXED_AMOUNT" nếu là giảm tiền trực tiếp
+  
+      message.success(`Áp dụng mã giảm giá thành công! Giảm ${soTienGiam.toLocaleString()} VNĐ`);
+    } catch (error) {
+      console.error("Lỗi khi lấy chi tiết mã giảm giá:", error);
+      message.error("Không thể lấy thông tin mã giảm giá");
+    }
+  };
+  
 
   const getChuongTrinhGiamGia = async () => {
     try {
@@ -284,16 +357,20 @@ const BanHangTaiQuay = () => {
   const getAllKhachHangData = async () => {
     try {
       const result = await getAllKhachHang();
-      console.log(result.data);
+      console.log("API Response:", result.data);
 
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
       }
+
+      // Lọc danh sách khách hàng có roleEntity.ten === "ROLE_USER"
       const filteredUsers = result.data
         .filter(
           (user) =>
             Array.isArray(user.userRoleEntities) &&
-            user.userRoleEntities.some((role) => role.id === "00c46be4-930") // Kiểm tra ID hoặc thêm điều kiện phù hợp
+            user.userRoleEntities.some(
+              (role) => role.roleEntity?.ten === "ROLE_USER"
+            )
         )
         .map((user) => ({
           id: user.id,
@@ -301,9 +378,11 @@ const BanHangTaiQuay = () => {
           soDienThoai: user.soDienThoai ?? "Không có SĐT",
           diaChi:
             Array.isArray(user.diaChiEntities) && user.diaChiEntities.length > 0
-              ? user.diaChiEntities
-              : ["Không có địa chỉ"],
+              ? user.diaChiEntities.map((diaChi) => diaChi.diaChi).join(", ")
+              : "Không có địa chỉ",
         }));
+
+      console.log("Danh sách khách hàng sau khi lọc:", filteredUsers);
 
       setKhachHangList(filteredUsers);
     } catch (error) {
@@ -311,6 +390,7 @@ const BanHangTaiQuay = () => {
       message.error("Không thể tải danh sách khách hàng");
     }
   };
+
   const fetchHoaDonCho = async (updatedHoaDonId = null) => {
     try {
       const response = await getListHoaDonCho();
@@ -393,6 +473,7 @@ const BanHangTaiQuay = () => {
     getAllKhachHangData();
     getChuongTrinhGiamGia();
     fetchHoaDonCho();
+    getAllMaGiamGiaData();
   }, []);
 
   useEffect(() => {
@@ -1026,15 +1107,16 @@ const BanHangTaiQuay = () => {
         <br />
         <br />
         <Select
-          placeholder="Chọn Chương Trình Giảm Giá"
-          value={selectedGiamGia?.id}
-          onChange={handleSelectGiamGia}
+          placeholder="Chọn Mã Giảm Giá"
+          value={selectedMaGiamGia || undefined}
+          onChange={handleMaGiamGiaChange}
+          allowClear
+          style={{ width: "100%" }}
         >
-          {giamGiaList
-            .filter((gg) => getTotalAmount() >= gg.dieuKien)
-            .map((gg) => (
-              <Option key={gg.id} value={gg.id}>
-                {gg.ten} (Giảm {gg.phanTramGiam}%, tối đa {gg.soTienGiamMax})
+          {Array.isArray(maGiamGiaList) &&
+            maGiamGiaList.map((mg) => (
+              <Option key={mg.id} value={mg.id}>
+                {mg.ten} - {mg.giaTri} {mg.loai === "PERCENT" ? "%" : "VNĐ"}
               </Option>
             ))}
         </Select>

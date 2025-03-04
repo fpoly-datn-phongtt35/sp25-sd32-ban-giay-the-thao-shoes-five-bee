@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./GiamGiaSanPham.css";
-import { Space, Table, Button, Input, message, Modal, Form } from "antd";
+import { Space, Table, Button, Input, message, Modal, Form, Radio } from "antd";
 import {
   addGiamGiaHoaDon,
   deleteGiamGiaHoaDon,
@@ -11,7 +11,7 @@ import {
 const GiamGiaHoaDon = () => {
   const [ma, setMa] = useState("");
   const [ten, setTen] = useState("");
-  const [phanTramGiam, setPhamTramGiam] = useState("");
+  const [phanTramGiam, setPhanTramGiam] = useState("");
   const [ngayBatDau, setNgayBatDau] = useState("");
   const [ngayKetThuc, setNgayKetThuc] = useState("");
   const [GiamGiaHoaDon, setGiamGiaHoaDon] = useState([]);
@@ -21,10 +21,13 @@ const GiamGiaHoaDon = () => {
   const [editingGiamGiaHoaDon, setEditingGiamGiaHoaDon] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const [updatingGiamGiaHoaDon, setUpdatingGiamGiaHoaDon] = useState(null); // Mã giảm giá đang cập nhật
+  const [value, setValue] = useState(null); // Giá trị input radio/trạng thái
 
   const loadGiamGiaHoaDon = async () => {
     try {
       const result = await getGiamGiaHoaDon();
+
       const GiamGiaHoaDonData = result.data.map((item, index) => ({
         key: index,
         ID: item.id,
@@ -38,16 +41,55 @@ const GiamGiaHoaDon = () => {
         SO_LUONG: item.soLuong,
         TRANG_THAI: item.trangThai,
       }));
+      console.log("GiamGiaHoaDonData", GiamGiaHoaDonData);
+
       setGiamGiaHoaDon(GiamGiaHoaDonData);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu đợt giảm giá:", error);
     }
   };
-
+  const onChange = (e) => {
+    console.log("radio checked", e.target.value);
+    setValue(e.target.value);
+  };
   useEffect(() => {
     loadGiamGiaHoaDon();
   }, []);
+  const handleUpdate = (record) => {
+    console.log("record", record);
 
+    setUpdatingGiamGiaHoaDon(record);
+    setMa(record.MA);
+    setTen(record.TEN);
+    setDieuKien(record.DIEU_KIEN);
+    setSoTienGiamMax(record.SO_TIEN_GIAM_MAX);
+    setSoLuong(record.SO_LUONG);
+    setPhanTramGiam(record.PHAN_TRAM_GIAM);
+    setNgayBatDau(record.NGAY_BAT_DAU);
+    setNgayKetThuc(record.NGAY_KET_THUC);
+    setIsModalVisible(true);
+  };
+
+  const handleAdd = () => {
+    setMa("");
+    setTen("");
+    setDieuKien("");
+    setSoTienGiamMax("");
+    setSoLuong("");
+    setPhanTramGiam("");
+    setNgayBatDau("");
+    setNgayKetThuc("");
+    setIsAddModalVisible(true);
+  };
+
+  const handleModalCancel = () => {
+    setIsModalVisible(false);
+    setEditingGiamGiaHoaDon(null);
+  };
+
+  const handleAddModalCancel = () => {
+    setIsAddModalVisible(false);
+  };
   const handleAddSubmit = async () => {
     // if (!ma || !ten || !dieuKien) {
     //   message.error("Mã, Tên và Điều kiện phiếu giảm giá không được bỏ trống!");
@@ -79,7 +121,7 @@ const GiamGiaHoaDon = () => {
       setDieuKien("");
       setSoTienGiamMax("");
       setSoLuong("");
-      setPhamTramGiam("");
+      setPhanTramGiam("");
       setNgayBatDau("");
       setNgayKetThuc("");
     } catch (error) {
@@ -90,18 +132,16 @@ const GiamGiaHoaDon = () => {
   };
 
   const handleUpdateSubmit = async () => {
-    // if (!ma || !ten || !dieuKien) {
-    //   message.error("Mã, Tên và Điều kiện không được để trống");
-    //   return;
-    // }
+    const updatedTrangThai = value === 1 ? 0 : 1;
 
-    const updatedTrangThai = getTrangThaiFromDates(
-      new Date(ngayBatDau),
-      new Date(ngayKetThuc)
-    );
+    // Kiểm tra xem có ID không
+    if (!updatingGiamGiaHoaDon?.ID) {
+      message.error("Không tìm thấy ID của mã giảm giá cần cập nhật!");
+      return;
+    }
 
     const updatedGiamGiaHoaDon = {
-      ma: ma,
+      id: updatingGiamGiaHoaDon.ID,
       ten: ten,
       dieuKien: parseFloat(dieuKien),
       soTienGiamMax: parseFloat(soTienGiamMax),
@@ -113,22 +153,22 @@ const GiamGiaHoaDon = () => {
     };
 
     try {
-      await updateGiamGiaHoaDon(editingGiamGiaHoaDon.ID, updatedGiamGiaHoaDon);
-      message.success("Cập nhật thành công");
+      await updateGiamGiaHoaDon(updatedGiamGiaHoaDon);
+      message.success("Cập nhật mã giảm giá thành công!");
       loadGiamGiaHoaDon();
       setIsModalVisible(false);
-      setEditingGiamGiaHoaDon(null);
-      setMa("");
+      setUpdatingGiamGiaHoaDon(null);
       setTen("");
       setDieuKien("");
       setSoTienGiamMax("");
       setSoLuong("");
-      setPhamTramGiam("");
+      setPhanTramGiam("");
       setNgayBatDau("");
       setNgayKetThuc("");
+      setValue(null);
     } catch (error) {
-      message.error("Lỗi khi cập nhật đợt giảm giá");
-      console.error("Lỗi khi cập nhật đợt giảm giá", error);
+      console.error("Lỗi khi cập nhật mã giảm giá:", error);
+      message.error("Lỗi khi cập nhật mã giảm giá!");
     }
   };
 
@@ -184,7 +224,7 @@ const GiamGiaHoaDon = () => {
       title: "Trạng Thái",
       dataIndex: "TRANG_THAI",
       key: "TRANG_THAI",
-      render: (text) => (text === 0 ? "Còn" : text === 1 ? "Hết" : "Đang chờ"),
+      render: (text) => (text === 0 ? "Hoạt Động" : text === 1 ? "Không Hoạt Động" : "Đang chờ"),
     },
     {
       title: "Thao tác",
@@ -197,40 +237,6 @@ const GiamGiaHoaDon = () => {
       ),
     },
   ];
-
-  const handleUpdate = (record) => {
-    setEditingGiamGiaHoaDon(record);
-    setMa(record.MA);
-    setTen(record.TEN);
-    setDieuKien(record.DIEU_KIEN);
-    setSoTienGiamMax(record.SO_TIEN_GIAM_MAX);
-    setSoLuong(record.SO_LUONG);
-    setPhamTramGiam(record.PHAN_TRAM_GIAM);
-    setNgayBatDau(record.NGAY_BAT_DAU);
-    setNgayKetThuc(record.NGAY_KET_THUC);
-    setIsModalVisible(true);
-  };
-
-  const handleAdd = () => {
-    setMa("");
-    setTen("");
-    setDieuKien("");
-    setSoTienGiamMax("");
-    setSoLuong("");
-    setPhamTramGiam("");
-    setNgayBatDau("");
-    setNgayKetThuc("");
-    setIsAddModalVisible(true);
-  };
-
-  const handleModalCancel = () => {
-    setIsModalVisible(false);
-    setEditingGiamGiaHoaDon(null);
-  };
-
-  const handleAddModalCancel = () => {
-    setIsAddModalVisible(false);
-  };
 
   return (
     <div className="dot-giam-gia">
@@ -277,7 +283,7 @@ const GiamGiaHoaDon = () => {
           <Form.Item label="Phần Trăm Giảm">
             <Input
               value={phanTramGiam}
-              onChange={(e) => setPhamTramGiam(e.target.value)}
+              onChange={(e) => setPhanTramGiam(e.target.value)}
             />
           </Form.Item>
           <Form.Item label="Số Lượng">
@@ -339,7 +345,7 @@ const GiamGiaHoaDon = () => {
           <Form.Item label="Phần Trăm Giảm">
             <Input
               value={phanTramGiam}
-              onChange={(e) => setPhamTramGiam(e.target.value)}
+              onChange={(e) => setPhanTramGiam(e.target.value)}
             />
           </Form.Item>
           <Form.Item label="Số Lượng">
@@ -347,6 +353,12 @@ const GiamGiaHoaDon = () => {
               value={soLuong}
               onChange={(e) => setSoLuong(e.target.value)}
             />
+          </Form.Item>
+          <Form.Item label="Trạng Thái">
+            <Radio.Group onChange={onChange} value={value}>
+              <Radio value={1}>Hoạt động</Radio>
+              <Radio value={2}>Không hoạt động</Radio>
+            </Radio.Group>
           </Form.Item>
         </Form>
       </Modal>
