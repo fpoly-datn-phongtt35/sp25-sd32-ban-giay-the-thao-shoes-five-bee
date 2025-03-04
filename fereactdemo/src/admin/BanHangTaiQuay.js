@@ -40,6 +40,7 @@ import {
   getGiamGiaHoaDon,
 } from "../service/GiamGiaHoaDonService";
 import WebcamComponent from "./WebcamComponent";
+import AddressModal from "./AddressModal"; 
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [customerMoney, setCustomerMoney] = useState("");
@@ -75,6 +76,9 @@ const BanHangTaiQuay = () => {
   const [editingKhachHang, setEditingKhachHang] = useState(null);
   const [hoTen, setHoTen] = useState("");
   const [soDienThoai, setSoDienThoai] = useState("");
+  const [diaChi, setDiaChi] = useState("");
+  const [showModal, setShowModal] = useState(false);
+
   const { Option } = Select;
   const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
   const [initialTotalHoaDon, setInitialTotalHoaDon] = useState(totalHoaDon);
@@ -364,10 +368,12 @@ const BanHangTaiQuay = () => {
     setSelectedKhachHang(value);
     try {
       const response = await detailKhachHang(value);
-      console.log(response.data);
+      console.log("khachhang",response.data);
       const khachHang = response.data;
       setHoTen(khachHang.hoTen);
       setSoDienThoai(khachHang.soDienThoai);
+      setDiaChi(khachHang.diaChi);
+
     } catch (error) {
       message.error("Lỗi khi lấy chi tiết khách hàng");
     }
@@ -769,6 +775,7 @@ const BanHangTaiQuay = () => {
     setSelectedKhachHang(null);
     setHoTen("");
     setSoDienThoai("");
+    setDiaChi(""); 
     setPages([]);
     setSelectedPage(1);
     setIsKhachLe(true);
@@ -911,6 +918,7 @@ const BanHangTaiQuay = () => {
         setSelectedKhachHang(null);
         setHoTen("");
         setSoDienThoai("");
+        setDiaChi("");
         setSelectedGiamGia(null);
         setCustomerMoney("");
         setChangeAmount(0);
@@ -943,6 +951,7 @@ const BanHangTaiQuay = () => {
     setSelectedKhachHang(null);
     setHoTen("");
     setSoDienThoai("");
+    setDiaChi("");
   };
 
   return (
@@ -1114,6 +1123,22 @@ const BanHangTaiQuay = () => {
           onChange={(e) => setSoDienThoai(e.target.value)}
           placeholder="Nhập số điện thoại khách hàng"
         />
+         <div>
+      <label>Địa Chỉ:</label>
+      <Input
+        type="text"
+        value={diaChi}
+        onClick={() => setShowModal(true)}
+        placeholder="Nhập địa chỉ khách hàng"
+        readOnly
+      />
+
+      <AddressModal
+        visible={showModal}
+        onClose={() => setShowModal(false)}
+        setDiaChi={setDiaChi}
+      />
+    </div>
         <Button
           type="primary"
           onClick={handleAddKhachHang}
@@ -1183,6 +1208,8 @@ const BanHangTaiQuay = () => {
         </button>
       </div>
     </div>
+
+
   );
 };
 

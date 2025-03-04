@@ -34,7 +34,7 @@ public class UpdateHoaDonController {
     public HoaDonEntity huyHoaDon(@PathVariable UUID id) {
         return trangThaiHoaDonService.huyHoaDon(id);
     }
-    @GetMapping
+    @GetMapping("/getAll")
     public List<HoaDonEntity> getAllHoaDon() {
         return trangThaiHoaDonService.getAllHoaDon();
     }
