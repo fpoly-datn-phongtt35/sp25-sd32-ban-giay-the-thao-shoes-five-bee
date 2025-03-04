@@ -69,8 +69,18 @@ public class GiayController {
     return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
   }
   @GetMapping("/search-ten")
-  public ResponseEntity<List<GiayEntity>> searchGiayByName(@RequestParam String ten) {
+  public ResponseEntity<?> searchGiayByName(@RequestParam String ten) {
+    if (ten == null || ten.trim().isEmpty()) {
+      return ResponseEntity.badRequest().body("Tên không được để trống.");
+    }
+
     List<GiayEntity> result = giayService.findByTen(ten);
+
+    if (result.isEmpty()) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Không tìm thấy kết quả phù hợp.");
+    }
+
     return ResponseEntity.ok(result);
   }
+
 }

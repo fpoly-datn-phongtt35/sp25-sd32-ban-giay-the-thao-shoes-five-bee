@@ -12,7 +12,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/trang-thai-hoa-don")
-public class UpdateHoaDonController {
+public class HoaDonController {
     @Autowired
     private TrangThaiHoaDonService trangThaiHoaDonService;
     @PutMapping("/xac-nhan/{id}")
