@@ -38,12 +38,14 @@ const useCart = () => {
 
         let cartItems = [];
         if (response && response.data) {
-          if (Array.isArray(response.data)) {
-            cartItems = response.data;
+          if (Array.isArray(response.data.gioHangChiTietResponses)) {
+            cartItems = response.data.gioHangChiTietResponses;
           } else {
-            cartItems = [response.data];
+            cartItems = [response.data.gioHangChiTietResponses];
           }
         }
+        localStorage.setItem("idGioHang", response.data.idGioHang); 
+
         const validItems = cartItems.filter(item =>
           item &&
           item.giayChiTietId &&

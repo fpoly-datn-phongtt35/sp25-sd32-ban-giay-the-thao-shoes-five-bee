@@ -55,7 +55,7 @@ const Layout = () => {
         <Outlet /> {/* Render các route con */}
       </main>
       <footer>
-      <Footer />
+        <Footer />
       </footer>
     </div>
   );
@@ -70,8 +70,8 @@ function App() {
             <Route element={<Layout />}>
               <Route path="/home" element={<Home />} />
               <Route path="/cart" element={<Cart />} />
-              <Route path="/bill" element={<Bill />} />
-              <Route path="/OrderStatusPage" element={<OrderStatusPage />} />
+              <Route path="/check-out" element={<Bill />} />
+              <Route path="/orderStatusPage" element={<OrderStatusPage />} />
               <Route path="/profile" element={<ProfileUser />} />
               <Route path="/addresslist" element={<AddressList />} />
               <Route path="/productAll" element={<ProductAll />} />
