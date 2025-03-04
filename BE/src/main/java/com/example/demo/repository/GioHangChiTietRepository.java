@@ -21,4 +21,7 @@ public interface GioHangChiTietRepository extends JpaRepository<GioHangChiTietEn
 
     @Query("SELECT g FROM GioHangChiTietEntity g WHERE g.gioHangEntity.id = :idGioHang")
     List<GioHangChiTietEntity> findByGioHangEntity(@Param("idGioHang") UUID idGioHang);
+
+    @Query("SELECT g FROM GioHangChiTietEntity g WHERE g.id IN :ids")
+    List<GioHangChiTietEntity> findByIds(List<UUID> ids);
 }

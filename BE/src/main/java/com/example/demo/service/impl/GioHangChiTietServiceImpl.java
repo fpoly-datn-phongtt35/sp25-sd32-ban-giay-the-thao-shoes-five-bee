@@ -1,19 +1,17 @@
 package com.example.demo.service.impl;
 
-import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.GioHangChiTietEntity;
-import com.example.demo.entity.GioHangEntity;
-import com.example.demo.entity.UserEntity;
-import com.example.demo.repository.GiayChiTietRepository;
-import com.example.demo.repository.GioHangChiTietRepository;
-import com.example.demo.repository.GioHangRepository;
-import com.example.demo.repository.UserRepository;
+import com.example.demo.dto.response.GioHangChiTietResponse;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.GioHangChiTietService;
 import com.example.demo.service.GioHangService;
 import com.example.demo.service.UsersService;
+import java.math.BigDecimal;
 import java.sql.Date;
+import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -27,6 +25,42 @@ public class GioHangChiTietServiceImpl implements GioHangChiTietService {
   private final UserRepository userRepository;
   private final UsersService usersService;
   private final GiayChiTietRepository giayChiTietRepository;
+  private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
+
+  @Override
+  public List<GioHangChiTietResponse> getGioHangChiTietKhiCheckout(List<UUID> ids) {
+    return gioHangChiTietRepository.findByIds(ids).stream()
+            .map(gioHangChiTietEntity -> {
+              GiayChiTietEntity giayChiTiet = gioHangChiTietEntity.getGiayChiTietEntity();
+              GiayEntity giay = giayChiTiet.getGiayEntity();
+
+
+              String anhGiayUrl = Optional.ofNullable(giay.getAnhGiayEntities())
+                      .filter(list -> !list.isEmpty())
+                      .map(list -> list.get(0).getTenUrl())
+                      .orElse(null); // URL mặc định nếu không có ảnh
+
+
+              BigDecimal soTienDaGiam = Optional.ofNullable(
+                              giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId()))
+                      .map(GiamGiaChiTietSanPhamEntity::getSoTienDaGiam)
+                      .orElse(BigDecimal.ZERO);
+
+              return GioHangChiTietResponse.builder()
+                      .id(gioHangChiTietEntity.getId())
+                      .giayChiTietId(giayChiTiet.getId())
+                      .tenGiay(giay.getTen())
+                      .anhGiayUrl(anhGiayUrl)
+                      .mauSac(giayChiTiet.getMauSacEntity().getTen())
+                      .kichCo(giayChiTiet.getKichCoEntity().getTen())
+                      .giaBan(giayChiTiet.getGiaBan())
+                      .donGiaKhiGiam(giayChiTiet.getGiaBan().subtract(soTienDaGiam))
+                      .soLuong(gioHangChiTietEntity.getSoLuong())
+                      .build();
+            })
+            .collect(Collectors.toList());
+  }
+
 
   @Override
   public void addToCart(UUID idGiayChiTiet, Integer soLuong) {
@@ -80,7 +114,6 @@ public class GioHangChiTietServiceImpl implements GioHangChiTietService {
               .trangThai(1)
               .build());
     }
-
   }
 
   public GioHangChiTietEntity updateSoLuongGiay(UUID idGioHangChiTiet, boolean isIncrease) {
