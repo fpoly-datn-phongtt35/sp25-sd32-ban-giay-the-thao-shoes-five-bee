@@ -1,7 +1,6 @@
 import React, { useState, useEffect } from "react";
 import "./bill.css";
 import { fetchCustomerId } from '../service/LoginService.js';
-import { Header } from "../header/Header";
 import { addHoaDon1 } from '../service/HoaDonService.js';
 import LoadThongTinKhachHangHoaDon from "../components/LoadThongTinKhachHangHoaDon.js";
 import LoadThongTinDiaChiHoaDon from "../components/LoadThongTinDiaChiHoaDon.js";
@@ -24,7 +23,7 @@ export const Bill = () => {
     hinhThucThanhToan: 1,
     hinhThucNhanHang: 1,
     soTienGiam: 0,
-    phiShip: 0,
+    phiShip: 30000,
     soDiemSuDung: 0,
     soTienQuyDoi: 0,
     trangThai: 0,
@@ -88,8 +87,7 @@ export const Bill = () => {
     } catch (error) {
       console.error("Lỗi khi tạo đơn hàng", error);
     }
-    // Sau khi gửi dữ liệu thành công, điều hướng đến trang OrderStatusPage
-    navigate('/OrderStatusPage');
+    navigate('/orderStatusPage');
   };
 
   const exportToExcel = () => {
@@ -100,7 +98,7 @@ export const Bill = () => {
       "Tên người nhận": order.tenNguoiNhan,
       "Số điện thoại người nhận": order.sdtNguoiNhan,
       "Tổng tiền hàng": `₫${order.tongTien.toLocaleString()}`,
-      "Hình thức mua": order.hinhThucMua === 1 ? "Online" : "Offline",
+      "Hình thức mua": order.hinhThucMua === 1 ? "Offline" : "Online",
       "Hình thức thanh toán": order.hinhThucThanhToan === '0' ? "Chuyển khoản" : "Thu hộ (COD)",
       "Hình thức nhận hàng": order.hinhThucNhanHang === 1 ? "Giao tận nơi" : "Nhận tại cửa hàng",
       "Số tiền giảm": `₫${order.soTienGiam.toLocaleString()}`,
@@ -127,7 +125,6 @@ export const Bill = () => {
 
   return (
     <div>
-      <Header />
       <div className="bill_container">
       <form onSubmit={handleSubmit} className="bill_form">
       <HoaDonCart customerId={khachHangId} onSetTongTienHang={setTongTienHang} />
@@ -187,7 +184,6 @@ export const Bill = () => {
             </div>
           </section>
         </div>
-        {/* <HoaDonCart customerId={khachHangId} onSetTongTienHang={setTongTienHang} /> */}
       </form>
     </div>
     </div>

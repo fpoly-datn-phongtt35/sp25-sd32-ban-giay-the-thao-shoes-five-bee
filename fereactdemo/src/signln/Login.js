@@ -36,20 +36,19 @@ const Login = () => {
   const loginButton = async (e) => {
     e.preventDefault();
     setError("");
-
     if (!email.trim()) {
       setError("Email không được để trống");
       return;
     }
-
     if (!matKhau.trim()) {
       setError("Mật khẩu không được để trống");
       return;
     }
-
     try {
       const response = await loginCustomer(email, matKhau);
       console.log("Đăng nhập thành công:", response);
+      localStorage.setItem("idGioHang", response.idGioHang);
+
       if (response.token) {
         localStorage.setItem("token", response.token);
       }

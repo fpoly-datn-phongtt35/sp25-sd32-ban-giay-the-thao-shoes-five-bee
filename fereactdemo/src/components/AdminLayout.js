@@ -34,6 +34,8 @@ const AdminLayout = () => {
     const handleLogout = () => {
         localStorage.removeItem('token');
         localStorage.removeItem('refreshToken');
+        localStorage.removeItem('cart');
+        localStorage.removeItem('idGioHang');
         setIsLoggedIn(false);
         setUser(null);
         window.dispatchEvent(new Event('loginChange'));
