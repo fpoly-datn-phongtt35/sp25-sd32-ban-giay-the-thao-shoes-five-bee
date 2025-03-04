@@ -22,7 +22,7 @@ public class BanHangTaiQuayController {
   @PostMapping("/thanh-toan/{idHoaDon}")
   public ResponseEntity<?> thanhToanTaiQuay(
       @PathVariable("idHoaDon") UUID idHoaDon,
-      @RequestParam UUID idGiamGia,
+      @RequestParam(required = false) UUID idGiamGia,
       @RequestParam Integer hinhThucThanhToan,
       @RequestParam Boolean isGiaoHang,
       @RequestBody HoaDonRequest hoaDonRequest) {

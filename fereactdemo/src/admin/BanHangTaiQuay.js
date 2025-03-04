@@ -40,6 +40,7 @@ import {
   getGiamGiaHoaDon,
 } from "../service/GiamGiaHoaDonService";
 import WebcamComponent from "./WebcamComponent";
+import { createVNPayPayment } from "../service/VnpayService";
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [customerMoney, setCustomerMoney] = useState("");
@@ -647,119 +648,69 @@ const BanHangTaiQuay = () => {
   };
 
   const handlePayment = async () => {
-    const totalAmountToPay = getTotalAmount();
-    const parsedMoney = parseCurrency(customerMoney);
-
-    console.log("Tổng tiền cần thanh toán:", totalAmountToPay);
-    console.log("Tiền khách đưa:", parsedMoney);
-
-    if (parsedMoney < totalAmountToPay && selectedOption !== "option3") {
-      message.error("Tiền khách đưa không đủ!");
+    if (!selectedOption) {
+      message.error("Vui lòng chọn hình thức thanh toán!");
       return;
     }
-
-    const currentPage = pages.find((page) => page.id === selectedPage);
-    if (!currentPage) {
-      message.error("Không tìm thấy hóa đơn!");
+  
+    if (selectedOption === "option1" && changeAmount < 0) {
+      message.error("Số tiền khách đưa không đủ!");
       return;
     }
-
+  
     try {
-      let createdHoaDonId;
-      const isKhachLe = !selectedKhachHang && (!hoTen || !soDienThoai);
-
-      const newHoaDon = {
-        khachHang: selectedKhachHang ? { id: selectedKhachHang } : null,
-        hoTenKhachHang: selectedKhachHang ? hoTen : "Khách lẻ",
-        soDienThoaiKhachHang: selectedKhachHang ? soDienThoai : null,
-        trangThai: 3,
-        tongTien: getTotalAmount(),
-        ngayTao: new Date().toISOString(),
-        hinhThucMua: 1,
-        hinhThucThanhToan: selectedOption === "option3" ? 0 : 1,
+      const hoaDonRequest = {
+        ma: `HD${moment().format('YYYYMMDDHHmmss')}`,
+        moTa: "Thanh toán tại quầy",
+        tenNguoiNhan: hoTen || "Khách lẻ",
+        sdtNguoiNhan: soDienThoai || null,
+        tongTien: totalHoaDon,
+        diaChi: null,
+        tinh: null,
+        huyen: null,
+        xa: null,
+        idGiamGia: selectedMaGiamGia || null,
+        hinhThucThanhToan: selectedOption === "option1" ? 1 : 0,
+        isGiaoHang: false
       };
-
-      if (selectedOption === "option3") {
-        // Thanh toán qua VNPay
-        const response = await addHoaDon(newHoaDon);
-        createdHoaDonId = response.data.id;
-      } else {
-        // Thanh toán tại quầy
-        createdHoaDonId = currentPage.hoaDonId;
-        await updateHoaDon(createdHoaDonId, newHoaDon);
-        await thanhToanTaiQuay(createdHoaDonId, newHoaDon); // ✅ Gọi API thanh toán tại quầy
-      }
-
-      if (appliedGiamGia) {
-        console.log("Thông tin chương trình giảm giá:", appliedGiamGia);
-        await addChuongTrinhGiamGiaHoaDonChiTiet(
-          createdHoaDonId,
-          appliedGiamGia,
-          getTotalAmount()
-        );
-      }
-
-      for (const product of selectedProducts[selectedPage] || []) {
-        const currentProduct = giay.find((p) => p.ID === product.ID);
-        if (currentProduct) {
-          const updatedQuantity = Math.max(
-            currentProduct.SOLUONG - product.SOLUONG,
-            0
-          );
-          await updateGiayChiTiet(product.ID, { soLuongTon: updatedQuantity });
+  
+      console.log("Sending request with data:", hoaDonRequest); // Debug log
+  
+      if (selectedOption === "option1") {
+        // Thanh toán tiền mặt
+        const response = await thanhToanTaiQuay(selectedHoaDonId, hoaDonRequest);
+        console.log("Payment response:", response); // Debug log
+        
+        if (response.status === 200) {
+          message.success("Thanh toán thành công!");
+          resetState();
+          fetchHoaDonCho(); // Refresh danh sách hóa đơn
+        }
+        
+      } else if (selectedOption === "option3") {
+        // Thanh toán VNPay
+        try {
+          const vnpayResponse = await createVNPayPayment(totalHoaDon, selectedHoaDonId);
+          if (vnpayResponse.data) {
+            // Lưu thông tin thanh toán trước khi chuyển hướng
+            await thanhToanTaiQuay(selectedHoaDonId, hoaDonRequest);
+            window.location.href = vnpayResponse.data;
+            console.log("URL thanh toán VNPay:", vnpayResponse.data);
+            
+          }
+        } catch (error) {
+          console.error("Lỗi khi tạo URL thanh toán VNPay:", error);
+          message.error("Không thể tạo liên kết thanh toán VNPay!");
         }
       }
-
-      const hoaDonChiTietSanPham = Object.values(selectedProducts).flatMap(
-        (pageProducts) =>
-          (Array.isArray(pageProducts) ? pageProducts : []).map((product) =>
-            addHoaDonChiTiet({
-              hoaDon: { id: createdHoaDonId },
-              giayChiTiet: { id: product.ID },
-              soLuong: product.SOLUONG,
-              donGia: product.GIABAN,
-              trangThai: selectedOption === "option3" ? 0 : 1,
-            })
-          )
-      );
-      await Promise.all(hoaDonChiTietSanPham);
-
-      if (selectedOption === "option3") {
-        // Xử lý thanh toán VNPay
-        const paymentUrl = await createVNPayUrl(
-          Math.round(totalAmountToPay),
-          createdHoaDonId
-        );
-        if (paymentUrl && paymentUrl.startsWith("http")) {
-          window.open(paymentUrl, "_blank");
-          message.success("Đã tạo yêu cầu thanh toán qua VNPay.");
-
-          const checkPaymentStatus = setInterval(async () => {
-            const updatedHoaDonResponse = await getHoaDon(createdHoaDonId);
-            const updatedHoaDon = updatedHoaDonResponse.data;
-
-            if (updatedHoaDon.trangThai === 3) {
-              clearInterval(checkPaymentStatus);
-              message.success("Thanh toán VNPay thành công!");
-              resetState();
-            }
-          }, 5000);
-        } else {
-          throw new Error("Invalid payment URL received");
-        }
-      } else {
-        message.success(
-          isKhachLe
-            ? "Thanh toán thành công với khách lẻ!"
-            : "Thanh toán thành công!"
-        );
-        resetState();
-        fetchHoaDon();
-        getAllGiay();
-      }
+        
     } catch (error) {
-      console.error("Lỗi khi cập nhật hóa đơn:", error);
-      message.error("Thanh toán thất bại!");
+      console.error("Lỗi thanh toán:", error);
+      if (error.response) {
+        message.error(`Lỗi: ${error.response.data.message || "Có lỗi xảy ra khi thanh toán!"}`);
+      } else {
+        message.error("Có lỗi xảy ra khi thanh toán!");
+      }
     }
   };
 
@@ -779,6 +730,8 @@ const BanHangTaiQuay = () => {
     setSelectedGiamGia(null);
     setAppliedGiamGia(null);
     setSoTienGiam(0);
+    setSelectedMaGiamGia(null);
+    setGiaTriGiam(0);
   };
   const addChuongTrinhGiamGiaHoaDonChiTiet = async (
     hoaDonId,
