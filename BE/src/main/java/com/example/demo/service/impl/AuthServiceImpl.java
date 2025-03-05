@@ -70,8 +70,26 @@ public class AuthServiceImpl implements AuthService {
         if(!userEntity.getIsEnabled()){
             return ResponseEntity.badRequest().body("tài khoản này chưa được kích hoạt");
         }
+        
+        // Kiểm tra và tạo giỏ hàng nếu chưa có
+        if (userEntity.getGioHangEntity() == null) {
+            GioHangEntity gioHangEntity = new GioHangEntity();
+            gioHangEntity.setMa(generateUniqueCode());
+            gioHangEntity.setUserEntity(userEntity);
+            gioHangEntity.setNgayTao(new Date(System.currentTimeMillis()));
+            gioHangEntity.setNgayCapNhat(new Date(System.currentTimeMillis()));
+            gioHangEntity.setTrangThai(1);
+            gioHangEntity.setGhiChu("Giỏ hàng mới tạo");
+            gioHangRepository.save(gioHangEntity);
+            
+            userEntity.setGioHangEntity(gioHangEntity);
+            userRepository.save(userEntity);
+        }
+
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getMatKhau()));
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getMatKhau())
+            );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtTokenProvider.getToken(authentication);
             CustomUserDetail userDetail = (CustomUserDetail) authentication.getPrincipal();
@@ -80,10 +98,17 @@ public class AuthServiceImpl implements AuthService {
                     .collect(Collectors.toList());
             String refreshToken = jwtTokenProvider.refreshToken(userEntity.getHoTen());
 
-            return ResponseEntity.ok(new JwtResponse(token,userDetail.getEmail(),userDetail.getPassword(),roles,refreshToken,userEntity.getGioHangEntity().getId()));
-        }catch (BadCredentialsException ex){
+            return ResponseEntity.ok(new JwtResponse(
+                token,
+                userDetail.getEmail(),
+                userDetail.getPassword(),
+                roles,
+                refreshToken,
+                userEntity.getGioHangEntity().getId()
+            ));
+        } catch (BadCredentialsException ex){
             throw new RuntimeException("email hoặc mật khẩu không đúng");
-        }catch (ExpiredJwtException exx){
+        } catch (ExpiredJwtException exx){
             throw new RuntimeException("accessToken hết hạn vui lòng làm mới ");
         }
     }
