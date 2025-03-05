@@ -24,4 +24,7 @@ public interface GioHangChiTietRepository extends JpaRepository<GioHangChiTietEn
 
     @Query("select sum (g.soLuong) from GioHangChiTietEntity g where g.gioHangEntity.id=:idGioHang")
     Integer countTotalProductsInCart(@Param("idGioHang")UUID idGioHang);
+
+    @Query("SELECT g FROM GioHangChiTietEntity g WHERE g.id IN :ids")
+    List<GioHangChiTietEntity> findByIds(List<UUID> ids);
 }

@@ -78,7 +78,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       // Nếu mã giảm giá tồn tại, kiểm tra điều kiện áp dụng
       if (giamGia != null
           && giamGia.getSoLuong() > 0
-          && tongTienSanPhamGoc.compareTo(giamGia.getDieuKien()) >= 0) {
+          && tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0) {
         soTienGiamKhiApMa =
             giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
                 idHoaDon, giamGia, tongTienSanPhamKhiGiam);
@@ -222,15 +222,15 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   public List<HoaDonEntity> getListHoaDonCho() {
     return hoaDonRepository.getListByTrangThai();
   }
+
   @Override
   public List<HoaDonChiTietEntity> getSanPhamTrongHoaDon(UUID idHoaDon) {
     HoaDonEntity hoaDon =
-            hoaDonRepository
-                    .findById(idHoaDon)
-                    .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+        hoaDonRepository
+            .findById(idHoaDon)
+            .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
     return hoaDonChiTietRepository.findByHoaDon(hoaDon);
   }
-
 
   @Override
   public void deleteHoaDonCho(UUID idHoaDon) {
