@@ -25,4 +25,5 @@ public interface HoaDonChiTietRepository
   HoaDonChiTietEntity findByHoaDonEntityAndGiayChiTietEntity(HoaDonEntity hoaDon, GiayChiTietEntity giayChiTiet);
 
   List<HoaDonChiTietEntity> findAllByHoaDonEntity_Id(UUID hoaDonId);
+  
 }
