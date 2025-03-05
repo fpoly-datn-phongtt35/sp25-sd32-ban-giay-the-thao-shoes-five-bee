@@ -13,9 +13,11 @@ import com.example.demo.entity.GiayEntity;
 import org.springframework.data.domain.Pageable;
 
 public interface GiamGiaSanPhamService {
+  void updateTrangThaiGimGiaSanPham();
 
   GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
-          GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest);
+      GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest);
+
   List<GiamGiaSanPhamEntity> getAll();
 
   GiamGiaSanPhamEntity add(GiamGiaSanPhamDto giamGiaSanPhamDto);
@@ -28,6 +30,8 @@ public interface GiamGiaSanPhamService {
 
   PageResponse<GiamGiaSanPhamEntity> findByPagingCriteria(
       GiamGiaSanPhamDto giamGiaSanPhamDto, Pageable pageable);
+
   ByteArrayOutputStream exportExcel() throws IOException;
+
   List<GiamGiaSanPhamEntity> findByTen(String ten);
 }

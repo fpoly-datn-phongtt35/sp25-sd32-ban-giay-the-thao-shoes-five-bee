@@ -10,6 +10,7 @@ import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -23,6 +24,17 @@ import org.springframework.stereotype.Service;
 public class GiamGiaHoaDonServiceImpl implements GiamGiaHoaDonService {
 
   private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
+
+  @Override
+  public void updateTrangThaiGiamGiaHoaDon() {
+    giamGiaHoaDonRepository.findAll().stream()
+        .filter(g -> g.getNgayKetThuc().after(new Date()))
+        .forEach(
+            gg -> {
+              gg.setTrangThai(1);
+              giamGiaHoaDonRepository.save(gg);
+            });
+  }
 
   @Override
   public GiamGiaHoaDonEntity getGiamGia(String ma) {

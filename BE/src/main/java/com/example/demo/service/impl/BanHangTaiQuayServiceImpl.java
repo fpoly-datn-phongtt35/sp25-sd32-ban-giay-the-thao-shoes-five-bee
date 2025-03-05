@@ -105,7 +105,8 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setSoTienGiam(soTienGiam.add(soTienGiamKhiApMa));
     hoaDon.setPhiShip(phiShip);
     hoaDon.setHinhThucNhanHang(isGiaoHang ? 1 : 2);
-    hoaDon.setTrangThai(2);
+    hoaDon.setTrangThai(
+        hinhThucThanhToan == 2 ? 0 : 2); // Nếu thanh tóán khi nhận hàng thì sẽ set là 0
     hoaDon.setUserEntity(user);
 
     hoaDonRepository.save(hoaDon);

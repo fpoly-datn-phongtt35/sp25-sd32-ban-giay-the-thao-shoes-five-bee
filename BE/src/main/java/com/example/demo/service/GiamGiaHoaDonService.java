@@ -7,6 +7,8 @@ import java.util.List;
 import org.springframework.data.domain.Pageable;
 
 public interface GiamGiaHoaDonService {
+  void updateTrangThaiGiamGiaHoaDon();
+
   GiamGiaHoaDonEntity getGiamGia(String ma);
 
   List<GiamGiaHoaDonEntity> getAll();
