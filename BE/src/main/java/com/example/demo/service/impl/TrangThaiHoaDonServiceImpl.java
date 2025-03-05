@@ -32,33 +32,54 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         if (currentStatus == 2) {
             throw new RuntimeException("Hóa đơn đã hoàn thành, không thể xác nhận tiếp.");
         }
-        if (currentStatus == 8) {
+        if (currentStatus == 7) {
             throw new RuntimeException("Hóa đơn đã bị hủy, không thể xác nhận tiếp.");
         }
 
-        // Chuyển đổi trạng thái theo luồng hợp lý
+        // Chuyển đổi trạng thái theo quy trình hợp lý
         switch (currentStatus) {
-            case 0:
-                hoaDon.setTrangThai(3); // Chờ xác nhận → Đã xác nhận
+            case 3: // CHO_XAC_NHAN (Đặt ship)
+                hoaDon.setTrangThai(4); // ĐÃ_XÁC_NHẬN
                 break;
-            case 3:
-                hoaDon.setTrangThai(4); // Đã xác nhận → Chờ vận chuyển
+            case 4: // ĐÃ_XÁC_NHẬN
+                if (kiemTraTonKho(hoaDon)) {
+                    hoaDon.setTrangThai(6); // Còn hàng → ĐANG CHUẨN BỊ
+                } else {
+                    hoaDon.setTrangThai(5); // Hết hàng → CHỜ NHẬP HÀNG
+                }
                 break;
-            case 4:
-                hoaDon.setTrangThai(5); // Chờ vận chuyển → Đang vận chuyển
+            case 5: // CHỜ NHẬP HÀNG
+                if (kiemTraTonKho(hoaDon)) {
+                    hoaDon.setTrangThai(6); // Khi có hàng → ĐANG CHUẨN BỊ
+                } else {
+                    throw new RuntimeException("Hàng chưa nhập đủ, không thể chuẩn bị đơn hàng.");
+                }
                 break;
-            case 5:
-                hoaDon.setTrangThai(6); // Đang vận chuyển → Đã giao hàng
+            case 6: // ĐANG CHUẨN BỊ
+                hoaDon.setTrangThai(8); // ĐANG GIAO HÀNG
                 break;
-            case 6:
-                hoaDon.setTrangThai(2); // Đã giao hàng → Hoàn thành
+            case 8: // ĐANG GIAO HÀNG
+                hoaDon.setTrangThai(9); // GIAO THÀNH CÔNG
                 break;
-            default:
-                throw new RuntimeException("Trạng thái hiện tại không thể xác nhận tiếp.");
+            case 9: // GIAO THÀNH CÔNG
+                hoaDon.setTrangThai(2); // HOÀN THÀNH
+                break;
+//            case 10: // GIAO THẤT BẠI
+//                if (kiemTraDaTraHang(hoaDon)) {
+//                    hoaDon.setTrangThai(12); // ĐÃ TRẢ HÀNG
+//                } else {
+//                    hoaDon.setTrangThai(13); // MẤT HÀNG
+//                }
+//                break;
         }
 
         return hoaDonRepository.save(hoaDon);
     }
+    private boolean kiemTraTonKho(HoaDonEntity hoaDon) {
+        return hoaDon.getItems().stream().allMatch(sp -> sp.getSoLuong() > 0);
+    }
+
+
 
 
 
@@ -67,7 +88,13 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         Optional<HoaDonEntity> hoaDonOpt = hoaDonRepository.findById(id);
         if (hoaDonOpt.isPresent()) {
             HoaDonEntity hoaDon = hoaDonOpt.get();
-            hoaDon.setTrangThai(8); // Đã hủy
+
+            // Chỉ có thể hủy nếu đơn chưa hoàn thành
+            if (hoaDon.getTrangThai() == 2) {
+                throw new RuntimeException("Hóa đơn đã hoàn thành, không thể hủy.");
+            }
+
+            hoaDon.setTrangThai(7); // ĐÃ HỦY
             return hoaDonRepository.save(hoaDon);
         } else {
             throw new RuntimeException("Không tìm thấy hóa đơn với ID: " + id);
