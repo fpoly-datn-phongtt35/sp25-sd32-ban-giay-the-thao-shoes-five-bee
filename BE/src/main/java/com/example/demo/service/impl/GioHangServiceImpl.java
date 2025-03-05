@@ -84,7 +84,6 @@ public class GioHangServiceImpl implements GioHangService {
                         item.getGiayChiTietEntity().getGiaBan(),
                         giamGiaChiTietSanPhamRepository
                                     .findByGiayChiTiet(item.getGiayChiTietEntity().getId())
-                                    .getSoTienDaGiam()
                                 != null
                             ? item.getGiayChiTietEntity()
                                 .getGiaBan()
