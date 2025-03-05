@@ -55,5 +55,6 @@ public class UserEntity {
 
     @OneToOne
     @JoinColumn(name = "ID_GIO_HANG")
+    @JsonIgnore
     private GioHangEntity gioHangEntity;
 }
