@@ -385,7 +385,7 @@ const BanHangTaiQuay = () => {
   const getAllKhachHangData = async () => {
     try {
       const result = await getAllKhachHang();
-      console.log("API Response:", result.data);
+    
 
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
@@ -575,7 +575,7 @@ const BanHangTaiQuay = () => {
   const getAllGiay = async () => {
     try {
       const result = await getAllGiayChiTiet();
-
+ console.log("Dữ liệu giày:", result.data);
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu trả về không hợp lệ");
       }
