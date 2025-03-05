@@ -37,6 +37,7 @@ public class HoaDonChiTietEntity {
     private Integer trangThai;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "ID_HOA_DON")
     private HoaDonEntity hoaDonEntity;
 

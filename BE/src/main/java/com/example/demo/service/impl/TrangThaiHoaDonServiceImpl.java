@@ -3,10 +3,15 @@ package com.example.demo.service.impl;
 import com.example.demo.entity.HoaDonEntity;
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.TrangThaiHoaDonService;
+import com.itextpdf.kernel.pdf.PdfDocument;
+import com.itextpdf.kernel.pdf.PdfWriter;
+import com.itextpdf.layout.Document;
+import com.itextpdf.layout.element.Paragraph;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -77,6 +82,32 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     @Override
     public List<HoaDonEntity> getAllHoaDon() {
         return hoaDonRepository.findAll();
+    }
+
+    @Override
+    public Optional<HoaDonEntity> findById(UUID id) {
+        return hoaDonRepository.findById(id);
+    }
+
+    @Override
+    public byte[] printHoaDon(UUID id) {
+        Optional<HoaDonEntity> optional = hoaDonRepository.findById(id);
+        if (optional.isPresent()){
+            HoaDonEntity hoaDonEntity = optional.get();
+            ByteArrayOutputStream hoaDon1 = new ByteArrayOutputStream();
+            PdfWriter writer = new PdfWriter(hoaDon1);
+            PdfDocument pdfDocument = new PdfDocument(writer);
+            Document document= new Document(pdfDocument);
+            document.add(new Paragraph("HOA DON MUA HÀNG :"));
+            document.add(new Paragraph("MA HOA DON :"+hoaDonEntity.getMa()));
+            document.add(new Paragraph("TEN KHACH HANG :"+hoaDonEntity.getUserEntity().getHoTen()));
+            document.add(new Paragraph(("NGAY TAO :"+hoaDonEntity.getNgayTao())));
+            document.add(new Paragraph("SO DIEN THOAI :"+hoaDonEntity.getUserEntity().getSoDienThoai()));
+            document.add(new Paragraph("TONG TIEN :"+ hoaDonEntity.getTongTien()));
+            document.close();
+            return hoaDon1.toByteArray();
+        }
+        return null;
     }
 
 }

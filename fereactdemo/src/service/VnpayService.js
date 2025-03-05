@@ -1,9 +1,14 @@
 import axios from "axios";
 
-const REST_API_BASE_URL = "http://localhost:5000/api/vnpay";
+const REST_API_BASE_URL = "http://localhost:5000";
 
-export const createVNPayPayment = (paymentData) => {
-  return axios.post(`${REST_API_BASE_URL}/create-payment`, paymentData);
+export const createVNPayPayment = (amount, orderId) => {
+  return axios.get(`${REST_API_BASE_URL}/pay`, {
+    params: {
+      amount: amount,
+      orderId: orderId
+    }
+  });
 };
 
 export const vnpayReturn = (queryParams) => {

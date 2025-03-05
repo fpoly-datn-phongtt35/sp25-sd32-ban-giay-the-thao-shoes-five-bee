@@ -52,4 +52,9 @@ public class UserEntity {
 
     @OneToMany(mappedBy = "userEntity", cascade = CascadeType.REMOVE, orphanRemoval = true, fetch = FetchType.LAZY)
     private List<UserRoleEntity> userRoleEntities = new ArrayList<>();
+
+    @OneToOne
+    @JoinColumn(name = "ID_GIO_HANG")
+    @JsonIgnore
+    private GioHangEntity gioHangEntity;
 }

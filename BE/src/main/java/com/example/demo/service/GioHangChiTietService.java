@@ -14,4 +14,5 @@ public interface GioHangChiTietService {
     void addToCart(UUID idGiayChiTiet, Integer soLuong);
     GioHangChiTietEntity updateSoLuongGiay(UUID idGioHangChiTiet, boolean isIncrease);
     void deleteSanPhamTrongGioHang(UUID idGioHangChiTiet);
+    Integer getTotalProductsInCart(UUID idGioHang);
 }

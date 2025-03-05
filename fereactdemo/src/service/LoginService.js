@@ -68,6 +68,8 @@ const isLoggedIn = () => {
 const logout = () => {
   localStorage.removeItem('token');
   localStorage.removeItem('refreshToken');
+  localStorage.removeItem('cart');
+  localStorage.removeItem('idGioHang');
 }
 
 const isAdmin = () => getRole() === "ROLE_ADMIN";

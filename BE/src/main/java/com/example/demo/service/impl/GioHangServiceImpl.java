@@ -33,7 +33,7 @@ public class GioHangServiceImpl implements GioHangService {
   private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
 
   @Override
-  public List<GioHangChiTietResponse> getCartItems() {
+  public GioHangResponse getCartItems() {
     String email = usersService.getAuthenticatedUserEmail();
 
     Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
@@ -43,6 +43,19 @@ public class GioHangServiceImpl implements GioHangService {
 
     UserEntity userEntity = userEntityOptional.get();
     // Tìm giỏ hàng của user nếu chưa có thì tạo mới
+    GioHangEntity gioHang = gioHangRepository.findByUserEntity(userEntity)
+            .orElseGet(()->{
+              GioHangEntity newGioHang = new GioHangEntity();
+              newGioHang.setMa(generateUniqueCode());
+              newGioHang.setUserEntity(userEntity);
+              newGioHang.setNgayTao(new Date(System.currentTimeMillis()));
+              newGioHang.setNgayCapNhat(new Date(System.currentTimeMillis()));
+              newGioHang.setTrangThai(1);
+              newGioHang.setGhiChu("Giỏ hàng mới tạo");
+              return gioHangRepository.save(newGioHang);
+            });
+    GioHangResponse gioHangResponse = new GioHangResponse();
+    gioHangResponse.setIdGioHang(gioHang.getId());
     GioHangEntity gioHang =
         gioHangRepository
             .findByUserEntity(userEntity)
@@ -63,7 +76,7 @@ public class GioHangServiceImpl implements GioHangService {
         gioHangChiTietRepository.findByGioHangEntity(gioHang.getId());
 
     // Chuyển đổi sang DTO để trả về frontend
-    return chiTietList.stream()
+    List<GioHangChiTietResponse> gioHangChiTietResponseList = chiTietList.stream()
         .map(
             item ->
                 new GioHangChiTietResponse(
@@ -86,6 +99,8 @@ public class GioHangServiceImpl implements GioHangService {
                                 .getSoTienDaGiam()),
                     item.getSoLuong()))
         .collect(Collectors.toList());
+    gioHangResponse.setGioHangChiTietResponses(gioHangChiTietResponseList);
+    return gioHangResponse;
   }
 
   private String generateUniqueCode() {

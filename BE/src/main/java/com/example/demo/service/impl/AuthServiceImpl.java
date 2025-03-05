@@ -4,10 +4,12 @@ import com.example.demo.dto.request.LoginRequest;
 import com.example.demo.dto.request.SignupRequest;
 import com.example.demo.dto.request.UserOtpDto;
 import com.example.demo.dto.response.JwtResponse;
+import com.example.demo.entity.GioHangEntity;
 import com.example.demo.entity.RoleEntity;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.entity.UserRoleEntity;
 import com.example.demo.jwt.JwtTokenProvider;
+import com.example.demo.repository.GioHangRepository;
 import com.example.demo.repository.RoleRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.repository.UserRoleRepository;
@@ -28,10 +30,12 @@ import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 
+import java.sql.Date;
 import java.time.Duration;
 import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Map;
+import java.util.UUID;
 import java.util.stream.Collectors;
 
 @Service
@@ -51,7 +55,8 @@ public class AuthServiceImpl implements AuthService {
     private PasswordEncoder passwordEncoder;
     @Autowired
     private SendMailService sendMailService;
-
+    @Autowired
+    private GioHangRepository gioHangRepository;
     @Override
     public ResponseEntity<?> login(LoginRequest loginRequest) {
         if(loginRequest.getEmail() == null || loginRequest.getEmail().isEmpty()){
@@ -65,8 +70,26 @@ public class AuthServiceImpl implements AuthService {
         if(!userEntity.getIsEnabled()){
             return ResponseEntity.badRequest().body("tài khoản này chưa được kích hoạt");
         }
+        
+        // Kiểm tra và tạo giỏ hàng nếu chưa có
+        if (userEntity.getGioHangEntity() == null) {
+            GioHangEntity gioHangEntity = new GioHangEntity();
+            gioHangEntity.setMa(generateUniqueCode());
+            gioHangEntity.setUserEntity(userEntity);
+            gioHangEntity.setNgayTao(new Date(System.currentTimeMillis()));
+            gioHangEntity.setNgayCapNhat(new Date(System.currentTimeMillis()));
+            gioHangEntity.setTrangThai(1);
+            gioHangEntity.setGhiChu("Giỏ hàng mới tạo");
+            gioHangRepository.save(gioHangEntity);
+            
+            userEntity.setGioHangEntity(gioHangEntity);
+            userRepository.save(userEntity);
+        }
+
         try {
-            Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getMatKhau()));
+            Authentication authentication = authenticationManager.authenticate(
+                new UsernamePasswordAuthenticationToken(loginRequest.getEmail(),loginRequest.getMatKhau())
+            );
             SecurityContextHolder.getContext().setAuthentication(authentication);
             String token = jwtTokenProvider.getToken(authentication);
             CustomUserDetail userDetail = (CustomUserDetail) authentication.getPrincipal();
@@ -74,10 +97,18 @@ public class AuthServiceImpl implements AuthService {
                     .map(GrantedAuthority::getAuthority)
                     .collect(Collectors.toList());
             String refreshToken = jwtTokenProvider.refreshToken(userEntity.getHoTen());
-            return ResponseEntity.ok(new JwtResponse(token,userDetail.getEmail(),userDetail.getPassword(),roles,refreshToken));
-        }catch (BadCredentialsException ex){
+
+            return ResponseEntity.ok(new JwtResponse(
+                token,
+                userDetail.getEmail(),
+                userDetail.getPassword(),
+                roles,
+                refreshToken,
+                userEntity.getGioHangEntity().getId()
+            ));
+        } catch (BadCredentialsException ex){
             throw new RuntimeException("email hoặc mật khẩu không đúng");
-        }catch (ExpiredJwtException exx){
+        } catch (ExpiredJwtException exx){
             throw new RuntimeException("accessToken hết hạn vui lòng làm mới ");
         }
     }
@@ -107,11 +138,28 @@ public class AuthServiceImpl implements AuthService {
         UserRoleEntity userRoleEntity = new UserRoleEntity();
         userRoleEntity.setUserEntity(savedUser);
         userRoleEntity.setRoleEntity(roleEntity);
+
         userRoleRepository.save(userRoleEntity);
+
+        GioHangEntity gioHangEntity = new GioHangEntity();
+        gioHangEntity.setMa(generateUniqueCode());
+        gioHangEntity.setUserEntity(userEntity);
+        gioHangEntity.setNgayTao(new Date(System.currentTimeMillis()));
+        gioHangEntity.setNgayCapNhat(new Date(System.currentTimeMillis()));
+        gioHangEntity.setTrangThai(1);
+        gioHangEntity.setGhiChu("Giỏ hàng mới tạo");
+        gioHangRepository.save(gioHangEntity);
+
+        userEntity.setGioHangEntity(gioHangEntity);
+        userRepository.save(userEntity);
 
         String emailBody = buildEmail(savedUser.getHoTen(),otpCode);
         sendMailService.sendMail(signupRequest.getEmail(),emailBody,"Xác nhận đăng ký tài khoản - Mã OTP");
         return ResponseEntity.ok(Map.of("message","Người dùng đã được đăng kí . Vui lòng kiểm tra email để nhận mã OTP"));
+    }
+
+    private String generateUniqueCode() {
+        return "GH" + UUID.randomUUID().toString().substring(0,6).toUpperCase();
     }
 
     @Override

@@ -78,24 +78,6 @@ const OrderItem = ({ order, onChangeData }) => {
     }
   };
 
-  // const OrderCard = ({ product }) => {
-  //   return (
-  //     <div className="order-body" onClick={() => handleViewOrderDetail(order)}>
-  //   <img className="product-image" src={product.giayChiTiet.giay.anhGiay.tenUrl} alt={product.name} />
-  //   <div className="product-info">
-  //     <p className="product-name">{product.giayChiTiet.giay.ten}</p>
-  //     <p className="product-category">Phân loại hàng: {product.giayChiTiet.mauSac.ten}, {product.giayChiTiet.kichCo.ten}</p>
-  //     <p className="product-quantity">Số Lượng: x{product.soLuong}</p>
-  //     <p className="return-policy">{returnPolicy}</p>
-  //   </div>
-  //   <div className="product-price">
-  //     <p className="old-price">₫{product.giaNhap}</p>
-  //     <p className="new-price">₫{product.donGia}</p>
-  //   </div>
-  // </div>
-  //   );
-  // };
-
 
   useEffect(() => {
     if (order && order.trangThai && order.trangThai.toLocaleString() === "5") {
@@ -118,9 +100,6 @@ const OrderItem = ({ order, onChangeData }) => {
       <div className="order-header">
         <button className="favorite-btn"><Link to={"/productAll"}>Xem Shop</Link></button>
         <span className="shop-name">Five Start</span>
-        {/* <span className="shop-name"><h4>Mã Hóa Đơn: #{order.ma}</h4></span>
-    <button className="chat-btn">Chat</button>
-    <button className="view-shop-btn"><Link to={"/home"}>Xem Shop</Link></button> */}
         <span className="order-status">
           {order.trangThai.toLocaleString() === "0" && "Chờ Xác Nhận"}
           {order.trangThai.toLocaleString() === "1" && "Vận Chuyển"}

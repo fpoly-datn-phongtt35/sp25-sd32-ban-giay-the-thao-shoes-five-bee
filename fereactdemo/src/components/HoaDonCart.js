@@ -1,19 +1,21 @@
 import React, { useEffect, useState } from "react";
 import "./HoaDonCart.css";
 import { getByKhachHangId } from "../service/GioHangChiTietService"
+import useCart from "./Cart";
 
 const Cart = ({ customerId, onSetTongTienHang }) => {
-  const [cart, setCart] = useState([]);
+  const { cart, increment, decrement, removeProduct } = useCart();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [cartt, setCart] = useState([]);
+  const [selectedProducts, setSelectedProducts] = useState([]);
 
   useEffect(() => {
-    // console.log("customerId:", customerId);
     if (customerId) {
       const fetchCard = async () => {
         try {
           const response = await getByKhachHangId(customerId);
-          console.log(response.data);
+          console.log("data" + response.data);
           const data = Array.isArray(response.data) ? response.data : [response.data];
           setCart(data);
         } catch (error) {
@@ -32,9 +34,10 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
   }, [cart]);
 
   const totalAmount = cart.reduce(
-    (total, product) => total + (product.giayChiTiet.giaBan || 0) * (product.soLuong || 1),
+    (total, product) => total + (product.giaBan || 0) * (product.soLuong || 1),
     0
   );
+
   if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   return (
@@ -42,7 +45,6 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
       <div className="cart">
         <div className="cart_content">
           <p>Thông tin sản phẩm</p>
-          <p>Phân loại hàng</p>
           <p>Đơn giá</p>
           <p>Số lượng</p>
           <p>Thành tiền</p>
@@ -50,30 +52,27 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
         {cart.map((product, index) => (
           <div className="prouduct_cart" key={index}>
             <div className="prouduct_cart_name">
-              <img src={product.giayChiTiet.giay.anhGiay.tenUrl} alt={product.name} />
+              <img
+                src={product.anhGiayUrl || '/placeholder.jpg'}
+                alt={product.tenGiay || 'Hình ảnh sản phẩm'}
+              />
               <div style={{ marginTop: "20px" }}>
-                <p>{product.giayChiTiet.giay.ten}</p>
-                {/* <button onClick={() => removeProduct(index)}>Xóa</button> */}
+                <p>{product.tenGiay || 'Sản phẩm không xác định'}</p>
               </div>
             </div>
-            <div className="prouduct_cart_classify">
-              <p>{product.giayChiTiet.mauSac.ten}</p>
-              <p>{product.giayChiTiet.kichCo.ten}</p>
-            </div>
+
             <div className="prouduct_cart_price">
-              <p>{(product.giayChiTiet.giaBan || 0).toLocaleString()}đ</p>
+              <p>{(product.giaBan || 0).toLocaleString()}đ</p>
             </div>
             <div className="prouduct_cart_count">
               <div className="prouduct_cart_count_count">
-                {/* <button onClick={() => decrement(index)}>-</button> */}
                 <p>{product.soLuong}</p>
-                {/* <button onClick={() => increment(index)}>+</button> */}
               </div>
             </div>
             <div className="prouduct_cart_discount">
               <p>
                 {(
-                  (product.giayChiTiet.giaBan || 0) * (product.soLuong || 1)
+                  (product.giaBan || 0) * (product.soLuong || 1)
                 ).toLocaleString()}
                 đ
               </p>

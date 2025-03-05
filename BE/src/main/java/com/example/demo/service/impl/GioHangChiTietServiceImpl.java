@@ -138,4 +138,9 @@ public class GioHangChiTietServiceImpl implements GioHangChiTietService {
   public void deleteSanPhamTrongGioHang(UUID idGioHangChiTiet) {
     gioHangChiTietRepository.deleteById(idGioHangChiTiet);
   }
+
+  @Override
+  public Integer getTotalProductsInCart(UUID idGioHang) {
+    return gioHangChiTietRepository.countTotalProductsInCart(idGioHang);
+  }
 }
