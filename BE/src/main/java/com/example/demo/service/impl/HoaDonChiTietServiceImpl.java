@@ -40,7 +40,7 @@ public class HoaDonChiTietServiceImpl implements HoaDonChiTietService {
         Optional<HoaDonEntity> hoaDonEntity = hoaDonRepository.findById(id);
         if(hoaDonEntity.isPresent()){
             HoaDonEntity hoaDonEntity1 = hoaDonEntity.get();
-            List<HoaDonChiTietEntity> hoaDonChiTietEntities = hoaDonChiTietRepository.findAllByHoaDon_Id(id);
+            List<HoaDonChiTietEntity> hoaDonChiTietEntities = hoaDonChiTietRepository.findAllByHoaDonEntity_Id(id);
             Optional<GiamGiaHoaDonChiTietEntity> optionalDiscount = giamGiaHoaDonChiTietRepository.findById(id);
 
             ByteArrayOutputStream hoaDon1 = new ByteArrayOutputStream();
