@@ -44,49 +44,57 @@ public class GioHangServiceImpl implements GioHangService {
 
     UserEntity userEntity = userEntityOptional.get();
     // Tìm giỏ hàng của user nếu chưa có thì tạo mới
-    GioHangEntity gioHang = gioHangRepository.findByUserEntity(userEntity)
-            .orElseGet(()->{
-              GioHangEntity newGioHang = new GioHangEntity();
-              newGioHang.setMa(generateUniqueCode());
-              newGioHang.setUserEntity(userEntity);
-              newGioHang.setNgayTao(new Date(System.currentTimeMillis()));
-              newGioHang.setNgayCapNhat(new Date(System.currentTimeMillis()));
-              newGioHang.setTrangThai(1);
-              newGioHang.setGhiChu("Giỏ hàng mới tạo");
-              return gioHangRepository.save(newGioHang);
-            });
+    GioHangEntity gioHang =
+        gioHangRepository
+            .findByUserEntity(userEntity)
+            .orElseGet(
+                () -> {
+                  GioHangEntity newGioHang = new GioHangEntity();
+                  newGioHang.setMa(generateUniqueCode());
+                  newGioHang.setUserEntity(userEntity);
+                  newGioHang.setNgayTao(new Date(System.currentTimeMillis()));
+                  newGioHang.setNgayCapNhat(new Date(System.currentTimeMillis()));
+                  newGioHang.setTrangThai(1);
+                  newGioHang.setGhiChu("Giỏ hàng mới tạo");
+                  return gioHangRepository.save(newGioHang);
+                });
     GioHangResponse gioHangResponse = new GioHangResponse();
     gioHangResponse.setIdGioHang(gioHang.getId());
-
 
     // Lấy danh sách sản phẩm trong giỏ hàng
     List<GioHangChiTietEntity> chiTietList =
         gioHangChiTietRepository.findByGioHangEntity(gioHang.getId());
 
     // Chuyển đổi sang DTO để trả về frontend
-    List<GioHangChiTietResponse> gioHangChiTietResponseList = chiTietList.stream()
-        .map(
-            item ->
-                new GioHangChiTietResponse(
-                    item.getId(),
-                    item.getGiayChiTietEntity().getId(),
-                    item.getGiayChiTietEntity().getGiayEntity().getTen(),
-                    item.getGiayChiTietEntity()
-                        .getGiayEntity()
-                        .getAnhGiayEntities()
-                        .get(0)
-                        .getTenUrl(),
-                    item.getGiayChiTietEntity().getMauSacEntity().getTen(),
-                    item.getGiayChiTietEntity().getKichCoEntity().getTen(),
-                    item.getGiayChiTietEntity().getGiaBan(),
-                    item.getGiayChiTietEntity()
-                        .getGiaBan()
-                        .subtract(
-                            giamGiaChiTietSanPhamRepository
-                                .findByGiayChiTiet(item.getGiayChiTietEntity().getId())
-                                .getSoTienDaGiam()),
-                    item.getSoLuong()))
-        .collect(Collectors.toList());
+    List<GioHangChiTietResponse> gioHangChiTietResponseList =
+        chiTietList.stream()
+            .map(
+                item ->
+                    new GioHangChiTietResponse(
+                        item.getId(),
+                        item.getGiayChiTietEntity().getId(),
+                        item.getGiayChiTietEntity().getGiayEntity().getTen(),
+                        item.getGiayChiTietEntity()
+                            .getGiayEntity()
+                            .getAnhGiayEntities()
+                            .get(0)
+                            .getTenUrl(),
+                        item.getGiayChiTietEntity().getMauSacEntity().getTen(),
+                        item.getGiayChiTietEntity().getKichCoEntity().getTen(),
+                        item.getGiayChiTietEntity().getGiaBan(),
+                        giamGiaChiTietSanPhamRepository
+                                    .findByGiayChiTiet(item.getGiayChiTietEntity().getId())
+                                    .getSoTienDaGiam()
+                                != null
+                            ? item.getGiayChiTietEntity()
+                                .getGiaBan()
+                                .subtract(
+                                    giamGiaChiTietSanPhamRepository
+                                        .findByGiayChiTiet(item.getGiayChiTietEntity().getId())
+                                        .getSoTienDaGiam())
+                            : item.getGiayChiTietEntity().getGiaBan(),
+                        item.getSoLuong()))
+            .collect(Collectors.toList());
     gioHangResponse.setGioHangChiTietResponses(gioHangChiTietResponseList);
     return gioHangResponse;
   }
