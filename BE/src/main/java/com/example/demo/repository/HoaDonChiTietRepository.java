@@ -23,4 +23,6 @@ public interface HoaDonChiTietRepository
   List<HoaDonChiTietEntity> findByHoaDonGetChiTiet(@Param("hoaDon") HoaDonEntity hoaDon);
 
   HoaDonChiTietEntity findByHoaDonEntityAndGiayChiTietEntity(HoaDonEntity hoaDon, GiayChiTietEntity giayChiTiet);
+
+  List<HoaDonChiTietEntity> findAllByHoaDon_Id(UUID hoaDonId);
 }
