@@ -80,6 +80,7 @@ public class HoaDonEntity {
     private Integer trangThai;
 
     @ManyToOne(fetch = FetchType.LAZY)
+
     @JoinColumn(name = "ID_USER",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private UserEntity userEntity;
 

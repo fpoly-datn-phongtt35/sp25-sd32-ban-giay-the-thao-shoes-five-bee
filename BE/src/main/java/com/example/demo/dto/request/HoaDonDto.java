@@ -34,6 +34,12 @@ public class HoaDonDto {
 
     private String diaChi;
 
+    private String Xa;
+
+    private String Huyen;
+
+    private String Tinh;
+
     private BigDecimal tongTien;
 
     private Integer hinhThucMua;
@@ -47,4 +53,6 @@ public class HoaDonDto {
     private BigDecimal phiShip;
 
     private Integer trangThai;
+
+    private UserDto userDto;
 }

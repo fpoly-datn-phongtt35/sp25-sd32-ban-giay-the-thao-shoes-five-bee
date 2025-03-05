@@ -1,5 +1,7 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.request.HoaDonDto;
+import com.example.demo.dto.request.UserDto;
 import com.example.demo.entity.HoaDonEntity;
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.TrangThaiHoaDonService;
@@ -15,6 +17,7 @@ import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -80,8 +83,40 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     }
 
     @Override
-    public List<HoaDonEntity> getAllHoaDon() {
-        return hoaDonRepository.findAll();
+    public List<HoaDonDto> getAllHoaDon() {
+        List<HoaDonEntity> hoaDons = hoaDonRepository.findAll();
+        return hoaDons.stream().map(hd -> new HoaDonDto(
+                hd.getId(),
+                hd.getMa(),
+                hd.getNgayTao(),
+                hd.getNgayThanhToan(),
+                hd.getMoTa(),
+                hd.getTenNguoiNhan(),
+                hd.getSdtNguoiNhan(),
+                hd.getXa(),
+                hd.getHuyen(),
+                hd.getTinh(),
+                hd.getDiaChi(),
+                hd.getTongTien(),
+                hd.getHinhThucMua(),
+                hd.getHinhThucThanhToan(),
+                hd.getHinhThucNhanHang(),
+                hd.getSoTienGiam(),
+                hd.getPhiShip(),
+                hd.getTrangThai(),
+                hd.getUserEntity() != null ? new UserDto(
+                        hd.getUserEntity().getId(),
+                        null, // Không cần ảnh
+                        hd.getUserEntity().getHoTen(),
+                        null, // Không cần ngày sinh
+                        hd.getUserEntity().getSoDienThoai(),
+                        hd.getUserEntity().getEmail(),
+                        null, // Không cần mật khẩu
+                        null, // Không cần isEnabled
+                        null, // Không cần roleNames
+                        null  // Không cần địa chỉ
+                ) : null
+        )).collect(Collectors.toList());
     }
 
     @Override

@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.HoaDonDto;
 import com.example.demo.entity.HoaDonEntity;
 import com.example.demo.service.TrangThaiHoaDonService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -39,7 +40,7 @@ public class HoaDonController {
         return trangThaiHoaDonService.huyHoaDon(id);
     }
     @GetMapping("/getAll")
-    public List<HoaDonEntity> getAllHoaDon() {
+    public List<HoaDonDto> getAllHoaDon() {
         return trangThaiHoaDonService.getAllHoaDon();
     }
     @GetMapping("/{id}")

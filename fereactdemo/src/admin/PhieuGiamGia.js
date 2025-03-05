@@ -161,10 +161,10 @@ const DotGiamGia = () => {
       title: "Trạng Thái",
       dataIndex: "TRANG_THAI",
       key: "TRANG_THAI",
-      render: (text) => (text === 0 ? "Còn" : text === 1 ? "Hết" : "Đang chờ"),
+      render: (text) => (text === 0 ? "Hoạt động" : text === 1 ? "Không hoạt động" : "Đang chờ"),
     },
     {
-      title: "Action",
+      title: "Thao tác",
       key: "action",
       render: (text, record) => (
         <Space size="middle">

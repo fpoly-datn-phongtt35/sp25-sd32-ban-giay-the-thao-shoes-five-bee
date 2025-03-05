@@ -1,23 +1,23 @@
 import React, { useEffect, useState } from "react";
 import { getChucVu } from "../service/ChucVuService";
 import {
-  addNhanVien,
-  deleteNhanVien,
-  detailNhanVien,
-  getAllNhanVien,
-  updateNhanVien,
+    addNhanVien,
+    deleteNhanVien,
+    detailNhanVien,
+    getAllNhanVien,
+    updateNhanVien,
 } from "../service/NhanVienService";
 import {
-  Button,
-  Form,
-  Input,
-  message,
-  Modal,
-  Radio,
-  Select,
-  Space,
-  Table,
-  DatePicker,
+    Button,
+    Form,
+    Input,
+    message,
+    Modal,
+    Radio,
+    Select,
+    Space,
+    Table,
+    DatePicker,
 } from "antd";
 import { Option } from "antd/es/mentions";
 import bcrypt from "bcryptjs";
@@ -39,22 +39,22 @@ const NhanVien = () => {
     const [soDienThoai, setSoDienThoai] = useState("");
 
 
-  const getActiveNhanVien = () => {
-    return nhanVien.filter((item) => item.TRANG_THAI === 0);
-  };
-  const onSelectChange = (newSelectedRowKeys) => {
-    console.log("selectedRowKeys changed: ", newSelectedRowKeys);
-    setSelectedRowKeys(newSelectedRowKeys);
-  };
+    const getActiveNhanVien = () => {
+        return nhanVien.filter((item) => item.TRANG_THAI === 0);
+    };
+    const onSelectChange = (newSelectedRowKeys) => {
+        console.log("selectedRowKeys changed: ", newSelectedRowKeys);
+        setSelectedRowKeys(newSelectedRowKeys);
+    };
 
-  const onChange = (e) => {
-    console.log("radio checked", e.target.value);
-    setValue(e.target.value);
-  };
+    const onChange = (e) => {
+        console.log("radio checked", e.target.value);
+        setValue(e.target.value);
+    };
 
-  const trangThai = (status) => {
-    return status === 0 ? "Đang sử dụng" : "Không sử dụng";
-  };
+    const trangThai = (status) => {
+        return status === 0 ? "Đang sử dụng" : "Không sử dụng";
+    };
 
 
     useEffect(() => {
@@ -97,7 +97,7 @@ const NhanVien = () => {
             message.error("Không được để trống mật khẩu");
             return;
         }
-        
+
         const userData = {
             hoTen: hoTen,
             email: email,
@@ -193,15 +193,15 @@ const NhanVien = () => {
                 <br /><br />
                 <Input placeholder='Số Điện Thoại' value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
                 <br /><br />
-                <DatePicker 
-                    placeholder='Ngày Sinh' 
-                    value={ngaySinh} 
+                <DatePicker
+                    placeholder='Ngày Sinh'
+                    value={ngaySinh}
                     onChange={(date) => setNgaySinh(date)}
                     style={{ width: '100%' }}
                 />
                 <br /><br />
-                <input 
-                    type="file" 
+                <input
+                    type="file"
                     onChange={handleFileChange}
                     accept="image/*"
                     style={{ marginBottom: '16px' }}
@@ -215,8 +215,8 @@ const NhanVien = () => {
                 )}
                 <br />
                 <Radio.Group onChange={onChange} value={value}>
-                    <Radio value={1}>Còn</Radio>
-                    <Radio value={2}>Hết</Radio>
+                    <Radio value={1}>Hoạt động</Radio>
+                    <Radio value={2}>Không hoạt động</Radio>
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={createNhanVien}>
@@ -226,33 +226,33 @@ const NhanVien = () => {
                     Tải xuống mẫu Excel
                 </Button>
                 <br /><br />
-                <Table 
-                    pagination={{ pageSize: 5, defaultPageSize: 5 }} 
-                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }} 
+                <Table
+                    pagination={{ pageSize: 5, defaultPageSize: 5 }}
+                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
                     columns={[
                         {
-                            title: 'HỌ TÊN',
+                            title: 'Họ tên',
                             dataIndex: 'HOTEN',
                             key: 'HOTEN'
                         },
                         {
-                            title: 'EMAIL',
+                            title: 'Email',
                             dataIndex: 'EMAIL',
                             key: 'EMAIL'
                         },
                         {
-                            title: 'SỐ ĐIỆN THOẠI',
+                            title: 'Số điện thoại',
                             dataIndex: 'SODIENTHOAI',
                             key: 'SODIENTHOAI'
                         },
                         {
-                            title: 'NGÀY SINH',
+                            title: 'Ngày sinh',
                             dataIndex: 'NGAYSINH',
                             key: 'NGAYSINH',
                             render: (text) => text ? moment(text).format('DD/MM/YYYY') : 'Chưa có'
                         },
                         {
-                            title: 'ẢNH',
+                            title: 'Ảnh',
                             dataIndex: 'ANH',
                             key: 'ANH',
                             render: (text, record) => (
@@ -264,13 +264,13 @@ const NhanVien = () => {
                             ),
                         },
                         {
-                            title: 'TRẠNG THÁI',
+                            title: 'Trạng thái',
                             dataIndex: 'TRANG_THAI',
                             key: 'TRANG_THAI',
                             render: (text) => trangThai(text)
                         },
                         {
-                            title: 'THAO TÁC',
+                            title: 'Thao tác',
                             key: 'action',
                             render: (text, record) => (
                                 <Space size="middle">
@@ -279,8 +279,8 @@ const NhanVien = () => {
                                 </Space>
                             ),
                         },
-                    ]} 
-                    dataSource={nhanVien} 
+                    ]}
+                    dataSource={nhanVien}
                 />
             </div>
             <Modal title="Cập nhật Nhân Viên" onOk={editNhanVienButton} open={isModalVisible} onCancel={() => setIsModalVisible(false)}>
@@ -295,14 +295,14 @@ const NhanVien = () => {
                         <Input value={soDienThoai} onChange={(e) => setSoDienThoai(e.target.value)} />
                     </Form.Item>
                     <Form.Item label="Ngày Sinh">
-                        <DatePicker 
-                            value={ngaySinh} 
+                        <DatePicker
+                            value={ngaySinh}
                             onChange={(date) => setNgaySinh(date)}
                         />
                     </Form.Item>
                     <Form.Item label="Ảnh đại diện">
-                        <input 
-                            type="file" 
+                        <input
+                            type="file"
                             onChange={handleFileChange}
                             accept="image/*"
                         />
