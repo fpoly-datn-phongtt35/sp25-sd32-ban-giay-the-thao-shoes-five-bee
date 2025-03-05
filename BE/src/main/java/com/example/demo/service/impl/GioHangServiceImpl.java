@@ -1,6 +1,7 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.response.GioHangChiTietResponse;
+import com.example.demo.dto.response.GioHangResponse;
 import com.example.demo.entity.GioHangChiTietEntity;
 import com.example.demo.entity.GioHangEntity;
 import com.example.demo.entity.UserEntity;
@@ -56,20 +57,7 @@ public class GioHangServiceImpl implements GioHangService {
             });
     GioHangResponse gioHangResponse = new GioHangResponse();
     gioHangResponse.setIdGioHang(gioHang.getId());
-    GioHangEntity gioHang =
-        gioHangRepository
-            .findByUserEntity(userEntity)
-            .orElseGet(
-                () -> {
-                  GioHangEntity newGioHang = new GioHangEntity();
-                  newGioHang.setMa(generateUniqueCode());
-                  newGioHang.setUserEntity(userEntity);
-                  newGioHang.setNgayTao(new Date(System.currentTimeMillis()));
-                  newGioHang.setNgayCapNhat(new Date(System.currentTimeMillis()));
-                  newGioHang.setTrangThai(1);
-                  newGioHang.setGhiChu("Giỏ hàng mới tạo");
-                  return gioHangRepository.save(newGioHang);
-                });
+
 
     // Lấy danh sách sản phẩm trong giỏ hàng
     List<GioHangChiTietEntity> chiTietList =
