@@ -1,6 +1,7 @@
 package com.example.demo.controller;
 
 import com.example.demo.service.GioHangChiTietService;
+import java.util.List;
 import java.util.UUID;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -11,6 +12,11 @@ import org.springframework.web.bind.annotation.*;
 public class GioHangChiTietController {
 
   @Autowired private GioHangChiTietService gioHangChiTietService;
+
+  @GetMapping("/check-out")
+  public ResponseEntity<?> getGioHangChiTietKhiCheckout(@RequestBody List<UUID> ids) {
+    return ResponseEntity.ok(gioHangChiTietService.getGioHangChiTietKhiCheckout(ids));
+  }
 
   @PostMapping("/add-to-cart")
   public ResponseEntity<String> addToCart(

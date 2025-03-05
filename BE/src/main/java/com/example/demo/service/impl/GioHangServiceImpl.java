@@ -5,12 +5,14 @@ import com.example.demo.dto.response.GioHangResponse;
 import com.example.demo.entity.GioHangChiTietEntity;
 import com.example.demo.entity.GioHangEntity;
 import com.example.demo.entity.UserEntity;
+import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
 import com.example.demo.repository.GioHangChiTietRepository;
 import com.example.demo.repository.GioHangRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.GioHangService;
 import com.example.demo.service.UsersService;
 
+import java.math.BigDecimal;
 import java.sql.Date;
 import java.sql.Timestamp;
 import java.util.List;
@@ -29,14 +31,15 @@ public class GioHangServiceImpl implements GioHangService {
   private final UserRepository userRepository;
   private final UsersService usersService;
   private final GioHangChiTietRepository gioHangChiTietRepository;
+  private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
 
   @Override
   public GioHangResponse getCartItems() {
     String email = usersService.getAuthenticatedUserEmail();
 
     Optional<UserEntity> userEntityOptional = userRepository.findByEmail(email);
-    if(userEntityOptional.isEmpty()){
-      throw new RuntimeException("Không tìm thấy user với email :" +email);
+    if (userEntityOptional.isEmpty()) {
+      throw new RuntimeException("Không tìm thấy user với email :" + email);
     }
 
     UserEntity userEntity = userEntityOptional.get();
@@ -55,6 +58,7 @@ public class GioHangServiceImpl implements GioHangService {
     GioHangResponse gioHangResponse = new GioHangResponse();
     gioHangResponse.setIdGioHang(gioHang.getId());
 
+
     // Lấy danh sách sản phẩm trong giỏ hàng
     List<GioHangChiTietEntity> chiTietList =
         gioHangChiTietRepository.findByGioHangEntity(gioHang.getId());
@@ -67,17 +71,27 @@ public class GioHangServiceImpl implements GioHangService {
                     item.getId(),
                     item.getGiayChiTietEntity().getId(),
                     item.getGiayChiTietEntity().getGiayEntity().getTen(),
-                    item.getGiayChiTietEntity().getGiayEntity().getAnhGiayEntities().get(0).getTenUrl(),
+                    item.getGiayChiTietEntity()
+                        .getGiayEntity()
+                        .getAnhGiayEntities()
+                        .get(0)
+                        .getTenUrl(),
                     item.getGiayChiTietEntity().getMauSacEntity().getTen(),
                     item.getGiayChiTietEntity().getKichCoEntity().getTen(),
                     item.getGiayChiTietEntity().getGiaBan(),
+                    item.getGiayChiTietEntity()
+                        .getGiaBan()
+                        .subtract(
+                            giamGiaChiTietSanPhamRepository
+                                .findByGiayChiTiet(item.getGiayChiTietEntity().getId())
+                                .getSoTienDaGiam()),
                     item.getSoLuong()))
         .collect(Collectors.toList());
     gioHangResponse.setGioHangChiTietResponses(gioHangChiTietResponseList);
     return gioHangResponse;
   }
 
-    private String generateUniqueCode() {
-        return "GH" + UUID.randomUUID().toString().substring(0,6).toUpperCase();
-    }
+  private String generateUniqueCode() {
+    return "GH" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+  }
 }
