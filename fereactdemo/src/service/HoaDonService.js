@@ -1,6 +1,5 @@
-import axios from "axios";
-
-const REST_API_BASE_URL = "http://localhost:5000/api/hoadon";
+import axios from "../axiosConfig";
+const REST_API_BASE_URL = "trang-thai-hoa-don";
 
 export const getHoaDon1 = () => axios.get(REST_API_BASE_URL);
 
@@ -20,7 +19,7 @@ export const deleteHoaDon1 = (id) =>
   axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
 
 //Truongcute
-export const getHoaDon = () => axios.get(REST_API_BASE_URL);
+export const getHoaDon = () => axios.get(`${REST_API_BASE_URL}/getAll`);
 
 export const addHoaDon = (hoaDon) =>
   axios.post(`${REST_API_BASE_URL}/add`, hoaDon);

@@ -43,7 +43,7 @@ import WebcamComponent from "./WebcamComponent";
 
 import { createVNPayPayment } from "../service/VnpayService";
 
-import AddressModal from "./AddressModal"; 
+import AddressModal from "./AddressModal";
 
 const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
@@ -260,30 +260,34 @@ const BanHangTaiQuay = () => {
     try {
       const result = await getGiamGiaHoaDon(); // Gọi API để lấy danh sách mã giảm giá
       console.log("API Response (Mã giảm giá):", result.data);
-
+  
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
       }
-
-      // Lọc và xử lý dữ liệu mã giảm giá
-      const filteredMaGiamGia = result.data.map((mg) => ({
+  
+      // Lọc chỉ lấy mã giảm giá đang hoạt động (TRANG_THAI === 0)
+      const filteredMaGiamGia = result.data
+      .filter((mg) => mg.trangThai !== undefined && Number(mg.trangThai) === 0) // Chỉ lấy mã giảm giá có trạng thái 0 (hoạt động)
+      .map((mg) => ({
         id: mg.id,
         ten: mg.ten ?? "Không có tên",
         giaTri: mg.phanTramGiam ?? 0,
         loai: mg.loai ?? "VNĐ",
         soluong: mg.soLuong,
-        soTienGiamMax: mg.soTienGiamMax, // Có thể là "PERCENT" hoặc "VNĐ"
+        soTienGiamMax: mg.soTienGiamMax,
       }));
-
-      console.log("Danh sách mã giảm giá sau khi xử lý:", filteredMaGiamGia);
-      setMaGiamGiaList(filteredMaGiamGia);
+    
+    console.log("Danh sách mã giảm giá sau khi lọc:", filteredMaGiamGia);
+    setMaGiamGiaList(filteredMaGiamGia);
+    
     } catch (error) {
       console.error("Lỗi khi lấy danh sách mã giảm giá:", error);
       message.error("Không thể tải danh sách mã giảm giá");
     }
   };
+  
 
-  const handleMaGiamGiaChange = async (value) => {
+ const handleMaGiamGiaChange = async (value) => {
     let hoaDonGoc = totalHoaDon + giaTriGiam; // Reset tổng tiền về ban đầu trước khi áp dụng mã mới
 
     // Nếu đã có mã giảm giá, hủy mã cũ
@@ -301,6 +305,12 @@ const BanHangTaiQuay = () => {
       console.log("Chi tiết mã giảm giá:", response.data);
 
       const maGiamGia = response.data;
+
+      // Bỏ qua mã giảm giá nếu không hoạt động
+      if (maGiamGia.TRANG_THAI !== 0) {
+        message.error("Mã giảm giá này không hoạt động!");
+        return;
+      }
 
       const today = new Date();
       const startDate = new Date(maGiamGia.ngayBatDau);
@@ -356,6 +366,7 @@ const BanHangTaiQuay = () => {
     }
   };
 
+
   const getChuongTrinhGiamGia = async () => {
     try {
       const result = await getPhieuGiamGia();
@@ -372,12 +383,11 @@ const BanHangTaiQuay = () => {
     setSelectedKhachHang(value);
     try {
       const response = await detailKhachHang(value);
-      console.log("khachhang",response.data);
+      console.log("khachhang", response.data);
       const khachHang = response.data;
       setHoTen(khachHang.hoTen);
       setSoDienThoai(khachHang.soDienThoai);
       setDiaChi(khachHang.diaChi);
-
     } catch (error) {
       message.error("Lỗi khi lấy chi tiết khách hàng");
     }
@@ -385,7 +395,6 @@ const BanHangTaiQuay = () => {
   const getAllKhachHangData = async () => {
     try {
       const result = await getAllKhachHang();
-    
 
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
@@ -575,7 +584,7 @@ const BanHangTaiQuay = () => {
   const getAllGiay = async () => {
     try {
       const result = await getAllGiayChiTiet();
- console.log("Dữ liệu giày:", result.data);
+      console.log("Dữ liệu giày:", result.data);
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu trả về không hợp lệ");
       }
@@ -661,15 +670,15 @@ const BanHangTaiQuay = () => {
       message.error("Vui lòng chọn hình thức thanh toán!");
       return;
     }
-  
+
     if (selectedOption === "option1" && changeAmount < 0) {
       message.error("Số tiền khách đưa không đủ!");
       return;
     }
-  
+
     try {
       const hoaDonRequest = {
-        ma: `HD${moment().format('YYYYMMDDHHmmss')}`,
+        ma: `HD${moment().format("YYYYMMDDHHmmss")}`,
         moTa: "Thanh toán tại quầy",
         tenNguoiNhan: hoTen || "Khách lẻ",
         sdtNguoiNhan: soDienThoai || null,
@@ -680,43 +689,50 @@ const BanHangTaiQuay = () => {
         xa: null,
         idGiamGia: selectedMaGiamGia || null,
         hinhThucThanhToan: selectedOption === "option1" ? 1 : 0,
-        isGiaoHang: false
+        isGiaoHang: false,
       };
-  
+
       console.log("Sending request with data:", hoaDonRequest); // Debug log
-  
+
       if (selectedOption === "option1") {
         // Thanh toán tiền mặt
-        const response = await thanhToanTaiQuay(selectedHoaDonId, hoaDonRequest);
+        const response = await thanhToanTaiQuay(
+          selectedHoaDonId,
+          hoaDonRequest
+        );
         console.log("Payment response:", response); // Debug log
-        
+
         if (response.status === 200) {
           message.success("Thanh toán thành công!");
           resetState();
           fetchHoaDonCho(); // Refresh danh sách hóa đơn
         }
-        
       } else if (selectedOption === "option3") {
         // Thanh toán VNPay
         try {
-          const vnpayResponse = await createVNPayPayment(totalHoaDon, selectedHoaDonId);
+          const vnpayResponse = await createVNPayPayment(
+            totalHoaDon,
+            selectedHoaDonId
+          );
           if (vnpayResponse.data) {
             // Lưu thông tin thanh toán trước khi chuyển hướng
             await thanhToanTaiQuay(selectedHoaDonId, hoaDonRequest);
             window.location.href = vnpayResponse.data;
             console.log("URL thanh toán VNPay:", vnpayResponse.data);
-            
           }
         } catch (error) {
           console.error("Lỗi khi tạo URL thanh toán VNPay:", error);
           message.error("Không thể tạo liên kết thanh toán VNPay!");
         }
       }
-        
     } catch (error) {
       console.error("Lỗi thanh toán:", error);
       if (error.response) {
-        message.error(`Lỗi: ${error.response.data.message || "Có lỗi xảy ra khi thanh toán!"}`);
+        message.error(
+          `Lỗi: ${
+            error.response.data.message || "Có lỗi xảy ra khi thanh toán!"
+          }`
+        );
       } else {
         message.error("Có lỗi xảy ra khi thanh toán!");
       }
@@ -729,7 +745,7 @@ const BanHangTaiQuay = () => {
     setSelectedKhachHang(null);
     setHoTen("");
     setSoDienThoai("");
-    setDiaChi(""); 
+    setDiaChi("");
     setPages([]);
     setSelectedPage(1);
     setIsKhachLe(true);
@@ -1079,22 +1095,22 @@ const BanHangTaiQuay = () => {
           onChange={(e) => setSoDienThoai(e.target.value)}
           placeholder="Nhập số điện thoại khách hàng"
         />
-         <div>
-      <label>Địa Chỉ:</label>
-      <Input
-        type="text"
-        value={diaChi}
-        onClick={() => setShowModal(true)}
-        placeholder="Nhập địa chỉ khách hàng"
-        readOnly
-      />
+        <div>
+          <label>Địa Chỉ:</label>
+          <Input
+            type="text"
+            value={diaChi}
+            onClick={() => setShowModal(true)}
+            placeholder="Nhập địa chỉ khách hàng"
+            readOnly
+          />
 
-      <AddressModal
-        visible={showModal}
-        onClose={() => setShowModal(false)}
-        setDiaChi={setDiaChi}
-      />
-    </div>
+          <AddressModal
+            visible={showModal}
+            onClose={() => setShowModal(false)}
+            setDiaChi={setDiaChi}
+          />
+        </div>
         <Button
           type="primary"
           onClick={handleAddKhachHang}
@@ -1131,26 +1147,24 @@ const BanHangTaiQuay = () => {
           Tiền thừa: {formatCurrency(changeAmount)}
         </p>
         <hr />
-        <div className="check_tt">
-          <label>
-            <input
-              type="checkbox"
-              value="option1"
-              checked={selectedOption === "option1"}
-              onChange={handleChange}
-            />
+        <div className="button-group">
+          <button
+            className={`payment-button ${
+              selectedOption === "option1" ? "active" : ""
+            }`}
+            onClick={() => setSelectedOption("option1")}
+          >
             Tiền mặt
-          </label>
-          <br />
-          <label>
-            <input
-              type="checkbox"
-              value="option3"
-              checked={selectedOption === "option3"}
-              onChange={handleChange}
-            />
+          </button>
+
+          <button
+            className={`payment-button ${
+              selectedOption === "option3" ? "active" : ""
+            }`}
+            onClick={() => setSelectedOption("option3")}
+          >
             Chuyển Khoản (VNPay)
-          </label>
+          </button>
         </div>
         <p style={{ paddingTop: "10px" }}>
           Tổng Tiền: {formatCurrency(totalHoaDon)}
@@ -1164,8 +1178,6 @@ const BanHangTaiQuay = () => {
         </button>
       </div>
     </div>
-
-
   );
 };
 

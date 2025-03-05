@@ -58,61 +58,32 @@ const QuanLyHoaDon = () => {
 
     const fetchHoaDon = async () => {
         try {
-            const result = await getHoaDonChiTiet1();
+            const result = await getHoaDon();
             console.log("Dữ liệu từ API:", result.data);
-
+    
             if (!Array.isArray(result.data)) {
                 console.error("Dữ liệu không phải là mảng");
                 setData([]);
                 return;
             }
-
-            const formattedData = result.data.reduce((acc, item) => {
-                if (!item || !item.hoaDon) {
-                    console.error("Dữ liệu không hợp lệ:", item);
-                    return acc;
-                }
-
-                const existingOrder = acc.find(order => order.order_id === item.hoaDon.id);
-                const khachHang = item.hoaDon.khachHang || {};
-
-                if (existingOrder) {
-                    existingOrder.products.push({
-                        tenGiay: item.giayChiTiet && item.giayChiTiet.giay ? item.giayChiTiet.giay.ten : null,
-                        mauSac: item.giayChiTiet && item.giayChiTiet.mauSac ? item.giayChiTiet.mauSac.ten : null,
-                        kichCo: item.giayChiTiet && item.giayChiTiet.kichCo ? item.giayChiTiet.kichCo.ten : null,
-                        giaBan: item.giayChiTiet && item.giayChiTiet ? item.giayChiTiet.giaBan : null,
-                        soLuong: item.soLuong,
-
-                    });
-                } else {
-                    acc.push({
-                        key: item.hoaDon.id,
-                        order_id: item.hoaDon.id,
-                        ma: item.hoaDon.ma,
-                        user: khachHang.hoTen || item.hoaDon.hoTenKhachHang || "Khách lẻ",
-                        user_phone: khachHang.soDienThoai || item.hoaDon.soDienThoaiKhachHang || "N/A",
-                        order_on: item.hoaDon.ngayTao ? moment(item.hoaDon.ngayTao).format('DD/MM/YYYY') : 'N/A',
-                        status: mapTrangThai(item.hoaDon.trangThai),
-                        trangThai: item.hoaDon.trangThai,
-                        diaChi: item.hoaDon.diaChi,
-                        hinhThucMua: item.hoaDon.hinhThucMua === 0 ? 'Online' : 'Tại quầy',
-                        hinhThucThanhToan: item.hoaDon.hinhThucThanhToan === 0 ? 'Chuyển khoản' : 'Tiền mặt',
-
-                        products: [{
-                            tenGiay: item.giayChiTiet && item.giayChiTiet.giay ? item.giayChiTiet.giay.ten : null,
-                            mauSac: item.giayChiTiet && item.giayChiTiet.mauSac ? item.giayChiTiet.mauSac.ten : null,
-                            kichCo: item.giayChiTiet && item.giayChiTiet.kichCo ? item.giayChiTiet.kichCo.ten : null,
-                            giaBan: item.giayChiTiet && item.giayChiTiet ? item.giayChiTiet.giaBan : null,
-
-                            soLuong: item.soLuong,
-                        }],
-                        tongTien: item.hoaDon.tongTien,
-                    });
-                }
-                return acc;
-            }, []);
-
+    
+            const formattedData = result.data.map((item) => ({
+                key: item.id, // ID hóa đơn
+                order_id: item.id,
+                ma: item.ma, // Mã hóa đơn
+                user: item.tenNguoiNhan || (item.userDto?.hoTen ?? "Khách lẻ"), // Tên người nhận hoặc user
+                user_phone: item.sdtNguoiNhan || (item.userDto?.soDienThoai ?? "N/A"), // Số điện thoại
+                order_on: item.ngayTao ? moment(item.ngayTao).format('DD/MM/YYYY') : 'N/A', // Ngày tạo đơn
+                status: mapTrangThai(item.trangThai), // Trạng thái đơn hàng
+                trangThai: item.trangThai,
+                diaChi: item.diaChi || "Không có địa chỉ", // Địa chỉ đơn hàng
+                hinhThucMua: item.hinhThucMua === 0 ? 'Online' : 'Tại quầy',
+                hinhThucThanhToan: item.hinhThucThanhToan === 0 ? 'Chuyển khoản' : 'Tiền mặt',
+                phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
+                soTienGiam: item.soTienGiam ?? 0, // Số tiền giảm giá
+                tongTien: item.tongTien, // Tổng tiền thanh toán
+            }));
+    
             console.log("Dữ liệu đã định dạng:", formattedData);
             setData(formattedData);
         } catch (error) {
@@ -120,6 +91,7 @@ const QuanLyHoaDon = () => {
             message.error("Lỗi khi tải dữ liệu!");
         }
     };
+    
 
 
 
@@ -411,9 +383,9 @@ const QuanLyHoaDon = () => {
                     <Button type="primary" size="small" onClick={() => handleEdit(record)}>
                         Sửa
                     </Button>
-                    <Button type="danger" size="small" onClick={() => handleDeleteSingle(record)}>
+                    {/* <Button type="danger" size="small" onClick={() => handleDeleteSingle(record)}>
                         Xóa
-                    </Button>
+                    </Button> */}
                 </Space>
             ),
         },
