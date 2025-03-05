@@ -44,7 +44,7 @@ const useCart = () => {
             cartItems = [response.data.gioHangChiTietResponses];
           }
         }
-        localStorage.setItem("idGioHang", response.data.idGioHang); 
+        localStorage.setItem("idGioHang", response.data.idGioHang);
 
         const validItems = cartItems.filter(item =>
           item &&
