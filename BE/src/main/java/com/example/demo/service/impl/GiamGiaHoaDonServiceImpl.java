@@ -28,7 +28,7 @@ public class GiamGiaHoaDonServiceImpl implements GiamGiaHoaDonService {
   @Override
   public void updateTrangThaiGiamGiaHoaDon() {
     giamGiaHoaDonRepository.findAll().stream()
-        .filter(g -> g.getNgayKetThuc().after(new Date()))
+        .filter(g -> g.getNgayKetThuc().before(new Date()))
         .forEach(
             gg -> {
               gg.setTrangThai(1);
