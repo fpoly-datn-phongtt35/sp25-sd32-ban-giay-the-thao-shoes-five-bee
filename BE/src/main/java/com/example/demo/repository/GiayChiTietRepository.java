@@ -47,4 +47,8 @@ public interface GiayChiTietRepository
   // Tìm theo ID giày
   @Query("SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId")
   List<GiayChiTietEntity> findByGiayEntityId(@Param("giayId") UUID giayId);
+
+  List<GiayChiTietEntity> findByKichCoEntityId(UUID kichCoId);
+
+  List<GiayChiTietEntity> findByMauSacEntityIdAndKichCoEntityId(UUID mauSacId, UUID kichCoId);
 }
