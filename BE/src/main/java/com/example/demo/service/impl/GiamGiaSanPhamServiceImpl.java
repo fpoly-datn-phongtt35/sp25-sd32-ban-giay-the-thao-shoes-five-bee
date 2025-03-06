@@ -18,10 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -32,6 +30,7 @@ import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.domain.Specification;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -265,4 +264,66 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   public List<GiamGiaSanPhamEntity> findByTen(String ten) {
     return giamGiaSanPhamRepository.findByTenContainingIgnoreCase(ten);
   }
+  @Transactional
+  @Override
+  public void apDungGiamGiaChoSanPham(List<UUID> idSanPhamList, UUID idGiamGia) {
+    // 1. Lấy chương trình giảm giá mới từ DB
+    GiamGiaSanPhamEntity chuongTrinhGiamGia = giamGiaSanPhamRepository.findById(idGiamGia)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy chương trình giảm giá!"));
+
+    // 2. Duyệt qua danh sách sản phẩm (dù có 1 hay nhiều sản phẩm)
+    for (UUID idSanPham : idSanPhamList) {
+      GiayChiTietEntity sanPham = giayChiTietRepository.findById(idSanPham)
+              .orElseThrow(() -> new RuntimeException("Không tìm thấy sản phẩm với ID: " + idSanPham));
+
+      // 3. Kiểm tra nếu sản phẩm đã có giảm giá trước đó
+      Optional<GiamGiaChiTietSanPhamEntity> giamGiaHienTai =
+              giamGiaChiTietSanPhamRepository.findByGiayChiTiet_Id(sanPham.getId());
+
+      if (giamGiaHienTai.isPresent()) {
+        // Nếu đã có giảm giá, cập nhật giảm giá mới
+        GiamGiaChiTietSanPhamEntity giamGiaCu = giamGiaHienTai.get();
+        giamGiaCu.setChuongTrinhGiamSanPhamEntity(chuongTrinhGiamGia);
+
+        // Tính toán số tiền giảm mới
+        BigDecimal soTienDaGiam = sanPham.getGiaBan()
+                .multiply(BigDecimal.valueOf(chuongTrinhGiamGia.getPhanTramGiam()))
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+        BigDecimal giaSauGiam = sanPham.getGiaBan().subtract(soTienDaGiam);
+
+        giamGiaCu.setSoTienDaGiam(soTienDaGiam);
+        giamGiaChiTietSanPhamRepository.save(giamGiaCu);
+
+        // Cập nhật giá sản phẩm
+        sanPham.setGiaBan(giaSauGiam);
+        giayChiTietRepository.save(sanPham);
+      } else {
+        // Nếu chưa có giảm giá, tạo mới
+        BigDecimal soTienDaGiam = sanPham.getGiaBan()
+                .multiply(BigDecimal.valueOf(chuongTrinhGiamGia.getPhanTramGiam()))
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+        BigDecimal giaSauGiam = sanPham.getGiaBan().subtract(soTienDaGiam);
+
+        GiamGiaChiTietSanPhamEntity giamGiaMoi = GiamGiaChiTietSanPhamEntity.builder()
+                .soTienDaGiam(soTienDaGiam)
+                .giayChiTiet(sanPham)
+                .chuongTrinhGiamSanPhamEntity(chuongTrinhGiamGia)
+                .build();
+
+        giamGiaChiTietSanPhamRepository.save(giamGiaMoi);
+
+        // Cập nhật giá sản phẩm
+        sanPham.setGiaBan(giaSauGiam);
+        giayChiTietRepository.save(sanPham);
+      }
+    }
+  }
+
+
+
+
+
 }
+
+
+

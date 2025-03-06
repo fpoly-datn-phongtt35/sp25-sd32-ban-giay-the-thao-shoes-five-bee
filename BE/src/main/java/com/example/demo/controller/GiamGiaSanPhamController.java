@@ -14,6 +14,9 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.Map;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/giam-gia-san-pham")
@@ -68,5 +71,19 @@ public class GiamGiaSanPhamController {
   public ResponseEntity<List<GiamGiaSanPhamEntity>> searchGiamGiaByName(@RequestParam String ten) {
     List<GiamGiaSanPhamEntity> result = giamGiaSanPhamService.findByTen(ten);
     return ResponseEntity.ok(result);
+  }
+  @PostMapping("/ap-dung")
+  public ResponseEntity<String> apDungGiamGiaChoSanPham(@RequestBody Map<String, Object> payload) {
+    // Lấy danh sách sản phẩm từ request body
+    List<UUID> idSanPhamList = ((List<String>) payload.get("idSanPhamList"))
+            .stream().map(UUID::fromString).collect(Collectors.toList());
+
+    // Lấy ID chương trình giảm giá từ request body
+    UUID idGiamGia = UUID.fromString((String) payload.get("idGiamGia"));
+
+    // Gọi service để áp dụng giảm giá
+    giamGiaSanPhamService.apDungGiamGiaChoSanPham(idSanPhamList, idGiamGia);
+
+    return ResponseEntity.ok("Áp dụng giảm giá thành công cho sản phẩm đã chọn!");
   }
 }
