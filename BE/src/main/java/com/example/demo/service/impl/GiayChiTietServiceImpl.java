@@ -1,6 +1,9 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.GiayChiTietDto;
+import com.example.demo.dto.request.GiayDto;
+import com.example.demo.dto.request.KichCoUpdateDto;
+import com.example.demo.dto.request.MauSacUpdateDto;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.AnhGiayEntity;
 import com.example.demo.entity.GiayChiTietEntity;
@@ -26,6 +29,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -226,6 +230,24 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         return list;
     }
 
-
+    @Override
+    public List<GiayChiTietEntity> filterGiayChiTiet(UUID mauSacId, UUID kichCoId) {
+        if (mauSacId != null && kichCoId != null) {
+            // Nếu có cả hai -> lọc theo cả màu sắc & kích cỡ
+            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityId(mauSacId, kichCoId);
+        } else if (mauSacId != null) {
+            // Nếu chỉ có màu sắc -> lọc theo màu sắc
+            return giayChiTietRepository.findByMauSacEntityId(mauSacId);
+        } else if (kichCoId != null) {
+            // Nếu chỉ có kích cỡ -> lọc theo kích cỡ
+            return giayChiTietRepository.findByKichCoEntityId(kichCoId);
+        } else {
+            // Nếu không truyền gì -> trả về tất cả giày
+            return giayChiTietRepository.findAll();
+        }
+    }
 
 }
+
+
+

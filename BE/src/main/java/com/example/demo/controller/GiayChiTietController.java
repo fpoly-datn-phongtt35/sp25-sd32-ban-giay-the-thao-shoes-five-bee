@@ -65,4 +65,12 @@ public class GiayChiTietController {
     List<GiayChiTietEntity> chiTietList = giayChiTietService.getAllGiayChiTietByGiayId(giayId);
     return ResponseEntity.ok(chiTietList);
   }
+  @GetMapping("/loc")
+  public ResponseEntity<List<GiayChiTietEntity>> filterGiayChiTiet(
+          @RequestParam(required = false) UUID mauSacId,
+          @RequestParam(required = false) UUID kichCoId) {
+
+    List<GiayChiTietEntity> result = giayChiTietService.filterGiayChiTiet(mauSacId, kichCoId);
+    return ResponseEntity.ok(result);
+  }
 }
