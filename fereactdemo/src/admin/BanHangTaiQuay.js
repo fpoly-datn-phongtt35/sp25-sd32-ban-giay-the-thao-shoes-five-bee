@@ -307,10 +307,10 @@ const BanHangTaiQuay = () => {
       const maGiamGia = response.data;
 
       // Bỏ qua mã giảm giá nếu không hoạt động
-      if (maGiamGia.TRANG_THAI !== 0) {
-        message.error("Mã giảm giá này không hoạt động!");
-        return;
-      }
+      // if (maGiamGia.TRANG_THAI !== 0) {
+      //   message.error("Mã giảm giá này không hoạt động!");
+      //   return;
+      // }
 
       const today = new Date();
       const startDate = new Date(maGiamGia.ngayBatDau);
