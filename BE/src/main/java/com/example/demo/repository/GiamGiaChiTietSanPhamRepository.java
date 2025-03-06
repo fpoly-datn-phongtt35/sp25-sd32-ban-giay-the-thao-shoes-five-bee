@@ -2,6 +2,9 @@ package com.example.demo.repository;
 
 import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
 import com.example.demo.entity.GiayEntity;
+
+import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -17,4 +20,8 @@ public interface GiamGiaChiTietSanPhamRepository
 
   @Query("SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.giayChiTiet.id = :id")
   GiamGiaChiTietSanPhamEntity findByGiayChiTiet(@Param("id") UUID id);
+
+  Optional<GiamGiaChiTietSanPhamEntity> findByGiayChiTiet_Id(UUID giayChiTietId);
+
+
 }
