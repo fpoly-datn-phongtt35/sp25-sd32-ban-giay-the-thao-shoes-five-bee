@@ -27,13 +27,18 @@ public class GiamGiaHoaDonServiceImpl implements GiamGiaHoaDonService {
 
   @Override
   public void updateTrangThaiGiamGiaHoaDon() {
-    giamGiaHoaDonRepository.findAll().stream()
-        .filter(g -> g.getNgayKetThuc().before(new Date()))
-        .forEach(
-            gg -> {
-              gg.setTrangThai(1);
-              giamGiaHoaDonRepository.save(gg);
-            });
+    List<GiamGiaHoaDonEntity> danhSachGiamGia = giamGiaHoaDonRepository.findAll();
+    Date now = new Date();
+
+    danhSachGiamGia.forEach(
+        gg -> {
+          if (gg.getNgayKetThuc().before(now)) {
+            gg.setTrangThai(1);
+          } else if (gg.getNgayBatDau().after(now)) {
+            gg.setTrangThai(0);
+          }
+          giamGiaHoaDonRepository.save(gg);
+        });
   }
 
   @Override

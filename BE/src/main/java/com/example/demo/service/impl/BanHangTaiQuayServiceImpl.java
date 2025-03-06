@@ -78,7 +78,8 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       // Nếu mã giảm giá tồn tại, kiểm tra điều kiện áp dụng
       if (giamGia != null
           && giamGia.getSoLuong() > 0
-          && tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0) {
+          && tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0
+          && giamGia.getTrangThai() == 0) {
         soTienGiamKhiApMa =
             giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
                 idHoaDon, giamGia, tongTienSanPhamKhiGiam);

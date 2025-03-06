@@ -6,7 +6,6 @@ import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
 import com.example.demo.entity.GiamGiaSanPhamEntity;
 import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
 import com.example.demo.repository.GiamGiaSanPhamRepository;
 import com.example.demo.repository.GiayChiTietRepository;
@@ -15,7 +14,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -44,13 +42,18 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
   @Override
   public void updateTrangThaiGimGiaSanPham() {
-    giamGiaSanPhamRepository.findAll().stream()
-        .filter(g -> g.getNgayKetThuc().before(new Date()))
-        .forEach(
-            gg -> {
-              gg.setTrangThai(1);
-              giamGiaSanPhamRepository.save(gg);
-            });
+    List<GiamGiaSanPhamEntity> danhSachGiamGia = giamGiaSanPhamRepository.findAll();
+    Date now = new Date();
+
+    danhSachGiamGia.forEach(
+        gg -> {
+          if (gg.getNgayKetThuc().before(now)) {
+            gg.setTrangThai(1);
+          } else if (gg.getNgayBatDau().after(now)) {
+            gg.setTrangThai(0);
+          }
+          giamGiaSanPhamRepository.save(gg);
+        });
   }
 
   @Override
