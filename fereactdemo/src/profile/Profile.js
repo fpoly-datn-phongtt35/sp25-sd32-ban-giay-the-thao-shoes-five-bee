@@ -108,13 +108,18 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
 
   useEffect(() => {
     if (customerData.ngaySinh) {
-      console.log("Ngày sinh từ API:", customerData.ngaySinh);
+      const date = new Date(customerData.ngaySinh);
+
+      // Cộng thêm lệch múi giờ để giữ nguyên ngày
+      date.setHours(date.getHours() + Math.abs(date.getTimezoneOffset() / 60));
+
       setCustomerData(prevState => ({
         ...prevState,
-        ngaySinh: new Date(customerData.ngaySinh).toISOString().split('T')[0]
+        ngaySinh: date.toISOString().split('T')[0]
       }));
     }
   }, [customerData.ngaySinh]);
+
 
   const handleImageChange = (event) => {
     const file = event.target.files[0];

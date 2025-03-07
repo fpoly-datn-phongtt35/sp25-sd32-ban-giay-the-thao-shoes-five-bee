@@ -6,7 +6,6 @@ import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
 import com.example.demo.entity.GiamGiaSanPhamEntity;
 import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.GiamGiaChiTietSanPhamRepository;
 import com.example.demo.repository.GiamGiaSanPhamRepository;
 import com.example.demo.repository.GiayChiTietRepository;
@@ -15,12 +14,12 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
 import java.util.ArrayList;
+import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import lombok.RequiredArgsConstructor;
@@ -42,52 +41,67 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   private final GiayChiTietRepository giayChiTietRepository;
 
   @Override
+  public void updateTrangThaiGimGiaSanPham() {
+    List<GiamGiaSanPhamEntity> danhSachGiamGia = giamGiaSanPhamRepository.findAll();
+    Date now = new Date();
+
+    danhSachGiamGia.forEach(
+        gg -> {
+          if (gg.getNgayKetThuc().before(now)) {
+            gg.setTrangThai(1);
+          } else if (gg.getNgayBatDau().after(now)) {
+            gg.setTrangThai(0);
+          }
+          giamGiaSanPhamRepository.save(gg);
+        });
+  }
+
+  @Override
   public GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
-          GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
+      GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
 
     if (giamGiaChiTietSanPhamRequest.getIdGiayChiTiet() == null
-            && giamGiaChiTietSanPhamRequest.getIdGiayChiTiet().isEmpty()) {
+        && giamGiaChiTietSanPhamRequest.getIdGiayChiTiet().isEmpty()) {
       throw new IllegalArgumentException("Vui lòng truyền vào điều kiện để tạo giảm giá.");
     }
 
     GiamGiaSanPhamEntity giamGiaSanPham =
-            GiamGiaSanPhamEntity.builder()
-                    .ma(giamGiaChiTietSanPhamRequest.getMa())
-                    .ten(giamGiaChiTietSanPhamRequest.getTen())
-                    .phanTramGiam(giamGiaChiTietSanPhamRequest.getPhanTramGiam())
-                    .ngayBatDau(giamGiaChiTietSanPhamRequest.getNgayBatDau())
-                    .ngayKetThuc(giamGiaChiTietSanPhamRequest.getNgayKetThuc())
-                    .trangThai(1)
-                    .build();
+        GiamGiaSanPhamEntity.builder()
+            .ma(giamGiaChiTietSanPhamRequest.getMa())
+            .ten(giamGiaChiTietSanPhamRequest.getTen())
+            .phanTramGiam(giamGiaChiTietSanPhamRequest.getPhanTramGiam())
+            .ngayBatDau(giamGiaChiTietSanPhamRequest.getNgayBatDau())
+            .ngayKetThuc(giamGiaChiTietSanPhamRequest.getNgayKetThuc())
+            .trangThai(1)
+            .build();
     giamGiaSanPhamRepository.save(giamGiaSanPham);
 
     List<GiayChiTietEntity> giayChiTietEntities =
-            giayChiTietRepository.findGiayChiTietEntitiesByIds(
-                    giamGiaChiTietSanPhamRequest.getIdGiayChiTiet());
+        giayChiTietRepository.findGiayChiTietEntitiesByIds(
+            giamGiaChiTietSanPhamRequest.getIdGiayChiTiet());
 
     // Áp dụng giảm giá
     giayChiTietEntities.forEach(
-            sanPham -> {
-              BigDecimal soTienDaGiam =
-                      sanPham
-                              .getGiaBan()
-                              .multiply(BigDecimal.valueOf(giamGiaChiTietSanPhamRequest.getPhanTramGiam()))
-                              .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+        sanPham -> {
+          BigDecimal soTienDaGiam =
+              sanPham
+                  .getGiaBan()
+                  .multiply(BigDecimal.valueOf(giamGiaChiTietSanPhamRequest.getPhanTramGiam()))
+                  .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
 
-              GiamGiaChiTietSanPhamEntity chiTietGiamGia =
-                      GiamGiaChiTietSanPhamEntity.builder()
-                              .soTienDaGiam(soTienDaGiam)
-                              .trangThai(1)
-                              .giayChiTiet(sanPham)
-                              .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
-                              .build();
+          GiamGiaChiTietSanPhamEntity chiTietGiamGia =
+              GiamGiaChiTietSanPhamEntity.builder()
+                  .soTienDaGiam(soTienDaGiam)
+                  .trangThai(1)
+                  .giayChiTiet(sanPham)
+                  .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
+                  .build();
 
-              giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
-            });
+          giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
+        });
 
     return giamGiaSanPham;
   }
-
 
   @Override
   public List<GiamGiaSanPhamEntity> getAll() {
@@ -221,7 +235,9 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
     Sheet sheet = workbook.createSheet("ChuongTrinhGiamGia");
 
     Row headerRow = sheet.createRow(0);
-    String[] columns = {"ID", "Mã", "Tên", "Phần Trăm Giảm", "Ngày Bắt Đầu", "Ngày Kết Thúc", "Trạng Thái"};
+    String[] columns = {
+      "ID", "Mã", "Tên", "Phần Trăm Giảm", "Ngày Bắt Đầu", "Ngày Kết Thúc", "Trạng Thái"
+    };
     for (int i = 0; i < columns.length; i++) {
       Cell cell = headerRow.createCell(i);
       cell.setCellValue(columns[i]);
@@ -250,4 +266,3 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
     return giamGiaSanPhamRepository.findByTenContainingIgnoreCase(ten);
   }
 }
-

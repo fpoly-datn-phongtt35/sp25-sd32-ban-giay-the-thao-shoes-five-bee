@@ -51,7 +51,11 @@ public class GiayChiTietEntity {
   private Integer trangThai;
 
   @ManyToOne(fetch = FetchType.EAGER)
-
+  @JoinColumn(name = "ID_DANH_MUC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+  private DanhMucEntity danhMuc;
+  
+  
+//  @JsonBackReference
   @JoinColumn(name = "ID_GIAY", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private GiayEntity giayEntity;
   //  @JsonIgnore
