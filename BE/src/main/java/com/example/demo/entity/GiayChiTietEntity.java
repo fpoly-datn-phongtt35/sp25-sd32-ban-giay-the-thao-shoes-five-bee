@@ -55,7 +55,7 @@ public class GiayChiTietEntity {
   private DanhMucEntity danhMuc;
   
   
-//  @JsonBackReference
+  @ManyToOne
   @JoinColumn(name = "ID_GIAY", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private GiayEntity giayEntity;
   //  @JsonIgnore
