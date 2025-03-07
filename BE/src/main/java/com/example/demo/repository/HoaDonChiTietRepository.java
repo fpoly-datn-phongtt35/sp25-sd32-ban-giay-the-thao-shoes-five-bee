@@ -10,6 +10,8 @@ import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
 import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
+import java.util.Optional;
+
 
 @Repository
 public interface HoaDonChiTietRepository
@@ -23,6 +25,7 @@ public interface HoaDonChiTietRepository
   List<HoaDonChiTietEntity> findByHoaDonGetChiTiet(@Param("hoaDon") HoaDonEntity hoaDon);
 
   HoaDonChiTietEntity findByHoaDonEntityAndGiayChiTietEntity(HoaDonEntity hoaDon, GiayChiTietEntity giayChiTiet);
+
 
   List<HoaDonChiTietEntity> findAllByHoaDonEntity_Id(UUID hoaDonId);
   
