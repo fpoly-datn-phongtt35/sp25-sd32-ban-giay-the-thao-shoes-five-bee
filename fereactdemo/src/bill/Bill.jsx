@@ -39,7 +39,6 @@ export const Bill = () => {
   useEffect(() => {
     const getCustomerId = async () => {   
       const id = await fetchCustomerId();
-      console.log("customerId:", id);
       if (id) {
         setKhachHangId(id);
       } else {
