@@ -98,18 +98,20 @@ const OrderItem = ({ order, onChangeData }) => {
   return (
     <div className="order-item" >
       <div className="order-header">
-        <button className="favorite-btn"><Link to={"/productAll"}>Xem Shop</Link></button>
         <span className="shop-name">Five Start</span>
         <span className="order-status">
           {order.trangThai.toLocaleString() === "0" && "Chờ Xác Nhận"}
-          {order.trangThai.toLocaleString() === "1" && "Vận Chuyển"}
-          {order.trangThai.toLocaleString() === "2" && "Chờ Giao Hàng"}
-          {order.trangThai.toLocaleString() === "3" && "Hoàn Thành"}
-          {order.trangThai.toLocaleString() === "4" && "Đã Hủy"}
-          {order.trangThai.toLocaleString() === "5" && getOrderStatus(order, returnOrder)}
-          {order.trangThai.toLocaleString() === "6" && "Hoàn Tiền"}
-
+          {order.trangThai.toLocaleString() === "1" && "Hóa Đơn Chờ Thanh Toán"}
+          {order.trangThai.toLocaleString() === "2" && "Hoàn Thành"}
+          {order.trangThai.toLocaleString() === "3" && "Đã Xác Nhận"}
+          {order.trangThai.toLocaleString() === "4" && "Chờ Vận Chuyển"}
+          {order.trangThai.toLocaleString() === "5" && "Đang Vận Chuyển"}
+          {order.trangThai.toLocaleString() === "6" && "Đã Giao Hàng"}
+          {order.trangThai.toLocaleString() === "8" && "Đã Hủy"}
+          {order.trangThai.toLocaleString() === "9" && getOrderStatus(order, returnOrder)}
+          {order.trangThai.toLocaleString() === "7" && "Hoàn Tiền"}
         </span>
+
       </div>
 
       {/* {order.items.map((product, index) => (

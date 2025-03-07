@@ -9,12 +9,14 @@ export const OrderStatusPage = () => {
   const tabs = [
     { id: "all", label: "Tất cả Hóa đơn" },
     { id: "0", label: "Chờ Xác Nhận" },
-    { id: "1", label: "Vận Chuyển" },
-    { id: "2", label: "Chờ Giao Hàng" },
-    { id: "3", label: "Hoàn Thành" },
-    { id: "4", label: "Đã Hủy" },
-    { id: "5", label: "Trả Hàng/Hoàn Tiền"},
-  
+    // { id: "1", label: "Hóa Đơn Chờ Thanh Toán" },
+    { id: "3", label: "Đã Xác Nhận" },
+    { id: "4", label: "Chờ Vận Chuyển" },
+    { id: "5", label: "Đang Vận Chuyển" },
+    { id: "6", label: "Đã Giao Hàng" },
+    { id: "2", label: "Hoàn Thành" },
+    { id: "7", label: "Trả Hàng/Hoàn Tiền"},
+    { id: "8", label: "Đã Hủy" },
   ];
 
   const handleTabClick = (tabId) => {
@@ -23,7 +25,7 @@ export const OrderStatusPage = () => {
 
   return (
     <div>
-<div className="order-status-page">
+    <div className="order-status-page">
       
       <div className="tabs">
         {tabs.map((tab) => (

@@ -13,7 +13,7 @@ public class GioHangChiTietController {
 
   @Autowired private GioHangChiTietService gioHangChiTietService;
 
-  @GetMapping("/check-out")
+  @PostMapping("/check-out")
   public ResponseEntity<?> getGioHangChiTietKhiCheckout(@RequestBody List<UUID> ids) {
     return ResponseEntity.ok(gioHangChiTietService.getGioHangChiTietKhiCheckout(ids));
   }

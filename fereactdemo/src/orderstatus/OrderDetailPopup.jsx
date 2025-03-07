@@ -3,9 +3,9 @@ import { Button } from 'antd'; // Antd cho nút Print
 import './OrderDetailPopup.css'; // Import CSS nếu cần
 
 const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePrint }) => {
-
+  console.log("seledctOrder"+ selectedOrder);
   if (!selectedOrder) {
-    return null; // Nếu không có hóa đơn nào được chọn, không hiển thị popup
+    return null;
   }
 
   return (
@@ -19,22 +19,20 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
           <Button style={{ float: 'right', marginRight: '10px' }} type="primary" onClick={handlePrint}>
             Print
           </Button>
-
-          {/* Thông tin chi tiết đơn hàng */}
           <div className="thongtinhoadon">
             <div className="trai">
               <h4>Chi Tiết Đơn Hàng </h4>
               <h6>Mã Hóa Đơn: {selectedOrder?.ma || 'N/A'}</h6>
               <h6>Ngày Mua: {selectedOrder?.ngayTao.split('T')[0] || 'N/A'}</h6>
-              <h6>Hình Thức Mua: {selectedOrder?.hinhThucMua.toLocaleString()==="0"?"Online":"Offline" || 'N/A'}</h6>
-              <h6>Hình Thức Thanh Toán: {selectedOrder?.hinhThucThanhToan.toLocaleString()==="0"?"Thu hộ":"Chuyển khoản" || 'N/A'}</h6>
+              <h6>Hình Thức Mua: {selectedOrder?.hinhThucMua === 2 ? "Online" : selectedOrder?.hinhThucMua === 1 ? "Online" : 'N/A'}</h6>
+              <h6>Hình Thức Thanh Toán: {selectedOrder?.hinhThucThanhToan === 1 ? "VNpay" : selectedOrder?.hinhThucThanhToan === 2 ? "Thu hộ (COD)" : 'N/A'}</h6>
               <h6>Tổng Tiền: {selectedOrder?.tongTien?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}</h6>
             </div>
             <div className="phai">
               <h4>Thông tin khách hàng</h4>
               <h6>Tên Khách Hàng: {selectedOrder?.tenNguoiNhan || 'N/A'}</h6>
               <h6>Số Điện Thoại: {selectedOrder?.sdtNguoiNhan || 'N/A'}</h6>
-              <h6>Địa Chỉ: {selectedOrder?.diaChi || 'N/A'}</h6>
+              <h6>Địa Chỉ: {`${selectedOrder?.diaChi || 'N/A'}, ${selectedOrder?.xa || 'N/A'}, ${selectedOrder?.huyen || 'N/A'}, ${selectedOrder?.tinh || 'N/A'}`}</h6>
             </div>
           </div>
 
@@ -53,14 +51,20 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
               </thead>
               <tbody>
                 {selectedOrder?.items.map((product, index) => (
+                  console.log("Product data:", product),
+
                   <tr key={index}>
-                    <td>{product.giayChiTiet.giay.ten}</td>
-                    <td>{product.giayChiTiet.mauSac.ten}</td>
-                    <td>{product.giayChiTiet.kichCo.ten}</td>
-                    <td>{product.giayChiTiet.giaBan?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}</td>
+                     <img
+                        src={product.giayChiTietEntity?.giayEntity?.anhGiayEntities[0]?.tenUrl || '/placeholder.jpg'}
+                        alt={product.giayChiTietEntity?.giayEntity?.ten || 'Hình ảnh sản phẩm'}
+                        style={{ width: '50px', height: '50px' }}
+                      />
+                    <td>{product.giayChiTietEntity?.mauSacEntity?.ten || 'N/A'}</td>
+                    <td>{product.giayChiTietEntity?.kichCoEntity?.ten || 'N/A'}</td>
+                    <td>{product.giaBan?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}</td>
                     <td>{product.soLuong}</td>
                     <td>
-                      {(product.soLuong * product.giayChiTiet.giaBan)?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}
+                      {(product.soLuong * product.giaBan)?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}
                     </td>
                   </tr>
                 ))}
@@ -70,7 +74,7 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
                   <td colSpan="5" style={{ textAlign: 'right' }}><strong>Tổng cộng:</strong></td>
                   <td>
                     <strong>
-                      {selectedOrder?.items.reduce((total, product) => total + (product.soLuong * product.giayChiTiet.giaBan), 0)
+                      {selectedOrder?.items.reduce((total, product) => total + (product.soLuong * product.giaBan), 0)
                         .toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}
                     </strong>
                   </td>

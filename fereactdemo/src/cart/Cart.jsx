@@ -115,9 +115,16 @@ export const Cart = () => {
               <div className="total_value_total">
                 Tổng tiền : <p>{totalAmount.toLocaleString()}đ </p>
               </div>
-              <button onClick={handleCheckoutClick}>
-                <Link to={"/check-out"}>Thanh toán</Link>
-              </button>
+              {selectedProducts.length > 0 ? (
+          <Link 
+          to={"/check-out"}
+          state={{ selectedProducts }}
+          >
+          <button>Thanh toán</button>
+          </Link>
+          ) : (
+          <button onClick={handleCheckoutClick}>Thanh toán</button>
+          )}
             </div>
           </div>
         </div>

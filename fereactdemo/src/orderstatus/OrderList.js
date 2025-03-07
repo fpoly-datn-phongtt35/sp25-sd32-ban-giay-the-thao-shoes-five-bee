@@ -31,11 +31,9 @@ const OrderList = ({ status }) => {
   }, []);
 
   useEffect(() => {
-    // Hàm gọi API để lấy hóa đơn
     const fetchInvoices = async () => {
       try {
         const response = await getHoaDonByKhachHangId1(khachHangId);
-        // console.log(response.data);
         setOrders(response.data); // Giả sử API trả về danh sách hóa đơn
         setLoading(false);
       } catch (error) {
@@ -43,8 +41,6 @@ const OrderList = ({ status }) => {
         setLoading(false);
       }
     };
-
-    // Kiểm tra xem có `customerId` hay không trước khi gọi API
     if (khachHangId) {
       fetchInvoices();
     }
