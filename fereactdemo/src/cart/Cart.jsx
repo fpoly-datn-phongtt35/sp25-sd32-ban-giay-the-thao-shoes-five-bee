@@ -3,14 +3,23 @@ import { Header } from "../header/Header";
 import { Link } from "react-router-dom";
 import useCart from "../components/Cart";
 import { useEffect, useState } from "react";
-import { message } from "antd";
+import { message, Select } from "antd";
+import { getGiamGiaHoaDon } from "../service/GiamGiaHoaDonService";
 
 export const Cart = () => {
   const { cart,loading, error,  increment, decrement, removeProduct } = useCart();
   const [selectedProducts, setSelectedProducts] = useState([]);
+  const [idGiamGiaHoaDon, setIdGiamGiaHoaDon] = useState(null); 
+  const [discounts, setDiscounts] = useState([]);
+  const [phanTramGiam, setPhanTramGiam] = useState(0);
+
   
   useEffect(() => {
-    console.log("product duoc chọn :", selectedProducts);
+    const fetchDiscountData = async () => {
+      const discountData = await getGiamGiaHoaDon();
+      setDiscounts(discountData || []);
+    };
+    fetchDiscountData();
   }, [selectedProducts]);
 
   const handleCheckboxChangeProduct = (productId) => {
@@ -19,6 +28,12 @@ export const Cart = () => {
     } else {
       setSelectedProducts([...selectedProducts, productId]);
     }
+  };
+
+  const handleDiscountChange = (value) => {
+    setIdGiamGiaHoaDon(value);
+    const selectedDiscount = discounts.find((discount) => discount.id === value);
+    setPhanTramGiam(selectedDiscount?.phanTramGiam || 0); 
   };
 
   if (loading) return <p>Đang tải giỏ hàng...</p>;
@@ -118,7 +133,7 @@ export const Cart = () => {
               {selectedProducts.length > 0 ? (
           <Link 
           to={"/check-out"}
-          state={{ selectedProducts }}
+          state={{ selectedProducts, idGiamGiaHoaDon,phanTramGiam  }}
           >
           <button>Thanh toán</button>
           </Link>

@@ -32,9 +32,7 @@ const useCart = () => {
       }
       setLoading(true);
       try {
-        console.log("Đang lấy giỏ hàng cho ID khách hàng:", khachHangId);
         const response = await getByKhachHangId(khachHangId);
-        console.log("Phản hồi giỏ hàng:", response);
 
         let cartItems = [];
         if (response && response.data) {
@@ -54,8 +52,6 @@ const useCart = () => {
           item.soLuong &&
           item.anhGiayUrl
         );
-        console.log("Các mục giỏ hàng hợp lệ:", validItems);
-
         if (validItems.length === 0) {
           console.log("Không tìm thấy mục hợp lệ trong phản hồi giỏ hàng");
         }
