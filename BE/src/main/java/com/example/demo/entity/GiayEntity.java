@@ -72,7 +72,6 @@ public class GiayEntity {
     private KieuDangEntity kieuDang;
 
     @ManyToOne(fetch = FetchType.EAGER)
-
     @JoinColumn(name = "ID_DANH_MUC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private DanhMucEntity danhMuc;
 
