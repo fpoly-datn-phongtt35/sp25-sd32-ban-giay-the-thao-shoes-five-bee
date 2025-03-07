@@ -82,6 +82,7 @@ public class HoaDonEntity {
     @ManyToOne(fetch = FetchType.LAZY)
 
     @JoinColumn(name = "ID_USER",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    @JsonIgnore
     private UserEntity userEntity;
 
 

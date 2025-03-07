@@ -4,7 +4,6 @@ import {
 } from "antd";
 import { Modal, Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-// import { fetchOrderDetails } from '../service/OrderService.js';  // API lấy chi tiết đơn hàng
 import { createReturnRequest, fetchOrderDetails } from '../service/ReturnOrderService';  // API tạo yêu cầu trả hàng
 
 function ReturnRequestModal({ onAddReturnRequest, orderDetails }) {
@@ -124,7 +123,7 @@ function ReturnRequestModal({ onAddReturnRequest, orderDetails }) {
                   <Form.Check
                     key={item.id}
                     type="checkbox"
-                    label={`${item.giayChiTiet.giay.ten} - Số lượng: ${item.soLuong}`}
+                    label={`${item.ten} - Số lượng: ${item.soLuong}`}
                     checked={returnRequest.returnItems.includes(item.id)}  // Mặc định được chọn
                   // onChange={(e) => handleItemSelection(e, item.id)}
                   />

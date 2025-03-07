@@ -145,4 +145,9 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         return null;
     }
 
+    @Override
+    public List<HoaDonEntity> getHoaDonByUserId(UUID userId) {
+        return hoaDonRepository.findByUserId(userId);
+    }
+
 }

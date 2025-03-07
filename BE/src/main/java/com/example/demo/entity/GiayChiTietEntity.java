@@ -51,6 +51,10 @@ public class GiayChiTietEntity {
   private Integer trangThai;
 
   @ManyToOne(fetch = FetchType.EAGER)
+  @JoinColumn(name = "ID_DANH_MUC", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+  private DanhMucEntity danhMuc;
+  
+  
 //  @JsonBackReference
   @JoinColumn(name = "ID_GIAY", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private GiayEntity giayEntity;
@@ -58,4 +62,6 @@ public class GiayChiTietEntity {
   @OneToMany(mappedBy = "giayChiTietEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<AnhGiayEntity> danhSachAnh = new ArrayList<>();
 
+  @OneToMany(mappedBy = "giayChiTiet", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
+  private List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntities = new ArrayList<>();
 }

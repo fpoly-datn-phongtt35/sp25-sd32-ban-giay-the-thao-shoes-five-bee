@@ -13,4 +13,5 @@ public interface TrangThaiHoaDonService {
     List<HoaDonDto> getAllHoaDon();
     Optional<HoaDonEntity> findById(UUID id);
     public byte[] printHoaDon(UUID id);
+    List<HoaDonEntity> getHoaDonByUserId(UUID userId);
 }

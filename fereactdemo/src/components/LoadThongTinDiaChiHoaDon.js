@@ -1,7 +1,7 @@
 import React, { useState, useEffect } from 'react';
 import { getDiaChiByKhachHangId } from '../service/DiaChiService.js';
 import AddressModal from '../address/AddressModal.js'; // Đường dẫn tới file AddressModal.js
-import {getHoaDonChiTiet1} from "../service/HoaDonChiTietService";
+import { getHoaDonChiTiet1 } from "../service/HoaDonChiTietService";
 
 const DataCustomerInfo = ({ customerId, onDiaChiChange }) => {
   const [customerData, setCustomerData] = useState([]);
@@ -24,10 +24,7 @@ const DataCustomerInfo = ({ customerId, onDiaChiChange }) => {
     const fetchCustomerData = async () => {
       try {
         const response = await getDiaChiByKhachHangId(customerId);
-        // Kiểm tra xem dữ liệu có phải là mảng không, nếu không thì đưa nó vào mảng
         const data = Array.isArray(response.data) ? response.data : [response.data];
-
-        // Chỉ lọc các địa chỉ có trangThai = 1
         const filteredData = data.filter(item => item.trangThai === 1);
 
         setCustomerData(filteredData);

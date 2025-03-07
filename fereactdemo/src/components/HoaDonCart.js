@@ -1,44 +1,44 @@
 import React, { useEffect, useState } from "react";
 import "./HoaDonCart.css";
-import { getByKhachHangId } from "../service/GioHangChiTietService"
+import { getGioHangChiTietCheckOut } from "../service/GioHangChiTietService"
 import useCart from "./Cart";
-
+import { useLocation } from "react-router-dom";
 const Cart = ({ customerId, onSetTongTienHang }) => {
   const { cart, increment, decrement, removeProduct } = useCart();
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
   const [cartt, setCart] = useState([]);
-  const [selectedProducts, setSelectedProducts] = useState([]);
+  const location = useLocation();
+  const [products, setProducts] = useState([]);
+  const selectedProducts = location.state?.selectedProducts || [];
 
   useEffect(() => {
-    if (customerId) {
-      const fetchCard = async () => {
-        try {
-          const response = await getByKhachHangId(customerId);
-          console.log("data" + response.data);
-          const data = Array.isArray(response.data) ? response.data : [response.data];
-          setCart(data);
-        } catch (error) {
-          setError(error.message);
-        } finally {
-          setLoading(false);
+    const fetchProducts = async () => {
+      if (selectedProducts.length > 0) {
+        const data = await getGioHangChiTietCheckOut(selectedProducts);
+        setProducts(data);
+        setCart(data);
+        var arr = [];
+        for (var i = 0; i < data.length; i++) {
+          arr.push(data[i].id)
         }
-      };
-
-      fetchCard();
-    }
-  }, [customerId]);
+        localStorage.setItem("idGioHangChiTiet",arr);
+      }
+    };
+    fetchProducts();
+  }, [selectedProducts]);
 
   useEffect(() => {
     onSetTongTienHang(totalAmount)
-  }, [cart]);
+  }, [cartt]);
 
-  const totalAmount = cart.reduce(
+  const totalAmount = cartt.reduce(
     (total, product) => total + (product.giaBan || 0) * (product.soLuong || 1),
     0
   );
+  if (products.length === 0) return <p>Không có sản phẩm nào để thanh toán!</p>;
 
-  if (loading) return <p>Loading...</p>;
+  // if (loading) return <p>Loading...</p>;
   if (error) return <p>Error: {error}</p>;
   return (
     <div className="container_cart">
@@ -49,7 +49,7 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
           <p>Số lượng</p>
           <p>Thành tiền</p>
         </div>
-        {cart.map((product, index) => (
+        {cartt.map((product, index) => (
           <div className="prouduct_cart" key={index}>
             <div className="prouduct_cart_name">
               <img

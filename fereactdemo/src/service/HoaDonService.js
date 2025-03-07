@@ -1,16 +1,30 @@
 import axios from "../axiosConfig";
 const REST_API_BASE_URL = "trang-thai-hoa-don";
 
+const REST_API_BASE_URLS = "http://localhost:5000/api/online";
+
+
 export const getHoaDon1 = () => axios.get(REST_API_BASE_URL);
 
-export const getHoaDonByKhachHangId1 = (khachHangId) =>
-  axios.get(`${REST_API_BASE_URL}/khachHang/${khachHangId}`);
+export const getHoaDonByKhachHangId1 = (userId) =>
+  axios.get(`${REST_API_BASE_URLS}/user/${userId}`);
 
 export const getHoaDonById1 = (hoaDonId) =>
   axios.get(`${REST_API_BASE_URL}/${hoaDonId}`);
 
-export const addHoaDon1 = (khachHangId, hoaDon) =>
-  axios.post(`${REST_API_BASE_URL}/add/khachhang/${khachHangId}`, hoaDon);
+
+export const paymentOnline = (banHangOnlineRequest) => {
+  const token = localStorage.getItem("token");
+  return axios.post(
+    `${REST_API_BASE_URLS}/thanh-toan`,
+    banHangOnlineRequest,
+    {
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    }
+  );
+};
 
 export const updateHoaDon1 = (id, hoaDon) =>
   axios.put(`${REST_API_BASE_URL}/update1/${id}`, hoaDon);

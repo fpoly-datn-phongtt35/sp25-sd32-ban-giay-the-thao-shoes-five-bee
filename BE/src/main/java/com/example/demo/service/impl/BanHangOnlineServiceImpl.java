@@ -13,6 +13,7 @@ import java.util.UUID;
 import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -29,11 +30,19 @@ public class BanHangOnlineServiceImpl implements BanHangService {
   private final GiamGiaHoaDonChiTietService giamGiaHoaDonChiTietService;
 
   @Override
+  @Transactional
   public HoaDonEntity banHangOnline(
       UUID idGiamGia, Integer hinhThucThanhToan, BanHangOnlineRequest banHangOnlineRequest) {
 
-    GiamGiaHoaDonEntity giamGiaHoaDonEntity =
-        giamGiaHoaDonRepository.findById(idGiamGia).orElse(null);
+    GiamGiaHoaDonEntity giamGiaHoaDonEntity = new GiamGiaHoaDonEntity();
+
+    if(idGiamGia != null){
+       giamGiaHoaDonEntity =
+              giamGiaHoaDonRepository.findById(idGiamGia).orElse(null);
+    }else {
+       giamGiaHoaDonEntity.setPhanTramGiam(0);
+       giamGiaHoaDonEntity.setSoTienGiamMax(new BigDecimal(0));
+    }
 
     HoaDonEntity hoaDonEntity = new HoaDonEntity();
 
@@ -59,6 +68,7 @@ public class BanHangOnlineServiceImpl implements BanHangService {
                   giayChiTiet.setSoLuongTon(
                       giayChiTiet.getSoLuongTon() - gioHangChiTietEntity.getSoLuong());
 
+
                   giayChiTietRepository.save(giayChiTiet);
 
                   return HoaDonChiTietEntity.builder()
@@ -67,6 +77,7 @@ public class BanHangOnlineServiceImpl implements BanHangService {
                       .donGia(donGia)
                       .trangThai(1)
                       .giayChiTietEntity(giayChiTiet)
+                      .hoaDonEntity(hoaDonEntity)
                       .build();
                 })
             .collect(Collectors.toList());
@@ -109,7 +120,7 @@ public class BanHangOnlineServiceImpl implements BanHangService {
     }
 
     BigDecimal tongTienThanhToan =
-        donGiaGiam.subtract(soTienGiamKhiApMa).add(BigDecimal.valueOf(30000));
+        donGiaGiam.subtract(soTienGiamKhiApMa);
     BigDecimal soTienGiam = tienGoc.subtract(donGiaGiam).add(soTienGiamKhiApMa);
 
     hoaDonEntity.setMa(banHangOnlineRequest.getMa());
@@ -127,11 +138,17 @@ public class BanHangOnlineServiceImpl implements BanHangService {
     hoaDonEntity.setHinhThucThanhToan(hinhThucThanhToan);
     hoaDonEntity.setHinhThucNhanHang(1);
     hoaDonEntity.setSoTienGiam(soTienGiam);
-    hoaDonEntity.setPhiShip(BigDecimal.valueOf(30000));
-    hoaDonEntity.setTrangThai(2);
+    hoaDonEntity.setPhiShip(BigDecimal.valueOf(0));
+    if (banHangOnlineRequest.getHinhThucThanhToan() ==1 ){
+      hoaDonEntity.setTrangThai(2);
+    }else {
+      hoaDonEntity.setTrangThai(0);
+    }
     hoaDonEntity.setUserEntity(userRepository.findByEmail(email).get());
 
     hoaDonChiTietRepository.saveAll(hoaDonChiTietEntities);
+
+    gioHangChiTietRepository.deleteAllById(banHangOnlineRequest.getIdsGioHangChiTiet());
 
     return hoaDonRepository.save(hoaDonEntity);
   }
