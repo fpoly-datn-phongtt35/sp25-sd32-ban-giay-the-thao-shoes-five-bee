@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.response.DoanhThuResponse;
 import com.example.demo.service.ThongKeDoanhThuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -19,48 +20,30 @@ public class DoanhThuController {
     private ThongKeDoanhThuService thongKeDoanhThuService;
 
     @GetMapping("/ngay-hien-tai")
-    public String getDoanhThuNgayHienTai() {
-        BigDecimal result = thongKeDoanhThuService.getDoanhThuNgayHienTai();
-        return result != null ? "Doanh thu của bạn là: " + result.toString() : "Chưa có dữ liệu trong database";
+    public DoanhThuResponse getDoanhThuNgayHienTai() {
+        return thongKeDoanhThuService.getDoanhThuNgayHienTai();
     }
 
     @GetMapping("/thang-hien-tai")
-    public String getDoanhThuThangHienTai() {
-        BigDecimal result = thongKeDoanhThuService.getDoanhThuThangHienTai();
-        return result != null ? "Doanh thu của bạn là: " + result.toString() : "Chưa có dữ liệu trong database";
+    public DoanhThuResponse getDoanhThuThangHienTai() {
+        return thongKeDoanhThuService.getDoanhThuThangHienTai();
     }
 
     @GetMapping("/nam-hien-tai")
-    public String getDoanhThuNamHienTai() {
-        BigDecimal result = thongKeDoanhThuService.getDoanhThuNamHienTai();
-        return result != null ? "Doanh thu của bạn là: " + result.toString() : "Chưa có dữ liệu trong database";
+    public DoanhThuResponse getDoanhThuNamHienTai() {
+        return thongKeDoanhThuService.getDoanhThuNamHienTai();
     }
 
     @GetMapping("/ngay-cu-the")
-    public String getDoanhThuTheoNgayCuThe(@RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") LocalDate ngay) {
-        BigDecimal result = thongKeDoanhThuService.getDoanhThuTheoNgayCuThe(ngay);
-        return result != null ? "Doanh thu của bạn là: " + result.toString() : "Chưa có dữ liệu trong database";
+    public DoanhThuResponse getDoanhThuTheoNgayCuThe(@RequestParam("ngay") String ngay) {
+        LocalDate date = LocalDate.parse(ngay);
+        return thongKeDoanhThuService.getDoanhThuTheoNgayCuThe(date);
     }
 
-    @GetMapping("/khoang-thoi-gian")
-    public String getDoanhThuTheoKhoangNgay(
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") String startDate,
-            @RequestParam @DateTimeFormat(pattern = "yyyy-MM-dd") String endDate) {
-
-        startDate = startDate.trim();
-        endDate = endDate.trim();
-
-        LocalDate start = LocalDate.parse(startDate);
-        LocalDate end = LocalDate.parse(endDate);
-
-        BigDecimal result = thongKeDoanhThuService.getDoanhThuTheoKhoangNgay(start, end);
-        return result != null ? "Doanh thu của bạn là: " + result.toString() : "Chưa có dữ liệu trong database";
+    @GetMapping("/khoang-ngay")
+    public DoanhThuResponse getDoanhThuTheoKhoangNgay(@RequestParam("start") String start, @RequestParam("end") String end) {
+        LocalDate startDate = LocalDate.parse(start);
+        LocalDate endDate = LocalDate.parse(end);
+        return thongKeDoanhThuService.getDoanhThuTheoKhoangNgay(startDate, endDate);
     }
-
-    @GetMapping("/theo-ngay")
-    public List<String> getDoanhThuTheoNgay() {
-        List<String> result = thongKeDoanhThuService.getDoanhThuTheoNgay();
-        return result != null && !result.isEmpty() ? result : List.of("Chưa có dữ liệu trong database");
-    }
-    //xong
 }
