@@ -80,8 +80,8 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
       // Lưu vào database để lấy ID
       giayChiTiet = giayChiTietRepository.save(giayChiTiet);
 
-      // Tạo mã QR dựa trên ID và lưu vào maVach
-      String maVach = giayChiTiet.getId().toString();
+
+      String maVach = giayChiTiet.getGiayEntity().getTen();
       giayChiTiet.setMaVach(maVach);
 
       // Lưu lại với maVach
