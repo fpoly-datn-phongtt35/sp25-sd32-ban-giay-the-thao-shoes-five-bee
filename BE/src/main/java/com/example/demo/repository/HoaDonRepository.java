@@ -6,7 +6,6 @@ import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
-import org.springframework.data.repository.query.Param;
 import org.springframework.stereotype.Repository;
 
 import java.math.BigDecimal;
@@ -55,6 +54,13 @@ public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, Jpa
 
     Optional<HoaDonEntity> findById(UUID id);
 
-    @Query("SELECT h FROM HoaDonEntity h WHERE h.userEntity.id = :userId")
-    List<HoaDonEntity> findByUserId(@Param("userId") UUID userId);
+    @Query("SELECT COALESCE(SUM(h.tongTien), 0) FROM HoaDonEntity h " +
+            "WHERE h.trangThai = 2 AND YEAR(h.ngayThanhToan) = :year " +
+            "AND MONTH(h.ngayThanhToan) = :month")
+    BigDecimal doanhThuTheoThangCuThe(int year, int month);
+
+    // Doanh thu theo năm cụ thể
+    @Query("SELECT COALESCE(SUM(h.tongTien), 0) FROM HoaDonEntity h " +
+            "WHERE h.trangThai = 2 AND YEAR(h.ngayThanhToan) = :year")
+    BigDecimal doanhThuTheoNamCuThe(int year);
 }
