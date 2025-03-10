@@ -12,6 +12,8 @@ public interface ThongKeDoanhThuService {
     DoanhThuResponse getDoanhThuNamHienTai();
     DoanhThuResponse getDoanhThuTheoNgayCuThe(LocalDate ngay);
     DoanhThuResponse getDoanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate);
+    DoanhThuResponse getDoanhThuThangCuThe(int year, int month);
+    DoanhThuResponse getDoanhThuNamCuThe(int year);
 
     //xong
 }

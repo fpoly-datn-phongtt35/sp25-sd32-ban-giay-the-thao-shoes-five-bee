@@ -49,5 +49,16 @@ public class ThongKeDoanhThuServiceImpl implements ThongKeDoanhThuService {
         BigDecimal doanhThu = Optional.ofNullable(hoaDonRepository.doanhThuTheoKhoangNgay(startDate, endDate)).orElse(BigDecimal.ZERO);
         return new DoanhThuResponse("Doanh thu từ " + startDate + " đến " + endDate, doanhThu);
     }
+    @Override
+    public DoanhThuResponse getDoanhThuThangCuThe(int year, int month) {
+        BigDecimal doanhThuThangCuThe = hoaDonRepository.doanhThuTheoThangCuThe(year, month);
+        return new DoanhThuResponse("Doanh thu tháng " + month + " năm " + year, doanhThuThangCuThe);
+    }
+
+    @Override
+    public DoanhThuResponse getDoanhThuNamCuThe(int year) {
+        BigDecimal doanhThuNamCuThe = hoaDonRepository.doanhThuTheoNamCuThe(year);
+        return new DoanhThuResponse("Doanh thu năm " + year, doanhThuNamCuThe);
+    }
 }
 
