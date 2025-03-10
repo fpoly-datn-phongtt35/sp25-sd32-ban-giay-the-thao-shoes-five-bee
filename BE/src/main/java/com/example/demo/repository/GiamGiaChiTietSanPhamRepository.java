@@ -20,5 +20,6 @@ public interface GiamGiaChiTietSanPhamRepository
   @Query("SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.giayChiTiet.id = :id")
   GiamGiaChiTietSanPhamEntity findByGiayChiTiet(@Param("id") UUID id);
 
+  Optional<GiamGiaChiTietSanPhamEntity> findByGiayChiTiet_Id(UUID giayChiTietId);
 
 }

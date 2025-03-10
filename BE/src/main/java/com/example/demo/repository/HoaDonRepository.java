@@ -53,4 +53,14 @@ public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, Jpa
     List<HoaDonEntity> findAllById(List<UUID> ids);
 
     Optional<HoaDonEntity> findById(UUID id);
+
+    @Query("SELECT COALESCE(SUM(h.tongTien), 0) FROM HoaDonEntity h " +
+            "WHERE h.trangThai = 2 AND YEAR(h.ngayThanhToan) = :year " +
+            "AND MONTH(h.ngayThanhToan) = :month")
+    BigDecimal doanhThuTheoThangCuThe(int year, int month);
+
+    // Doanh thu theo năm cụ thể
+    @Query("SELECT COALESCE(SUM(h.tongTien), 0) FROM HoaDonEntity h " +
+            "WHERE h.trangThai = 2 AND YEAR(h.ngayThanhToan) = :year")
+    BigDecimal doanhThuTheoNamCuThe(int year);
 }

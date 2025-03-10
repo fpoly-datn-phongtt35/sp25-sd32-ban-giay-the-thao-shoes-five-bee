@@ -4,10 +4,7 @@ import com.example.demo.dto.response.DoanhThuResponse;
 import com.example.demo.service.ThongKeDoanhThuService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.math.BigDecimal;
 import java.time.LocalDate;
@@ -45,5 +42,16 @@ public class DoanhThuController {
         LocalDate startDate = LocalDate.parse(start);
         LocalDate endDate = LocalDate.parse(end);
         return thongKeDoanhThuService.getDoanhThuTheoKhoangNgay(startDate, endDate);
+    }
+
+    @GetMapping("/nam-cu-the")
+    public DoanhThuResponse getDoanhThuNamCuThe(@RequestParam("year") int year) {
+        return thongKeDoanhThuService.getDoanhThuNamCuThe(year);
+    }
+
+    // Endpoint cho doanh thu theo tháng cụ thể
+    @GetMapping("/thang-cu-the")
+    public DoanhThuResponse getDoanhThuThangCuThe(@RequestParam("year") int year, @RequestParam("month") int month) {
+        return thongKeDoanhThuService.getDoanhThuThangCuThe(year, month);
     }
 }
