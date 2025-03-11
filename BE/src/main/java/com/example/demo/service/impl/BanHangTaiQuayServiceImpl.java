@@ -87,7 +87,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     }
 
     BigDecimal soTienGiam = tongTienSanPhamGoc.subtract(tongTienSanPhamKhiGiam);
-    BigDecimal phiShip = isGiaoHang ? BigDecimal.valueOf(30000) : BigDecimal.ZERO;
+    BigDecimal phiShip = isGiaoHang ? BigDecimal.valueOf(0) : BigDecimal.ZERO;
 
     hoaDon.setMa(hoaDonRequest.getMa());
     hoaDon.setNgayThanhToan(new Date());
