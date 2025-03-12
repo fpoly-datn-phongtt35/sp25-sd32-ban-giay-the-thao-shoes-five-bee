@@ -689,8 +689,11 @@ const BanHangTaiQuay = () => {
       idGiamGia: selectedMaGiamGia || null,
       hinhThucThanhToan: selectedPaymentMethod,
       isGiaoHang: isGiaoHang,
-      trangThai: selectedPaymentMethod === 2 ? 0 : 2, // ✅ Nếu thanh toán khi giao hàng → Chờ thanh toán (0), ngược lại → Đã thanh toán (2)
+      trangThai: isGiaoHang
+        ? (selectedPaymentMethod === 0 || selectedPaymentMethod === 1 ? 3 : 0)
+        : 2,
     };
+
 
     try {
       if (selectedPaymentMethod === 0 || selectedPaymentMethod === 2) {
