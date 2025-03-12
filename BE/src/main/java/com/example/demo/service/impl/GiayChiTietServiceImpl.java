@@ -231,21 +231,23 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
     }
 
     @Override
-    public List<GiayChiTietEntity> filterGiayChiTiet(UUID mauSacId, UUID kichCoId) {
-        if (mauSacId != null && kichCoId != null) {
-            // Nếu có cả hai -> lọc theo cả màu sắc & kích cỡ
+    public List<GiayChiTietEntity> filterGiayChiTiet(UUID mauSacId, UUID kichCoId, UUID thuongHieuId) {
+        if (mauSacId != null && kichCoId != null && thuongHieuId != null) {
+            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityIdAndGiayEntity_ThuongHieu_Id(mauSacId, kichCoId, thuongHieuId);
+        } else if (mauSacId != null && kichCoId != null) {
             return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityId(mauSacId, kichCoId);
         } else if (mauSacId != null) {
-            // Nếu chỉ có màu sắc -> lọc theo màu sắc
             return giayChiTietRepository.findByMauSacEntityId(mauSacId);
         } else if (kichCoId != null) {
-            // Nếu chỉ có kích cỡ -> lọc theo kích cỡ
             return giayChiTietRepository.findByKichCoEntityId(kichCoId);
+        } else if (thuongHieuId != null) {
+            return giayChiTietRepository.findByGiayEntity_ThuongHieu_Id(thuongHieuId);
         } else {
-            // Nếu không truyền gì -> trả về tất cả giày
             return giayChiTietRepository.findAll();
         }
     }
+
+
 
 }
 

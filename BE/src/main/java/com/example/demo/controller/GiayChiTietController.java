@@ -68,9 +68,10 @@ public class GiayChiTietController {
   @GetMapping("/loc")
   public ResponseEntity<List<GiayChiTietEntity>> filterGiayChiTiet(
           @RequestParam(required = false) UUID mauSacId,
-          @RequestParam(required = false) UUID kichCoId) {
+          @RequestParam(required = false) UUID kichCoId,
+          @RequestParam(required = false) UUID thuongHieuId) {
 
-    List<GiayChiTietEntity> result = giayChiTietService.filterGiayChiTiet(mauSacId, kichCoId);
+    List<GiayChiTietEntity> result = giayChiTietService.filterGiayChiTiet(mauSacId, kichCoId, thuongHieuId);
     return ResponseEntity.ok(result);
   }
 }
