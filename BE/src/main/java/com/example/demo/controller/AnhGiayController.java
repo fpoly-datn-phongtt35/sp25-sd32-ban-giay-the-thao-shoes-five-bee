@@ -25,7 +25,11 @@ public class AnhGiayController {
     @Autowired
     private AnhGiayService anhGiayService;
     @PostMapping("/add")
-
+    public AnhGiayEntity uploadImage(@RequestPart("data")AnhGiayDto anhGiayDto,
+                                     @RequestPart("file")MultipartFile file) throws IOException{
+        String uploadImage = anhGiayService.uploadImage(file);
+        return anhGiayService.add(anhGiayDto,uploadImage);
+    }
     @GetMapping("/getAll")
     public List<AnhGiayEntity> getAll() {
         return anhGiayService.getAll();
