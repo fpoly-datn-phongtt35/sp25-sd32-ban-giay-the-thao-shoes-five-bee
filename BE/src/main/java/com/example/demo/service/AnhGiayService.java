@@ -23,5 +23,7 @@ public interface AnhGiayService {
     List<AnhGiayEntity> assignToGiayChiTietAndGetAnh(UUID giayChiTietId, List<UUID> anhGiayIds);
     List<AnhGiayEntity> getAnhByGiayChiTietId(UUID giayChiTietId);
 
+    String uploadImage2(MultipartFile file) throws IOException;
+    AnhGiayEntity addAnhToGiayChiTiet(UUID giayChiTietId, String imageUrl,int trangThai);
 
 }
