@@ -38,7 +38,7 @@ public class GiayChiTietEntity {
   @JoinColumn(name = "ID_KICH_CO", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
   private KichCoEntity kichCoEntity;
 
-  @JoinColumn(name = "MA_VACH")
+  @Column(name = "MA_VACH")
   private String maVach;
 
   @Column(name = "GIA_BAN")
