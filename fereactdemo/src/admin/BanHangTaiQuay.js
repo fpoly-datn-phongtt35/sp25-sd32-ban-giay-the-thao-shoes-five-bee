@@ -82,7 +82,7 @@ const BanHangTaiQuay = () => {
   const [soDienThoai, setSoDienThoai] = useState("");
   const [diaChi, setDiaChi] = useState("");
   const [showModal, setShowModal] = useState(false);
-
+  const [searchTerm, setSearchTerm] = useState("");
   const { Option } = Select;
   const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
   const [initialTotalHoaDon, setInitialTotalHoaDon] = useState(totalHoaDon);
@@ -92,6 +92,8 @@ const BanHangTaiQuay = () => {
   ]);
 
   const [isOpen, setIsOpen] = useState(false);
+  const [isNhapTienKhachDua, setIsNhapTienKhachDua] = useState(false);
+
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -260,34 +262,34 @@ const BanHangTaiQuay = () => {
     try {
       const result = await getGiamGiaHoaDon(); // Gọi API để lấy danh sách mã giảm giá
       console.log("API Response (Mã giảm giá):", result.data);
-  
+
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
       }
-  
+
       // Lọc chỉ lấy mã giảm giá đang hoạt động (TRANG_THAI === 0)
       const filteredMaGiamGia = result.data
-      .filter((mg) => mg.trangThai !== undefined && Number(mg.trangThai) === 0) // Chỉ lấy mã giảm giá có trạng thái 0 (hoạt động)
-      .map((mg) => ({
-        id: mg.id,
-        ten: mg.ten ?? "Không có tên",
-        giaTri: mg.phanTramGiam ?? 0,
-        loai: mg.loai ?? "VNĐ",
-        soluong: mg.soLuong,
-        soTienGiamMax: mg.soTienGiamMax,
-      }));
-    
-    console.log("Danh sách mã giảm giá sau khi lọc:", filteredMaGiamGia);
-    setMaGiamGiaList(filteredMaGiamGia);
-    
+        .filter(
+          (mg) => mg.trangThai !== undefined && Number(mg.trangThai) === 0
+        ) // Chỉ lấy mã giảm giá có trạng thái 0 (hoạt động)
+        .map((mg) => ({
+          id: mg.id,
+          ten: mg.ten ?? "Không có tên",
+          giaTri: mg.phanTramGiam ?? 0,
+          loai: mg.loai ?? "VNĐ",
+          soluong: mg.soLuong,
+          soTienGiamMax: mg.soTienGiamMax,
+        }));
+
+      console.log("Danh sách mã giảm giá sau khi lọc:", filteredMaGiamGia);
+      setMaGiamGiaList(filteredMaGiamGia);
     } catch (error) {
       console.error("Lỗi khi lấy danh sách mã giảm giá:", error);
       message.error("Không thể tải danh sách mã giảm giá");
     }
   };
-  
 
- const handleMaGiamGiaChange = async (value) => {
+  const handleMaGiamGiaChange = async (value) => {
     let hoaDonGoc = totalHoaDon + giaTriGiam; // Reset tổng tiền về ban đầu trước khi áp dụng mã mới
 
     // Nếu đã có mã giảm giá, hủy mã cũ
@@ -365,7 +367,6 @@ const BanHangTaiQuay = () => {
       message.error("Không thể lấy thông tin mã giảm giá");
     }
   };
-
 
   const getChuongTrinhGiamGia = async () => {
     try {
@@ -925,6 +926,15 @@ const BanHangTaiQuay = () => {
     setSoDienThoai("");
     setDiaChi("");
   };
+  const filteredGiay = giay.filter((item) =>
+    Object.values({
+      ten: item.TEN.toLowerCase(),
+      giaBan: item.GIABAN.toString(), // Chuyển giá bán thành chuỗi
+      soLuong: item.SOLUONG.toString(), // Chuyển số lượng thành chuỗi
+      kichCo: item.KiCH_CO.toString(), // Chuyển kích cỡ thành chuỗi
+      mauSac: item.MAU_SAC.toLowerCase(),
+    }).some((value) => value.includes(searchTerm.toLowerCase()))
+  );
 
   return (
     <div className="quay_container">
@@ -1006,7 +1016,21 @@ const BanHangTaiQuay = () => {
             )}
           </div>
         </div>
+
         <div className="product_list_tt">
+          {/* Ô tìm kiếm */}
+          <input
+            type="text"
+            placeholder="Tìm kiếm..."
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{
+              padding: "8px",
+              
+              width: "100%",
+              borderRadius: "10px",
+            }}
+          />
           <table className="product_table">
             <thead>
               <tr>
@@ -1015,14 +1039,14 @@ const BanHangTaiQuay = () => {
                 <th>Giá Bán</th>
                 <th>Số Lượng</th>
                 <th>Kích Cỡ</th>
-                <th>Màu Săc</th>
+                <th>Màu Sắc</th>
                 <th>Trạng Thái</th>
               </tr>
             </thead>
             <tbody>
-              {giay.map((item) => (
+              {filteredGiay.map((item) => (
                 <tr
-                  key={item.key}
+                  key={item.ID}
                   onClick={() => item.SOLUONG > 0 && handleProductClick(item)}
                   style={{
                     backgroundColor:
@@ -1036,7 +1060,6 @@ const BanHangTaiQuay = () => {
                     cursor: item.SOLUONG === 0 ? "not-allowed" : "pointer",
                   }}
                 >
-                  {/* Cột ảnh giày */}
                   <td>
                     {item.ANH_GIAY ? (
                       <img
@@ -1050,8 +1073,6 @@ const BanHangTaiQuay = () => {
                       "No Image"
                     )}
                   </td>
-
-                  {/* Các cột dữ liệu khác */}
                   <td>{item.TEN}</td>
                   <td>{item.GIABAN.toLocaleString("vi-VN")} đ</td>
                   <td>{item.SOLUONG}</td>
@@ -1064,8 +1085,9 @@ const BanHangTaiQuay = () => {
           </table>
         </div>
       </div>
+
       <div className="right">
-        <Select
+        {/* <Select
           placeholder="Chọn Khách Hàng"
           value={selectedKhachHang}
           onChange={handleKhachHangChange}
@@ -1076,10 +1098,10 @@ const BanHangTaiQuay = () => {
                 {hkh.hoTen}
               </Option>
             ))}
-        </Select>
-        <Button type="primary" danger onClick={handleClear}>
+        </Select> */}
+        {/* <Button type="primary" danger onClick={handleClear}>
           Clear
-        </Button>
+        </Button> */}
         <br />
         Họ Tên Khách Hàng :
         <Input
@@ -1111,15 +1133,14 @@ const BanHangTaiQuay = () => {
             setDiaChi={setDiaChi}
           />
         </div>
-        <Button
+        {/* <Button
           type="primary"
           onClick={handleAddKhachHang}
           style={{ marginTop: "10px" }}
           disabled={!hoTen || !soDienThoai}
         >
           Thêm Khách Hàng Mới
-        </Button>
-        <br />
+        </Button> */}
         <br />
         <Select
           placeholder="Chọn Mã Giảm Giá"
@@ -1135,24 +1156,30 @@ const BanHangTaiQuay = () => {
               </Option>
             ))}
         </Select>
-        <p>Tiền Khách Phải Trả: {formatCurrency(totalHoaDon)} VND</p>
-        Tiền khách đưa
-        <Input
-          value={customerMoney}
-          onChange={handleInputChange}
-          placeholder="Nhập số tiền khách đưa"
-        />
+        {/* <p>Tiền Khách Phải Trả: {formatCurrency(totalHoaDon)} VND</p> */}
+        {isNhapTienKhachDua && (
+          <Input
+            value={customerMoney}
+            onChange={handleInputChange}
+            placeholder="Nhập số tiền khách đưa"
+          />
+        )}
         <hr />
-        <p className={changeAmount < 0 ? "negative-change" : ""}>
-          Tiền thừa: {formatCurrency(changeAmount)}
-        </p>
+        {isNhapTienKhachDua && (
+          <p className={changeAmount < 0 ? "negative-change" : ""}>
+            Tiền thừa: {formatCurrency(changeAmount)}
+          </p>
+        )}
         <hr />
         <div className="button-group">
           <button
             className={`payment-button ${
               selectedOption === "option1" ? "active" : ""
             }`}
-            onClick={() => setSelectedOption("option1")}
+            onClick={() => {
+              setSelectedOption("option1");
+              setIsNhapTienKhachDua(true); // Hiển thị input khi chọn "Tiền mặt"
+            }}
           >
             Tiền mặt
           </button>

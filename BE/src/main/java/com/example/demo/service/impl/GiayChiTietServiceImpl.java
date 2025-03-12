@@ -97,7 +97,7 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         int width = 300;
         int height = 300;
         String fileType = "png";
-        String folderPath = "D:/QR/"; // Thư mục lưu QR Code
+        String folderPath = "C:/QR/"; // Thư mục lưu QR Code
         String filePath = folderPath + maVach + ".png"; // Đường dẫn file QR
 
         // Tạo thư mục nếu chưa tồn tại

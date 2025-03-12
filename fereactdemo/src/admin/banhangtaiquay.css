@@ -52,17 +52,19 @@
   height: 500px;  /* Cố định chiều cao */
   overflow-y: auto;  /* Bật thanh cuộn khi nội dung vượt quá */
   border: 1px solid #ccc;
-  margin-top: 100px;
+  margin-top: 30px;
+  border-radius: 10px;
 }
 
 .product_table {
     width: 100%;
     border-collapse: collapse;
+   
 }
 
 .product_table th,
 .product_table td {
-    border: 1px solid #ccc;
+    border: none;
     padding: 8px;
     text-align: center;
 }

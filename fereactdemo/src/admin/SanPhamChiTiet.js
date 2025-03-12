@@ -23,6 +23,7 @@ import {
 import { getMauSac } from "../service/MauSacService";
 import { getSizes } from "../service/KichCoService";
 
+
 import "./sanphamchitiet.css";
 const SanPhamChiTiet = () => {
   const [giayChiTiet, setGiayChiTiet] = useState([]);
@@ -60,8 +61,8 @@ const SanPhamChiTiet = () => {
   const getGiayData = async () => {
     const result = await getGiay();
     const activeGiay = result.data.filter((item) => item.trangThai === 0);
-    console.log("active giay", activeGiay); 
-    
+    console.log("active giay", activeGiay);
+
     setGiayList(activeGiay);
   };
 
@@ -81,7 +82,7 @@ const SanPhamChiTiet = () => {
     const result = await getGiay();
     const ten = result.data.map((item) => item.ten);
     console.log("ten giay", ten);
-    
+
     setTen(ten);
   };
 
@@ -254,7 +255,7 @@ const SanPhamChiTiet = () => {
       message.success("Thao tác thành công!");
 
       // Reset form
-      setTen("")
+      setTen("");
       setSoLuongTon1("");
       setGiaBan1("");
       setSelectedMauSac1(null);
@@ -282,7 +283,6 @@ const SanPhamChiTiet = () => {
 
   const detail = async (record) => {
     try {
-
       const response = await detailGiayChiTiet2(record.ID);
 
       const giayChiTiet = response.data;
@@ -327,10 +327,14 @@ const SanPhamChiTiet = () => {
     console.log("🔍 Dữ liệu cập nhật gửi đi:", newDataGiayChiTiet);
 
     try {
-      if (!newDataGiayChiTiet.giayDto?.id ||
+      if (
+        !newDataGiayChiTiet.giayDto?.id ||
         !newDataGiayChiTiet.mauSacDto?.id ||
-        !newDataGiayChiTiet.kichCoDto?.id) {
-        message.error("❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!");
+        !newDataGiayChiTiet.kichCoDto?.id
+      ) {
+        message.error(
+          "❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!"
+        );
         return;
       }
 
@@ -341,11 +345,16 @@ const SanPhamChiTiet = () => {
       resetForm();
       setIsModalVisible(false);
     } catch (error) {
-      console.error("❌ Lỗi cập nhật sản phẩm chi tiết:", error.response?.data || error.message);
-      message.error("❌ Lỗi cập nhật sản phẩm chi tiết: " + (error.response?.data?.message || error.message));
+      console.error(
+        "❌ Lỗi cập nhật sản phẩm chi tiết:",
+        error.response?.data || error.message
+      );
+      message.error(
+        "❌ Lỗi cập nhật sản phẩm chi tiết: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
-
 
   const resetForm = () => {
     setSoLuongTon1("");
