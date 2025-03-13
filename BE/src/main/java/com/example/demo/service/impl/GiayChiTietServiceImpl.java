@@ -20,6 +20,7 @@ import jakarta.persistence.criteria.Root;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,6 +45,22 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final KichCoRepository kichCoRepository;
   private final AnhGiayRepository anhGiayRepository;
     private final AnhGiayService anhGiayService;
+
+  @Override
+  public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
+        GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(id).orElse(null);
+
+        giayChiTiet.setSoLuongTon(soLuong);
+        giayChiTiet.setGiaBan(giaBan);
+
+        GiayEntity giay = giayRepository.findById(giayChiTiet.getGiayEntity().getId()).orElse(null);
+
+        giay.setSoLuongTon(giay.getSoLuongTon() - 1 + soLuong);
+
+        giayRepository.save(giay);
+
+        return giayChiTietRepository.save(giayChiTiet);
+    }
 
   @Override
   public List<GiayChiTietEntity> getAll() {

@@ -1,8 +1,9 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.GiayDto;
+import com.example.demo.dto.request.GiayRequest;
 import com.example.demo.dto.response.PageResponse;
-import com.example.demo.entity.AnhGiayEntity;
+import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.*;
 import com.example.demo.service.AnhGiayService;
@@ -11,14 +12,12 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
@@ -44,84 +43,136 @@ public class GiayServiceImpl implements GiayService {
   private final AnhGiayRepository anhGiayRepository;
 
   private final AnhGiayService anhGiayService;
+  private final MauSacRepository mauSacRepository;
+  private final KichCoRepository kichCoRepository;
+  private final GiayChiTietRepository giayChiTietRepository;
 
   @Override
   public List<GiayEntity> getAll() {
     return giayRepository.findAll();
   }
 
-
   @Override
-  public GiayEntity add(GiayDto giayDto) {
-      return giayRepository.save(
-              GiayEntity.builder()
-                      .ma(giayDto.getMa())
-                      .ten(giayDto.getTen())
-                      .moTa(giayDto.getMoTa())
-                      .giaNhap(giayDto.getGiaNhap())
-                      .giaBan(giayDto.getGiaBan())
-                      .soLuongTon(giayDto.getSoLuongTon())
-                      .trangThai(giayDto.getTrangThai())
-                      .thuongHieu(giayDto.getThuongHieuDto() != null ?
-                              thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null) : null)
-                      .chatLieu(giayDto.getChatLieuDto() != null ?
-                              chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null) : null)
-                      .danhMuc(giayDto.getDanhMucDto() != null ?
-                              danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null) : null)
-                      .deGiay(giayDto.getDeGiayDto() != null ?
-                              deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null) : null)
-                      .xuatXu(giayDto.getXuatXuDto() != null ?
-                              xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null) : null)
-                      .kieuDang(giayDto.getKieuDangDto() != null ?
-                              kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null) : null)
-                      .build());
+  public GiayEntity addGiayAndGiayChiTiet(GiayRequest giayRequest) {
+
+    GiayEntity giayEntity = giayRepository.findById(giayRequest.getGiayId()).orElse(null);
+
+    int tongSoLuong = 0;
+    List<GiayChiTietEntity> giayChiTietEntities = new ArrayList<>();
+
+    for (UUID mauSacId : giayRequest.getMauSacIds()) {
+      for (UUID kichCoId : giayRequest.getKichCoIds()) {
+        tongSoLuong++;
+        GiayChiTietEntity giayChiTiet =
+            GiayChiTietEntity.builder()
+                .giayEntity(giayRepository.findById(giayRequest.getGiayId()).orElse(null))
+                .mauSacEntity(mauSacRepository.findById(mauSacId).orElse(null))
+                .kichCoEntity(kichCoRepository.findById(kichCoId).orElse(null))
+                .giaBan(giayEntity.getGiaNhap())
+                .soLuongTon(1)
+                .build();
+        giayChiTietEntities.add(giayChiTiet);
+      }
+    }
+
+    // Lưu danh sách GiayChiTietEntity
+    giayChiTietRepository.saveAll(giayChiTietEntities);
+
+    giayEntity.setSoLuongTon(tongSoLuong);
+
+    return giayRepository.save(giayEntity);
   }
 
 
-    @Override
-    public GiayEntity update(GiayDto giayDto) {
-        Optional<GiayEntity> optional = giayRepository.findById(giayDto.getId());
 
-        return optional.map(o -> {
-            o.setMa(giayDto.getMa());
-            o.setTen(giayDto.getTen());
-            o.setMoTa(giayDto.getMoTa());
-            o.setGiaNhap(giayDto.getGiaNhap());
-            o.setGiaBan(giayDto.getGiaBan());
-            o.setSoLuongTon(giayDto.getSoLuongTon());
-            o.setTrangThai(giayDto.getTrangThai());
+  @Override
+  public GiayEntity add(GiayDto giayDto) {
+    return giayRepository.save(
+        GiayEntity.builder()
+            .ma(giayDto.getMa())
+            .ten(giayDto.getTen())
+            .moTa(giayDto.getMoTa())
+            .giaNhap(giayDto.getGiaNhap())
+            .giaBan(giayDto.getGiaBan())
+            .soLuongTon(giayDto.getSoLuongTon())
+            .trangThai(giayDto.getTrangThai())
+            .thuongHieu(
+                giayDto.getThuongHieuDto() != null
+                    ? thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null)
+                    : null)
+            .chatLieu(
+                giayDto.getChatLieuDto() != null
+                    ? chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null)
+                    : null)
+            .danhMuc(
+                giayDto.getDanhMucDto() != null
+                    ? danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null)
+                    : null)
+            .deGiay(
+                giayDto.getDeGiayDto() != null
+                    ? deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null)
+                    : null)
+            .xuatXu(
+                giayDto.getXuatXuDto() != null
+                    ? xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null)
+                    : null)
+            .kieuDang(
+                giayDto.getKieuDangDto() != null
+                    ? kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null)
+                    : null)
+            .build());
+  }
 
-            // ✅ Kiểm tra null trước khi gọi .getId()
-            if (giayDto.getThuongHieuDto() != null) {
-                o.setThuongHieu(thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null));
-            }
+  @Override
+  public GiayEntity update(GiayDto giayDto) {
+    Optional<GiayEntity> optional = giayRepository.findById(giayDto.getId());
 
-            if (giayDto.getChatLieuDto() != null) {
-                o.setChatLieu(chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null));
-            }
+    return optional
+        .map(
+            o -> {
+              o.setMa(giayDto.getMa());
+              o.setTen(giayDto.getTen());
+              o.setMoTa(giayDto.getMoTa());
+              o.setGiaNhap(giayDto.getGiaNhap());
+              o.setGiaBan(giayDto.getGiaBan());
+              o.setSoLuongTon(giayDto.getSoLuongTon());
+              o.setTrangThai(giayDto.getTrangThai());
 
-            if (giayDto.getDeGiayDto() != null) {
+              // ✅ Kiểm tra null trước khi gọi .getId()
+              if (giayDto.getThuongHieuDto() != null) {
+                o.setThuongHieu(
+                    thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null));
+              }
+
+              if (giayDto.getChatLieuDto() != null) {
+                o.setChatLieu(
+                    chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null));
+              }
+
+              if (giayDto.getDeGiayDto() != null) {
                 o.setDeGiay(deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null));
-            }
+              }
 
-            if (giayDto.getDanhMucDto() != null) {
-                o.setDanhMuc(danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null));
-            }
+              if (giayDto.getDanhMucDto() != null) {
+                o.setDanhMuc(
+                    danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null));
+              }
 
-            if (giayDto.getXuatXuDto() != null) {
+              if (giayDto.getXuatXuDto() != null) {
                 o.setXuatXu(xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null));
-            }
+              }
 
-            if (giayDto.getKieuDangDto() != null) {
-                o.setKieuDang(kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null));
-            }
+              if (giayDto.getKieuDangDto() != null) {
+                o.setKieuDang(
+                    kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null));
+              }
 
-            return giayRepository.save(o);
-        }).orElse(null);
-    }
+              return giayRepository.save(o);
+            })
+        .orElse(null);
+  }
 
-
-    @Override
+  @Override
   public GiayEntity detail(GiayDto giayDto) {
     Optional<GiayEntity> optional = giayRepository.findById(giayDto.getId());
     return optional.orElse(null);
@@ -204,53 +255,49 @@ public class GiayServiceImpl implements GiayService {
     return pageResponse;
   }
 
+  @Override
+  public GiayEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds) {
 
-    @Override
-    public GiayEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds) {
+    anhGiayService.assignToGiayByAnhGiayIdAndIds(id, anhGiayIds);
 
-        anhGiayService.assignToGiayByAnhGiayIdAndIds(id, anhGiayIds);
+    return giayRepository.findById(id).orElse(null);
+  }
 
-        return giayRepository.findById(id).orElse(null);
-
+  @Override
+  public ByteArrayOutputStream exportExcel() throws IOException {
+    List<GiayEntity> giayList = giayRepository.findAll();
+    Workbook workbook = new XSSFWorkbook();
+    Sheet sheet = workbook.createSheet("Giay");
+    Row headerRow = sheet.createRow(0);
+    String[] columns = {
+      "ID", "Mã Giày", "Tên Giày", "Mô Tả", "Giá Nhập", "Giá Bán", "Số Lượng Tồn", "Trạng Thái"
+    };
+    for (int i = 0; i < columns.length; i++) {
+      Cell cell = headerRow.createCell(i);
+      cell.setCellValue(columns[i]);
+    }
+    int rowNum = 1;
+    for (GiayEntity giay : giayList) {
+      Row row = sheet.createRow(rowNum++);
+      row.createCell(0).setCellValue(giay.getId().toString());
+      row.createCell(1).setCellValue(giay.getMa());
+      row.createCell(2).setCellValue(giay.getTen());
+      row.createCell(3).setCellValue(giay.getMoTa());
+      row.createCell(4).setCellValue(giay.getGiaNhap().doubleValue());
+      row.createCell(5).setCellValue(giay.getGiaBan().doubleValue());
+      row.createCell(6).setCellValue(giay.getSoLuongTon());
+      row.createCell(7).setCellValue(giay.getTrangThai());
     }
 
-    @Override
-    public ByteArrayOutputStream exportExcel() throws IOException {
-        List<GiayEntity> giayList = giayRepository.findAll();
-        Workbook workbook = new XSSFWorkbook();
-        Sheet sheet = workbook.createSheet("Giay");
-        Row headerRow = sheet.createRow(0);
-        String[] columns = {"ID", "Mã Giày", "Tên Giày", "Mô Tả", "Giá Nhập", "Giá Bán", "Số Lượng Tồn", "Trạng Thái"};
-        for (int i = 0; i < columns.length; i++) {
-            Cell cell = headerRow.createCell(i);
-            cell.setCellValue(columns[i]);
-        }
-        int rowNum = 1;
-        for (GiayEntity giay : giayList) {
-            Row row = sheet.createRow(rowNum++);
-            row.createCell(0).setCellValue(giay.getId().toString());
-            row.createCell(1).setCellValue(giay.getMa());
-            row.createCell(2).setCellValue(giay.getTen());
-            row.createCell(3).setCellValue(giay.getMoTa());
-            row.createCell(4).setCellValue(giay.getGiaNhap().doubleValue());
-            row.createCell(5).setCellValue(giay.getGiaBan().doubleValue());
-            row.createCell(6).setCellValue(giay.getSoLuongTon());
-            row.createCell(7).setCellValue(giay.getTrangThai());
-        }
+    ByteArrayOutputStream baos = new ByteArrayOutputStream();
+    workbook.write(baos);
+    workbook.close();
 
+    return baos;
+  }
 
-        ByteArrayOutputStream baos = new ByteArrayOutputStream();
-        workbook.write(baos);
-        workbook.close();
-
-        return baos;
-    }
-
-    @Override
-    public List<GiayEntity> findByTen(String ten) {
-        return giayRepository.findByTenContainingIgnoreCase(ten);
-    }
+  @Override
+  public List<GiayEntity> findByTen(String ten) {
+    return giayRepository.findByTenContainingIgnoreCase(ten);
+  }
 }
-
-
-

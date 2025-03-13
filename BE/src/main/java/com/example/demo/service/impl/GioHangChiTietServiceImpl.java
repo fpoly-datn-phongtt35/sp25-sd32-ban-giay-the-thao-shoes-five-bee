@@ -26,41 +26,43 @@ public class GioHangChiTietServiceImpl implements GioHangChiTietService {
   private final UsersService usersService;
   private final GiayChiTietRepository giayChiTietRepository;
   private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
+  private final GiayRepository giayRepository;
+
 
   @Override
   public List<GioHangChiTietResponse> getGioHangChiTietKhiCheckout(List<UUID> ids) {
     return gioHangChiTietRepository.findByIds(ids).stream()
-            .map(gioHangChiTietEntity -> {
+        .map(
+            gioHangChiTietEntity -> {
               GiayChiTietEntity giayChiTiet = gioHangChiTietEntity.getGiayChiTietEntity();
               GiayEntity giay = giayChiTiet.getGiayEntity();
 
-
-              String anhGiayUrl = Optional.ofNullable(giay.getAnhGiayEntities())
+              String anhGiayUrl =
+                  Optional.ofNullable(giay.getAnhGiayEntities())
                       .filter(list -> !list.isEmpty())
                       .map(list -> list.get(0).getTenUrl())
                       .orElse(null); // URL mặc định nếu không có ảnh
 
-
-              BigDecimal soTienDaGiam = Optional.ofNullable(
-                              giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId()))
+              BigDecimal soTienDaGiam =
+                  Optional.ofNullable(
+                          giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId()))
                       .map(GiamGiaChiTietSanPhamEntity::getSoTienDaGiam)
                       .orElse(BigDecimal.ZERO);
 
               return GioHangChiTietResponse.builder()
-                      .id(gioHangChiTietEntity.getId())
-                      .giayChiTietId(giayChiTiet.getId())
-                      .tenGiay(giay.getTen())
-                      .anhGiayUrl(anhGiayUrl)
-                      .mauSac(giayChiTiet.getMauSacEntity().getTen())
-                      .kichCo(giayChiTiet.getKichCoEntity().getTen())
-                      .giaBan(giayChiTiet.getGiaBan())
-                      .donGiaKhiGiam(giayChiTiet.getGiaBan().subtract(soTienDaGiam))
-                      .soLuong(gioHangChiTietEntity.getSoLuong())
-                      .build();
+                  .id(gioHangChiTietEntity.getId())
+                  .giayChiTietId(giayChiTiet.getId())
+                  .tenGiay(giay.getTen())
+                  .anhGiayUrl(anhGiayUrl)
+                  .mauSac(giayChiTiet.getMauSacEntity().getTen())
+                  .kichCo(giayChiTiet.getKichCoEntity().getTen())
+                  .giaBan(giayChiTiet.getGiaBan())
+                  .donGiaKhiGiam(giayChiTiet.getGiaBan().subtract(soTienDaGiam))
+                  .soLuong(gioHangChiTietEntity.getSoLuong())
+                  .build();
             })
-            .collect(Collectors.toList());
+        .collect(Collectors.toList());
   }
-
 
   @Override
   public void addToCart(UUID idGiayChiTiet, Integer soLuong) {
