@@ -1140,7 +1140,7 @@ const BanHangTaiQuay = () => {
           {Array.isArray(maGiamGiaList) &&
             maGiamGiaList.map((mg) => (
               <Option key={mg.id} value={mg.id}>
-                {mg.ten} - {mg.giaTri} %
+                {mg.ten} - {mg.giaTri} % 
               </Option>
             ))}
         </Select>

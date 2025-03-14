@@ -6,6 +6,7 @@ import {
   getGiayDetail,
   updateGiay,
   assignAnhGiay,
+  addBienThe,
 } from "../service/GiayService";
 import {
   Button,
@@ -77,8 +78,8 @@ const SanPham = () => {
   const [isChiTietModalVisible, setIsChiTietModalVisible] = useState(false);
   const [editingGiayChiTiet, setEditingGiayChiTiet] = useState(null);
 
-  const [selectedMauSac1, setSelectedMauSac1] = useState(null);
-  const [selectedKichCo1, setSelectedKichCo1] = useState(null);
+  const [selectedKichCo1, setSelectedKichCo1] = useState([]);
+  const [selectedMauSac1, setSelectedMauSac1] = useState([]);
   const [selectedAnhGiay1, setSelectedAnhGiay1] = useState(null);
 
   const [danhSachChiTiet, setDanhSachChiTiet] = useState([]);
@@ -86,8 +87,11 @@ const SanPham = () => {
   const [soLuongTon1, setSoLuongTon1] = useState(null);
 
   const [giaBan1, setGiaBan1] = useState(null);
-
+  const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGiay1, setSelectedGiay1] = useState(null);
+  const [tempSelectedKichCo, setTempSelectedKichCo] = useState([]);
+  const [tempSelectedMauSac, setTempSelectedMauSac] = useState([]);
+  const [isPopupOpen, setIsPopupOpen] = useState(false);
   const [IsModalVisibleUpdateGiayChiTiet, setIsModalVisibleUpdateGiayChiTiet] =
     useState(null);
 
@@ -96,6 +100,33 @@ const SanPham = () => {
     getKichCoList();
     getAnhList();
   }, []);
+  const handleOpenPopup = () => {
+    setTempSelectedKichCo([...selectedKichCo1]);
+    setTempSelectedMauSac([...selectedMauSac1]);
+    setIsPopupOpen(true);
+  };
+
+  // Chọn / bỏ chọn kích cỡ trong popup
+  const handleSelectKichCo = (kcId) => {
+    setTempSelectedKichCo((prev) =>
+      prev.includes(kcId) ? prev.filter((id) => id !== kcId) : [...prev, kcId]
+    );
+  };
+
+  // Chọn / bỏ chọn màu sắc trong popup
+  const handleSelectMauSac = (msId) => {
+    setTempSelectedMauSac((prev) =>
+      prev.includes(msId) ? prev.filter((id) => id !== msId) : [...prev, msId]
+    );
+  };
+
+  // Xác nhận lựa chọn
+  const handleConfirmSelection = () => {
+    setSelectedKichCo1(tempSelectedKichCo);
+    setSelectedMauSac1(tempSelectedMauSac);
+    setIsPopupOpen(false);
+  };
+
   const getMauSacList = async () => {
     const result = await getMauSac();
     const activeMauSac =
@@ -125,7 +156,6 @@ const SanPham = () => {
       }
       setSelectedGiay1(id);
 
-      
       const response = await getGiayChitietDetail1(id);
       console.log("Dữ liệu sản phẩm chi tiết:", response.data);
 
@@ -185,58 +215,70 @@ const SanPham = () => {
   };
   const handleUpdate = async (record) => {
     if (!editingGiayChiTiet) {
-        message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
-        return;
+      message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
+      return;
     }
 
     // Kiểm tra xem sản phẩm có đúng với sản phẩm đang được xem không
     if (editingGiayChiTiet?.id !== record.id) {
-      message.error("❌ Bạn đang chỉnh sửa một sản phẩm khác với sản phẩm trong chi tiết!");
+      message.error(
+        "❌ Bạn đang chỉnh sửa một sản phẩm khác với sản phẩm trong chi tiết!"
+      );
       return;
-  }
-  
+    }
+
     const updatedGiayChiTiet = {
-        id: editingGiayChiTiet?.id || null,
-        soLuongTon: soLuongTon1,
-        giaBan: giaBan1,
-        giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
-        trangThai: value === 1 ? 0 : 1,
-        mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null,
-        kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
-        danhSachAnh: selectedAnhGiay1 ? selectedAnhGiay1.map((id) => ({ id })) : [],
+      id: editingGiayChiTiet?.id || null,
+      soLuongTon: soLuongTon1,
+      giaBan: giaBan1,
+      giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
+      trangThai: value === 1 ? 0 : 1,
+      mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null,
+      kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
+      danhSachAnh: selectedAnhGiay1
+        ? selectedAnhGiay1.map((id) => ({ id }))
+        : [],
     };
 
     console.log("🔍 Dữ liệu cập nhật gửi đi:", updatedGiayChiTiet);
 
     try {
-        if (!updatedGiayChiTiet.giayDto?.id ||
-            !updatedGiayChiTiet.mauSacDto?.id ||
-            !updatedGiayChiTiet.kichCoDto?.id) {
-            message.error("❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!");
-            return;
-        }
+      if (
+        !updatedGiayChiTiet.giayDto?.id ||
+        !updatedGiayChiTiet.mauSacDto?.id ||
+        !updatedGiayChiTiet.kichCoDto?.id
+      ) {
+        message.error(
+          "❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!"
+        );
+        return;
+      }
 
-        const response = await updateGiayChiTiet(updatedGiayChiTiet);
-        message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
+      const response = await updateGiayChiTiet(updatedGiayChiTiet);
+      message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
 
-        // Cập nhật danh sách sản phẩm chi tiết
-        fetchSanPhamChiTiet({ ID: selectedGiay1 });
+      // Cập nhật danh sách sản phẩm chi tiết
+      fetchSanPhamChiTiet({ ID: selectedGiay1 });
 
-        // Cập nhật lại form với dữ liệu mới từ API
-        setSoLuongTon1("");
-        setGiaBan1("");
-        setSelectedMauSac1(response.data.mauSacDto?.id || null);
-        setSelectedKichCo1(response.data.kichCoDto?.id || null);
-        setSelectedGiay1(response.data.giayDto?.id || null);
-        selectedAnhGiay1(response.data.danhSachAnh || null);
-        setIsModalVisible(false);
+      // Cập nhật lại form với dữ liệu mới từ API
+      setSoLuongTon1("");
+      setGiaBan1("");
+      setSelectedMauSac1(response.data.mauSacDto?.id || null);
+      setSelectedKichCo1(response.data.kichCoDto?.id || null);
+      setSelectedGiay1(response.data.giayDto?.id || null);
+      selectedAnhGiay1(response.data.danhSachAnh || null);
+      setIsModalVisible(false);
     } catch (error) {
-        console.error("❌ Lỗi cập nhật sản phẩm chi tiết:", error.response?.data || error.message);
-        message.error("❌ Lỗi cập nhật sản phẩm chi tiết: " + (error.response?.data?.message || error.message));
+      console.error(
+        "❌ Lỗi cập nhật sản phẩm chi tiết:",
+        error.response?.data || error.message
+      );
+      message.error(
+        "❌ Lỗi cập nhật sản phẩm chi tiết: " +
+          (error.response?.data?.message || error.message)
+      );
     }
-};
-
-
+  };
 
   const handleDelete = async (record) => {
     try {
@@ -255,72 +297,53 @@ const SanPham = () => {
 
   const handleAdd = async () => {
     const newTrangThai1 = value === 1 ? 0 : 1;
-
+  
     console.log("🔹 Số lượng tồn:", soLuongTon1);
     console.log("🔹 Giá bán:", giaBan1);
     console.log("🔹 Giày đã chọn:", selectedGiay1);
     console.log("🔹 Màu sắc đã chọn:", selectedMauSac1);
     console.log("🔹 Kích cỡ đã chọn:", selectedKichCo1);
     console.log("🔹 ảnh đã chọn:", selectedAnhGiay1);
-
+  
     try {
       // 🏀 Kiểm tra dữ liệu đầu vào trước khi gửi
-      if (
-        !soLuongTon1 ||
-        !selectedGiay1 ||
-        !selectedMauSac1 ||
-        !selectedKichCo1
-      ) {
-        message.error("Vui lòng nhập đầy đủ thông tin trước khi thêm!");
-        return;
-      }
-
-      // console.log("📤 Dữ liệu gửi lên BE:", {
-      //   soLuongTon1,
-      //   giaBan1,
-      //   selectedGiay1,
-      //   selectedMauSac1,
-      //   selectedKichCo1,
-      //   selectedAnhGiay1,
-      // });
-
-      // 🏀 Thêm mới sản phẩm chi tiết
-      const newProduct = await addGiayChiTiet({
+      // if (
+      //   !soLuongTon1 ||
+      //   !giaBan1 ||
+      //   !selectedGiay1 ||
+      //   selectedMauSac1.length === 0 ||
+      //   selectedKichCo1.length === 0
+      // ) {
+      //   message.error("Vui lòng nhập đầy đủ thông tin trước khi thêm!");
+      //   return;
+      // }
+  
+      const newProduct = {
         soLuongTon: parseInt(soLuongTon1), // Ép kiểu số nguyên
         giaBan: parseFloat(giaBan1), // Ép kiểu số
-        giayDto: { id: selectedGiay1 },
-        mauSacDto: { id: selectedMauSac1 },
-        kichCoDto: { id: selectedKichCo1 },
-        danhSachAnh: selectedAnhGiay1
-          ? selectedAnhGiay1.map((id) => ({ id }))
-          : [],
+        giayId: selectedGiay1, // Chuyển thành ID trực tiếp
+        mauSacIds: selectedMauSac1, // Danh sách UUID
+        kichCoIds: selectedKichCo1, // Danh sách UUID
+        danhSachAnh: selectedAnhGiay1 ? selectedAnhGiay1.map((id) => ({ id })) : [],
         trangThai: newTrangThai1,
-      });
-
-      // 🌀 Cập nhật danh sách ngay lập tức
-      // setDanhSachChiTiet((prevList) => [
-      //   ...prevList,
-      //   {
-      //     id: newProduct.id, // Lấy ID từ dữ liệu trả về
-      //     ten: newProduct.giayDto.ten, // Lấy tên từ giày
-      //     giaBan: newProduct.giaBan,
-      //     mauSac: newProduct.mauSacDto.ten,
-      //     kichCo: newProduct.kichCoDto.ten,
-      //     soLuongTon: newProduct.soLuongTon,
-      //     anh: newProduct.anhGiayDtos.map((ag) => ag.tenUrl),
-      //   },
-      // ]);
-      console.log("📥 Phản hồi từ BE:", newProduct);
+      };
+  
+      console.log("📤 Dữ liệu gửi lên BE:", JSON.stringify(newProduct, null, 2));
+  
+      // 🏀 Gửi request thêm mới sản phẩm chi tiết
+      const response = await addBienThe(newProduct);
+  
+      console.log("📥 Phản hồi từ BE:", response);
       fetchSanPhamChiTiet({ ID: selectedGiay1 });
-
+  
       message.success("Thêm sản phẩm chi tiết mới thành công!");
-
+  
       // Reset form
       setTen("");
       setSoLuongTon1("");
       setGiaBan1("");
-      setSelectedMauSac1(null);
-      setSelectedKichCo1(null);
+      setSelectedMauSac1([]);  
+      setSelectedKichCo1([]);  
       setSelectedGiay1(null);
       setValue(1);
     } catch (error) {
@@ -328,6 +351,8 @@ const SanPham = () => {
       message.error("Lỗi khi thực hiện thao tác: " + error.message);
     }
   };
+  
+  
 
   // Hàm hiển thị popup
   const columnsGiayChiTiet = [
@@ -696,7 +721,7 @@ const SanPham = () => {
       <Button type="primary" onClick={() => setIsModalVisible1(true)}>
         Thêm Giày
       </Button>
-      {/*  */}
+      {/*chi tiet san pham  */}
       <Modal
         title="Chi Tiết Sản Phẩm"
         visible={isChiTietModalVisible}
@@ -721,7 +746,7 @@ const SanPham = () => {
       >
         <div style={{ width: "100%" }}>
           <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
-            <Select
+            {/* <Select
               mode="multiple"
               placeholder="Chọn Ảnh Giày"
               value={selectedAnhGiay1}
@@ -794,31 +819,97 @@ const SanPham = () => {
               placeholder="Số Lượng Tồn"
               value={soLuongTon1}
               onChange={(e) => setSoLuongTon1(e.target.value)}
-            />
-            <Select
-              placeholder="Chọn Kích Cỡ"
-              value={selectedKichCo1}
-              onChange={setSelectedKichCo1}
-            >
-              {Array.isArray(kichCoList) &&
-                kichCoList.map((kc) => (
-                  <Select.Option key={kc.id} value={kc.id}>
-                    {kc.ten}
-                  </Select.Option>
+            /> */}
+            <div className="shoe-picker-container">
+              <h3 className="shoe-picker-title">Kích Cỡ và Màu Sắc</h3>
+
+              {/* Hiển thị kích cỡ đã chọn */}
+              <div className="shoe-picker-option-group">
+                <span className="shoe-picker-label">Kích Cỡ:</span>
+                {selectedKichCo1.map((kcId) => (
+                  <div key={kcId} className="selected-item">
+                    {kichCoList.find((kc) => kc.id === kcId)?.ten}
+                    <button
+                      className="remove-btn"
+                      onClick={() =>
+                        setSelectedKichCo1(
+                          selectedKichCo1.filter((id) => id !== kcId)
+                        )
+                      }
+                    >
+                      −
+                    </button>
+                  </div>
                 ))}
-            </Select>
-            <Select
-              placeholder="Chọn Màu Sắc"
-              value={selectedMauSac1}
-              onChange={setSelectedMauSac1}
-            >
-              {Array.isArray(mauSacList) &&
-                mauSacList.map((ms) => (
-                  <Select.Option key={ms.id} value={ms.id}>
-                    {ms.ten}
-                  </Select.Option>
+                <button className="add-btn" onClick={handleOpenPopup}>
+                  +
+                </button>
+              </div>
+
+              {/* Hiển thị màu sắc đã chọn (Bằng chữ) */}
+              <div className="shoe-picker-option-group">
+                <span className="shoe-picker-label">Màu Sắc:</span>
+                {selectedMauSac1.map((msId) => (
+                  <div key={msId} className="selected-item">
+                    {mauSacList.find((ms) => ms.id === msId)?.ten}
+                    <button
+                      className="remove-btn"
+                      onClick={() =>
+                        setSelectedMauSac1(
+                          selectedMauSac1.filter((id) => id !== msId)
+                        )
+                      }
+                    >
+                      −
+                    </button>
+                  </div>
                 ))}
-            </Select>
+                <button className="add-btn" onClick={handleOpenPopup}>
+                  +
+                </button>
+              </div>
+
+              {/* Popup chọn kích cỡ và màu sắc */}
+              <Modal
+                title="Chọn Kích Cỡ & Màu Sắc"
+                open={isPopupOpen}
+                onCancel={() => setIsPopupOpen(false)}
+                onOk={handleConfirmSelection}
+              >
+                <div>
+                  <h4>Chọn Kích Cỡ</h4>
+                  <div className="option-grid">
+                    {kichCoList.map((kc) => (
+                      <button
+                        key={kc.id}
+                        className={`option-btn ${
+                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                        }`}
+                        onClick={() => handleSelectKichCo(kc.id)}
+                      >
+                        {kc.ten}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div style={{ marginTop: 10 }}>
+                  <h4>Chọn Màu Sắc</h4>
+                  <div className="option-grid">
+                    {mauSacList.map((ms) => (
+                      <button
+                        key={ms.id}
+                        className={`option-btn ${
+                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                        }`}
+                        onClick={() => handleSelectMauSac(ms.id)}
+                      >
+                        {ms.ten}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+              </Modal>
+            </div>
           </div>
 
           <Table
