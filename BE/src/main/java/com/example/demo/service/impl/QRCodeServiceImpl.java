@@ -105,23 +105,14 @@ public class QRCodeServiceImpl implements QRCodeService {
         giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
         giayChiTietRepository.save(giayChiTiet);
 
-        // 📌 Cập nhật tổng `soLuongTon` của `GiayEntity`
-        capNhatSoLuongTongGiay(giay);
+
 
         // 📌 Lưu dữ liệu hóa đơn chi tiết
         hoaDonChiTietRepository.save(hoaDonChiTiet);
 
         return "Sản phẩm đã được thêm vào hóa đơn chờ!";
     }
-    private void capNhatSoLuongTongGiay(GiayEntity giay) {
-        // 📌 Tính tổng số lượng tồn của tất cả `GiayChiTietEntity` của `GiayEntity` này
-        int tongSoLuong = giayChiTietRepository.findByGiayEntity(giay)
-                .stream().mapToInt(GiayChiTietEntity::getSoLuongTon).sum();
 
-        // 📌 Cập nhật `soLuongTon` của giày tổng
-        giay.setSoLuongTon(tongSoLuong);
-        giayRepository.save(giay);
-    }
 
 
 
