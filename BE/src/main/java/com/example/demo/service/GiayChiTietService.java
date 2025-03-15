@@ -28,4 +28,5 @@ public interface GiayChiTietService {
   GiayChiTietEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds);
 
   List<GiayChiTietEntity> getAllGiayChiTietByGiayId(UUID giayId);
+  List<GiayChiTietEntity> filterGiayChiTiet(UUID mauSacId, UUID kichCoId, UUID thuongHieuId);
 }
