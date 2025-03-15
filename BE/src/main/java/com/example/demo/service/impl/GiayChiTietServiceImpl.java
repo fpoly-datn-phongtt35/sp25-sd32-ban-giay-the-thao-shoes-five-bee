@@ -242,7 +242,22 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         System.out.println("Result: " + list.size() + " items found.");
         return list;
     }
-
+    @Override
+    public List<GiayChiTietEntity> filterGiayChiTiet(UUID mauSacId, UUID kichCoId, UUID thuongHieuId) {
+        if (mauSacId != null && kichCoId != null && thuongHieuId != null) {
+            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityIdAndGiayEntity_ThuongHieu_Id(mauSacId, kichCoId, thuongHieuId);
+        } else if (mauSacId != null && kichCoId != null) {
+            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityId(mauSacId, kichCoId);
+        } else if (mauSacId != null) {
+            return giayChiTietRepository.findByMauSacEntityId(mauSacId);
+        } else if (kichCoId != null) {
+            return giayChiTietRepository.findByKichCoEntityId(kichCoId);
+        } else if (thuongHieuId != null) {
+            return giayChiTietRepository.findByGiayEntity_ThuongHieu_Id(thuongHieuId);
+        } else {
+            return giayChiTietRepository.findAll();
+        }
+    }
 
 
 }
