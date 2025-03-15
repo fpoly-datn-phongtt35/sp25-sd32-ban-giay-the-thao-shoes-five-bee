@@ -14,7 +14,7 @@ import org.springframework.stereotype.Repository;
 
 @Repository
 public interface GiayChiTietRepository
-        extends JpaRepository<GiayChiTietEntity, UUID>, JpaSpecificationExecutor<GiayChiTietEntity> {
+    extends JpaRepository<GiayChiTietEntity, UUID>, JpaSpecificationExecutor<GiayChiTietEntity> {
 
 
   List<GiayChiTietEntity> findByGiayEntity(GiayEntity giay);
@@ -26,15 +26,15 @@ public interface GiayChiTietRepository
 
   // Tìm theo ID giày và ID màu sắc
   @Query(
-          "SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId AND g.mauSacEntity.id = :mauSacId")
+      "SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId AND g.mauSacEntity.id = :mauSacId")
   List<GiayChiTietEntity> findByGiayEntityIdAndMauSacEntityId(
-          @Param("giayId") UUID giayId, @Param("mauSacId") UUID mauSacId);
+      @Param("giayId") UUID giayId, @Param("mauSacId") UUID mauSacId);
 
   // Tìm theo ID thương hiệu và ID màu sắc
   @Query(
-          "SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.thuongHieu.id = :thuongHieuId AND g.mauSacEntity.id = :mauSacId")
+      "SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.thuongHieu.id = :thuongHieuId AND g.mauSacEntity.id = :mauSacId")
   List<GiayChiTietEntity> findByGiayEntityThuongHieuIdAndMauSacEntityId(
-          @Param("thuongHieuId") UUID thuongHieuId, @Param("mauSacId") UUID mauSacId);
+      @Param("thuongHieuId") UUID thuongHieuId, @Param("mauSacId") UUID mauSacId);
 
   // Tìm theo ID thương hiệu
   @Query("SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.thuongHieu.id = :thuongHieuId")
@@ -47,15 +47,4 @@ public interface GiayChiTietRepository
   // Tìm theo ID giày
   @Query("SELECT g FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId")
   List<GiayChiTietEntity> findByGiayEntityId(@Param("giayId") UUID giayId);
-
-
-  //LOC
-
-  List<GiayChiTietEntity> findByKichCoEntityId(UUID kichCoId);
-  List<GiayChiTietEntity> findByGiayEntity_ThuongHieu_Id(UUID thuongHieuId);
-  List<GiayChiTietEntity> findByMauSacEntityIdAndKichCoEntityId(UUID mauSacId, UUID kichCoId);
-  List<GiayChiTietEntity> findByMauSacEntityIdAndKichCoEntityIdAndGiayEntity_ThuongHieu_Id(
-          UUID mauSacId, UUID kichCoId, UUID thuongHieuId);
-
-
 }
