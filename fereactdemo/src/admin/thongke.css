@@ -1,142 +1,147 @@
 /* Container chính để chứa các biểu đồ và bảng */
 .statistics-container {
-    padding: 20px;
-    max-width: 1200px; /* Đặt chiều rộng tối đa để vừa với giao diện */
-    margin: 0 auto; /* Căn giữa container */
-  }
-  
-  /* Thẻ tiêu đề cho mỗi biểu đồ */
-  h1 {
-    font-size: 2rem;
-    margin-bottom: 20px;
-    text-align: center; /* Căn giữa tiêu đề */
-  }
-  
-  /* Container cho các biểu đồ */
-  .charts-container {
-    display: flex;
-    flex-wrap: wrap; /* Cho phép các biểu đồ xuống dòng nếu không đủ không gian */
-    justify-content: space-between; /* Căn giữa các biểu đồ và phân bố đều */
-    gap: 20px; /* Khoảng cách giữa các biểu đồ */
-    margin: 0 -10px; /* Điều chỉnh margin để cân đối khoảng cách giữa các biểu đồ */
-  }
-  /* Container cho các biểu đồ theo tháng và năm */
-  .year-month-container {
-    display: flex;
-    justify-content: space-between; /* Căn giữa các biểu đồ */
-    /* Cho phép các biểu đồ xuống dòng nếu không đủ không gian */
-    gap: 20px; /* Khoảng cách giữa các biểu đồ */
-  }
-  
-  /* Thẻ cho mỗi biểu đồ */
-  .chart-card {
-    flex: 1 1 calc(33.333% - 20px); /* Đảm bảo mỗi biểu đồ chiếm khoảng 33.333% chiều rộng của container, trừ khoảng cách giữa các biểu đồ */
-    max-width: calc(33.333% - 20px); /* Đảm bảo biểu đồ không vượt quá 33.333% chiều rộng của container */
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 20px;
-    background-color: #fff;
-  }
-  /* Đảm bảo bảng không vượt quá kích thước của khung chứa */
-  .table-container {
-    margin-top: 30px;
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    padding: 20px;
-    border-radius: 8px;
-    background-color: #fff;
-    overflow-x: auto; /* Cho phép cuộn ngang nếu bảng quá rộng */
-    max-width: 100%; /* Đảm bảo bảng không vượt quá chiều rộng khung chứa */
-  }
-  
-  /* Tiêu đề bảng */
-  .table-container h2 {
-    margin-bottom: 20px;
-    font-size: 1.5rem;
-    color: #333;
-    text-align: center; /* Căn giữa tiêu đề bảng */
-  }
-  
-  /* Bảng */
-  table {
-    width: 100%; /* Chiều rộng bảng 100% của khung chứa */
-    border-collapse: collapse;
-    table-layout: fixed; /* Điều chỉnh kích thước cột tự động */
-  }
-  
-  /* Ô tiêu đề và ô dữ liệu */
-  table th, table td {
-    padding: 12px;
-    text-align: left;
-    border-bottom: 1px solid #ddd;
-    overflow: hidden; /* Ngăn dữ liệu bị xếp chồng */
-    text-overflow: ellipsis; /* Hiển thị dấu ... nếu dữ liệu quá dài */
-    white-space: nowrap; /* Ngăn dòng dữ liệu bị ngắt */
-  }
-  
-  /* Ô tiêu đề */
-  table th {
-    background-color: #f4f4f4;
-    font-weight: bold;
-    color: #555;
-    font-size: 1rem;
-  }
-  
-  /* Hàng dữ liệu chẵn */
-  table tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-  
-  /* Hiệu ứng hover cho hàng dữ liệu */
-  table tr:hover {
-    background-color: #f1f1f1;
-    transition: background-color 0.3s ease;
-  }
-  /* Căn giữa nội dung bảng */
-  .table-container table {
-    margin: 0 auto;
-  }
-  .statistics-container {
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
-  
-  .charts-container {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 20px;
-  }
-  
-  .chart-card {
-    flex: 1 1 calc(33.333% - 20px);
-    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
-    border-radius: 8px;
-    padding: 20px;
-    background-color: #fff;
-  }
-  
-  .table-container {
-    margin-top: 20px;
-  }
-  
-  table {
-    width: 100%;
-    border-collapse: collapse;
-  }
-  
-  th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
-    text-align: left;
-  }
-  
-  th {
-    background-color: #f4f4f4;
-  }
-  
-  h1 {
-    margin-bottom: 20px;
-  }
-  
-  h2 {
-    margin-bottom: 10px;
-  }
+  padding: 20px;
+  max-width: 1200px;
+  /* Đặt chiều rộng tối đa để vừa với giao diện */
+  margin: 0 auto;
+  /* Căn giữa container */
+  font-family: Arial, sans-serif;
+}
+
+/* Thẻ tiêu đề cho mỗi biểu đồ */
+h1 {
+  font-size: 2rem;
+  margin-bottom: 20px;
+  text-align: center;
+  /* Căn giữa tiêu đề */
+}
+
+/* Container cho các biểu đồ */
+.charts-container {
+  display: flex;
+  flex-wrap: wrap;
+  /* Cho phép các biểu đồ xuống dòng nếu không đủ không gian */
+  justify-content: space-between;
+  /* Căn giữa các biểu đồ và phân bố đều */
+  gap: 20px;
+  /* Khoảng cách giữa các biểu đồ */
+  margin: 0 -10px;
+  /* Điều chỉnh margin để cân đối khoảng cách giữa các biểu đồ */
+}
+
+/* Thẻ cho mỗi biểu đồ */
+.chart-card {
+  flex: 1 1 calc(33.333% - 20px);
+  /* Đảm bảo mỗi biểu đồ chiếm khoảng 33.333% chiều rộng của container, trừ khoảng cách giữa các biểu đồ */
+  max-width: calc(33.333% - 20px);
+  /* Đảm bảo biểu đồ không vượt quá 33.333% chiều rộng của container */
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  border-radius: 8px;
+  padding: 20px;
+  background-color: #fff;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  text-align: center;
+  min-height: 350px;
+  /* Tăng chiều cao của biểu đồ */
+  height: 350px;
+  /* Đảm bảo chiều cao cố định cho biểu đồ */
+}
+
+/* Đảm bảo bảng không vượt quá kích thước của khung chứa */
+.table-container {
+  margin-top: 30px;
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+  padding: 20px;
+  border-radius: 8px;
+  background-color: #fff;
+  overflow-x: auto;
+  /* Cho phép cuộn ngang nếu bảng quá rộng */
+  max-width: 100%;
+  /* Đảm bảo bảng không vượt quá chiều rộng khung chứa */
+}
+
+/* Tiêu đề bảng */
+.table-container h2 {
+  margin-bottom: 20px;
+  font-size: 1.5rem;
+  color: #333;
+  text-align: center;
+  /* Căn giữa tiêu đề bảng */
+}
+
+/* Bảng */
+table {
+  width: 100%;
+  /* Chiều rộng bảng 100% của khung chứa */
+  border-collapse: collapse;
+  table-layout: fixed;
+  /* Điều chỉnh kích thước cột tự động */
+}
+
+/* Ô tiêu đề và ô dữ liệu */
+table th,
+table td {
+  padding: 12px;
+  text-align: left;
+  border-bottom: 1px solid #ddd;
+  overflow: hidden;
+  /* Ngăn dữ liệu bị xếp chồng */
+  text-overflow: ellipsis;
+  /* Hiển thị dấu ... nếu dữ liệu quá dài */
+  white-space: nowrap;
+  /* Ngăn dòng dữ liệu bị ngắt */
+}
+
+/* Ô tiêu đề */
+table th {
+  background-color: #f4f4f4;
+  font-weight: bold;
+  color: #555;
+  font-size: 1rem;
+}
+
+/* Hàng dữ liệu chẵn */
+table tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+/* Hiệu ứng hover cho hàng dữ liệu */
+table tr:hover {
+  background-color: #f1f1f1;
+  transition: background-color 0.3s ease;
+}
+
+/* Căn giữa nội dung bảng */
+.table-container table {
+  margin: 0 auto;
+}
+
+/* Đảm bảo khoảng cách giữa các biểu đồ và bảng */
+.statistics-container .charts-container {
+  margin-bottom: 30px;
+}
+
+/* Điều chỉnh font */
+h2 {
+  font-size: 1.25rem;
+  margin-bottom: 10px;
+}
+
+/* Tooltip style - Nếu bạn muốn tăng chiều rộng của tooltip */
+.chartjs-tooltip {
+  font-size: 1rem;
+  padding: 10px;
+  background-color: rgba(0, 0, 0, 0.7);
+  /* Màu nền tooltip */
+  color: white;
+  border-radius: 5px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.2);
+}
+
+/* Đảm bảo các biểu đồ hiển thị đầy đủ */
+.chart-card canvas {
+  width: 100% !important;
+  height: 100% !important;
+}

@@ -20,6 +20,7 @@ import jakarta.persistence.criteria.Root;
 
 import java.io.File;
 import java.io.IOException;
+import java.math.BigDecimal;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
 import java.util.ArrayList;
@@ -44,6 +45,22 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final KichCoRepository kichCoRepository;
   private final AnhGiayRepository anhGiayRepository;
     private final AnhGiayService anhGiayService;
+
+  @Override
+  public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
+        GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(id).orElse(null);
+
+        giayChiTiet.setSoLuongTon(soLuong);
+        giayChiTiet.setGiaBan(giaBan);
+
+        GiayEntity giay = giayRepository.findById(giayChiTiet.getGiayEntity().getId()).orElse(null);
+
+        giay.setSoLuongTon(giay.getSoLuongTon() - 1 + soLuong);
+
+        giayRepository.save(giay);
+
+        return giayChiTietRepository.save(giayChiTiet);
+    }
 
   @Override
   public List<GiayChiTietEntity> getAll() {
@@ -76,8 +93,8 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
       // Lưu vào database để lấy ID
       giayChiTiet = giayChiTietRepository.save(giayChiTiet);
 
-      // Tạo mã QR dựa trên ID và lưu vào maVach
-      String maVach = giayChiTiet.getId().toString();
+
+      String maVach = giayChiTiet.getGiayEntity().getTen();
       giayChiTiet.setMaVach(maVach);
 
       // Lưu lại với maVach
@@ -97,7 +114,7 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         int width = 300;
         int height = 300;
         String fileType = "png";
-        String folderPath = "D:/QR/"; // Thư mục lưu QR Code
+        String folderPath = "C:/QR/"; // Thư mục lưu QR Code
         String filePath = folderPath + maVach + ".png"; // Đường dẫn file QR
 
         // Tạo thư mục nếu chưa tồn tại
@@ -225,7 +242,22 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         System.out.println("Result: " + list.size() + " items found.");
         return list;
     }
-
+    @Override
+    public List<GiayChiTietEntity> filterGiayChiTiet(UUID mauSacId, UUID kichCoId, UUID thuongHieuId) {
+        if (mauSacId != null && kichCoId != null && thuongHieuId != null) {
+            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityIdAndGiayEntity_ThuongHieu_Id(mauSacId, kichCoId, thuongHieuId);
+        } else if (mauSacId != null && kichCoId != null) {
+            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityId(mauSacId, kichCoId);
+        } else if (mauSacId != null) {
+            return giayChiTietRepository.findByMauSacEntityId(mauSacId);
+        } else if (kichCoId != null) {
+            return giayChiTietRepository.findByKichCoEntityId(kichCoId);
+        } else if (thuongHieuId != null) {
+            return giayChiTietRepository.findByGiayEntity_ThuongHieu_Id(thuongHieuId);
+        } else {
+            return giayChiTietRepository.findAll();
+        }
+    }
 
 
 }

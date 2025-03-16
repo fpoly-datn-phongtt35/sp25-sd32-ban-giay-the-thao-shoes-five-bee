@@ -8,6 +8,7 @@ import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.repository.AnhGiayRepository;
 import com.example.demo.repository.GiayChiTietRepository;
 import com.example.demo.service.AnhGiayService;
+import lombok.Builder;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -31,8 +32,8 @@ import java.util.UUID;
 @Slf4j
 public class AnhGiayServiceImpl implements AnhGiayService {
     @Autowired
-    private AnhGiayRepository anhGiayRepository;
-    private GiayChiTietRepository giayChiTietRepository;
+    private final AnhGiayRepository anhGiayRepository;
+    private final GiayChiTietRepository giayChiTietRepository;
 
     private final Cloudinary cloudinary;
 
@@ -162,9 +163,35 @@ public class AnhGiayServiceImpl implements AnhGiayService {
     public List<AnhGiayEntity> getAnhByGiayChiTietId(UUID giayChiTietId) {
         return anhGiayRepository.findAnhByGiayChiTietId(giayChiTietId);
     }
+    @Override
+    public String uploadImage2(MultipartFile file) throws IOException {
+        File fileUpload = convert(file);
+        String publicId = UUID.randomUUID().toString();
+        cloudinary.uploader().upload(fileUpload, ObjectUtils.asMap("public_id", publicId));
+        return cloudinary.url().generate(publicId);
+    }
+
+    @Override
+    @Transactional
+    public AnhGiayEntity addAnhToGiayChiTiet(UUID giayChiTietId, String imageUrl, int trangThai) {
+        GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(giayChiTietId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy GiayChiTiet với ID: " + giayChiTietId));
+
+        AnhGiayEntity anhGiay = AnhGiayEntity.builder()
+                .tenUrl(imageUrl)
+                .trangThai(trangThai)  // ✅ Set trạng thái mặc định là 0
+                .giayChiTietEntity(giayChiTiet)
+                .build();
+
+        return anhGiayRepository.save(anhGiay);
+    }
 
 
 
 }
+
+
+
+
 
 

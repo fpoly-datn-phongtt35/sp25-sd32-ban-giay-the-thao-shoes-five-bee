@@ -5,6 +5,8 @@ const REST_API_BASE_URL = "/giay";
 export const getGiay = () => axios.post(`${REST_API_BASE_URL}/getAll`);
 
 export const addGiay = (giay) => axios.post(`${REST_API_BASE_URL}/add`, giay);
+export const addBienThe = (giay) => axios.post(`${REST_API_BASE_URL}/add-bien-the`, giay);
+
 
 export const deleteGiay = (id) =>
   axios.post(`${REST_API_BASE_URL}/delete`, { id });

@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.response.DoanhThuResponse;
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.ThongKeDoanhThuService;
 import lombok.RequiredArgsConstructor;
@@ -20,37 +21,44 @@ public class ThongKeDoanhThuServiceImpl implements ThongKeDoanhThuService {
     private HoaDonRepository hoaDonRepository;
 
     @Override
-    public BigDecimal getDoanhThuNgayHienTai() {
-        return Optional.ofNullable(hoaDonRepository.doanhThuNgayHienTai()).orElse(BigDecimal.ZERO);
+    public DoanhThuResponse getDoanhThuNgayHienTai() {
+        BigDecimal doanhThu = Optional.ofNullable(hoaDonRepository.doanhThuNgayHienTai()).orElse(BigDecimal.ZERO);
+        return new DoanhThuResponse("Doanh thu ngày hiện tại", doanhThu);
     }
 
     @Override
-    public BigDecimal getDoanhThuThangHienTai() {
-        return Optional.ofNullable(hoaDonRepository.doanhThuThangHienTai()).orElse(BigDecimal.ZERO);
+    public DoanhThuResponse getDoanhThuThangHienTai() {
+        BigDecimal doanhThu = Optional.ofNullable(hoaDonRepository.doanhThuThangHienTai()).orElse(BigDecimal.ZERO);
+        return new DoanhThuResponse("Doanh thu tháng hiện tại", doanhThu);
     }
 
     @Override
-    public BigDecimal getDoanhThuNamHienTai() {
-        return Optional.ofNullable(hoaDonRepository.doanhThuNamHienTai()).orElse(BigDecimal.ZERO);
+    public DoanhThuResponse getDoanhThuNamHienTai() {
+        BigDecimal doanhThu = Optional.ofNullable(hoaDonRepository.doanhThuNamHienTai()).orElse(BigDecimal.ZERO);
+        return new DoanhThuResponse("Doanh thu năm hiện tại", doanhThu);
     }
 
     @Override
-    public BigDecimal getDoanhThuTheoNgayCuThe(LocalDate ngay) {
-        return Optional.ofNullable(hoaDonRepository.doanhThuTheoNgayCuThe(ngay)).orElse(BigDecimal.ZERO);
+    public DoanhThuResponse getDoanhThuTheoNgayCuThe(LocalDate ngay) {
+        BigDecimal doanhThu = Optional.ofNullable(hoaDonRepository.doanhThuTheoNgayCuThe(ngay)).orElse(BigDecimal.ZERO);
+        return new DoanhThuResponse("Doanh thu ngày: " + ngay, doanhThu);
     }
 
     @Override
-    public BigDecimal getDoanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate) {
-        return Optional.ofNullable(hoaDonRepository.doanhThuTheoKhoangNgay(startDate, endDate)).orElse(BigDecimal.ZERO);
+    public DoanhThuResponse getDoanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate) {
+        BigDecimal doanhThu = Optional.ofNullable(hoaDonRepository.doanhThuTheoKhoangNgay(startDate, endDate)).orElse(BigDecimal.ZERO);
+        return new DoanhThuResponse("Doanh thu từ " + startDate + " đến " + endDate, doanhThu);
+    }
+    @Override
+    public DoanhThuResponse getDoanhThuThangCuThe(int year, int month) {
+        BigDecimal doanhThuThangCuThe = hoaDonRepository.doanhThuTheoThangCuThe(year, month);
+        return new DoanhThuResponse("Doanh thu tháng " + month + " năm " + year, doanhThuThangCuThe);
     }
 
     @Override
-    public List<String> getDoanhThuTheoNgay() {
-        return hoaDonRepository.doanhThuTheoNgay().stream()
-                .map(result -> String.format("Ngày: %s, Doanh thu: %s",
-                        Objects.toString(result[0], "Không xác định"),
-                        Objects.toString(result[1], "0")))
-                .collect(Collectors.toList());
+    public DoanhThuResponse getDoanhThuNamCuThe(int year) {
+        BigDecimal doanhThuNamCuThe = hoaDonRepository.doanhThuTheoNamCuThe(year);
+        return new DoanhThuResponse("Doanh thu năm " + year, doanhThuNamCuThe);
     }
-    //xong
 }
+

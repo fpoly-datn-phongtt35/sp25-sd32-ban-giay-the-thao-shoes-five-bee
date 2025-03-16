@@ -14,6 +14,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/giam-gia-san-pham")
@@ -43,8 +44,10 @@ public class GiamGiaSanPhamController {
     return ResponseEntity.ok(giamGiaSanPhamService.add(giamGiaSanPhamDto));
   }
 
-  @PostMapping("/update")
-  public ResponseEntity<?> update(@RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
+  @PostMapping("/update/{id}")
+  public ResponseEntity<?> update(@PathVariable("id") UUID id, @RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
+    // Bạn có thể sử dụng id để xác định đợt giảm giá cần cập nhật
+    giamGiaSanPhamDto.setId(id);
     return ResponseEntity.ok(giamGiaSanPhamService.update(giamGiaSanPhamDto));
   }
 

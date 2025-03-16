@@ -1,15 +1,19 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.response.DoanhThuResponse;
+
 import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
 public interface ThongKeDoanhThuService {
-    BigDecimal getDoanhThuNgayHienTai();
-    BigDecimal getDoanhThuThangHienTai();
-    BigDecimal getDoanhThuNamHienTai();
-    BigDecimal getDoanhThuTheoNgayCuThe(LocalDate ngay);
-    BigDecimal getDoanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate);
-    List<String> getDoanhThuTheoNgay();
+    DoanhThuResponse getDoanhThuNgayHienTai();
+    DoanhThuResponse getDoanhThuThangHienTai();
+    DoanhThuResponse getDoanhThuNamHienTai();
+    DoanhThuResponse getDoanhThuTheoNgayCuThe(LocalDate ngay);
+    DoanhThuResponse getDoanhThuTheoKhoangNgay(LocalDate startDate, LocalDate endDate);
+    DoanhThuResponse getDoanhThuThangCuThe(int year, int month);
+    DoanhThuResponse getDoanhThuNamCuThe(int year);
+
     //xong
 }

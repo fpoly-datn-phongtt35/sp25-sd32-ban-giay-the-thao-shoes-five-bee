@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
 import com.example.demo.dto.request.GiayDto;
+import com.example.demo.dto.request.GiayRequest;
 import com.example.demo.entity.GiayEntity;
 import com.example.demo.service.GiamGiaSanPhamService;
 import com.example.demo.service.GiayService;
@@ -34,6 +35,11 @@ public class GiayController {
     return ResponseEntity.ok(
             giayService.findByPagingCriteria(giayDto, pageable));
   }
+
+  @PostMapping("/add-bien-the")
+  public ResponseEntity<?> addBienThe(@RequestBody GiayRequest giayRequest) {
+    return ResponseEntity.ok(giayService.addGiayAndGiayChiTiet(giayRequest));
+    }
 
   @PostMapping("/add")
   public ResponseEntity<?> add(@RequestBody GiayDto giayDto) {
