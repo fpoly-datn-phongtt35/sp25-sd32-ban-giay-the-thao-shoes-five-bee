@@ -113,7 +113,6 @@ const handleSubmit = async (e) => {
       idGiamGia: order.idGiamGia || null,
       idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet") 
     });
-    console.log("Kết quả thanh toán:", response.data);
   }else if(selectedOption === "option1"){
     const response = await paymentOnline({
       ...order,

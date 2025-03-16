@@ -1,8 +1,12 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.request.UpdateAddressBillRequest;
+import com.example.demo.dto.request.UpdateQuantityRequest;
+import com.example.demo.entity.DiaChiEntity;
 import com.example.demo.entity.GiamGiaHoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonEntity;
+import com.example.demo.repository.DiaChiRepository;
 import com.example.demo.repository.GiamGiaHoaDonChiTietRepository;
 import com.example.demo.repository.HoaDonChiTietRepository;
 import com.example.demo.repository.HoaDonRepository;
@@ -16,6 +20,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -30,6 +35,36 @@ public class HoaDonChiTietServiceImpl implements HoaDonChiTietService {
     private HoaDonRepository hoaDonRepository;
     @Autowired
     private GiamGiaHoaDonChiTietRepository giamGiaHoaDonChiTietRepository;
+    @Autowired
+    private DiaChiRepository diaChiRepository;
+    @Override
+    public HoaDonEntity updateAddress(UUID idHoaDon, UpdateAddressBillRequest updateAddressBillRequest) {
+        HoaDonEntity hoaDonEntity = hoaDonRepository.findById(idHoaDon)
+                .orElseThrow(()-> new RuntimeException("hóa đơn không tồn tại"));
+        hoaDonEntity.setDiaChi(updateAddressBillRequest.getDiaChi());
+        hoaDonEntity.setXa(updateAddressBillRequest.getXa());
+        hoaDonEntity.setHuyen(updateAddressBillRequest.getHuyen());
+        hoaDonEntity.setTinh(updateAddressBillRequest.getTinh());
+        return hoaDonRepository.save(hoaDonEntity);
+    }
+
+    @Override
+    public HoaDonChiTietEntity updateQuantity(UUID id, UUID idGiayChiTiet, UpdateQuantityRequest updateQuantityRequest) {
+        HoaDonChiTietEntity item = hoaDonChiTietRepository.findByHoaDonEntityIdAndGiayChiTietEntityId(id,idGiayChiTiet)
+                .orElseThrow(() -> new RuntimeException("sản phẩm không tồn tại trong đơn hàng"));
+
+        item.setSoLuong(updateQuantityRequest.getSoLuong());
+
+        // cập nhật tổng tiền trong hóa đơn
+        HoaDonEntity hoaDon = item.getHoaDonEntity();
+        hoaDon.setTongTien(hoaDon.getItems().stream()
+                .map(i -> i.getGiaBan().multiply(BigDecimal.valueOf(i.getSoLuong())))
+                .reduce(BigDecimal.ZERO, BigDecimal::add));
+
+        hoaDonRepository.save(hoaDon);
+        return hoaDonChiTietRepository.save(item);
+    }
+
     @Override
     public List<HoaDonChiTietEntity> findByHoaDonGetChiTiet(HoaDonEntity hoaDon) {
         return hoaDonChiTietRepository.findByHoaDonGetChiTiet(hoaDon);
@@ -83,5 +118,41 @@ public class HoaDonChiTietServiceImpl implements HoaDonChiTietService {
             return hoaDon1.toByteArray();
         }
         return null;
+    }
+
+    @Override
+    public boolean capNhatDiaChi(UUID hoaDonId, UUID diaChiId) {
+        Optional<HoaDonEntity> hoaDonEntityOpt = hoaDonRepository.findById(hoaDonId);
+        Optional<DiaChiEntity> diaChiEntityOpt = diaChiRepository.findById(diaChiId);
+
+        if (!hoaDonEntityOpt.isPresent()) {
+            System.out.println("Không tìm thấy hóa đơn với ID: " + hoaDonId);
+            return false;
+        }
+
+        if (!diaChiEntityOpt.isPresent()) {
+            System.out.println("Không tìm thấy địa chỉ với ID: " + diaChiId);
+            return false;
+        }
+
+        HoaDonEntity hoaDonEntity = hoaDonEntityOpt.get();
+        DiaChiEntity diaChiEntity = diaChiEntityOpt.get();
+
+        if (hoaDonEntity.getTrangThai() != 0) {
+            System.out.println("Hóa đơn không ở trạng thái 0, không thể cập nhật!");
+            return false;
+        }
+
+        // Cập nhật thông tin địa chỉ vào hóa đơn
+        hoaDonEntity.setDiaChi(diaChiEntity.getTenDiaChi());
+        hoaDonEntity.setXa(diaChiEntity.getXa());
+        hoaDonEntity.setHuyen(diaChiEntity.getHuyen());
+        hoaDonEntity.setTinh(diaChiEntity.getThanhPho());
+        hoaDonEntity.setTenNguoiNhan(diaChiEntity.getTenNguoiNhan());
+        hoaDonEntity.setSdtNguoiNhan(diaChiEntity.getSdtNguoiNhan());
+
+        hoaDonRepository.save(hoaDonEntity);
+        System.out.println("Cập nhật địa chỉ thành công cho hóa đơn: " + hoaDonId);
+        return true;
     }
 }

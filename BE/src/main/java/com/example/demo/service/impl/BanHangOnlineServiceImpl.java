@@ -65,11 +65,9 @@ public class BanHangOnlineServiceImpl implements BanHangService {
                       giamGiaOpt != null ? giamGiaOpt.getSoTienDaGiam() : BigDecimal.ZERO;
                   BigDecimal donGia = giayChiTiet.getGiaBan().subtract(soTienDaGiam);
 
-                  giayChiTiet.setSoLuongTon(
-                      giayChiTiet.getSoLuongTon() - gioHangChiTietEntity.getSoLuong());
 
+                      giayChiTietRepository.save(giayChiTiet);
 
-                  giayChiTietRepository.save(giayChiTiet);
 
                   return HoaDonChiTietEntity.builder()
                       .soLuong(gioHangChiTietEntity.getSoLuong())
@@ -123,7 +121,7 @@ public class BanHangOnlineServiceImpl implements BanHangService {
         donGiaGiam.subtract(soTienGiamKhiApMa);
     BigDecimal soTienGiam = tienGoc.subtract(donGiaGiam).add(soTienGiamKhiApMa);
 
-    hoaDonEntity.setMa(banHangOnlineRequest.getMa());
+    hoaDonEntity.setMa(generateUniqueCode());
     hoaDonEntity.setNgayTao(new Date());
     hoaDonEntity.setNgayThanhToan(hinhThucThanhToan == 2 ? new Date() : null);
     hoaDonEntity.setMoTa(banHangOnlineRequest.getMoTa());
@@ -140,7 +138,19 @@ public class BanHangOnlineServiceImpl implements BanHangService {
     hoaDonEntity.setSoTienGiam(soTienGiam);
     hoaDonEntity.setPhiShip(BigDecimal.valueOf(0));
     if (banHangOnlineRequest.getHinhThucThanhToan() ==1 ){
-      hoaDonEntity.setTrangThai(2);
+              gioHangChiTietEntities.stream()
+                      .forEach(
+                              gioHangChiTietEntity -> {
+                                GiayChiTietEntity giayChiTiet =
+                                        giayChiTietRepository
+                                                .findById(gioHangChiTietEntity.getGiayChiTietEntity().getId())
+                                                .orElse(null);
+                                giayChiTiet.setSoLuongTon(
+                                        giayChiTiet.getSoLuongTon() - gioHangChiTietEntity.getSoLuong());
+                                giayChiTietRepository.save(giayChiTiet);
+
+                                });
+      hoaDonEntity.setTrangThai(3);
     }else {
       hoaDonEntity.setTrangThai(0);
     }
@@ -152,4 +162,8 @@ public class BanHangOnlineServiceImpl implements BanHangService {
 
     return hoaDonRepository.save(hoaDonEntity);
   }
+
+    private String generateUniqueCode() {
+        return "HD" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
+    }
 }

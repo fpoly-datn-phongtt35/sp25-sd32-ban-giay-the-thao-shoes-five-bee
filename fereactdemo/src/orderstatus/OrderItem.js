@@ -5,7 +5,7 @@ import {
 } from "antd";
 import './OrderStyle.css';
 import { Link } from "react-router-dom";
-import { updateHoaDon1 } from "../service/HoaDonService.js"
+import { huyDonMuaUser, updateHoaDon1 } from "../service/HoaDonService.js"
 import ReturnRequestModal from '../orderstatus/ReturnRequestForm.js';
 import { fetchOrderDetails } from '../service/ReturnOrderService';  // API tạo yêu cầu trả hàng
 import OrderDetailPopup from './OrderDetailPopup'; // Đường dẫn tới file OrderDetailPopup
@@ -34,7 +34,7 @@ const OrderItem = ({ order, onChangeData }) => {
   const handleChangeReturnStatus = async (newStatus) => {
 
     try {
-      const response = await updateHoaDon1(order.id, {
+      const response = await huyDonMuaUser(order.id, {
         trangThai: parseInt(newStatus.status, 10),
       });
       if (response.data) {
@@ -50,7 +50,7 @@ const OrderItem = ({ order, onChangeData }) => {
   const handleChangeStatus = async (newStatus) => {
 
     try {
-      const response = await updateHoaDon1(order.id, {
+      const response = await huyDonMuaUser(order.id, {
         trangThai: parseInt(newStatus, 10),
       });
       if (response.data) {
@@ -93,12 +93,11 @@ const OrderItem = ({ order, onChangeData }) => {
 
       fetchHoaDon();
     }
-  }, [order]); // Chạy lại useEffect khi order thay đổi
-
+  }, [order]);
   return (
     <div className="order-item" >
       <div className="order-header">
-        <span className="shop-name">Five Start</span>
+        <span className="shop-name">Five Bee</span>
         <span className="order-status">
           {order.trangThai.toLocaleString() === "0" && "Chờ Xác Nhận"}
           {order.trangThai.toLocaleString() === "1" && "Hóa Đơn Chờ Thanh Toán"}
@@ -125,7 +124,7 @@ const OrderItem = ({ order, onChangeData }) => {
         <div className="product-info">
           <p className="product-name">Mã hóa đơn: {order.ma}</p>
           <p className="product-category">Ngày mua: {order.ngayTao.split('T')[0]}</p>
-          <p className="product-quantity">Hình Thức Thanh Toán: {order?.hinhThucThanhToan.toLocaleString() === "0" ? "Thu hộ" : "Chuyển khoản" || 'N/A'}</p>
+          <p className="product-quantity">Hình Thức Thanh Toán: {order?.hinhThucThanhToan.toLocaleString() === "2" ? "Thu hộ (COD)" : "Chuyển khoản" || 'N/A'}</p>
           <p className="product-category">Địa chỉ nhận hàng: {order.diaChi}</p>
           <p className="return-policy">{returnPolicy}</p>
         </div>
@@ -145,7 +144,7 @@ const OrderItem = ({ order, onChangeData }) => {
           {order.trangThai.toLocaleString() === "1" && <ReturnRequestModal orderDetails={order} onAddReturnRequest={handleChangeReturnStatus}>Yêu Cầu Trả Hàng/Hoàn Tiền</ReturnRequestModal>}
           {order.trangThai.toLocaleString() === "2" && <button onClick={() => handleChangeStatus("3")} className="contact-seller-btn">Đã Nhận Hàng</button>}
           {order.trangThai.toLocaleString() === "2" && <ReturnRequestModal orderDetails={order} onAddReturnRequest={handleChangeReturnStatus}>Yêu Cầu Trả Hàng/Hoàn Tiền</ReturnRequestModal>}
-          {order.trangThai.toLocaleString() === "3" && <button className="contact-seller-btn">Đánh Giá</button>}
+          {/* {order.trangThai.toLocaleString() === "3" && <button className="contact-seller-btn">Đánh Giá</button>} */}
           {order.trangThai.toLocaleString() === "3" && <ReturnRequestModal orderDetails={order} onAddReturnRequest={handleChangeReturnStatus}>Yêu Cầu Trả Hàng/Hoàn Tiền</ReturnRequestModal>}
           {order.trangThai.toLocaleString() === "4" && <button className="contact-seller-btn" onClick={() => handleViewOrderDetail(order)} >Xem Chi Tiết</button>}
           {order.trangThai.toLocaleString() === "4" && <button onClick={() => handleChangeStatus("0")} className="contact-seller-btn">Mua Lại</button>}

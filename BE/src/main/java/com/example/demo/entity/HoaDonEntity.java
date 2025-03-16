@@ -46,13 +46,13 @@ public class HoaDonEntity {
     @Column(name = "SO_DIEN_THOAI_NGUOI_NHAN")
     private String sdtNguoiNhan;
 
-    @Column(name = "XA")
+    @Column(name = "XA",columnDefinition = "NVARCHAR(255)")
     private String xa;
 
-    @Column(name = "HUYEN")
+    @Column(name = "HUYEN",columnDefinition = "NVARCHAR(255)")
     private String huyen;
 
-    @Column(name = "TINH")
+    @Column(name = "TINH",columnDefinition = "NVARCHAR(255)")
     private String tinh;
 
     @Column(name = "DIA_CHI",columnDefinition = "NVARCHAR(255)")

@@ -3,6 +3,7 @@ const REST_API_BASE_URL = "trang-thai-hoa-don";
 
 const REST_API_BASE_URLS = "http://localhost:5000/api/online";
 
+const REST_API_BASE_URLSS = "http://localhost:5000/hoa-don-chi-tiet";
 
 export const getHoaDon1 = () => axios.get(REST_API_BASE_URL);
 
@@ -12,6 +13,29 @@ export const getHoaDonByKhachHangId1 = (userId) =>
 export const getHoaDonById1 = (hoaDonId) =>
   axios.get(`${REST_API_BASE_URL}/${hoaDonId}`);
 
+export const updateOrderAddress = async (hoaDonId, diaChiId) => {
+  try {
+    const response = await axios.put(`${REST_API_BASE_URLSS}/${hoaDonId}/update-address`, null, {
+      params: { diaChiId },
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật địa chỉ:", error.response?.data || error.message);
+    throw error;
+  }
+};
+
+export const updateOrderItemQuantity = async (idHoaDon, idGiayChiTiet, quantity) => {
+  try {
+    const response = await axios.put(`${REST_API_BASE_URLSS}/${idHoaDon}/items/${idGiayChiTiet}/quantity`, {
+      soLuong: quantity,
+    });
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật số lượng:", error);
+    throw error;
+  }
+};
 
 export const paymentOnline = (banHangOnlineRequest) => {
   const token = localStorage.getItem("token");
@@ -26,8 +50,8 @@ export const paymentOnline = (banHangOnlineRequest) => {
   );
 };
 
-export const updateHoaDon1 = (id, hoaDon) =>
-  axios.put(`${REST_API_BASE_URL}/update1/${id}`, hoaDon);
+export const huyDonMuaUser = (id) =>
+  axios.put(`${REST_API_BASE_URL}/${id}/huy`);
 
 export const deleteHoaDon1 = (id) =>
   axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
