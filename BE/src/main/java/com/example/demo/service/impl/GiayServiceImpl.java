@@ -70,6 +70,7 @@ public class GiayServiceImpl implements GiayService {
                 .kichCoEntity(kichCoRepository.findById(kichCoId).orElse(null))
                 .giaBan(giayEntity.getGiaNhap())
                 .soLuongTon(1)
+                    .trangThai(0)
                 .build();
         giayChiTietEntities.add(giayChiTiet);
       }
