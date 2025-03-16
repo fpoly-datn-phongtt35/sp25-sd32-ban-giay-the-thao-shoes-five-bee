@@ -41,7 +41,7 @@ function AddressModal({ onAddAddress }) {
     const fetchProvinces = async () => {
       try {
         const response = await getProvinces();
-        setProvinces(response.data); 
+        setProvinces(response.data);
       } catch (error) {
         console.error("Lỗi khi lấy tỉnh/thành phố", error);
       }
@@ -99,7 +99,7 @@ function AddressModal({ onAddAddress }) {
     try {
       const response = await addDiaChi(khachHangId, diaChi);
       if (response.data) {
-        onAddAddress(response.data); 
+        onAddAddress(response.data);
       }
       handleClose();
     } catch (error) {
@@ -188,7 +188,7 @@ function AddressModal({ onAddAddress }) {
 
             <Form.Group controlId="formDefaultAddress" className="mt-3">
               <Form.Check
-                checked={diaChi.trangThai === 1} // Hiển thị checkbox đã được chọn nếu trangThai là 1
+                checked={diaChi.trangThai === 1}
                 onChange={(e) => setDiaChi(prevState => ({ ...prevState, trangThai: e.target.checked ? 1 : 0 }))}
                 type="checkbox"
                 label="Đặt làm địa chỉ mặc định"

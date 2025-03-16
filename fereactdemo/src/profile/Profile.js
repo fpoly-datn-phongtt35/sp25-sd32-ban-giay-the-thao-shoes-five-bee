@@ -78,7 +78,6 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
       try {
         const response = await getDiaChiByKhachHangId(khachHangId);
         const data = Array.isArray(response.data) ? response.data : [response.data];
-        // Chỉ lọc các địa chỉ có trangThai = 1
         const filteredData = data.filter(item => item.trangThai === 1);
         setAddressData(filteredData);
         if (filteredData.length > 0) {
@@ -109,8 +108,6 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
   useEffect(() => {
     if (customerData.ngaySinh) {
       const date = new Date(customerData.ngaySinh);
-
-      // Cộng thêm lệch múi giờ để giữ nguyên ngày
       date.setHours(date.getHours() + Math.abs(date.getTimezoneOffset() / 60));
 
       setCustomerData(prevState => ({
@@ -162,7 +159,6 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
     <div className="profile-container">
       <h2 className="profile-title">Hồ Sơ Của Tôi</h2>
       <p className="profile-description">Quản lý thông tin hồ sơ để bảo mật tài khoản</p>
-      {/* Thông báo cập nhật thành công */}
       {updateSuccess && <div className="alert alert-success">Cập nhật thành công!</div>}
       <div className="profile-content">
         <div className="profile-left">
@@ -184,7 +180,7 @@ export const Profile = ({ khachHangId, data, onUpdateProfile }) => {
                 type="text"
                 id="hoTen"
                 value={customerData.hoTen || ""}
-                onChange={handleChange} // Xử lý thay đổi dữ liệu
+                onChange={handleChange}
               />
             </div>
 

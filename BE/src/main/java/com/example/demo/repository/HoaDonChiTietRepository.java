@@ -4,6 +4,7 @@ import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonEntity;
 import java.util.List;
+import java.util.Optional;
 import java.util.UUID;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -25,5 +26,8 @@ public interface HoaDonChiTietRepository
   HoaDonChiTietEntity findByHoaDonEntityAndGiayChiTietEntity(HoaDonEntity hoaDon, GiayChiTietEntity giayChiTiet);
 
   List<HoaDonChiTietEntity> findAllByHoaDonEntity_Id(UUID hoaDonId);
-  
+
+  Optional<HoaDonChiTietEntity> findByHoaDonEntityIdAndGiayChiTietEntityId(UUID hoaDonId, UUID giayChiTietId);
+
+
 }

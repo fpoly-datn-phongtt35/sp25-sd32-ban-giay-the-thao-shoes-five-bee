@@ -33,7 +33,6 @@ function UpdateAddressModal({ addressData, onAddAddress }) {
     fetchProvinces();
   }, []);
 
-  // Fetch districts based on selected province
   const handleProvinceChange = async (e) => {
     const selectedOption = e.target.options[e.target.selectedIndex];
     const selectedProvince_id = selectedOption.value;

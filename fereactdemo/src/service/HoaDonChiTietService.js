@@ -13,6 +13,8 @@ export const deleteHoaDonChiTiet1 = (id) =>
 
 export const updateHoaDonChiTiet1 = (id, hoaDonChiTiet) =>
   axios.put(`${REST_API_BASE_URL}/update/${id}`, hoaDonChiTiet);
+
+
 //truongcute
 export const getHoaDonChiTiet = () => axios.get(REST_API_BASE_URL);
 

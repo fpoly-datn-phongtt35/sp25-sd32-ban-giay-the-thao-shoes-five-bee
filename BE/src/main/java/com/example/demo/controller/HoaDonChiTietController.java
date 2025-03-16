@@ -1,5 +1,7 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.UpdateAddressBillRequest;
+import com.example.demo.dto.request.UpdateQuantityRequest;
 import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonEntity;
 import com.example.demo.repository.HoaDonRepository;
@@ -8,10 +10,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
@@ -34,6 +33,29 @@ public class HoaDonChiTietController {
             return ResponseEntity.ok(danhSachChiTiet);
         }
         return ResponseEntity.notFound().build();
+    }
+
+    @PutMapping("/{idHoaDon}/address")
+    public ResponseEntity<HoaDonEntity> updateAddress(@PathVariable UUID idHoaDon, @RequestBody UpdateAddressBillRequest updateAddressBillRequest){
+        return ResponseEntity.ok(hoaDonChiTietService.updateAddress(idHoaDon,updateAddressBillRequest));
+    }
+
+    @PutMapping("/{id}/items/{idGiayChiTiet}/quantity")
+    public ResponseEntity<HoaDonChiTietEntity> updateQuantity(
+            @PathVariable UUID id,
+            @PathVariable UUID idGiayChiTiet,
+            @RequestBody UpdateQuantityRequest updateQuantityRequest
+            ){
+        return ResponseEntity.ok(hoaDonChiTietService.updateQuantity(id,idGiayChiTiet,updateQuantityRequest));
+    }
+
+    @PutMapping("/{hoaDonId}/update-address")
+    public ResponseEntity<String> updateInvoiceAddress(@PathVariable UUID hoaDonId, @RequestParam UUID diaChiId) {
+        boolean updated = hoaDonChiTietService.capNhatDiaChi(hoaDonId, diaChiId);
+        if (updated) {
+            return ResponseEntity.ok("Cập nhật địa chỉ thành công");
+        }
+        return ResponseEntity.badRequest().body("Không thể cập nhật địa chỉ");
     }
 
     @GetMapping("/download-pdf-hdct/{id}")
