@@ -37,7 +37,7 @@ import {
 } from "../service/BanHangTaiQuay";
 import {
   detailGiamGiaHoaDon,
-  getGiamGiaHoaDon,
+  getGiamGia,
 } from "../service/GiamGiaHoaDonService";
 import WebcamComponent from "./WebcamComponent";
 
@@ -260,32 +260,29 @@ const BanHangTaiQuay = () => {
   };
   const getAllMaGiamGiaData = async () => {
     try {
-      const result = await getGiamGiaHoaDon(); // Gọi API để lấy danh sách mã giảm giá
+      const result = await getGiamGia(); // Thay đổi từ getGiamGiaHoaDon sang getGiamGia
       console.log("API Response (Mã giảm giá):", result.data);
 
-      if (!result || !Array.isArray(result.data)) {
-        throw new Error("Dữ liệu API không hợp lệ hoặc không phải mảng");
+      if (!result || !result.data) {
+        throw new Error("Dữ liệu API không hợp lệ");
       }
 
-      // Lọc chỉ lấy mã giảm giá đang hoạt động (TRANG_THAI === 0)
-      const filteredMaGiamGia = result.data
-        .filter(
-          (mg) => mg.trangThai !== undefined && Number(mg.trangThai) === 0
-        ) // Chỉ lấy mã giảm giá có trạng thái 0 (hoạt động)
-        .map((mg) => ({
-          id: mg.id,
-          ten: mg.ten ?? "Không có tên",
-          giaTri: mg.phanTramGiam ?? 0,
-          loai: mg.loai ?? "VNĐ",
-          soluong: mg.soLuong,
-          soTienGiamMax: mg.soTienGiamMax,
-        }));
+      // Chuyển đổi dữ liệu từ API
+      const maGiamGia = result.data;
+      const formattedMaGiamGia = {
+        id: maGiamGia.id,
+        ten: maGiamGia.ten ?? "Không có tên",
+        giaTri: maGiamGia.phanTramGiam ?? 0,
+        loai: maGiamGia.loai ?? "VNĐ",
+        soluong: maGiamGia.soLuong,
+        soTienGiamMax: maGiamGia.soTienGiamMax,
+      };
 
-      console.log("Danh sách mã giảm giá sau khi lọc:", filteredMaGiamGia);
-      setMaGiamGiaList(filteredMaGiamGia);
+      console.log("Mã giảm giá đã được format:", formattedMaGiamGia);
+      setMaGiamGiaList([formattedMaGiamGia]); // Đặt trong mảng vì API trả về mã giảm giá tốt nhất
     } catch (error) {
-      console.error("Lỗi khi lấy danh sách mã giảm giá:", error);
-      message.error("Không thể tải danh sách mã giảm giá");
+      console.error("Lỗi khi lấy mã giảm giá:", error);
+      message.error("Không thể tải mã giảm giá");
     }
   };
 

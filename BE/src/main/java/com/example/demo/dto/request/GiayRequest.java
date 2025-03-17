@@ -27,4 +27,6 @@ public class GiayRequest {
   private BigDecimal giaBan;
 
   private Integer soLuongTon;
+
+  private Integer trangThai;
 }

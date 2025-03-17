@@ -2,8 +2,14 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.HoaDonDto;
 import com.example.demo.dto.request.UserDto;
+import com.example.demo.entity.GiayChiTietEntity;
+import com.example.demo.entity.GioHangChiTietEntity;
+import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonEntity;
+import com.example.demo.repository.GiayChiTietRepository;
+import com.example.demo.repository.GioHangChiTietRepository;
 import com.example.demo.repository.HoaDonRepository;
+import com.example.demo.service.GioHangChiTietService;
 import com.example.demo.service.TrangThaiHoaDonService;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
@@ -24,6 +30,10 @@ import java.util.stream.Collectors;
 public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     @Autowired
     private HoaDonRepository hoaDonRepository;
+    @Autowired
+    private GioHangChiTietRepository gioHangChiTietRepository;
+    @Autowired
+    private GiayChiTietRepository giayChiTietRepository;
 
     @Override
     public HoaDonEntity xacNhanHoaDon(UUID id) {
@@ -48,6 +58,8 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         switch (currentStatus) {
             case 0:
                 hoaDon.setTrangThai(3); // Chờ xác nhận → Đã xác nhận
+                // Trừ số lượng tồn kho khi chuyển từ "Chờ xác nhận" sang "Đã xác nhận"
+                updateStockAfterOrderConfirmed(hoaDon);
                 break;
             case 3:
                 hoaDon.setTrangThai(4); // Đã xác nhận → Chờ vận chuyển
@@ -67,6 +79,23 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
 
         return hoaDonRepository.save(hoaDon);
     }
+
+    // Giảm số lượng tồn kho khi trạng thái hóa đơn được xác nhận
+    private void updateStockAfterOrderConfirmed(HoaDonEntity hoaDon) {
+        for (HoaDonChiTietEntity item : hoaDon.getItems()) {
+            GiayChiTietEntity giayChiTiet = item.getGiayChiTietEntity();
+            int remainingStock = giayChiTiet.getSoLuongTon() - item.getSoLuong();
+
+            if (remainingStock < 0) {
+                throw new RuntimeException("Sản phẩm " + giayChiTiet.getMaVach() + " không đủ số lượng trong kho.");
+            }
+
+            giayChiTiet.setSoLuongTon(remainingStock);
+            giayChiTietRepository.save(giayChiTiet);
+        }
+    }
+
+
 
 
 
