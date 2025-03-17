@@ -87,9 +87,9 @@ public class TraHangServiceImpl implements TraHangService {
         boolean tatCaSanPhamDaTra = hoaDonEntity.getItems().stream()
                 .allMatch(item -> item.getSoLuong() == 0);
         if (tatCaSanPhamDaTra) {
-            hoaDonEntity.setTrangThai(7); // 7: hoan tra toan bo
+            hoaDonEntity.setTrangThai(9); // 7: hoan tra toan bo
         } else {
-            hoaDonEntity.setTrangThai(9); // 9: hoan tra mot phan
+            hoaDonEntity.setTrangThai(10); // 9: hoan tra mot phan
         }
         hoaDonRepository.save(hoaDonEntity);
 

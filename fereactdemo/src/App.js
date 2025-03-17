@@ -28,7 +28,7 @@ import ChucVu from "./admin/ChucVu";
 import HangKhachHang from "./admin/HangKhachHang";
 import Register from "./signup/Register";
 import Home from "./home/Home";
-
+import DanhMuc from "./admin/DanhMuc";
 import { Cart } from "./cart/Cart";
 import { Bill } from "./bill/Bill";
 import { OrderStatusPage } from "./orderstatus/OrderStatusPage";
@@ -95,6 +95,7 @@ function App() {
               <Route path="tra-hang" element={<ReturnOrderStatusPage />} />
               <Route path="san-pham" element={<SanPham />} />
               <Route path="thuong-hieu" element={<ThuongHieu />} />
+              <Route path="danh-muc" element={<DanhMuc />} />
               <Route path="san-pham-chi-tiet" element={<SanPhamChiTiet />} />
               <Route path="mau-sac" element={<MauSac />} />
               <Route path="xuat-xu" element={<XuatXu />} />
