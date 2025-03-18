@@ -14,6 +14,7 @@ import {
   Table,
   Upload,
   message,
+  Row, Col,
 } from "antd";
 import { UploadOutlined } from "@ant-design/icons";
 
@@ -156,42 +157,25 @@ const AnhSanPham = () => {
         </Button>
         <br />
         <br />
-        <Table
-          pagination={{ pageSize: 5, defaultPageSize: 5 }}
-          // rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
-          columns={[
-            {
-              title: "Ảnh",
-              dataIndex: "TENURL",
-              render: (tenUrl) =>
-                tenUrl ? (
+        <Row gutter={[16, 16]}>
+          {anhGiay.map((item, index) => (
+            <Col span={4} key={index}>
+              <div style={{ textAlign: "center" }}>
+                {item.TENURL ? (
                   <img
-                    src={tenUrl} // ✅ Dùng trực tiếp tenUrl
+                    src={item.TENURL}
                     alt="Ảnh giày"
-                    style={{ maxWidth: "400px", height: "auto", borderRadius: "5px" }}
+                    style={{ width: "100%", borderRadius: "5px" }}
                   />
                 ) : (
                   "Không có ảnh"
-                ),
-            },
-            {
-              title: "TRANG THAI",
-              dataIndex: "TRANG_THAI",
-              render: (text, record) => trangThai(record.TRANG_THAI),
-            },
-            {
-              title: "ACTION",
-              key: "action",
-              render: (text, record) => (
-                <Space size="middle">
-                  {/* <Button onClick={() => detailAnhGiay(record)}>Update</Button> */}
-                  <Button onClick={() => removeAnhGiay(record)}>Delete</Button>
-                </Space>
-              ),
-            },
-          ]}
-          dataSource={anhGiay}
-        />
+                )}
+                <div>{trangThai(item.TRANG_THAI)}</div>
+                <Button onClick={() => removeAnhGiay(item)}>Delete</Button>
+              </div>
+            </Col>
+          ))}
+        </Row>
       </div>
       <Modal
         title="Update Ảnh Giày"
@@ -215,6 +199,5 @@ const AnhSanPham = () => {
       </Modal>
     </div>
   );
-};
-
+}
 export default AnhSanPham;

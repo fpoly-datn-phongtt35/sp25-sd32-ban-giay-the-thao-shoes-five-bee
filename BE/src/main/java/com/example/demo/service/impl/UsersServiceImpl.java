@@ -6,14 +6,8 @@ import com.example.demo.dto.request.DiaChiDto;
 import com.example.demo.dto.request.UserDto;
 import com.example.demo.dto.request.UserDtoSearch;
 import com.example.demo.dto.response.PageResponse;
-import com.example.demo.entity.DiaChiEntity;
-import com.example.demo.entity.RoleEntity;
-import com.example.demo.entity.UserEntity;
-import com.example.demo.entity.UserRoleEntity;
-import com.example.demo.repository.DiaChiRepository;
-import com.example.demo.repository.RoleRepository;
-import com.example.demo.repository.UserRepository;
-import com.example.demo.repository.UserRoleRepository;
+import com.example.demo.entity.*;
+import com.example.demo.repository.*;
 import com.example.demo.service.UsersService;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
@@ -54,6 +48,7 @@ public class UsersServiceImpl implements UsersService {
   @Autowired private PasswordEncoder passwordEncoder;
   @Autowired private DiaChiRepository diaChiRepository;
   @Autowired private Cloudinary cloudinary;
+  @Autowired private GioHangRepository gioHangRepository;
 
   @Override
   public String getAuthenticatedUserEmail() throws UsernameNotFoundException {
@@ -139,14 +134,25 @@ public class UsersServiceImpl implements UsersService {
     userEntity.setEmail(userDto.getEmail());
     userEntity.setMatKhau(passwordEncoder.encode(userDto.getMatKhau()));
     userEntity.setIsEnabled(userDto.getIsEnabled());
-    UserEntity savedUser = userRepository.save(userEntity);
+    GioHangEntity gioHangEntity = new GioHangEntity();
+    gioHangEntity.setMa(generateUniqueCode());
+    gioHangEntity.setUserEntity(userEntity);
+    gioHangEntity.setNgayTao(new java.sql.Date(System.currentTimeMillis()));
+    gioHangEntity.setNgayCapNhat(new java.sql.Date(System.currentTimeMillis()));
+    gioHangEntity.setTrangThai(1);
+    gioHangEntity.setGhiChu("Giỏ hàng mới tạo");
+    gioHangRepository.save(gioHangEntity);
+
+    userEntity.setGioHangEntity(gioHangEntity);
+    userRepository.save(userEntity);
+//    UserEntity savedUser = userRepository.save(userEntity);
     // them role vao user
     if (userDto.getRoleNames() != null && !userDto.getRoleNames().isEmpty()) {
       List<UserRoleEntity> userRoles =
           userDto.getRoleNames().stream()
               .map(roleName -> roleRepository.findByTen(roleName).orElse(null))
               .filter(role -> role != null)
-              .map(role -> new UserRoleEntity(savedUser, role))
+              .map(role -> new UserRoleEntity(userEntity, role))
               .collect(Collectors.toList());
       userRoleRepository.saveAll(userRoles);
     }
@@ -159,14 +165,17 @@ public class UsersServiceImpl implements UsersService {
                     diaChiEntity.setXa(diaChiDto.getXa());
                     diaChiEntity.setHuyen(diaChiDto.getHuyen());
                     diaChiEntity.setThanhPho(diaChiDto.getThanhPho());
-                    diaChiEntity.setUserEntity(savedUser);
+                    diaChiEntity.setUserEntity(userEntity);
                     return diaChiEntity;
                   })
               .collect(Collectors.toList());
       diaChiRepository.saveAll(diaChiEntities);
     }
 
-    return savedUser;
+    return userEntity;
+  }
+  private String generateUniqueCode() {
+    return "GH" + UUID.randomUUID().toString().substring(0,6).toUpperCase();
   }
 
   @Override

@@ -108,7 +108,7 @@ const OrderItem = ({ order, onChangeData }) => {
           {order.trangThai.toLocaleString() === "6" && "Đã Giao Hàng"}
           {order.trangThai.toLocaleString() === "8" && "Đã Hủy"}
           {order.trangThai.toLocaleString() === "9" && getOrderStatus(order, returnOrder)}
-          {order.trangThai.toLocaleString() === "7" && "Hoàn Tiền"}
+          {order.trangThai.toLocaleString() === "7" && "Trả Hàng"}
         </span>
 
       </div>
