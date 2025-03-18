@@ -52,7 +52,7 @@ import { getMauSac } from "../service/MauSacService";
 const SanPham = () => {
   const [giay, setGiay] = useState([]);
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [value, setValue] = useState(1);
+  const [value, setValue] = useState(2);
   const [ten, setTen] = useState("");
   const [moTa, setMoTa] = useState("");
   const [giaNhap, setGiaNhap] = useState("");
@@ -362,7 +362,7 @@ const SanPham = () => {
       setSelectedMauSac1([]);
       setSelectedKichCo1([]);
       setSelectedGiay1(null);
-      setValue(1);
+      setValue(2);
     } catch (error) {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error("Lỗi khi thực hiện thao tác: " + error.message);
@@ -1038,159 +1038,174 @@ const SanPham = () => {
       </Modal>
       {/*  */}
       <Modal
-        title="Thêm Giày"
+        title="Thêm Sản Phẩm"
         visible={isModalVisible1}
         onOk={creatGiay}
         onCancel={() => setIsModalVisible1(false)}
         okText="Thêm"
         cancelText="Hủy"
+    
       >
-        <div style={{ float: "left", width: "45%" }}>
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Thương Hiệu"
-            value={selectedThuongHieu}
-            onChange={handleThuongHieuChange}
-          >
-            {Array.isArray(thuongHieuList) &&
-              thuongHieuList.map((th) => (
-                <Option key={th.id} value={th.id}>
-                  {th.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Chất Liệu"
-            value={selectedChatLieu}
-            onChange={handleChatLieuChange}
-          >
-            {Array.isArray(chatLieuList) &&
-              chatLieuList.map((cl) => (
-                <Option key={cl.id} value={cl.id}>
-                  {cl.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Đế Giày"
-            value={selectedDeGiay}
-            onChange={handleDeGiayChange}
-          >
-            {Array.isArray(deGiayList) &&
-              deGiayList.map((deg) => (
-                <Option key={deg.id} value={deg.id}>
-                  {deg.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Xuất Xứ"
-            value={selectedXuatXu}
-            onChange={handleXuatXuChange}
-          >
-            {Array.isArray(xuatXuList) &&
-              xuatXuList.map((xx) => (
-                <Option key={xx.id} value={xx.id}>
-                  {xx.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Kiểu Dáng"
-            value={selectedKieuDang}
-            onChange={handleKieuDangChange}
-          >
-            {Array.isArray(kieuDangList) &&
-              kieuDangList.map((kd) => (
-                <Option key={kd.id} value={kd.id}>
-                  {kd.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-        </div>
+        <Form layout="horizontal">
+          <Row gutter={16} >
+            {/* Cột bên trái */}
+            <Col span={12} >
+              <Form.Item
+                label="Tên Giày"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Input
+                  placeholder="Tên Giày"
+                  value={ten}
+                  onChange={(e) => setTen(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Thương Hiệu"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Thương Hiệu"
+                  value={selectedThuongHieu}
+                  onChange={handleThuongHieuChange}
+                >
+                  {Array.isArray(thuongHieuList) &&
+                    thuongHieuList.map((th) => (
+                      <Option key={th.id} value={th.id}>
+                        {th.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
 
-        <div style={{ float: "right", width: "45%" }}>
-          <Select
-            mode="multiple"
-            style={{ width: "100%" }}
-            placeholder="Chọn Ảnh Giày"
-            value={selectedAnhGiay}
-            onChange={handleAnhGiayChange}
+              <Form.Item
+                label="Chất Liệu"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Chất Liệu"
+                  value={selectedChatLieu}
+                  onChange={handleChatLieuChange}
+                >
+                  {Array.isArray(chatLieuList) &&
+                    chatLieuList.map((cl) => (
+                      <Option key={cl.id} value={cl.id}>
+                        {cl.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                label="Xuất Xứ"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Xuất Xứ"
+                  value={selectedXuatXu}
+                  onChange={handleXuatXuChange}
+                >
+                  {Array.isArray(xuatXuList) &&
+                    xuatXuList.map((xx) => (
+                      <Option key={xx.id} value={xx.id}>
+                        {xx.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+            </Col>
+
+            {/* Cột bên phải */}
+            <Col span={12}>
+              <Form.Item
+                label="Ảnh Giày"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="Chọn Ảnh Giày"
+                  value={selectedAnhGiay}
+                  onChange={handleAnhGiayChange}
+                >
+                  {Array.isArray(anhGiayList) &&
+                    anhGiayList.map((ag) => (
+                      <Option key={ag.id} value={ag.id}>
+                        <img
+                          src={ag.tenUrl}
+                          alt="Ảnh giày"
+                          style={{ width: "80%", height: 150, marginLeft: 30 }}
+                        />
+                        {ag.tenUrl}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Đế Giày"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Đế Giày"
+                  value={selectedDeGiay}
+                  onChange={handleDeGiayChange}
+                >
+                  {Array.isArray(deGiayList) &&
+                    deGiayList.map((deg) => (
+                      <Option key={deg.id} value={deg.id}>
+                        {deg.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Kiểu Dáng"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Kiểu Dáng"
+                  value={selectedKieuDang}
+                  onChange={handleKieuDangChange}
+                >
+                  {Array.isArray(kieuDangList) &&
+                    kieuDangList.map((kd) => (
+                      <Option key={kd.id} value={kd.id}>
+                        {kd.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Trạng Thái"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Radio.Group onChange={onChange} value={value}>
+                  <Radio value={2}>Hoạt động</Radio>
+                  <Radio value={1}>Không hoạt động</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item
+            label="Mô Tả"
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 20 }}
           >
-            {Array.isArray(anhGiayList) &&
-              anhGiayList.map((ag) => (
-                <Option key={ag.id} value={ag.id}>
-                  <img
-                    src={ag.tenUrl}
-                    alt="Ảnh giày"
-                    style={{
-                      width: "80%",
-                      height: 150,
-                      marginLeft: 30,
-                    }}
-                  />
-                  {ag.tenUrl}
-                </Option>
-              ))}
-          </Select>
-
-          <br />
-          <br />
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Tên Giày"
-            value={ten}
-            onChange={(e) => setTen(e.target.value)}
-          />
-          <br />
-          <br />
-
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Giá Bán ($)"
-            value={giaBan}
-            onChange={(e) => setGiaBan(e.target.value)}
-          />
-          <br />
-          <br />
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Số Lượng Tồn"
-            value={soLuongTon}
-            onChange={(e) => setSoLuongTon(e.target.value)}
-          />
-          <br />
-          <br />
-          <Radio.Group onChange={onChange} value={value}>
-            <Radio value={1}>Không hoạt động</Radio>
-            <Radio value={2}>Hoạt động</Radio>
-          </Radio.Group>
-        </div>
-
-        <br />
-
-        <TextArea
-          rows={4}
-          placeholder="Mô Tả"
-          value={moTa}
-          onChange={(e) => setMoTa(e.target.value)}
-        />
-        <br />
-        <br />
+            <TextArea
+              rows={4}
+              placeholder="Mô Tả"
+              value={moTa}
+              onChange={(e) => setMoTa(e.target.value)}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
 
       <Table
@@ -1353,11 +1368,7 @@ const SanPham = () => {
                 marginLeft: "50%",
               }}
             >
-              <Button
-                
-                icon={<EditOutlined />}
-                onClick={editGiayButton}
-              ></Button>
+              <Button icon={<EditOutlined />} onClick={editGiayButton}></Button>
             </div>
           </Row>
         </div>

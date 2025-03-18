@@ -1,5 +1,5 @@
 import axios from "../axiosConfig";
-const REST_API_BASE_URL = "trang-thai-hoa-don";
+const REST_API_BASE_URL = "/trang-thai-hoa-don";
 
 const REST_API_BASE_URLS = "http://localhost:5000/api/online";
 
@@ -71,8 +71,25 @@ export const updateHoaDon = (id, hoaDon) =>
   axios.put(`${REST_API_BASE_URL}/update/${id}`, hoaDon);
 
 // Truong
-export const detailHoaDon = (id) =>
-  axios.get(`${REST_API_BASE_URL}/detail/${id}`);
+export const detailHoaDon = async (id) => {
+  try {
+    const response = await axios.get(`${REST_API_BASE_URL}/${id}`);
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi lấy chi tiết hóa đơn:", error);
+    throw error; // Ném lỗi để xử lý ở nơi gọi hàm
+  }
+};
+export const xacNhanHoaDon = async (id, data) => {
+  try {
+    const response = await axios.put(`${REST_API_BASE_URL}/xac-nhan/${id}`, data);
+    return response.data;
+  } catch (error) {
+    console.error("❌ Lỗi khi xác nhận hóa đơn:", error);
+    throw error;
+  }
+};
+
 
 export const printfHoaDon = (id) =>
   axios.get(`${REST_API_BASE_URL}/download-pdf/${id}`, {
