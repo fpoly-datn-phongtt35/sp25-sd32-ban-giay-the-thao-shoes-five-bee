@@ -166,14 +166,15 @@ public class TraHangServiceImpl implements TraHangService {
     public List<XemTraHangDto> getProductsReturned(UUID hoaDonId) {
         // Lấy hóa đơn từ ID
         HoaDonEntity hoaDonEntity = hoaDonRepository.findById(hoaDonId)
-                .orElseThrow(() -> new RuntimeException("Hoa don khong ton tai"));
+                .orElseThrow(() -> new RuntimeException("Hóa đơn không tồn tại"));
 
-        // Lấy các sản phẩm đã được hoàn trả từ hóa đơn
+        // Lấy các sản phẩm đã được hoàn trả từ hóa đơn, loại trừ các đơn trả hàng đã bị hủy
         List<TraHangChiTietEntity> traHangChiTietEntities = traHangChiTietEntityRepository.findByHoaDonEntity(hoaDonEntity);
 
-        // Lọc các sản phẩm có trạng thái đã hoàn trả và tính số lượng trả lại
+        // Lọc các sản phẩm có trạng thái "Hoàn trả" và loại trừ các đơn trả hàng đã bị hủy
         List<XemTraHangDto> returnedProducts = traHangChiTietEntities.stream()
-                .filter(traHang -> traHang.getHoaDonChiTietEntity().getTrangThai() == 3)  // Trạng thái 3: "Hoàn trả"
+                .filter(traHang -> traHang.getHoaDonChiTietEntity().getTrangThai() == 3  // Trạng thái 3: "Hoàn trả"
+                        && traHang.getTraHangEntity().getTrangThai() != 0) // Trạng thái 0: "Đã hủy"
                 .map(traHang -> {
                     // Tạo DTO để trả về
                     XemTraHangDto dto = new XemTraHangDto();
@@ -183,14 +184,19 @@ public class TraHangServiceImpl implements TraHangService {
                     String tenGiay = traHang.getHoaDonChiTietEntity().getGiayChiTietEntity().getGiayEntity().getTen();
                     dto.setTenSanPham(tenGiay);  // Gán tên giày vào DTO
 
+                    // Số lượng trả lại
                     dto.setSoLuongTra(traHang.getSoLuongTra());
+
+                    // Tổng tiền hoàn trả cho sản phẩm
                     dto.setGiaHoanTra(traHang.getGiaHoanTra());
+
                     return dto;
                 })
                 .collect(Collectors.toList());
 
         return returnedProducts;
     }
+
 
     @Override
     public Optional<TraHangEntity> findById(UUID traHangId) {
