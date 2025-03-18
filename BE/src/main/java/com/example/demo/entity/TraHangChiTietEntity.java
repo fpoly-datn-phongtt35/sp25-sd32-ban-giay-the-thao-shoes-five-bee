@@ -33,4 +33,7 @@ public class TraHangChiTietEntity {
     @ManyToOne
     @JoinColumn(name = "ID_HOA_DON_CHI_TIET", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private HoaDonChiTietEntity hoaDonChiTietEntity;
+    @ManyToOne
+    @JoinColumn(name = "ID_HOA_DON", foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    private HoaDonEntity hoaDonEntity;  // Mối quan hệ với HoaDonEntity
 }

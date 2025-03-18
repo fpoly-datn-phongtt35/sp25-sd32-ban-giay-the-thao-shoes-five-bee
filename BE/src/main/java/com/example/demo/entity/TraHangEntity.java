@@ -48,4 +48,6 @@ public class TraHangEntity {
 
     @OneToMany(mappedBy = "traHangEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<TraHangChiTietEntity> traHangChiTietEntities;
+
+
 }
