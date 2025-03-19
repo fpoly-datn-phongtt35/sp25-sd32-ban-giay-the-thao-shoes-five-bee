@@ -8,12 +8,20 @@ import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.*;
 import com.example.demo.service.AnhGiayService;
 import com.example.demo.service.GiayService;
+import com.google.zxing.BarcodeFormat;
+import com.google.zxing.MultiFormatWriter;
+import com.google.zxing.WriterException;
+import com.google.zxing.client.j2se.MatrixToImageWriter;
+import com.google.zxing.common.BitMatrix;
 import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
 import java.io.ByteArrayOutputStream;
+import java.io.File;
 import java.io.IOException;
+import java.nio.file.FileSystems;
+import java.nio.file.Path;
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
@@ -63,25 +71,61 @@ public class GiayServiceImpl implements GiayService {
     for (UUID mauSacId : giayRequest.getMauSacIds()) {
       for (UUID kichCoId : giayRequest.getKichCoIds()) {
         tongSoLuong++;
+
+        // Tạo GiayChiTietEntity cho mỗi sản phẩm
         GiayChiTietEntity giayChiTiet =
-            GiayChiTietEntity.builder()
-                .giayEntity(giayRepository.findById(giayRequest.getGiayId()).orElse(null))
-                .mauSacEntity(mauSacRepository.findById(mauSacId).orElse(null))
-                .kichCoEntity(kichCoRepository.findById(kichCoId).orElse(null))
-                .giaBan(giayEntity.getGiaNhap())
-                .soLuongTon(1)
-                    .trangThai(0)
-                .build();
+                GiayChiTietEntity.builder()
+                        .giayEntity(giayRepository.findById(giayRequest.getGiayId()).orElse(null))
+                        .mauSacEntity(mauSacRepository.findById(mauSacId).orElse(null))
+                        .kichCoEntity(kichCoRepository.findById(kichCoId).orElse(null))
+                        .giaBan(giayEntity.getGiaNhap())
+                        .soLuongTon(1)
+                        .trangThai(0)
+                        .build();
+
         giayChiTietEntities.add(giayChiTiet);
+
+        // Tạo mã QR cho sản phẩm (dựa trên ID của GiayChiTietEntity)
+        try {
+          generateQRCode(giayChiTiet.getId().toString());  // Gọi hàm generateQRCode và truyền mã vạch
+        } catch (WriterException | IOException e) {
+          e.printStackTrace();  // In ra lỗi nếu có khi tạo mã QR
+        }
       }
     }
 
-    // Lưu danh sách GiayChiTietEntity
+    // Lưu danh sách GiayChiTietEntity vào cơ sở dữ liệu
     giayChiTietRepository.saveAll(giayChiTietEntities);
 
+    // Cập nhật số lượng tồn cho GiayEntity
     giayEntity.setSoLuongTon(tongSoLuong);
 
+    // Lưu lại GiayEntity
     return giayRepository.save(giayEntity);
+  }
+
+  public void generateQRCode(String maVach) throws WriterException, IOException {
+    int width = 300;
+    int height = 300;
+    String fileType = "png";
+    String folderPath = "C:/QR/"; // Thư mục lưu QR Code
+    String filePath = folderPath + maVach + ".png"; // Đường dẫn file QR
+
+    // Tạo thư mục nếu chưa tồn tại
+    File folder = new File(folderPath);
+    if (!folder.exists()) {
+      boolean isCreated = folder.mkdirs();
+      if (!isCreated) {
+        throw new IOException("Không thể tạo thư mục: " + folderPath);
+      }
+    }
+
+    // Tạo mã QR
+    BitMatrix bitMatrix = new MultiFormatWriter().encode(maVach, BarcodeFormat.QR_CODE, width, height);
+    Path path = FileSystems.getDefault().getPath(filePath);
+    MatrixToImageWriter.writeToPath(bitMatrix, fileType, path);
+
+    System.out.println("QR Code đã được lưu tại: " + filePath);
   }
 
 
