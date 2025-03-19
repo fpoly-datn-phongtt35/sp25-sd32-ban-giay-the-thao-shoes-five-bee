@@ -62,7 +62,6 @@ public class GiayServiceImpl implements GiayService {
 
   @Override
   public GiayEntity addGiayAndGiayChiTiet(GiayRequest giayRequest) {
-
     GiayEntity giayEntity = giayRepository.findById(giayRequest.getGiayId()).orElse(null);
 
     int tongSoLuong = 0;
@@ -83,26 +82,35 @@ public class GiayServiceImpl implements GiayService {
                         .trangThai(0)
                         .build();
 
+        // Lưu đối tượng GiayChiTietEntity vào cơ sở dữ liệu để có ID
+        giayChiTiet = giayChiTietRepository.save(giayChiTiet);  // Lưu đối tượng vào cơ sở dữ liệu
+
         giayChiTietEntities.add(giayChiTiet);
 
-        // Tạo mã QR cho sản phẩm (dựa trên ID của GiayChiTietEntity)
-//        try {
-//          generateQRCode(giayChiTiet.getId().toString());  // Gọi hàm generateQRCode và truyền mã vạch
-//        } catch (WriterException | IOException e) {
-//          e.printStackTrace();  // In ra lỗi nếu có khi tạo mã QR
-//        }
+        // Kiểm tra giayChiTiet.getId() có null không trước khi gọi generateQRCode
+        if (giayChiTiet.getId() != null) {
+          try {
+            generateQRCode(giayChiTiet.getId().toString());  // Gọi hàm generateQRCode và truyền mã vạch
+          } catch (WriterException | IOException e) {
+            e.printStackTrace();  // In ra lỗi nếu có khi tạo mã QR
+          }
+        } else {
+          System.out.println("GiayChiTietEntity ID is null, skipping QR generation.");
+        }
       }
     }
 
-    // Lưu danh sách GiayChiTietEntity vào cơ sở dữ liệu
+    // Lưu danh sách GiayChiTietEntity vào cơ sở dữ liệu (nếu cần thiết)
     giayChiTietRepository.saveAll(giayChiTietEntities);
 
     // Cập nhật số lượng tồn cho GiayEntity
     giayEntity.setSoLuongTon(tongSoLuong);
 
-    // Lưu lại GiayEntity
+    // Lưu lại GiayEntity vào cơ sở dữ liệu
     return giayRepository.save(giayEntity);
   }
+
+
 
   public void generateQRCode(String maVach) throws WriterException, IOException {
     int width = 300;

@@ -29,4 +29,6 @@ public class GiayRequest {
   private Integer soLuongTon;
 
   private Integer trangThai;
+
+  private List<AnhGiayDto> anhGiayDtos;
 }
