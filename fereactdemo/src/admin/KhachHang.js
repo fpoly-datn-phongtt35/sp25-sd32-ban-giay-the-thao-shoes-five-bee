@@ -107,11 +107,22 @@ const KhachHang = () => {
 
     const removeKhachHang = async (record) => {
         try {
-            await deleteKhachHang(record.ID);
+            const userDto = {
+                id: record.ID,
+                hoTen: record.HOTEN,
+                email: record.EMAIL,
+                matKhau: record.MATKHAU,
+                trangThai: record.TRANG_THAI,
+                soDienThoai: record.SODIENTHOAI,
+                ngaySinh: record.NGAYSINH,
+                anh: record.ANH
+            };
+            
+            await deleteKhachHang(userDto);
             message.success("Xóa thành công!");
             getKhachHangData();
         } catch (error) {
-            message.error("Lỗi khi xóa khách hàng");
+            message.error("Lỗi khi xóa khách hàng: " + (error.response?.data?.message || error.message));
         }
     };
 

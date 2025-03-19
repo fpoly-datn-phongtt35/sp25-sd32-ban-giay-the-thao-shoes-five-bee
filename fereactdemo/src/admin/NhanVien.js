@@ -62,22 +62,35 @@ const NhanVien = () => {
     }, []);
 
     const getNhanVien = async () => {
-        const result = await getAllNhanVien();
-        const loadTable = result.data
-            .filter(item => item.roleNames.includes('ROLE_STAFF'))
-            .map((item, index) => ({
-                key: index,
-                ID: item.id,
-                HOTEN: item.hoTen,
-                EMAIL: item.email,
-                ANH: item.anh,
-                TRANG_THAI: item.isEnabled ? 0 : 1,
-                NGAYSINH: item.ngaySinh,
-                SODIENTHOAI: item.soDienThoai,
-            }));
-        setNhanVien(loadTable);
-        const activeNhanVienData = loadTable.filter(item => item.TRANG_THAI === 0);
-        setActiveNhanVien(activeNhanVienData);
+        try {
+            const result = await getAllNhanVien();
+            const loadTable = result.data
+                .filter(item => {
+                    // Kiểm tra xem người dùng có vai trò ROLE_STAFF không
+                    return item.userRoleEntities && 
+                           Array.isArray(item.userRoleEntities) && 
+                           item.userRoleEntities.some(role => 
+                               role.roleEntity && 
+                               role.roleEntity.ten === 'ROLE_STAFF'
+                           );
+                })
+                .map((item, index) => ({
+                    key: index,
+                    ID: item.id,
+                    HOTEN: item.hoTen,
+                    EMAIL: item.email,
+                    ANH: item.anh,
+                    TRANG_THAI: item.isEnabled ? 0 : 1,
+                    NGAYSINH: item.ngaySinh,
+                    SODIENTHOAI: item.soDienThoai,
+                }));
+            setNhanVien(loadTable);
+            const activeNhanVienData = loadTable.filter(item => item.TRANG_THAI === 0);
+            setActiveNhanVien(activeNhanVienData);
+        } catch (error) {
+            console.error("Lỗi khi lấy danh sách nhân viên:", error);
+            message.error("Không thể tải danh sách nhân viên");
+        }
     };
 
     const handleFileChange = (e) => {
