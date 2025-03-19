@@ -306,7 +306,7 @@ const SanPham = () => {
       id: updatedRecord.id,
       soLuongTon: Number(updatedRecord.soLuongTon) || 0,
       giaBan: parseFloat(updatedRecord.giaBan) || 0,
-      trangThai: updatedRecord.trangThai === 1 ? 0 : 1,
+      trangThai: updatedRecord.trangThai === 0 ? 1 : 0,
     };
 
     console.log("📌 Dữ liệu gửi lên API:", updatedGiayChiTiet);
@@ -1040,6 +1040,17 @@ const SanPham = () => {
                 />
               </Form.Item>
               <Form.Item
+                label="Giá Bán"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Input
+                  placeholder="Giá Bán"
+                  value={giaBan}
+                  onChange={(e) => setGiaBan(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item
                 label="Thương Hiệu"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 16 }}
@@ -1198,6 +1209,25 @@ const SanPham = () => {
             render: (text, record, index) => <span>{index + 1}</span>,
           },
           {
+            title: "Ảnh",
+            dataIndex: "ANH_GIAY",
+            width: 150,
+            render: (tenUrl) =>
+              tenUrl ? (
+                <img
+                  src={tenUrl} // ✅ Dùng trực tiếp tenUrl
+                  alt="Ảnh giày"
+                  style={{
+                    maxWidth: "100px",
+                    height: "auto",
+                    borderRadius: "5px",
+                  }}
+                />
+              ) : (
+                "Không có ảnh"
+              ),
+          },
+          {
             title: "Tên",
             dataIndex: "TEN",
             width: 150,
@@ -1258,7 +1288,7 @@ const SanPham = () => {
       {/* thông tin sản phẩm */}
       <Modal
         title="Thông tin  Sản Phẩm"
-        onOk={editGiayButton}
+        // onOk={editGiayButton}
         onCancel={() => setIsModalVisible(false)}
         visible={isModalVisible}
       >
