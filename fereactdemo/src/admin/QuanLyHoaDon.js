@@ -39,6 +39,7 @@ const QuanLyHoaDon = () => {
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [selectAll, setSelectAll] = useState(false);
   const [data, setData] = useState([]);
+  const [dataHoaDonChiTiet, setDataHoaDonChiTiet] = useState([]);
   const [statusFilter, setStatusFilter] = useState(null);
   const [dateFilter, setDateFilter] = useState(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
@@ -83,7 +84,8 @@ const QuanLyHoaDon = () => {
         setData([]);
         return;
       }
-
+      // hinh thuc mua 0 tien mat 1 vnpay 2 thanh toan khi giao
+      // 1 tại quầy 2 online
       const formattedData = result.data.map((item) => ({
         key: item.id, // ID hóa đơn
         order_id: item.id,
@@ -96,7 +98,7 @@ const QuanLyHoaDon = () => {
         status: mapTrangThai(item.trangThai), // Trạng thái đơn hàng
         trangThai: item.trangThai,
         diaChi: item.diaChi || "Không có địa chỉ", // Địa chỉ đơn hàng
-        hinhThucMua: item.hinhThucMua === 0 ? "Tại quầy" : "Online",
+        hinhThucMua: item.hinhThucMua === 1 ? "Tại Quầy" : "Online",
         hinhThucThanhToan:
           item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
         phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
@@ -122,6 +124,80 @@ const QuanLyHoaDon = () => {
       console.error("Lỗi khi fetch dữ liệu: ", error);
       message.error("Lỗi khi tải dữ liệu!");
     }
+  };
+  useEffect(() => {
+    if (dataHoaDonChiTiet.length > 0) {
+      togglePopup();
+    }
+  }, [dataHoaDonChiTiet]); // Chạy khi dữ liệu cập nhật
+
+  const fetchHoaDonChiTiet = async (id) => {
+    if (!id) {
+      console.error("ID hóa đơn không hợp lệ!");
+      message.error("Không tìm thấy ID hóa đơn!");
+      return;
+    }
+
+    try {
+      const result = await detailHoaDon(id);
+      // console.log("Dữ liệu từ API hóa đơn chi tiết:", result);
+
+      if (!result || !Array.isArray(result.items)) {
+        console.error("Dữ liệu không hợp lệ hoặc không phải mảng.");
+        setDataHoaDonChiTiet([]);
+        return;
+      }
+
+      // Format dữ liệu
+      const formattedData = {
+        key: result.id,
+        order_id: result.id,
+        ma: result.ma,
+        user: result.tenNguoiNhan || (result.userDto?.hoTen ?? "Khách lẻ"),
+        user_phone:
+          result.sdtNguoiNhan || (result.userDto?.soDienThoai ?? "N/A"),
+        order_on: result.ngayTao
+          ? moment(result.ngayTao).format("DD/MM/YYYY")
+          : "N/A",
+        status: mapTrangThai(result.trangThai),
+        trangThai: result.trangThai,
+        diaChi: result.diaChi || "Không có địa chỉ",
+        hinhThucMua: result.hinhThucMua === 1 ? "Tại Quầy" : "Online",
+        hinhThucThanhToan:
+          result.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+        phiShip: result.phiShip ?? 0,
+        soTienGiam: result.soTienGiam ?? 0,
+        tongTien: result.tongTien,
+        products: result.items.map((product) => ({
+          id: product.id,
+          tenGiay: product.giayChiTietEntity.giayEntity.ten,
+          mauSac: product.giayChiTietEntity.mauSacEntity.ten,
+          kichCo: product.giayChiTietEntity.kichCoEntity.ten,
+          soLuong: product.soLuong,
+          giaBan: product.giaBan,
+          hinhAnh:
+            product.giayChiTietEntity.giayEntity.anhGiayEntities?.[0]?.tenUrl ??
+            "",
+        })),
+      };
+      console.log("formattedData:", formattedData);
+
+      setDataHoaDonChiTiet(formattedData); // Chuyển thành mảng chứa 1 đối tượng
+    } catch (error) {
+      console.error("Lỗi khi fetch dữ liệu:", error);
+      message.error("Lỗi khi tải dữ liệu hóa đơn!");
+    }
+  };
+  const handleOrderClick = async (orderId) => {
+    if (!orderId) {
+      console.error("Order ID không hợp lệ");
+      message.error("Không tìm thấy ID hóa đơn!");
+      return;
+    }
+
+    await fetchHoaDonChiTiet(orderId);
+
+    togglePopup();
   };
 
   const handleStatusChange = (value) => {
@@ -215,17 +291,16 @@ const QuanLyHoaDon = () => {
 
   const handleEdit = async (record) => {
     try {
-      console.log(" Record nhận được trong handleEdit:", record);
+      console.log("📌 Record nhận được trong handleEdit:", record);
 
       if (!record || !record.order_id) {
         throw new Error(
-          " Không có order_id! Dữ liệu nhận được: " + JSON.stringify(record)
+          "❌ Không có order_id! Dữ liệu nhận được: " + JSON.stringify(record)
         );
       }
 
       // Gọi API lấy chi tiết hóa đơn
       const hoaDon = await detailHoaDon(record.order_id);
-      console.log("✅ Dữ liệu trả về từ API detailHoaDon:", hoaDon);
 
       if (!hoaDon) {
         throw new Error("❌ API trả về dữ liệu null hoặc undefined!");
@@ -242,21 +317,25 @@ const QuanLyHoaDon = () => {
 
       // Cập nhật dữ liệu vào form
       form.setFieldsValue({
-        status: hoaDon.status || "",
+        status: getTrangThaiText(hoaDon.trangThai), // Hiển thị trạng thái đúng
         user: hoaDon.user || "",
         user_phone: hoaDon.user_phone || "",
         order_on: ngayTao,
-        soLuong: products.reduce((sum, product) => sum + (product.soLuong || 0), 0),
-        tenGiay: products.map((product) => product.tenGiay || "Không xác định").join(", "),
+        soLuong: products.reduce(
+          (sum, product) => sum + (product.soLuong || 0),
+          0
+        ),
+        tenGiay: products
+          .map((product) => product.tenGiay || "Không xác định")
+          .join(", "),
       });
 
       // Cập nhật trạng thái bản ghi
       setEditingRecord({
         ...hoaDon,
-        ngayTao, 
+        ngayTao,
         id: hoaDon.id || hoaDon.order_id, // Đảm bảo có ID
       });
-      
 
       setIsViewOnly(true);
       setIsModalVisible(true);
@@ -264,16 +343,15 @@ const QuanLyHoaDon = () => {
       console.error("❌ Lỗi khi lấy chi tiết hóa đơn:", error);
       message.error("Có lỗi xảy ra khi lấy chi tiết hóa đơn!");
     }
-};
-
+  };
   const handleSave = () => {
     form.validateFields().then(async (values) => {
       console.log("Values to Update:", values);
 
       const trangThaiMoi = chuyenDoiTrangThai(values.status);
       const totalAmount = editingRecord?.tongTien; // Đảm bảo editingRecord tồn tại
-      console.log("editingRecord",editingRecord);
-      
+      console.log("editingRecord", editingRecord);
+
       if (!editingRecord?.id) {
         console.error("Lỗi: Không tìm thấy ID hóa đơn!");
         message.error("Không tìm thấy ID hóa đơn!");
@@ -295,7 +373,7 @@ const QuanLyHoaDon = () => {
         await xacNhanHoaDon(editingRecord.id || editingRecord.order_id, {
           trangThai: trangThaiMoi,
         });
-        
+
         await fetchHoaDon();
 
         setIsModalVisible(false);
@@ -306,7 +384,30 @@ const QuanLyHoaDon = () => {
       }
     });
   };
-
+  const getTrangThaiText = (statusCode) => {
+    switch (statusCode) {
+      case 0:
+        return "cho xac nhan";
+      case 1:
+        return "hoa don cho thanh toan";
+      case 2:
+        return "hoan thanh";
+      case 3:
+        return "da xac nhan";
+      case 4:
+        return "cho van chuyen";
+      case 5:
+        return "dang van chuyen";
+      case 6:
+        return "da giao hang";
+      case 7:
+        return "tra hang";
+      case 8:
+        return "huy";
+      default:
+        return "cho xac nhan"; // Giá trị mặc định nếu không khớp
+    }
+  };
   const chuyenDoiTrangThai = (trangThai) => {
     switch (trangThai) {
       case "cho xac nhan":
@@ -531,13 +632,7 @@ const QuanLyHoaDon = () => {
       );
     }
   };
-  const handleOrderClick = (orderId) => {
-    const selectedOrder = data.find((order) => order.order_id === orderId);
-    console.log("Selected Order:", selectedOrder);
 
-    setSelectedOrder(selectedOrder);
-    togglePopup();
-  };
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
   };
@@ -614,13 +709,13 @@ const QuanLyHoaDon = () => {
                   value: "hoa don cho thanh toan",
                   label: "Hóa đơn chờ thanh toán",
                 },
+                { value: "hoan thanh", label: "Hoàn thành" },
                 { value: "da xac nhan", label: "Đã xác nhận" },
                 { value: "cho van chuyen", label: "Chờ vận chuyển" },
                 { value: "dang van chuyen", label: "Đang vận chuyển" },
                 { value: "da giao hang", label: "Đã giao hàng" },
-                { value: "hoan thanh", label: "Hoàn thành" },
                 { value: "tra hang", label: "Trả hàng" },
-                { value: "huy", label: "Hủy" },
+                { value: "huy", label: "Đã Hủy" },
               ]}
             />
           </Form.Item>
@@ -649,17 +744,19 @@ const QuanLyHoaDon = () => {
             <div className="thongtinhoadon">
               <div className="trai">
                 <h4>Chi Tiết Đơn Hàng </h4>
-                <h6>Mã Hóa Đơn: {selectedOrder?.ma || "N/A"}</h6>
-                <h6>Ngày Mua: {selectedOrder?.order_on || "N/A"}</h6>
-                <h6>Hình Thức Mua: {selectedOrder?.hinhThucMua || "N/A"}</h6>
+                <h6>Mã Hóa Đơn: {dataHoaDonChiTiet?.ma || "N/A"}</h6>
+                <h6>Ngày Mua: {dataHoaDonChiTiet?.order_on || "N/A"}</h6>
+                <h6>
+                  Hình Thức Mua: {dataHoaDonChiTiet?.hinhThucMua || "N/A"}
+                </h6>
                 <h6>
                   HÌnh Thức Thanh Toán :{" "}
-                  {selectedOrder?.hinhThucThanhToan || "N/A"}
+                  {dataHoaDonChiTiet?.hinhThucThanhToan || "N/A"}
                 </h6>
 
                 <h6>
                   Tổng Tiền:{" "}
-                  {selectedOrder?.tongTien?.toLocaleString("vi-VN", {
+                  {dataHoaDonChiTiet?.tongTien?.toLocaleString("vi-VN", {
                     style: "currency",
                     currency: "VND",
                   }) || "N/A"}
@@ -667,15 +764,14 @@ const QuanLyHoaDon = () => {
               </div>
               <div className="phai">
                 <h4>Thông tin khách hàng</h4>
-                <h6>Tên Khách Hàng: {selectedOrder?.user || "N/A"}</h6>
-                <h6>Số Điện Thoại: {selectedOrder?.user_phone || "N/A"}</h6>
-                <h6>Địa Chỉ: {selectedOrder?.diaChi || "Tại Quầy"}</h6>
+                <h6>Tên Khách Hàng: {dataHoaDonChiTiet?.user || "N/A"}</h6>
+                <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
+                <h6>Địa Chỉ: {dataHoaDonChiTiet?.diaChi || "Tại Quầy"}</h6>
               </div>
             </div>
 
             {/* Thông tin các sản phẩm trong đơn hàng */}
             <div>
-              {/* <h4>Sản phẩm:</h4> */}
               <table
                 border="1"
                 style={{ width: "100%", borderCollapse: "collapse" }}
@@ -691,22 +787,36 @@ const QuanLyHoaDon = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  {selectedOrder?.products.map((product, index) => (
+                  {dataHoaDonChiTiet?.products.map((product, index) => (
                     <tr key={index}>
-                      <td>{product.tenGiay}</td>
-                      <td>{product.mauSac}</td>
-                      <td>{product.kichCo}</td>
+                      <td>
+                        <img
+                          src={product.hinhAnh || "/placeholder.jpg"}
+                          alt={product.tenGiay || "Hình ảnh sản phẩm"}
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            marginRight: "5px",
+                          }}
+                        />
+                        {product.tenGiay || "N/A"}
+                      </td>
+                      <td>{product.mauSac || "N/A"}</td>
+                      <td>{product.kichCo || "N/A"}</td>
                       <td>
                         {product.giaBan?.toLocaleString("vi-VN", {
                           style: "currency",
                           currency: "VND",
                         }) || "N/A"}
                       </td>
-                      <td>{product.soLuong}</td>
+                      <td>{product.soLuong || 0}</td>
                       <td>
                         {(product.soLuong * product.giaBan)?.toLocaleString(
                           "vi-VN",
-                          { style: "currency", currency: "VND" }
+                          {
+                            style: "currency",
+                            currency: "VND",
+                          }
                         ) || "N/A"}
                       </td>
                     </tr>
@@ -719,7 +829,7 @@ const QuanLyHoaDon = () => {
                     </td>
                     <td>
                       <strong>
-                        {selectedOrder?.products
+                        {dataHoaDonChiTiet?.products
                           .reduce(
                             (total, product) =>
                               total + product.soLuong * product.giaBan,

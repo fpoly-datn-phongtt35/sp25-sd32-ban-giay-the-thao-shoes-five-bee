@@ -46,6 +46,10 @@ import { createVNPayPayment } from "../service/VnpayService";
 import AddressModal from "./AddressModal";
 
 const BanHangTaiQuay = () => {
+  const [suggestions, setSuggestions] = useState([]); // Danh sách gợi ý
+  const [showPopupwebcam, setShowPopupwebcam] = useState(false);
+  const [isTyping, setIsTyping] = useState(false);
+  const [khachHangTimThay, setKhachHangTimThay] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
   const [customerMoney, setCustomerMoney] = useState("");
   const [giay, setGiay] = useState([]);
@@ -69,6 +73,7 @@ const BanHangTaiQuay = () => {
   const handleChange = (event) => {
     setSelectedOption(event.target.value);
   };
+  const [showWebcam, setShowWebcam] = useState(false);
   const [sizes, setSizes] = useState([]);
   const [colors, setColors] = useState([]);
   const [chuongTrinhGiamGia, setChuongTrinhGiamGia] = useState([]);
@@ -89,6 +94,7 @@ const BanHangTaiQuay = () => {
   const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
   const [initialTotalHoaDon, setInitialTotalHoaDon] = useState(totalHoaDon);
   const [hoaDonCho, setHoaDonCho] = useState([]);
+  const [scanResult, setScanResult] = useState("");
   const [availablePageNumbers, setAvailablePageNumbers] = useState([
     1, 2, 3, 4, 5,
   ]);
@@ -583,24 +589,30 @@ const BanHangTaiQuay = () => {
     try {
       const result = await getAllGiayChiTiet();
       console.log("Dữ liệu giày:", result.data);
+
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu trả về không hợp lệ");
       }
 
-      const dataGiay = result.data.map((item, index) => ({
-        ID: item.id ?? index,
-        TEN: item.giayEntity?.ten ?? "N/A", // Lấy tên giày từ giayEntity
-        ANH_GIAY:
-          item.giayEntity?.anhGiayEntities?.length > 0
-            ? item.giayEntity.anhGiayEntities[0].tenUrl // Lấy ảnh đầu tiên từ giayEntity
-            : null,
-        GIABAN: item.giaBan ?? 0,
-        SOLUONG: item.soLuongTon ?? 0,
-        MO_TA: item.giayEntity?.moTa ?? "Không có mô tả",
-        KiCH_CO: item.kichCoEntity?.ten ?? "N/A",
-        MAU_SAC: item.mauSacEntity?.ten ?? "N/A",
-        TRANG_THAI: item.trangThai === 0 ? "Đang bán" : "Ngừng bán",
-      }));
+      // Lọc giày có trạng thái Đang bán
+      const dataGiay = result.data
+        .filter((item) => item.trangThai === 0) // Chỉ lấy giày có trạng thái Đang bán
+        .map((item, index) => ({
+          ID: item.id ?? index,
+          TEN: `${item.giayEntity?.ten ?? "N/A"} (Size: ${
+            item.kichCoEntity?.ten ?? "N/A"
+          }, Màu: ${item.mauSacEntity?.ten ?? "N/A"})`,
+          ANH_GIAY:
+            item.giayEntity?.anhGiayEntities?.length > 0
+              ? item.giayEntity.anhGiayEntities[0].tenUrl
+              : null,
+          GIABAN: item.giaBan ?? 0,
+          SOLUONG: item.soLuongTon ?? 0,
+          MO_TA: item.giayEntity?.moTa ?? "Không có mô tả",
+          KiCH_CO: item.kichCoEntity?.ten ?? "N/A",
+          MAU_SAC: item.mauSacEntity?.ten ?? "N/A",
+          TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+        }));
 
       setGiay(dataGiay);
     } catch (error) {
@@ -893,6 +905,7 @@ const BanHangTaiQuay = () => {
       // Cập nhật danh sách số thứ tự có thể sử dụng
       setAvailablePageNumbers((prevNumbers) => [...prevNumbers, pageId].sort());
       getAllGiay();
+      setTotalHoaDon(0);
     } catch (error) {
       console.error("Lỗi khi xóa hóa đơn:", error);
       message.error("Không thể xóa hóa đơn");
@@ -919,43 +932,81 @@ const BanHangTaiQuay = () => {
       mauSac: item.MAU_SAC.toLowerCase(),
     }).some((value) => value.includes(searchTerm.toLowerCase()))
   );
+  useEffect(() => {
+    if (soDienThoai.trim() === "") {
+      setSuggestions([]);
+      setSelectedKhachHang(null);
+      setHoTen("");
+      return;
+    }
+
+    // Lọc khách hàng có số điện thoại chứa chuỗi nhập vào
+    const filteredKhachHang = khachHangList.filter(
+      (kh) => kh.soDienThoai.startsWith(soDienThoai) // Kiểm tra số bắt đầu bằng chuỗi nhập
+    );
+
+    setSuggestions(filteredKhachHang);
+  }, [soDienThoai, khachHangList]);
+
+  // Khi chọn khách hàng từ danh sách gợi ý
+  const handleSelectKhachHang = (value) => {
+    const foundKhachHang = khachHangList.find((kh) => kh.id === value);
+    if (foundKhachHang) {
+      setSoDienThoai(foundKhachHang.soDienThoai);
+      setHoTen(foundKhachHang.hoTen);
+      setSelectedKhachHang(foundKhachHang.id);
+    }
+  };
 
   return (
     <div className="quay_container">
-      {/* <div>
-      <h1>React Webcam</h1>
-      <WebcamComponent />
-    </div> */}
       <div className="left">
         <div className="product_list_hd">
-          <div>
-            {pages.map((page) => (
-              <div
-                key={page.id}
-                style={{ display: "inline-block", marginRight: "10px" }}
-              >
-                <Button
-                  className={
-                    page.id === selectedPage
-                      ? "page_button selected"
-                      : "page_button"
-                  }
-                  onClick={() => handleSelectPage(page.id, page.hoaDonId)}
+          <div style={{ display: "flex", justifyContent: "space-between" }}>
+            <div>
+              {pages.map((page) => (
+                <div
+                  key={page.id}
+                  style={{ display: "inline-block", marginRight: "10px" }}
                 >
-                  Hóa Đơn {page.id}
-                </Button>
+                  <Button
+                    className={
+                      page.id === selectedPage
+                        ? "page_button selected"
+                        : "page_button"
+                    }
+                    onClick={() => handleSelectPage(page.id, page.hoaDonId)}
+                  >
+                    Hóa Đơn {page.id}
+                  </Button>
 
-                <Button
-                  onClick={() => handleRemovePage(page.id)}
-                  style={{ marginLeft: "5px", color: "red" }}
-                >
-                  x
-                </Button>
-              </div>
-            ))}
-            <Button onClick={handleAddPage}>+</Button>
+                  <Button
+                    onClick={() => handleRemovePage(page.id)}
+                    style={{ marginLeft: "5px", color: "red" }}
+                  >
+                    x
+                  </Button>
+                </div>
+              ))}
+              <Button onClick={handleAddPage}>+</Button>
+            </div>
+            <div>
+              <Button onClick={() => setShowPopupwebcam(true)}>
+                Bật Webcam
+              </Button>
+
+              {showPopupwebcam && (
+                <div className="overlay_webcam">
+                  <WebcamComponent
+                    onClose={() => setShowPopupwebcam(false)}
+                    onScanSuccess={(result) => setScanResult(result)}
+                  />
+                </div>
+              )}
+
+              {scanResult && <p>Kết quả quét: {scanResult}</p>}
+            </div>
           </div>
-
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
             {selectedProducts[selectedHoaDonId] &&
@@ -1002,28 +1053,38 @@ const BanHangTaiQuay = () => {
         </div>
         <div className="product_list_tt">
           {/* Ô tìm kiếm */}
-          <input
-            type="text"
-            placeholder="Tìm kiếm..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
+          <div
             style={{
-              padding: "8px",
-              marginBottom: "10px",
-              width: "100%",
-              borderRadius: "5px",
+              // position: "sticky",
+              top: 0,
+              background: "white",
+              zIndex: 1000,
+              padding: "10px",
             }}
-          />
+          >
+            <input
+              type="text"
+              placeholder="Tìm kiếm..."
+              value={searchTerm}
+              onChange={(e) => setSearchTerm(e.target.value)}
+              style={{
+                padding: "8px",
+                width: "100%",
+                borderRadius: "15px",
+                border: "1px solid #ccc",
+              }}
+            />
+          </div>
 
           <table className="product_table">
             <thead>
               <tr>
                 <th>Ảnh</th>
-                <th>Tên</th>
+                <th style={{ width: "300px" }}>Tên</th>
                 <th>Giá Bán</th>
                 <th>Số Lượng</th>
-                <th>Kích Cỡ</th>
-                <th>Màu Sắc</th>
+                {/* <th>Kích Cỡ</th>
+                <th>Màu Sắc</th> */}
                 <th>Trạng Thái</th>
               </tr>
             </thead>
@@ -1048,8 +1109,8 @@ const BanHangTaiQuay = () => {
                     {item.ANH_GIAY ? (
                       <img
                         src={item.ANH_GIAY}
-                        width={50}
-                        height={50}
+                        width={100}
+                        height={100}
                         alt={item.TEN}
                         style={{ objectFit: "cover", borderRadius: "5px" }}
                       />
@@ -1057,11 +1118,19 @@ const BanHangTaiQuay = () => {
                       "No Image"
                     )}
                   </td>
-                  <td>{item.TEN}</td>
+                  <td
+                    style={{
+                      textAlign: "left",
+                      wordWrap: "break-word",
+                      whiteSpace: "normal",
+                    }}
+                  >
+                    {item.TEN}
+                  </td>
                   <td>{item.GIABAN.toLocaleString("vi-VN")} đ</td>
                   <td>{item.SOLUONG}</td>
-                  <td>{item.KiCH_CO}</td>
-                  <td>{item.MAU_SAC}</td>
+                  {/* <td>{item.KiCH_CO}</td>
+                  <td>{item.MAU_SAC}</td> */}
                   <td>{item.TRANG_THAI}</td>
                 </tr>
               ))}
@@ -1070,36 +1139,56 @@ const BanHangTaiQuay = () => {
         </div>
       </div>
       <div className="right">
-        <Select
-          placeholder="Chọn Khách Hàng"
-          value={selectedKhachHang}
-          onChange={handleKhachHangChange}
-        >
-          {Array.isArray(khachHangList) &&
-            khachHangList.map((hkh) => (
-              <Option key={hkh.id} value={hkh.id}>
-                {hkh.hoTen}
+        <div>
+          <span>Số Điện Thoại :</span>
+          <Select
+            showSearch
+            value={soDienThoai}
+            placeholder="Nhập số điện thoại khách hàng"
+            onSearch={(value) => setSoDienThoai(value)} // Nhập để gợi ý
+            onChange={(value) => setSoDienThoai(value)} // Chọn gợi ý sẽ điền vào ô nhập
+            style={{ width: "100%" }}
+            filterOption={false} // Không cần lọc mặc định, đã lọc bằng useEffect
+          >
+            {suggestions.map((kh) => (
+              <Option
+                key={kh.id}
+                value={kh.soDienThoai}
+                onClick={() => handleSelectKhachHang(kh.id)}
+              >
+                {kh.soDienThoai} - {kh.hoTen}
               </Option>
             ))}
-        </Select>
-        {/* <Button type="primary" danger onClick={handleClear}>
-          Clear
-        </Button> */}
-        <br />
-        Họ Tên Khách Hàng :
-        <Input
-          type="input"
-          value={hoTen}
-          onChange={(e) => setHoTen(e.target.value)}
-          placeholder="Nhập họ tên khách hàng"
-        />
-        Số Điện Thoại :
-        <Input
-          type="input"
-          value={soDienThoai}
-          onChange={(e) => setSoDienThoai(e.target.value)}
-          placeholder="Nhập số điện thoại khách hàng"
-        />
+          </Select>
+
+          {selectedKhachHang && (
+            <>
+              <br />
+              <span>Họ Tên Khách Hàng :</span>
+              <Input
+                type="text"
+                value={hoTen}
+                readOnly
+                placeholder="Tên khách hàng"
+              />
+              {/* 
+              <br />
+              <span>Chọn Khách Hàng:</span>
+              <Select
+                placeholder="Chọn Khách Hàng"
+                value={selectedKhachHang}
+                onChange={handleSelectKhachHang}
+                style={{ width: "100%" }}
+              >
+                {khachHangList.map((hkh) => (
+                  <Option key={hkh.id} value={hkh.id}>
+                    {hkh.hoTen}
+                  </Option>
+                ))}
+              </Select> */}
+            </>
+          )}
+        </div>
         {isGiaoHang && (
           <div>
             <label>Địa Chỉ:</label>
@@ -1117,16 +1206,16 @@ const BanHangTaiQuay = () => {
             />
           </div>
         )}
-        <Button
+        {/* <Button
           type="primary"
           onClick={handleAddKhachHang}
           style={{ marginTop: "10px" }}
           disabled={!hoTen || !soDienThoai}
         >
           Thêm Khách Hàng Mới
-        </Button>
+        </Button> */}
         <br />
-        <br />
+
         <Select
           placeholder="Chọn Mã Giảm Giá"
           value={selectedMaGiamGia || undefined}
@@ -1137,7 +1226,7 @@ const BanHangTaiQuay = () => {
           {Array.isArray(maGiamGiaList) &&
             maGiamGiaList.map((mg) => (
               <Option key={mg.id} value={mg.id}>
-                {mg.ten} - {mg.giaTri} % 
+                {mg.ten} - {mg.giaTri} %
               </Option>
             ))}
         </Select>

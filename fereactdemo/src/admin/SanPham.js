@@ -51,6 +51,7 @@ import { getMauSac } from "../service/MauSacService";
 
 const SanPham = () => {
   const [giay, setGiay] = useState([]);
+  const [editedData, setEditedData] = useState({});
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
   const [value, setValue] = useState(2);
   const [ten, setTen] = useState("");
@@ -91,7 +92,7 @@ const SanPham = () => {
   const [selectedKichCo1, setSelectedKichCo1] = useState([]);
   const [selectedMauSac1, setSelectedMauSac1] = useState([]);
   const [selectedAnhGiay1, setSelectedAnhGiay1] = useState(null);
-
+  const [updatedDataChiTiet, setUpdatedDataChỉTiet] = useState({});
   const [danhSachChiTiet, setDanhSachChiTiet] = useState([]);
 
   const [soLuongTon1, setSoLuongTon1] = useState(null);
@@ -199,98 +200,32 @@ const SanPham = () => {
     }
   };
 
-  const handleEdit = async (record) => {
-    try {
-      const response = await detailGiayChiTiet2(record.id);
+  // const handleEditGiayChiTiet = async (record) => {
+  //   try {
+  //     const response = await detailGiayChiTiet2(record.id);
 
-      const giayChiTiet = response.data;
-      console.log("🔍 Chi tiết giày:", giayChiTiet);
+  //     const giayChiTiet = response.data;
+  //     console.log("🔍 Chi tiết giày:", giayChiTiet);
 
-      setEditingGiayChiTiet(giayChiTiet);
-      setGiaBan1(giayChiTiet.giaBan);
-      setSoLuongTon1(giayChiTiet.soLuongTon); // Cập nhật số lượng tồn cho sản phẩm 1
-      setValue(giayChiTiet.trangThai === 0 ? 1 : 2);
-      setSelectedMauSac1(
-        giayChiTiet.mauSacEntity ? giayChiTiet.mauSacEntity.id : null
-      );
-      setSelectedKichCo1(
-        giayChiTiet.kichCoEntity ? giayChiTiet.kichCoEntity.id : null
-      );
-      setSelectedGiay1(
-        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null,
-        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.ten : null
-      );
-      setIsModalVisibleUpdateGiayChiTiet(true);
-    } catch (error) {
-      message.error("Lỗi khi detail giày chi tiết");
-    }
-  };
-  const handleUpdate = async (record) => {
-    if (!editingGiayChiTiet) {
-      message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
-      return;
-    }
-
-    // Kiểm tra xem sản phẩm có đúng với sản phẩm đang được xem không
-    if (editingGiayChiTiet?.id !== record.id) {
-      message.error(
-        "❌ Bạn đang chỉnh sửa một sản phẩm khác với sản phẩm trong chi tiết!"
-      );
-      return;
-    }
-
-    const updatedGiayChiTiet = {
-      id: editingGiayChiTiet?.id || null,
-      soLuongTon: soLuongTon1,
-      giaBan: giaBan1,
-      giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
-      trangThai: value === 1 ? 0 : 1,
-      mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null,
-      kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
-      danhSachAnh: selectedAnhGiay1
-        ? selectedAnhGiay1.map((id) => ({ id }))
-        : [],
-    };
-
-    console.log("🔍 Dữ liệu cập nhật gửi đi:", updatedGiayChiTiet);
-
-    try {
-      if (
-        !updatedGiayChiTiet.giayDto?.id ||
-        !updatedGiayChiTiet.mauSacDto?.id ||
-        !updatedGiayChiTiet.kichCoDto?.id
-      ) {
-        message.error(
-          "❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!"
-        );
-        return;
-      }
-
-      const response = await updateGiayChiTiet(updatedGiayChiTiet);
-      message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
-
-      // Cập nhật danh sách sản phẩm chi tiết
-      fetchSanPhamChiTiet({ ID: selectedGiay1 });
-
-      // Cập nhật lại form với dữ liệu mới từ API
-      setSoLuongTon1("");
-      setGiaBan1("");
-      setSelectedMauSac1(response.data.mauSacDto?.id || null);
-      setSelectedKichCo1(response.data.kichCoDto?.id || null);
-      setSelectedGiay1(response.data.giayDto?.id || null);
-      selectedAnhGiay1(response.data.danhSachAnh || null);
-      setIsModalVisible(false);
-    } catch (error) {
-      console.error(
-        "❌ Lỗi cập nhật sản phẩm chi tiết:",
-        error.response?.data || error.message
-      );
-      message.error(
-        "❌ Lỗi cập nhật sản phẩm chi tiết: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
-  };
+  //     setEditingGiayChiTiet(giayChiTiet);
+  //     setGiaBan1(giayChiTiet.giaBan);
+  //     setSoLuongTon1(giayChiTiet.soLuongTon); // Cập nhật số lượng tồn cho sản phẩm 1
+  //     setValue(giayChiTiet.trangThai === 0 ? 1 : 2);
+  //     setSelectedMauSac1(
+  //       giayChiTiet.mauSacEntity ? giayChiTiet.mauSacEntity.id : null
+  //     );
+  //     setSelectedKichCo1(
+  //       giayChiTiet.kichCoEntity ? giayChiTiet.kichCoEntity.id : null
+  //     );
+  //     setSelectedGiay1(
+  //       giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null,
+  //       giayChiTiet.giayEntity ? giayChiTiet.giayEntity.ten : null
+  //     );
+  //     setIsModalVisibleUpdateGiayChiTiet(true);
+  //   } catch (error) {
+  //     message.error("Lỗi khi detail giày chi tiết");
+  //   }
+  // };
 
   const handleDelete = async (record) => {
     try {
@@ -309,13 +244,6 @@ const SanPham = () => {
 
   const handleAdd = async () => {
     const newTrangThai1 = value === 1 ? 0 : 1;
-
-    console.log("🔹 Số lượng tồn:", soLuongTon1);
-    console.log("🔹 Giá bán:", giaBan1);
-    console.log("🔹 Giày đã chọn:", selectedGiay1);
-    console.log("🔹 Màu sắc đã chọn:", selectedMauSac1);
-    console.log("🔹 Kích cỡ đã chọn:", selectedKichCo1);
-    console.log("🔹 ảnh đã chọn:", selectedAnhGiay1);
 
     try {
       // 🏀 Kiểm tra dữ liệu đầu vào trước khi gửi
@@ -368,6 +296,53 @@ const SanPham = () => {
       message.error("Lỗi khi thực hiện thao tác: " + error.message);
     }
   };
+  const handleUpdateGiayChiTiet = async (record) => {
+    const updatedRecord = {
+      ...record,
+      ...editedData[record.id], // Lấy dữ liệu đã chỉnh sửa
+    };
+
+    const updatedGiayChiTiet = {
+      id: updatedRecord.id,
+      soLuongTon: Number(updatedRecord.soLuongTon) || 0,
+      giaBan: parseFloat(updatedRecord.giaBan) || 0,
+      trangThai: updatedRecord.trangThai === 1 ? 0 : 1,
+    };
+
+    console.log("📌 Dữ liệu gửi lên API:", updatedGiayChiTiet);
+
+    try {
+      const response = await updateGiayChiTiet(updatedGiayChiTiet);
+      message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
+
+      // Reset dữ liệu sau khi cập nhật
+      setEditedData((prev) => {
+        const newData = { ...prev };
+        delete newData[record.id]; // Xóa dữ liệu đã sửa sau khi gửi API
+        return newData;
+      });
+
+      fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
+    } catch (error) {
+      console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
+      message.error("❌ Lỗi cập nhật sản phẩm chi tiết!");
+    }
+  };
+  const handleAddImage = (record) => {
+    console.log("Thêm ảnh cho sản phẩm:", record);
+    
+  }
+  const handleInputChange = (e, record, field) => {
+    const { value } = e.target;
+    setEditedData((prev) => ({
+      ...prev,
+      [record.id]: {
+        // Mỗi sản phẩm được lưu theo ID
+        ...prev[record.id],
+        [field]: value, // Cập nhật trường được chỉnh sửa
+      },
+    }));
+  };
 
   // Hàm hiển thị popup
   const columnsGiayChiTiet = [
@@ -384,18 +359,27 @@ const SanPham = () => {
         </div>
       ),
     },
-
     {
       title: "Đơn giá",
       dataIndex: "giaBan",
       key: "giaBan",
-      render: (text, record) => <Input defaultValue={text} />,
+      render: (text, record) => (
+        <Input
+          defaultValue={text}
+          onChange={(e) => handleInputChange(e, record, "giaBan")}
+        />
+      ),
     },
     {
       title: "Số lượng",
       dataIndex: "soLuongTon",
       key: "soLuongTon",
-      render: (text, record) => <Input defaultValue={text} />,
+      render: (text, record) => (
+        <Input
+          defaultValue={text}
+          onChange={(e) => handleInputChange(e, record, "soLuongTon")}
+        />
+      ),
     },
     {
       title: "Ảnh",
@@ -405,7 +389,7 @@ const SanPham = () => {
         <Button
           type="dashed"
           icon={<PlusOutlined />}
-          // onClick={() => handleAddImage(record)}
+          onClick={() => handleAddImage(record)}
         />
       ),
     },
@@ -414,19 +398,14 @@ const SanPham = () => {
       key: "action",
       render: (_, record) => (
         <div style={{ display: "flex", gap: "8px" }}>
-          {/* <Button
-            type="primary"
-            onClick={() => handleEdit(record)}
-            icon={<EyeOutlined />}
-          /> */}
           <Button
             danger
             onClick={() => handleDelete(record)}
             icon={<DeleteOutlined />}
           />
           <Button
-            danger
-            onClick={() => handleUpdate(record)}
+            type="primary"
+            onClick={() => handleUpdateGiayChiTiet(record)}
             icon={<EditOutlined />}
           />
         </div>
@@ -574,10 +553,10 @@ const SanPham = () => {
   };
 
   const creatGiay = async () => {
-    if (!ten || !giaBan) {
-      message.error("Không được để trống!");
-      return;
-    }
+    // if (!ten || !giaBan) {
+    //   message.error("Không được để trống!");
+    //   return;
+    // }
 
     const newTrangThai = value === 1 ? 1 : 0;
 
@@ -654,10 +633,10 @@ const SanPham = () => {
     // Gọi fetch nhưng không mở popup danh sách sản phẩm
     const danhSachChiTiet = await fetchSanPhamChiTiet(record, false);
 
-    if (!danhSachChiTiet || danhSachChiTiet.length === 0) {
-      message.error("Không có sản phẩm chi tiết nào!");
-      return;
-    }
+    // if (!danhSachChiTiet || danhSachChiTiet.length === 0) {
+    //   message.error("Không có sản phẩm chi tiết nào!");
+    //   return;
+    // }
 
     const giayDto = {
       id: record.ID,
@@ -782,7 +761,7 @@ const SanPham = () => {
     .filter((item) =>
       Object.values({
         ten: item.TEN.toLowerCase(),
-        soLuong: item.SOLUONGTON.toString(),
+        soLuong: item.SOLUONGTON?.toString() || "0",
         thuongHieu: item.THUONG_HIEU.toLowerCase(),
       }).some((value) => value.includes(searchTerm.toLowerCase()))
     )
@@ -845,7 +824,7 @@ const SanPham = () => {
             style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}
           >
             <Button type="primary" onClick={() => handleAdd()}>
-              Thêm
+              Add
             </Button>
             <Button
               type="default"
@@ -1044,12 +1023,11 @@ const SanPham = () => {
         onCancel={() => setIsModalVisible1(false)}
         okText="Thêm"
         cancelText="Hủy"
-    
       >
         <Form layout="horizontal">
-          <Row gutter={16} >
+          <Row gutter={16}>
             {/* Cột bên trái */}
-            <Col span={12} >
+            <Col span={12}>
               <Form.Item
                 label="Tên Giày"
                 labelCol={{ span: 8 }}
@@ -1232,11 +1210,11 @@ const SanPham = () => {
               </span>
             ),
           },
-          {
-            title: "Số lượng",
-            dataIndex: "SOLUONGTON",
-            width: 100,
-          },
+          // {
+          //   title: "Số lượng",
+          //   dataIndex: "SOLUONGTON",
+          //   width: 100,
+          // },
           {
             title: "Thương hiệu",
             dataIndex: "THUONG_HIEU",

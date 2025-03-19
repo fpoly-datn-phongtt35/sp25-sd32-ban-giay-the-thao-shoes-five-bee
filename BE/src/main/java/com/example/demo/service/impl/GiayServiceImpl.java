@@ -78,7 +78,7 @@ public class GiayServiceImpl implements GiayService {
                         .giayEntity(giayRepository.findById(giayRequest.getGiayId()).orElse(null))
                         .mauSacEntity(mauSacRepository.findById(mauSacId).orElse(null))
                         .kichCoEntity(kichCoRepository.findById(kichCoId).orElse(null))
-                        .giaBan(giayEntity.getGiaNhap())
+                        .giaBan(giayEntity.getGiaBan())
                         .soLuongTon(1)
                         .trangThai(0)
                         .build();
@@ -86,11 +86,11 @@ public class GiayServiceImpl implements GiayService {
         giayChiTietEntities.add(giayChiTiet);
 
         // Tạo mã QR cho sản phẩm (dựa trên ID của GiayChiTietEntity)
-        try {
-          generateQRCode(giayChiTiet.getId().toString());  // Gọi hàm generateQRCode và truyền mã vạch
-        } catch (WriterException | IOException e) {
-          e.printStackTrace();  // In ra lỗi nếu có khi tạo mã QR
-        }
+//        try {
+//          generateQRCode(giayChiTiet.getId().toString());  // Gọi hàm generateQRCode và truyền mã vạch
+//        } catch (WriterException | IOException e) {
+//          e.printStackTrace();  // In ra lỗi nếu có khi tạo mã QR
+//        }
       }
     }
 

@@ -170,7 +170,7 @@ const AnhSanPham = () => {
                 ) : (
                   "Không có ảnh"
                 )}
-                <div>{trangThai(item.TRANG_THAI)}</div>
+                {/* <div>{trangThai(item.TRANG_THAI)}</div> */}
                 <Button onClick={() => removeAnhGiay(item)}>Delete</Button>
               </div>
             </Col>
