@@ -10,7 +10,12 @@
     align-items: center;
     z-index: 1000; /* Đảm bảo popup luôn hiển thị trên cùng */
   }
-  
+  .main-container {
+    width: calc(100% ); /* Trừ đi phần sidebar */
+    margin-left: auto;
+    margin-right: auto;
+    padding: 20px;
+  }
   .popup-content {
     width: 100%;   /* Chiếm toàn bộ chiều rộng màn hình */
     height: 100%;  /* Chiếm toàn bộ chiều cao màn hình */
@@ -60,4 +65,133 @@ th {
 
 tr:nth-child(even) {
     background-color: #f9f9f9;
+}
+.action_hoadon {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  background: #f8f9fa;
+  padding: 15px;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+  margin-bottom: 20px;
+  width: 100%;
+}
+
+.filter {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.filter p {
+  font-weight: bold;
+  margin: 0;
+}
+
+.filter_right {
+  display: flex;
+  gap: 10px;
+}
+
+.filter_right button {
+  padding: 8px 12px;
+  border-radius: 5px;
+  font-weight: bold;
+}
+
+.order_container {
+  width: 100%;
+  max-width: 100%;
+  overflow-x: auto; /* Đảm bảo bảng không bị tràn */
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
+}
+
+.ant-table {
+  border-radius: 10px;
+  overflow: hidden;
+  width: 100%;
+}
+
+.ant-btn-primary {
+  background-color: #1890ff;
+  border-color: #1890ff;
+}
+
+.ant-btn-danger {
+  background-color: #ff4d4f;
+  border-color: #ff4d4f;
+}
+
+.ant-btn:hover {
+  opacity: 0.8;
+}
+
+.ant-table-thead > tr > th {
+  background-color: #f0f2f5 !important;
+  font-weight: bold;
+  text-align: center;
+}
+
+.ant-table-tbody > tr > td {
+  text-align: center;
+}
+
+.ant-table-tbody > tr:hover {
+  background-color: #e6f7ff;
+}
+
+/* Responsive cho màn hình nhỏ */
+@media (max-width: 1024px) {
+  .action_hoadon {
+    flex-direction: column;
+    align-items: flex-start;
+    gap: 10px;
+  }
+
+  .filter {
+    width: 100%;
+  }
+
+  .filter_right {
+    width: 100%;
+    display: flex;
+    justify-content: flex-end;
+  }
+
+  .order_container {
+    padding: 15px;
+  }
+}
+
+@media (max-width: 768px) {
+  .action_hoadon {
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+  }
+
+  .filter {
+    align-items: center;
+  }
+
+  .filter_right {
+    justify-content: center;
+  }
+
+  .order_container {
+    padding: 10px;
+  }
+
+  .ant-table {
+    font-size: 12px; /* Giảm kích thước chữ */
+  }
+
+  .ant-table-thead > tr > th,
+  .ant-table-tbody > tr > td {
+    padding: 8px;
+  }
 }

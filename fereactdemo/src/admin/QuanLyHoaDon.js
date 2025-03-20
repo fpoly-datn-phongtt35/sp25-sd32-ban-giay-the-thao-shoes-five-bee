@@ -46,7 +46,7 @@ const QuanLyHoaDon = () => {
   const [selectedOrderId, setSelectedOrderId] = useState(null);
   const [selectedOrder, setSelectedOrder] = useState();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
-
+  const [phoneFilter, setPhoneFilter] = useState("");
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -129,8 +129,7 @@ const QuanLyHoaDon = () => {
     if (dataHoaDonChiTiet.length > 0) {
       togglePopup();
     }
-  }, [dataHoaDonChiTiet]); // Chạy khi dữ liệu cập nhật
-
+  }, [dataHoaDonChiTiet]); 
   const fetchHoaDonChiTiet = async (id) => {
     if (!id) {
       console.error("ID hóa đơn không hợp lệ!");
@@ -140,7 +139,7 @@ const QuanLyHoaDon = () => {
 
     try {
       const result = await detailHoaDon(id);
-      // console.log("Dữ liệu từ API hóa đơn chi tiết:", result);
+      console.log("Dữ liệu từ API hóa đơn chi tiết:", result);
 
       if (!result || !Array.isArray(result.items)) {
         console.error("Dữ liệu không hợp lệ hoặc không phải mảng.");
@@ -164,7 +163,7 @@ const QuanLyHoaDon = () => {
         diaChi: result.diaChi || "Không có địa chỉ",
         hinhThucMua: result.hinhThucMua === 1 ? "Tại Quầy" : "Online",
         hinhThucThanhToan:
-          result.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+          result.hinhThucThanhToan === 0 ? "Tiền mặt" : "chuyển khoản",
         phiShip: result.phiShip ?? 0,
         soTienGiam: result.soTienGiam ?? 0,
         tongTien: result.tongTien,
@@ -228,15 +227,11 @@ const QuanLyHoaDon = () => {
         matchesDate = itemDate.isSame(dateFilter, "day");
       }
 
-      // console.log("Item:", item.order_id);
-      // console.log("Item date:", item.order_on);
-      // console.log(
-      //   "Filter date:",
-      //   dateFilter ? dateFilter.format("DD/MM/YYYY") : "No filter"
-      // );
-      // console.log("Matches date:", matchesDate);
+      // Kiểm tra nếu phoneFilter tồn tại thì phải khớp với số điện thoại
+      const matchesPhone =
+        !phoneFilter || item.user_phone.includes(phoneFilter);
 
-      return matchesStatus && matchesDate;
+      return matchesStatus && matchesDate && matchesPhone;
     });
   };
 
@@ -523,10 +518,11 @@ const QuanLyHoaDon = () => {
       ellipsis: true,
       render: (text, record) => (
         <a href="#" onClick={() => handleOrderClick(record.order_id)}>
-          {text}
+          {record.order_id.slice(0, 12)}... {/* Chỉ hiển thị 8 ký tự đầu */}
         </a>
       ),
     },
+
     {
       title: "User Name",
       dataIndex: "user",
@@ -636,12 +632,14 @@ const QuanLyHoaDon = () => {
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
   };
+  const handlePhoneSearch = (value) => {};
 
   return (
-    <div>
+    <div className="main-container">
       <div className="hd_content">
         <p style={{ fontSize: "20px" }}>Quản Lí Hóa Đơn</p>
       </div>
+
       <div className="action_hoadon">
         <div style={{ display: "flex", gap: "30px" }}>
           <div className="filter">
@@ -662,6 +660,15 @@ const QuanLyHoaDon = () => {
           <div className="filter">
             <p>Filter by Date</p>
             <DatePicker onChange={handleDateChange} format="DD/MM/YYYY" />
+          </div>
+          <div className="filter">
+            <p>Filter by Phone</p>
+            <Input
+              placeholder="Nhập số điện thoại"
+              value={phoneFilter}
+              onChange={(e) => setPhoneFilter(e.target.value)}
+              style={{ width: 150 }}
+            />
           </div>
         </div>
         <div className="filter_right">
