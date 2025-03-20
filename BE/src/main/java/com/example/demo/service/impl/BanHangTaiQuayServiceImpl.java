@@ -107,7 +107,11 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setPhiShip(phiShip);
     hoaDon.setHinhThucNhanHang(isGiaoHang ? 1 : 2);
     hoaDon.setTrangThai(
-        hinhThucThanhToan == 2 ? 0 : 2); // Nếu thanh tóán khi nhận hàng thì sẽ set là 0
+            isGiaoHang
+                    ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2)  // Trạng thái là 3 nếu là Tiền mặt hoặc Chuyển khoản, 2 nếu là thanh toán khi giao hàng
+                    : 2  // Nếu không giao hàng, trạng thái là 2
+    );
+
     hoaDon.setUserEntity(user);
 
     hoaDonRepository.save(hoaDon);
