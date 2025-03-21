@@ -683,9 +683,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-            id: ag.id,
-            tenUrl: ag.tenUrl,
-          }))
+          id: ag.id,
+          tenUrl: ag.tenUrl,
+        }))
         : [],
     };
 
@@ -780,7 +780,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -1150,9 +1150,8 @@ const SanPham = () => {
                     {kichCoList.map((kc) => (
                       <button
                         key={kc.id}
-                        className={`option-btn ${
-                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectKichCo(kc.id)}
                       >
                         {kc.ten}
@@ -1181,9 +1180,8 @@ const SanPham = () => {
                     {mauSacList.map((ms) => (
                       <button
                         key={ms.id}
-                        className={`option-btn ${
-                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectMauSac(ms.id)}
                       >
                         {ms.ten}
@@ -1427,7 +1425,7 @@ const SanPham = () => {
         bordered={false}
         columns={[
           {
-            title: "#",
+            title: "STT",
             dataIndex: "stt",
             width: 80,
             render: (text, record, index) => <span>{index + 1}</span>,
