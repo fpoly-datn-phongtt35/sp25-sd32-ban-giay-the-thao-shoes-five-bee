@@ -239,7 +239,9 @@ const GiamGiaHoaDon = () => {
   ];
 
   return (
+
     <div className="dot-giam-gia">
+      <h2>Quản lý Phiếu Giảm Giá</h2>
       <Button onClick={handleAdd}>Thêm Phiếu Giảm Giá</Button>
       <Table
         columns={columns}
