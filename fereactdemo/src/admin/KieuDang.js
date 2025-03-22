@@ -145,7 +145,7 @@ const KieuDang = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
-
+                <h2>Quản lý Kiểu Dáng</h2>
                 <Input placeholder='Tên Kiểu Dáng' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
@@ -154,7 +154,7 @@ const KieuDang = () => {
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={creatKieuDang}>
-                    Add
+                    Thêm
                 </Button>
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[

@@ -142,7 +142,7 @@ const MauSac = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
-
+                <h2>Quản lý Màu Sắc</h2>
                 <Input placeholder='Tên Màu Sắc' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
@@ -151,7 +151,7 @@ const MauSac = () => {
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={createMauSac}>
-                    Add
+                    Thêm
                 </Button>
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
