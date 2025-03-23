@@ -691,6 +691,7 @@ const BanHangTaiQuay = () => {
     setAppliedGiamGia(null); // Reset thông tin giảm giá đã áp dụng
     setSoTienGiam(0); // Reset số tiền giảm
     setSelectedMaGiamGia(null); // Reset mã giảm giá
+    setTotalHoaDon(0);
     setGiaTriGiam(0); // Reset giá trị giảm
     setVnpayUrl(""); // Reset URL thanh toán VNPay
     setScanResult(""); // Reset kết quả quét (nếu có)
