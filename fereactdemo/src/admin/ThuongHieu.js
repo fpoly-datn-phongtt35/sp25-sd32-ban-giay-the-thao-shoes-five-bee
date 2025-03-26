@@ -148,7 +148,7 @@ const ThuongHieu = () => {
                     style={{ marginBottom: "20px" }}
                 />
 
-                <Input placeholder='Tên Thương Hiệu' value={ten} onChange={(e) => setTen(e.target.value)} />
+                <Input placeholder='Nhập tên thương hiệu để thêm' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Hoạt động</Radio>

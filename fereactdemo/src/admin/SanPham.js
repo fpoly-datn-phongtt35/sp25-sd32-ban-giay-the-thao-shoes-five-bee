@@ -999,13 +999,13 @@ const SanPham = () => {
             style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}
           >
             <Button type="primary" onClick={() => handleAdd()}>
-              Add
+              Thêm
             </Button>
             <Button
               type="default"
               onClick={() => setIsChiTietModalVisible(false)}
             >
-              Cancel
+              Hủy
             </Button>
           </div>
         }
