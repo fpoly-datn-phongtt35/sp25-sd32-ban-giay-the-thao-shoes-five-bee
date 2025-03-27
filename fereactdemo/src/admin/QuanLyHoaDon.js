@@ -129,7 +129,7 @@ const QuanLyHoaDon = () => {
     if (dataHoaDonChiTiet.length > 0) {
       togglePopup();
     }
-  }, [dataHoaDonChiTiet]); 
+  }, [dataHoaDonChiTiet]);
   const fetchHoaDonChiTiet = async (id) => {
     if (!id) {
       console.error("ID hóa đơn không hợp lệ!");
@@ -223,17 +223,18 @@ const QuanLyHoaDon = () => {
 
       let matchesDate = true;
       if (dateFilter) {
-        const itemDate = moment(item.order_on, "DD/MM/YYYY").startOf("day");
+        // Kiểm tra ngày trong dữ liệu API có phải là ngày bạn chọn không
+        const itemDate = moment(item.order_on, "DD-MM-YYYY").startOf("day");
         matchesDate = itemDate.isSame(dateFilter, "day");
       }
 
-      // Kiểm tra nếu phoneFilter tồn tại thì phải khớp với số điện thoại
       const matchesPhone =
         !phoneFilter || item.user_phone.includes(phoneFilter);
 
       return matchesStatus && matchesDate && matchesPhone;
     });
   };
+
 
   const getColumnSearchProps = (dataIndex) => ({
     filterDropdown: ({ setSelectedKeys, selectedKeys, confirm }) => (
@@ -510,7 +511,7 @@ const QuanLyHoaDon = () => {
 
   const columns = [
     {
-      title: "Order ID",
+      title: "Xem chi tiết hóa đơn",
       dataIndex: "order_id",
       key: "order_id",
       width: 120,
@@ -524,7 +525,7 @@ const QuanLyHoaDon = () => {
     },
 
     {
-      title: "User Name",
+      title: "Họ tên khách hàng",
       dataIndex: "user",
       key: "user",
       width: 150,
@@ -532,7 +533,7 @@ const QuanLyHoaDon = () => {
       ellipsis: true,
     },
     {
-      title: "User Phone",
+      title: "Số điện thoại khách hàng",
       dataIndex: "user_phone",
       key: "user_phone",
       width: 120,
@@ -558,21 +559,21 @@ const QuanLyHoaDon = () => {
     //     },
     // },
     {
-      title: "Ordered On",
+      title: "Ngày đặt",
       dataIndex: "order_on",
       key: "order_on",
       width: 100,
       ...getColumnSearchProps("order_on"),
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       width: 100,
       ...getColumnSearchProps("status"),
     },
     {
-      title: "Action",
+      title: "Thao tác",
       key: "action",
       width: 120,
       render: (_, record) => (
@@ -632,7 +633,7 @@ const QuanLyHoaDon = () => {
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
   };
-  const handlePhoneSearch = (value) => {};
+  const handlePhoneSearch = (value) => { };
 
   return (
     <div className="main-container">
@@ -643,26 +644,30 @@ const QuanLyHoaDon = () => {
       <div className="action_hoadon">
         <div style={{ display: "flex", gap: "30px" }}>
           <div className="filter">
-            <p>Filter by Status</p>
+            <p>Lọc trạng thái</p>
             <Select
-              defaultValue="---All---"
+              defaultValue="Tất cả"
               style={{ width: 120 }}
               onChange={handleStatusChange}
               options={[
-                { value: "Đã đặt", label: "Đã đặt" },
-                { value: "Đã đóng gói", label: "Đã đóng gói" },
-                { value: "Đang giao", label: "Đang giao" },
-                { value: "Đã thanh toán", label: "Đã thanh toán" },
+                { value: "Chờ xác nhận", label: "Chờ xác nhận" },
+                { value: "Đã xác nhận", label: "Đã xác nhận" },
+                { value: "Chờ vận chuyển", label: "Chờ vận chuyển" },
+                { value: "Đang vận chuyển", label: "Đang vận chuyển" },
+                { value: "Hóa đơn chờ thanh toán", label: "Hóa đơn chờ thanh toán" },
+                { value: "Đã giao hàng", label: "Đã giao hàng" },
+                { value: "Hoàn thành", label: "Hoàn thành" },
+                { value: "Trả hàng", label: "Trả hàng" },
                 { value: "Đã hủy", label: "Đã hủy" },
               ]}
             />
           </div>
           <div className="filter">
-            <p>Filter by Date</p>
+            <p>Lọc theo ngày</p>
             <DatePicker onChange={handleDateChange} format="DD/MM/YYYY" />
           </div>
           <div className="filter">
-            <p>Filter by Phone</p>
+            <p>Tìm kiếm theo số điện thoại</p>
             <Input
               placeholder="Nhập số điện thoại"
               value={phoneFilter}
@@ -681,14 +686,19 @@ const QuanLyHoaDon = () => {
           </Button>
           {/* <Button type="danger" onClick={handleDelete}>
             Delete
-          </Button> */}
+
+          </Button>
         </div>
+
+          </Button>
+        </div> */}
+
       </div>
       <div className="order_container">
         <Table
           columns={columns}
-          dataSource={getFilteredData()}
-          rowKey="key" // Đảm bảo mỗi đối tượng trong dataSource có thuộc tính "key"
+          dataSource={getFilteredData()}  // Đảm bảo gọi đúng hàm lọc ở đây
+          rowKey="key"
           scroll={{ x: 1250 }}
           rowSelection={{
             selectedRowKeys,
@@ -697,8 +707,9 @@ const QuanLyHoaDon = () => {
               setSelectAll(keys.length === data.length);
             },
           }}
-          pagination={{ pageSize: 5 }} // Thay đổi số lượng hàng trên mỗi trang
+          pagination={{ pageSize: 5 }}
         />
+
       </div>
 
       <Modal

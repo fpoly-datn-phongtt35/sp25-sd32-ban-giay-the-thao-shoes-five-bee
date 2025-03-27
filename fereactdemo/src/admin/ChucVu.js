@@ -139,6 +139,7 @@ const ChucVu = () => {
   return (
     <div style={{ display: 'flex', justifyContent: 'center' }}>
       <div style={{ width: '100%', marginLeft: '200px' }}>
+        <h2>Quản lý Chức Vụ</h2>
         {/* <Input placeholder='Mã Chức Vụ' value={ma} onChange={(e) => setMa(e.target.value)} /> */}
         <br /><br />
         <Input placeholder='Tên Chức Vụ' value={ten} onChange={(e) => setTen(e.target.value)} />
@@ -151,7 +152,7 @@ const ChucVu = () => {
         </Radio.Group>
         <br /><br />
         <Button type="primary" onClick={add}>
-          Add
+          Thêm
         </Button>
         <br /><br />
         <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[

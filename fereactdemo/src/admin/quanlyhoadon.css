@@ -1,72 +1,153 @@
 .popup-overlay {
-    position: fixed;
-    top: 0;
-    left: 0;
-    width: 100%;
-    height: 100%;
-    background-color: rgba(0, 0, 0, 0.5); /* Nền mờ */
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    z-index: 1000; /* Đảm bảo popup luôn hiển thị trên cùng */
-  }
-  .main-container {
-    width: calc(100% ); /* Trừ đi phần sidebar */
-    margin-left: auto;
-    margin-right: auto;
-    padding: 20px;
-  }
-  .popup-content {
-    width: 100%;   /* Chiếm toàn bộ chiều rộng màn hình */
-    height: 100%;  /* Chiếm toàn bộ chiều cao màn hình */
-    background-color: white;
-    padding: 20px;
-    box-sizing: border-box;
-    overflow: auto; /* Đảm bảo nội dung cuộn được nếu quá dài */
-  }
-  .thongtinhoadon{
-    width: 100%;
-    padding: 20px;
-    display: flex;
-    margin-top: 20px;
 
-    gap: 10px;
-    background-color: #f2f2f2;
-    border-radius: 10px;
-    box-shadow: 5px 5px 5px rgba( 218, 214, 214)  ;
-  }
-  .trai {
-    width: 50%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-
-  }
-  .phai{
-    width: 50%;
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-  }
-  table {
-    width: 100%;
-    border-collapse: collapse;
-    margin-top: 5%;
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Nền mờ */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  /* Đảm bảo popup luôn hiển thị trên cùng */
 }
 
-th, td {
-    border: 1px solid #ddd;
-    padding: 8px;
+.main-container {
+  width: calc(100%);
+  /* Trừ đi phần sidebar */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px;
+}
+
+.popup-content {
+  width: 100%;
+  /* Chiếm toàn bộ chiều rộng màn hình */
+  height: 100%;
+  /* Chiếm toàn bộ chiều cao màn hình */
+  background-color: white;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: auto;
+  /* Đảm bảo nội dung cuộn được nếu quá dài */
+}
+
+.thongtinhoadon {
+  width: 100%;
+  padding: 20px;
+  display: flex;
+  margin-top: 20px;
+
+  gap: 10px;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px rgba(218, 214, 214);
+}
+
+.trai {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+}
+
+.phai {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 5%;
+
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0, 0, 0, 0.5);
+  /* Nền mờ */
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  z-index: 1000;
+  /* Đảm bảo popup luôn hiển thị trên cùng */
+
+}
+
+.main-container {
+  width: calc(100%);
+  /* Trừ đi phần sidebar */
+  margin-left: auto;
+  margin-right: auto;
+  padding: 20px;
+}
+
+.popup-content {
+  width: 100%;
+  /* Chiếm toàn bộ chiều rộng màn hình */
+  height: 100%;
+  /* Chiếm toàn bộ chiều cao màn hình */
+  background-color: white;
+  padding: 20px;
+  box-sizing: border-box;
+  overflow: auto;
+  /* Đảm bảo nội dung cuộn được nếu quá dài */
+}
+
+.thongtinhoadon {
+  width: 100%;
+  padding: 20px;
+  display: flex;
+
+  gap: 10px;
+  background-color: #f2f2f2;
+  border-radius: 10px;
+  box-shadow: 5px 5px 5px rgba(218, 214, 214);
+}
+
+.trai {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+
+}
+
+.phai {
+  width: 50%;
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+table {
+  width: 100%;
+  border-collapse: collapse;
+  margin-top: 5%;
+}
+
+th,
+td {
+  border: 1px solid #ddd;
+  padding: 8px;
 }
 
 th {
-    background-color: #f2f2f2;
-    text-align: left;
+  background-color: #f2f2f2;
+  text-align: left;
 }
 
 tr:nth-child(even) {
-    background-color: #f9f9f9;
+  background-color: #f9f9f9;
 }
+
 .action_hoadon {
   display: flex;
   justify-content: space-between;
@@ -104,7 +185,8 @@ tr:nth-child(even) {
 .order_container {
   width: 100%;
   max-width: 100%;
-  overflow-x: auto; /* Đảm bảo bảng không bị tràn */
+  overflow-x: auto;
+  /* Đảm bảo bảng không bị tràn */
   background: white;
   padding: 20px;
   border-radius: 10px;
@@ -131,17 +213,17 @@ tr:nth-child(even) {
   opacity: 0.8;
 }
 
-.ant-table-thead > tr > th {
+.ant-table-thead>tr>th {
   background-color: #f0f2f5 !important;
   font-weight: bold;
   text-align: center;
 }
 
-.ant-table-tbody > tr > td {
+.ant-table-tbody>tr>td {
   text-align: center;
 }
 
-.ant-table-tbody > tr:hover {
+.ant-table-tbody>tr:hover {
   background-color: #e6f7ff;
 }
 
@@ -188,13 +270,16 @@ tr:nth-child(even) {
   }
 
   .ant-table {
-    font-size: 12px; /* Giảm kích thước chữ */
+    font-size: 12px;
+    /* Giảm kích thước chữ */
   }
 
-  .ant-table-thead > tr > th,
-  .ant-table-tbody > tr > td {
+  .ant-table-thead>tr>th,
+  .ant-table-tbody>tr>td {
     padding: 8px;
   }
+
+  
 }
 
 /* css cthd */
@@ -235,17 +320,20 @@ tr:nth-child(even) {
   box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
 }
 
-.trai, .phai {
+.trai,
+.phai {
   width: 48%;
 }
 
-.trai h4, .phai h4 {
+.trai h4,
+.phai h4 {
   margin-bottom: 10px;
   font-size: 18px;
   color: #333;
 }
 
-.trai h6, .phai h6 {
+.trai h6,
+.phai h6 {
   font-size: 14px;
   margin: 5px 0;
   color: #555;
@@ -255,8 +343,10 @@ tr:nth-child(even) {
 /* Bọc toàn bộ bảng trong một container để dễ tùy chỉnh */
 table {
   width: 100%;
-  border-collapse: separate; /* Tách các ô, giúp loại bỏ đường kẻ */
-  border-spacing: 0 10px; /* Thêm khoảng cách giữa các hàng */
+  border-collapse: separate;
+  /* Tách các ô, giúp loại bỏ đường kẻ */
+  border-spacing: 0 10px;
+  /* Thêm khoảng cách giữa các hàng */
   margin-top: 20px;
   background: white;
   border-radius: 10px;
@@ -267,7 +357,7 @@ table {
 /* Tiêu đề bảng */
 th {
   /* background: linear-gradient(135deg, #007bff, #0056b3); */
-  color:black;
+  color: black;
   font-size: 16px;
   font-weight: bold;
 
@@ -282,14 +372,17 @@ td {
   text-align: center;
   font-size: 15px;
   color: #333;
-  border: none; /* Loại bỏ viền */
+  border: none;
+  /* Loại bỏ viền */
   /* background: rgba(0, 123, 255, 0.1);  */
-  border-radius: 10px; /* Bo góc mỗi ô */
+  border-radius: 10px;
+  /* Bo góc mỗi ô */
 }
 
 /* Khoảng cách giữa các hàng */
 tbody tr {
-  margin-bottom: 10px; /* Tạo khoảng cách giữa các hàng */
+  margin-bottom: 10px;
+  /* Tạo khoảng cách giữa các hàng */
   display: table-row;
 }
 
@@ -317,7 +410,8 @@ tfoot td {
   font-weight: bold;
   color: #000;
   padding: 15px;
-  border: none; /* Loại bỏ viền */
+  border: none;
+  /* Loại bỏ viền */
 }
 
 /* Cột giá bán và tổng tiền nổi bật hơn */
@@ -328,11 +422,13 @@ td:nth-child(6) {
 }
 
 /* Bo góc cho bảng */
-th:first-child, td:first-child {
+th:first-child,
+td:first-child {
   border-top-left-radius: 10px;
 }
 
-th:last-child, td:last-child {
+th:last-child,
+td:last-child {
   border-top-right-radius: 10px;
 }
 
@@ -343,3 +439,4 @@ tfoot td:first-child {
 tfoot td:last-child {
   border-bottom-right-radius: 10px;
 }
+

@@ -9,13 +9,20 @@ const KichCo = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [editingSize, setEditingSize] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(null);
-    const [activeChatLieu, setActiveChatLieu] = useState([]);
+    const [searchTerm, setSearchTerm] = useState(""); // State cho từ khóa tìm kiếm
+
     const getActiveChatLieu = () => {
         return size.filter(item => item.TRANG_THAI === 0);
-    }
+    };
+
     const convertTrangThai = (status) => {
         return status === 0 ? "Hoạt động" : "Không hoạt động";
     };
+
+    // Hàm lọc kích cỡ theo từ khóa tìm kiếm
+    const filteredSize = size.filter(item =>
+        item.TEN.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     useEffect(() => {
         loadSize();
@@ -27,12 +34,9 @@ const KichCo = () => {
             const sizeData = result.data.map((item, index) => ({
                 key: index,
                 ID: item.id,
-
                 TEN: item.ten,
                 TRANG_THAI: item.trangThai,
             }));
-            const activeChatLieuData = sizeData.filter(item => item.TRANG_THAI === 0);
-            setActiveChatLieu(activeChatLieuData);
             setSize(sizeData);
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu kích cỡ:", error);
@@ -77,6 +81,7 @@ const KichCo = () => {
         console.log('selectedRowKeys changed: ', newSelectedRowKeys);
         setSelectedRowKeys(newSelectedRowKeys);
     };
+
     const handleUpdate = (record) => {
         setEditingSize(record);
         setTen(record.TEN);
@@ -115,7 +120,7 @@ const KichCo = () => {
         };
 
         try {
-            await updateSize(updatedSize); // Không truyền ID vào URL nữa
+            await updateSize(updatedSize);
             message.success("Cập nhật kích cỡ thành công!");
             loadSize();
             setIsModalVisible(false);
@@ -127,7 +132,6 @@ const KichCo = () => {
             message.error("Lỗi khi cập nhật kích cỡ");
         }
     };
-
 
     const handleDelete = async (record) => {
         try {
@@ -144,12 +148,20 @@ const KichCo = () => {
         setValue(e.target.value);
     };
 
-
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
+                <h2>Quản lý Kích Cỡ</h2>
 
-                <Input placeholder='Tên Kích Cỡ' value={ten} onChange={(e) => setTen(e.target.value)} />
+                {/* Ô nhập tìm kiếm */}
+                <Input
+                    placeholder="Tìm kiếm kích cỡ"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{ marginBottom: "20px" }}
+                />
+
+                <Input placeholder='Nhập kích cỡ để thêm' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Hoạt động</Radio>
@@ -157,30 +169,35 @@ const KichCo = () => {
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={handleAdd}>
-                    Add
+                    Thêm
                 </Button>
                 <br /><br />
-                <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
-                    {
-                        title: 'Tên Kích Cỡ',
-                        dataIndex: 'TEN',
-                    },
-                    {
-                        title: 'Trạng thái',
-                        dataIndex: 'TRANG_THAI',
-                        render: (text, record) => convertTrangThai(record.TRANG_THAI),
-                    },
-                    {
-                        title: 'Thao tác',
-                        key: 'action',
-                        render: (text, record) => (
-                            <Space size="middle">
-                                <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
-                                <Button onClick={() => handleDelete(record)}>Xóa</Button>
-                            </Space>
-                        ),
-                    },
-                ]} dataSource={size} />
+                <Table
+                    pagination={{ pageSize: 5, defaultPageSize: 5 }}
+                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
+                    columns={[
+                        {
+                            title: 'Tên Kích Cỡ',
+                            dataIndex: 'TEN',
+                        },
+                        {
+                            title: 'Trạng thái',
+                            dataIndex: 'TRANG_THAI',
+                            render: (text, record) => convertTrangThai(record.TRANG_THAI),
+                        },
+                        {
+                            title: 'Thao tác',
+                            key: 'action',
+                            render: (text, record) => (
+                                <Space size="middle">
+                                    <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
+                                    <Button onClick={() => handleDelete(record)}>Xóa</Button>
+                                </Space>
+                            ),
+                        },
+                    ]}
+                    dataSource={filteredSize} // Hiển thị dữ liệu đã lọc
+                />
             </div>
             <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={handleUpdateSubmit} onCancel={() => setIsModalVisible(false)}>
                 <Form>

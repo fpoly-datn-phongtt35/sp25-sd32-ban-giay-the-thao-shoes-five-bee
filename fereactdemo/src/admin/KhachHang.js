@@ -224,6 +224,7 @@ const KhachHang = () => {
 
     return (
         <div style={{ padding: '20px' }}>
+            <h2>Quản lý Khách Hàng</h2>
             {/* Header Actions */}
             <div style={{
                 display: 'flex',

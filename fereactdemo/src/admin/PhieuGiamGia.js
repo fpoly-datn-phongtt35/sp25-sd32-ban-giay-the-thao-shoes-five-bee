@@ -208,7 +208,8 @@ const DotGiamGia = () => {
 
   return (
     <div className="dot-giam-gia">
-      <Button onClick={handleAdd}>Thêm Phiếu Giảm Giá</Button>
+      <h2>Quản lý Giảm Giá Sản Phẩm</h2>
+      <Button onClick={handleAdd}>Thêm đợt giảm giá</Button>
       <Table
         columns={columns}
         dataSource={dotGiamGia}
