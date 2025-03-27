@@ -62,32 +62,48 @@ public class GiayServiceImpl implements GiayService {
 
   @Override
   public GiayEntity addGiayAndGiayChiTiet(GiayRequest giayRequest) {
+    // Tìm kiếm GiayEntity từ cơ sở dữ liệu
     GiayEntity giayEntity = giayRepository.findById(giayRequest.getGiayId()).orElse(null);
+
+    // Kiểm tra giayEntity có tồn tại không
+    if (giayEntity == null) {
+      throw new RuntimeException("Giày không tồn tại.");
+    }
 
     int tongSoLuong = 0;
     List<GiayChiTietEntity> giayChiTietEntities = new ArrayList<>();
 
+    // Lặp qua các mauSacIds và kichCoIds để tạo GiayChiTietEntity
     for (UUID mauSacId : giayRequest.getMauSacIds()) {
       for (UUID kichCoId : giayRequest.getKichCoIds()) {
-        tongSoLuong++;
+        // Kiểm tra nếu kết hợp giữa màu sắc và kích cỡ đã tồn tại
+        Optional<GiayChiTietEntity> existingGiayChiTiet = giayChiTietRepository.findByGiayEntityAndMauSacEntityAndKichCoEntity(
+                giayEntity, mauSacRepository.findById(mauSacId).orElse(null), kichCoRepository.findById(kichCoId).orElse(null));
+
+        if (existingGiayChiTiet.isPresent()) {
+          // Nếu đã tồn tại, thông báo rằng kết hợp màu sắc và kích cỡ đã tồn tại
+          System.out.println("Kết hợp màu sắc và kích cỡ đã tồn tại.");
+          continue;  // Bỏ qua vòng lặp này và không tạo GiayChiTietEntity
+        }
+
+        tongSoLuong++;  // Tăng số lượng tồn lên 1 cho mỗi kết hợp
 
         // Tạo GiayChiTietEntity cho mỗi sản phẩm
-        GiayChiTietEntity giayChiTiet =
-                GiayChiTietEntity.builder()
-                        .giayEntity(giayRepository.findById(giayRequest.getGiayId()).orElse(null))
-                        .mauSacEntity(mauSacRepository.findById(mauSacId).orElse(null))
-                        .kichCoEntity(kichCoRepository.findById(kichCoId).orElse(null))
-                        .giaBan(giayEntity.getGiaBan())
-                        .soLuongTon(1)
-                        .trangThai(0)
-                        .build();
+        GiayChiTietEntity giayChiTiet = GiayChiTietEntity.builder()
+                .giayEntity(giayEntity)  // Đã có sẵn giayEntity, không cần gọi lại repository
+                .mauSacEntity(mauSacRepository.findById(mauSacId).orElse(null))
+                .kichCoEntity(kichCoRepository.findById(kichCoId).orElse(null))
+                .giaBan(giayEntity.getGiaBan())
+                .soLuongTon(1)
+                .trangThai(0)
+                .build();
 
-        // Lưu đối tượng GiayChiTietEntity vào cơ sở dữ liệu để có ID
-        giayChiTiet = giayChiTietRepository.save(giayChiTiet);  // Lưu đối tượng vào cơ sở dữ liệu
+
+        giayChiTiet = giayChiTietRepository.save(giayChiTiet);
 
         giayChiTietEntities.add(giayChiTiet);
 
-        // Kiểm tra giayChiTiet.getId() có null không trước khi gọi generateQRCode
+        // Kiểm tra ID trước khi tạo mã QR
         if (giayChiTiet.getId() != null) {
           try {
             generateQRCode(giayChiTiet.getId().toString());  // Gọi hàm generateQRCode và truyền mã vạch
@@ -109,6 +125,7 @@ public class GiayServiceImpl implements GiayService {
     // Lưu lại GiayEntity vào cơ sở dữ liệu
     return giayRepository.save(giayEntity);
   }
+
 
 
 
@@ -140,41 +157,50 @@ public class GiayServiceImpl implements GiayService {
 
   @Override
   public GiayEntity add(GiayDto giayDto) {
+    // Kiểm tra nếu giày đã tồn tại với tên giống nhau
+    Optional<GiayEntity> existingGiay = giayRepository.findByTen(giayDto.getTen());
+    if (existingGiay.isPresent()) {
+      // Nếu đã tồn tại, thông báo rằng sản phẩm đã có
+      throw new RuntimeException("Sản phẩm đã tồn tại với tên: " + giayDto.getTen());
+    }
+
+    // Nếu không có sản phẩm trùng tên, tiến hành lưu giày mới
     return giayRepository.save(
-        GiayEntity.builder()
-            .ma(giayDto.getMa())
-            .ten(giayDto.getTen())
-            .moTa(giayDto.getMoTa())
-            .giaNhap(giayDto.getGiaNhap())
-            .giaBan(giayDto.getGiaBan())
-            .soLuongTon(giayDto.getSoLuongTon())
-            .trangThai(giayDto.getTrangThai())
-            .thuongHieu(
-                giayDto.getThuongHieuDto() != null
-                    ? thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null)
-                    : null)
-            .chatLieu(
-                giayDto.getChatLieuDto() != null
-                    ? chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null)
-                    : null)
-            .danhMuc(
-                giayDto.getDanhMucDto() != null
-                    ? danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null)
-                    : null)
-            .deGiay(
-                giayDto.getDeGiayDto() != null
-                    ? deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null)
-                    : null)
-            .xuatXu(
-                giayDto.getXuatXuDto() != null
-                    ? xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null)
-                    : null)
-            .kieuDang(
-                giayDto.getKieuDangDto() != null
-                    ? kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null)
-                    : null)
-            .build());
+            GiayEntity.builder()
+                    .ma(giayDto.getMa())
+                    .ten(giayDto.getTen())
+                    .moTa(giayDto.getMoTa())
+                    .giaNhap(giayDto.getGiaNhap())
+                    .giaBan(giayDto.getGiaBan())
+                    .soLuongTon(giayDto.getSoLuongTon())
+                    .trangThai(giayDto.getTrangThai())
+                    .thuongHieu(
+                            giayDto.getThuongHieuDto() != null
+                                    ? thuongHieuRepository.findById(giayDto.getThuongHieuDto().getId()).orElse(null)
+                                    : null)
+                    .chatLieu(
+                            giayDto.getChatLieuDto() != null
+                                    ? chatLieuRepository.findById(giayDto.getChatLieuDto().getId()).orElse(null)
+                                    : null)
+                    .danhMuc(
+                            giayDto.getDanhMucDto() != null
+                                    ? danhMucRepository.findById(giayDto.getDanhMucDto().getId()).orElse(null)
+                                    : null)
+                    .deGiay(
+                            giayDto.getDeGiayDto() != null
+                                    ? deGiayRepository.findById(giayDto.getDeGiayDto().getId()).orElse(null)
+                                    : null)
+                    .xuatXu(
+                            giayDto.getXuatXuDto() != null
+                                    ? xuatXuRepository.findById(giayDto.getXuatXuDto().getId()).orElse(null)
+                                    : null)
+                    .kieuDang(
+                            giayDto.getKieuDangDto() != null
+                                    ? kieuDangRepository.findById(giayDto.getKieuDangDto().getId()).orElse(null)
+                                    : null)
+                    .build());
   }
+
 
   @Override
   public GiayEntity update(GiayDto giayDto) {
