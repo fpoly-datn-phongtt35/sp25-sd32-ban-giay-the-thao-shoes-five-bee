@@ -21,12 +21,15 @@ import {
   Switch,
   Row,
   Col,
+  Checkbox,
+  InputNumber,
 } from "antd";
 import {
   EyeOutlined,
   DeleteOutlined,
   EditOutlined,
   PlusOutlined,
+  AddOutlined,
 } from "@ant-design/icons";
 import "./Sanpham.css";
 import { validate as isUuid } from "uuid";
@@ -34,6 +37,8 @@ import { getThuongHieu } from "../service/ThuongHieuService";
 import { getChatLieu } from "../service/ChatLieuService";
 import { getDeGiay } from "../service/DeGiayService";
 import { getKieuDang } from "../service/KieuDangService";
+import { getDanhMuc } from "../service/DanhMucService";
+import ConfirmModal from "../popupThemNhanhThuocTInh/ConfirmModal"; 
 import { getXuatXu } from "../service/XuatXuService";
 import TextArea from "antd/es/input/TextArea";
 import { Option } from "antd/es/mentions";
@@ -48,6 +53,8 @@ import {
   updateGiayChiTiet,
 } from "../service/GiayChiTietService";
 import { getMauSac } from "../service/MauSacService";
+import PopupThemNhanhMauSac from "../popupThemNhanhThuocTInh/PopupThemNhanhMauSac";
+import PopupThemNhanhKichCo from "../popupThemNhanhThuocTInh/PopupThemNhanhKichCo";
 
 const SanPham = () => {
   const [giay, setGiay] = useState([]);
@@ -66,9 +73,17 @@ const SanPham = () => {
   const [deGiayList, setDeGiayList] = useState([]);
   const [xuatXuList, setXuatXuList] = useState([]);
   const [kieuDangList, setKieuDangList] = useState([]);
+  const [danhMucList, setDanhMucList] = useState([]);
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
+  const [selectedColors, setSelectedColors] = useState([]); // Mảng chứa màu sắc được chọn
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [anhGiayList, setAnhGiayList] = useState([]);
   const [selectedThuongHieu, setSelectedThuongHieu] = useState();
   const [selectedChatLieu, setSelectedChatLieu] = useState();
+  const [selectedDanhMuc, setSelectedDanhMuc] = useState();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedDeGiay, setSelectedDeGiay] = useState();
   const [selectedXuatXu, setSelectedXuatXu] = useState();
   const [selectedKieuDang, setSelectedKieuDang] = useState();
@@ -94,6 +109,7 @@ const SanPham = () => {
   const [selectedAnhGiay1, setSelectedAnhGiay1] = useState(null);
   const [updatedDataChiTiet, setUpdatedDataChỉTiet] = useState({});
   const [danhSachChiTiet, setDanhSachChiTiet] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const [soLuongTon1, setSoLuongTon1] = useState(null);
 
@@ -330,8 +346,7 @@ const SanPham = () => {
   };
   const handleAddImage = (record) => {
     console.log("Thêm ảnh cho sản phẩm:", record);
-    
-  }
+  };
   const handleInputChange = (e, record, field) => {
     const { value } = e.target;
     setEditedData((prev) => ({
@@ -447,11 +462,13 @@ const SanPham = () => {
     getKieuDangList();
     getXuatXuList();
     getAnhGiayList();
+    getDanhMucList();
   }, []);
 
   const getAllGiay = async () => {
     try {
       const result = await getGiay();
+      console.log("Dữ liệu giày:", result);
 
       if (!result || !result.data) {
         console.error("Error: result.data is undefined or null");
@@ -472,6 +489,7 @@ const SanPham = () => {
         SOLUONGTON: item.soLuongTon,
         TRANG_THAI: item.trangThai,
         THUONG_HIEU: item.thuongHieu ? item.thuongHieu.ten : null,
+        DANH_MUC: item.danhMuc ? item.danhMuc.ten : null,
         CHAT_LIEU: item.chatLieu ? item.chatLieu.ten : null,
         DE_GIAY: item.deGiay ? item.deGiay.ten : null,
         XUAT_XU: item.xuatXu ? item.xuatXu.ten : null,
@@ -516,6 +534,10 @@ const SanPham = () => {
     const result = await getKieuDang();
     setKieuDangList(result.data.filter((item) => item.trangThai === 0));
   };
+  const getDanhMucList = async () => {
+    const result = await getDanhMuc();
+    setDanhMucList(result.data.filter((item) => item.trangThai === 0));
+  };
 
   const getAnhGiayList = async () => {
     const result = await getAnhGiay();
@@ -532,6 +554,10 @@ const SanPham = () => {
     setSelectedChatLieu(value);
   };
 
+  const handleDanhMucChange = (value) => {
+    console.log(value);
+    setSelectedDanhMuc(value);
+  };
   const handleDeGiayChange = (value) => {
     console.log(value);
     setSelectedDeGiay(value);
@@ -566,6 +592,7 @@ const SanPham = () => {
       giaBan: parseFloat(giaBan),
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
+      danhMucDto: selectedDanhMuc ? { id: selectedDanhMuc } : null,
       thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
       chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
       deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
@@ -597,6 +624,7 @@ const SanPham = () => {
       setValue(null);
       setSelectedChatLieu(null);
       setSelectedThuongHieu(null);
+      setSelectedDanhMuc(null);
       setSelectedDeGiay(null);
       setSelectedKieuDang(null);
       setSelectedXuatXu(null);
@@ -645,6 +673,7 @@ const SanPham = () => {
       giaBan: record.giaBan,
       soLuongTon: record.soLuongTon,
       trangThai: record.trangThai,
+      danhMuc: record.danhMuc ? { id: record.danhMuc.id } : null,
       thuongHieu: record.thuongHieu ? { id: record.thuongHieu.id } : null,
       chatLieu: record.chatLieu ? { id: record.chatLieu.id } : null,
       deGiay: record.deGiay ? { id: record.deGiay.id } : null,
@@ -670,6 +699,7 @@ const SanPham = () => {
       setGiaBan(giay.giaBan);
       setSoLuongTon(giay.soLuongTon);
       setValue(giay.trangThai === 0 ? 2 : 1);
+      setSelectedDanhMuc(giay.danhMuc ? giay.danhMuc.id : null);
       setSelectedThuongHieu(giay.thuongHieu ? giay.thuongHieu.id : null);
       setSelectedChatLieu(giay.chatLieu ? giay.chatLieu.id : null);
       setSelectedDeGiay(giay.deGiay ? giay.deGiay.id : null);
@@ -684,6 +714,26 @@ const SanPham = () => {
     } catch (error) {
       message.error("Lỗi khi lấy chi tiết giày: " + error.message);
     }
+  };
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+
+    // Reset dữ liệu sau khi popup đóng
+    setEditingGiay(null);
+    setTen("");
+    setMoTa("");
+    setGiaBan("");
+    setSoLuongTon("");
+    setValue(null);
+    setSelectedChatLieu(null);
+    setSelectedThuongHieu(null);
+    setSelectedDanhMuc(null);
+    setSelectedDeGiay(null);
+    setSelectedKieuDang(null);
+    setSelectedXuatXu(null);
+    setSelectedMauSac(null);
+    setSelectedKichCo(null);
+    setSelectedAnhGiay(null);
   };
 
   const editGiayButton = async () => {
@@ -702,6 +752,7 @@ const SanPham = () => {
       giaBan: parseFloat(giaBan),
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
+      danhMucDto: selectedDanhMuc ? { id: selectedDanhMuc } : null,
       thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
       chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
       deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
@@ -763,18 +814,41 @@ const SanPham = () => {
         ten: item.TEN.toLowerCase(),
         soLuong: item.SOLUONGTON?.toString() || "0",
         thuongHieu: item.THUONG_HIEU.toLowerCase(),
+        giaBan: item.GIABAN?.toString() || "0",
       }).some((value) => value.includes(searchTerm.toLowerCase()))
     )
     .filter((item) => {
-      if (filterStatus === "all") return true; // Hiển thị tất cả
-      if (filterStatus === "selling") return item.TRANG_THAI === 0; // Đang bán
-      if (filterStatus === "stopped") return item.TRANG_THAI === 1; // Ngừng bán
+      if (filterStatus === "all") return true;
+      if (filterStatus === "selling") return item.TRANG_THAI === 0;
+      if (filterStatus === "stopped") return item.TRANG_THAI === 1;
+      return true;
+    })
+    .filter((item) => {
+      if (selectedBrand && item.THUONG_HIEU !== selectedBrand) return false;
+      return true;
+    })
+    .filter((item) => {
+      if (selectedCategory && item.DANH_MUC !== selectedCategory) return false;
+      return true;
+    })
+    .filter((item) => {
+      if (minPrice !== null && minPrice !== "" && item.GIABAN < minPrice)
+        return false;
+      if (maxPrice !== null && maxPrice !== "" && item.GIABAN > maxPrice)
+        return false;
       return true;
     });
 
   const [isModalVisible1, setIsModalVisible1] = useState(false);
-  const handleShowPopupSanphamInfo = () => {
-    setIsModalVisible(true);
+
+  const [isThemNhanhMausac, setIsThemNhanhMausac] = useState(false);
+  const [isThemNhanhKichCo, setIsThemNhanhKichCo] = useState(false);
+
+  const ThemNhanhMauSac = () => {
+    setIsThemNhanhMausac(true);
+  };
+  const ThemNhanhKichCo = () => {
+    setIsThemNhanhKichCo(true);
   };
   return (
     <div
@@ -783,37 +857,138 @@ const SanPham = () => {
       style={{ width: "100%" }}
     >
       <h1>Danh sách Sản Phẩm</h1>
-      <span style={{ marginRight: 8, fontWeight: "bold" }}>Tên Sản Phẩm</span>
 
       <div
         style={{
           display: "flex",
           justifyContent: "space-between",
-          gap: "16px",
+          marginLeft: "10px",
+          float: "right",
         }}
       >
-        <Input
-          placeholder="Nhập để tìm kiếm..."
-          value={searchTerm}
-          onChange={(e) => setSearchTerm(e.target.value)}
-          style={{ width: 300, marginBottom: 20 }}
-        />
         <Button type="primary" onClick={() => setIsModalVisible1(true)}>
           Thêm Sản Phẩm
         </Button>
       </div>
       {/* Bộ lọc trạng thái */}
-      <div style={{ marginBottom: 16 }}>
-        {/* <span style={{ marginRight: 8 }}>Trạng thái:</span> */}
-        <Radio.Group
-          value={filterStatus}
-          onChange={(e) => setFilterStatus(e.target.value)}
+      <div
+        style={{
+          background: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          marginBottom: "16px",
+          display: "flex",
+          justifyContent: "flex-start",
+        }}
+      >
+        <div style={{ width: 250, marginTop: 5 }}>
+          <Input
+            placeholder="Tìm kiếm sản phẩm "
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 120, marginBottom: 20 }}
+          />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "24px",
+            flexWrap: "nowrap",
+            marginLeft: "30px",
+          }}
         >
-          <Radio value="all">Tất cả</Radio>
-          <Radio value="selling">Đang bán</Radio>
-          <Radio value="stopped">Ngừng bán</Radio>
-        </Radio.Group>
+          {/* Bộ lọc thương hiệu */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              Thương hiệu:
+            </span>
+            <Select
+              placeholder="Chọn thương hiệu"
+              value={selectedBrand}
+              onChange={(value) => setSelectedBrand(value)}
+              style={{ width: 180 }}
+              dropdownStyle={{ width: 250 }}
+            >
+              <Select.Option value="">Tất cả</Select.Option>
+              {thuongHieuList.map((brand) => (
+                <Select.Option key={brand.id} value={brand.ten}>
+                  {brand.ten}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Bộ lọc danh mục */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              Danh mục:
+            </span>
+            <Select
+              placeholder="Chọn danh mục"
+              value={selectedCategory}
+              onChange={(value) => setSelectedCategory(value)}
+              style={{ width: 180 }}
+              dropdownStyle={{ width: 250 }}
+            >
+              <Select.Option value="">Tất cả</Select.Option>
+              {danhMucList.map((category) => (
+                <Select.Option key={category.id} value={category.ten}>
+                  {category.ten}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Lọc theo khoảng giá */}
+          <div style={{ display: "flex", gap: "8px", marginTop: "-10px" }}>
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              Giá từ:
+            </span>
+            <InputNumber
+              min={0}
+              value={minPrice}
+              onChange={setMinPrice}
+              style={{ width: 100 }}
+            />
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              đến{" "}
+            </span>
+            <InputNumber
+              min={0}
+              value={maxPrice}
+              onChange={setMaxPrice}
+              style={{ width: 100 }}
+            />
+          </div>
+        </div>
       </div>
+
       {/*chi tiet san pham  */}
       <Modal
         title="Chi Tiết Sản Phẩm"
@@ -983,9 +1158,24 @@ const SanPham = () => {
                         {kc.ten}
                       </button>
                     ))}
+                    <Button icon={<PlusOutlined />} onClick={ThemNhanhKichCo} />
                   </div>
+                  {/* Popup hiển thị khi gọi */}
+                  <Modal
+                    title="Thêm Nhanh Kích Cỡ"
+                    open={isThemNhanhKichCo}
+                    onCancel={() => setIsThemNhanhKichCo(false)}
+                    footer={null}
+                  >
+                    <div style={{ padding: "10px" }}>
+                      <PopupThemNhanhKichCo
+                        setIsThemNhanhKichCo={setIsThemNhanhKichCo}
+                        getKichCoList={getKichCoList}
+                      />
+                    </div>
+                  </Modal>
                 </div>
-                <div style={{ marginTop: 10 }}>
+                <div>
                   <h4>Chọn Màu Sắc</h4>
                   <div className="option-grid">
                     {mauSacList.map((ms) => (
@@ -999,7 +1189,23 @@ const SanPham = () => {
                         {ms.ten}
                       </button>
                     ))}
+                    <Button icon={<PlusOutlined />} onClick={ThemNhanhMauSac} />
                   </div>
+
+                  {/* Popup hiển thị khi gọi */}
+                  <Modal
+                    title="Thêm Nhanh Màu Sắc"
+                    open={isThemNhanhMausac}
+                    onCancel={() => setIsThemNhanhMausac(false)}
+                    footer={null}
+                  >
+                    <div style={{ padding: "10px" }}>
+                      <PopupThemNhanhMauSac
+                        setIsThemNhanhMausac={setIsThemNhanhMausac}
+                        getMauSacList={getMauSacList}
+                      />
+                    </div>
+                  </Modal>
                 </div>
               </Modal>
             </div>
@@ -1171,6 +1377,24 @@ const SanPham = () => {
                 </Select>
               </Form.Item>
               <Form.Item
+                label="Danh Mục"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Danh Mục"
+                  value={selectedDanhMuc}
+                  onChange={handleDanhMucChange}
+                >
+                  {Array.isArray(danhMucList) &&
+                    danhMucList.map((kd) => (
+                      <Option key={kd.id} value={kd.id}>
+                        {kd.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
                 label="Trạng Thái"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 16 }}
@@ -1240,11 +1464,16 @@ const SanPham = () => {
               </span>
             ),
           },
-          // {
-          //   title: "Số lượng",
-          //   dataIndex: "SOLUONGTON",
-          //   width: 100,
-          // },
+          {
+            title: "Số lượng",
+            dataIndex: "SOLUONGTON",
+            width: 100,
+          },
+          {
+            title: "Danh mục",
+            dataIndex: "DANH_MUC",
+            width: 150,
+          },
           {
             title: "Thương hiệu",
             dataIndex: "THUONG_HIEU",
@@ -1270,13 +1499,28 @@ const SanPham = () => {
             render: (text, record) => (
               <Space size="middle">
                 <EyeOutlined
-                  style={{ cursor: "pointer" }}
+                  style={{ cursor: "pointer", color: "blue" }}
                   onClick={() => detailGiay(record)}
                 />
 
                 <DeleteOutlined
                   style={{ cursor: "pointer", color: "red" }}
-                  onClick={() => removeGiay(record)}
+                  onClick={() => setConfirmOpen(true)} // Hiển thị hộp thoại xác nhận
+                />
+
+                {/* Hộp thoại xác nhận xóa */}
+                <ConfirmModal
+                  open={confirmOpen}
+                  onConfirm={() => {
+                    setConfirmOpen(false);
+                    removeGiay(record);
+                    console.log( record);
+                    
+                  
+                  }}
+                  onCancel={() => setConfirmOpen(false)}
+                  title="Xác nhận xóa"
+                  content={`Bạn có chắc muốn xóa giày "${record.TEN}" không?`}
                 />
               </Space>
             ),
@@ -1289,7 +1533,7 @@ const SanPham = () => {
       <Modal
         title="Thông tin  Sản Phẩm"
         // onOk={editGiayButton}
-        onCancel={() => setIsModalVisible(false)}
+        onCancel={() => handleCloseModal()}
         visible={isModalVisible}
       >
         <div
@@ -1361,6 +1605,19 @@ const SanPham = () => {
                   >
                     {Array.isArray(chatLieuList) &&
                       chatLieuList.map((cl) => (
+                        <Option key={cl.id} value={cl.id}>
+                          {cl.ten}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Danh Mục">
+                  <Select
+                    value={selectedDanhMuc}
+                    onChange={handleDanhMucChange}
+                  >
+                    {Array.isArray(danhMucList) &&
+                      danhMucList.map((cl) => (
                         <Option key={cl.id} value={cl.id}>
                           {cl.ten}
                         </Option>
