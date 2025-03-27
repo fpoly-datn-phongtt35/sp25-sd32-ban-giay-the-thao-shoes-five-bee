@@ -679,9 +679,9 @@ const QuanLyHoaDon = () => {
           >
             Print
           </Button>
-          <Button type="danger" onClick={handleDelete}>
+          {/* <Button type="danger" onClick={handleDelete}>
             Delete
-          </Button>
+          </Button> */}
         </div>
       </div>
       <div className="order_container">
@@ -741,7 +741,7 @@ const QuanLyHoaDon = () => {
               Back
             </Button>
             <Button
-              style={{ float: "right" }}
+              style={{ float: "right", marginRight: "10px" }}
               type="primary"
               onClick={handlePrint}
             >
@@ -771,7 +771,7 @@ const QuanLyHoaDon = () => {
               </div>
               <div className="phai">
                 <h4>Thông tin khách hàng</h4>
-                <h6>Tên Khách Hàng: {dataHoaDonChiTiet?.user || "N/A"}</h6>
+                <h6>Khách Hàng: {dataHoaDonChiTiet?.user || "N/A"}</h6>
                 <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
                 <h6>Địa Chỉ: {dataHoaDonChiTiet?.diaChi || "Tại Quầy"}</h6>
               </div>

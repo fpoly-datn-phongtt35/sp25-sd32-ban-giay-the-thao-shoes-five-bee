@@ -28,7 +28,8 @@
     width: 100%;
     padding: 20px;
     display: flex;
-   
+    margin-top: 20px;
+
     gap: 10px;
     background-color: #f2f2f2;
     border-radius: 10px;
@@ -194,4 +195,151 @@ tr:nth-child(even) {
   .ant-table-tbody > tr > td {
     padding: 8px;
   }
+}
+
+/* css cthd */
+.popup-overlay {
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.5);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+
+.popup-content {
+  background: white;
+  padding: 20px;
+  border-radius: 10px;
+  width: 80%;
+  max-width: 900px;
+  box-shadow: 0 5px 15px rgba(0, 0, 0, 0.2);
+}
+
+.HoaDonChiTiet h1 {
+  text-align: center;
+  margin-bottom: 20px;
+  font-size: 24px;
+}
+
+.thongtinhoadon {
+  display: flex;
+  justify-content: space-between;
+  background: #f9f9f9;
+  padding: 20px;
+  margin-top: 10px;
+  border-radius: 8px;
+  box-shadow: 0px 3px 5px rgba(0, 0, 0, 0.1);
+}
+
+.trai, .phai {
+  width: 48%;
+}
+
+.trai h4, .phai h4 {
+  margin-bottom: 10px;
+  font-size: 18px;
+  color: #333;
+}
+
+.trai h6, .phai h6 {
+  font-size: 14px;
+  margin: 5px 0;
+  color: #555;
+}
+
+/* Bọc toàn bộ bảng trong một container để dễ tùy chỉnh */
+/* Bọc toàn bộ bảng trong một container để dễ tùy chỉnh */
+table {
+  width: 100%;
+  border-collapse: separate; /* Tách các ô, giúp loại bỏ đường kẻ */
+  border-spacing: 0 10px; /* Thêm khoảng cách giữa các hàng */
+  margin-top: 20px;
+  background: white;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0px 5px 15px rgba(0, 0, 0, 0.15);
+}
+
+/* Tiêu đề bảng */
+th {
+  /* background: linear-gradient(135deg, #007bff, #0056b3); */
+  color:black;
+  font-size: 16px;
+  font-weight: bold;
+
+  /* text-transform: uppercase; */
+  border: none;
+  text-align: center;
+}
+
+/* Dòng dữ liệu */
+td {
+  padding: 15px;
+  text-align: center;
+  font-size: 15px;
+  color: #333;
+  border: none; /* Loại bỏ viền */
+  /* background: rgba(0, 123, 255, 0.1);  */
+  border-radius: 10px; /* Bo góc mỗi ô */
+}
+
+/* Khoảng cách giữa các hàng */
+tbody tr {
+  margin-bottom: 10px; /* Tạo khoảng cách giữa các hàng */
+  display: table-row;
+}
+
+/* Hiệu ứng hover khi di chuột vào dòng */
+tbody tr:hover td {
+  background: rgba(0, 123, 255, 0.2);
+  transition: all 0.3s ease-in-out;
+}
+
+/* Ảnh sản phẩm */
+td img {
+  width: 50px;
+  height: 50px;
+  border-radius: 5px;
+  box-shadow: 0 2px 5px rgba(0, 0, 0, 0.2);
+}
+
+/* Dòng tổng cộng */
+tfoot {
+  background: #f8f9fa;
+  font-size: 17px;
+}
+
+tfoot td {
+  font-weight: bold;
+  color: #000;
+  padding: 15px;
+  border: none; /* Loại bỏ viền */
+}
+
+/* Cột giá bán và tổng tiền nổi bật hơn */
+td:nth-child(4),
+td:nth-child(6) {
+  font-weight: bold;
+  color: #d9534f;
+}
+
+/* Bo góc cho bảng */
+th:first-child, td:first-child {
+  border-top-left-radius: 10px;
+}
+
+th:last-child, td:last-child {
+  border-top-right-radius: 10px;
+}
+
+tfoot td:first-child {
+  border-bottom-left-radius: 10px;
+}
+
+tfoot td:last-child {
+  border-bottom-right-radius: 10px;
 }

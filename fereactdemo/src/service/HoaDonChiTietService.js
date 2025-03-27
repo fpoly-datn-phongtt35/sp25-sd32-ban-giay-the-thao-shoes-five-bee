@@ -32,6 +32,7 @@ export const detailHoaDonChiTiet = (id) =>
   axios.get(`${REST_API_BASE_URL}/detail/${id}`);
 
 export const printfHoaDonChiTiet = (id) =>
-  axios.get(`${REST_API_BASE_URL}/download-pdf-hdct/${id}`, {
+  axios.get(`${REST_API_BASE_URL}/download-pdf/${id}`, {
     responseType: "blob",
+    
   });
