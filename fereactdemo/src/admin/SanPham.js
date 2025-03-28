@@ -18,13 +18,27 @@ import {
   Space,
   Table,
   message,
+  Switch,
+  Row,
+  Col,
+  Checkbox,
+  InputNumber,
 } from "antd";
+import {
+  EyeOutlined,
+  DeleteOutlined,
+  EditOutlined,
+  PlusOutlined,
+  AddOutlined,
+} from "@ant-design/icons";
 import "./Sanpham.css";
 import { validate as isUuid } from "uuid";
 import { getThuongHieu } from "../service/ThuongHieuService";
 import { getChatLieu } from "../service/ChatLieuService";
 import { getDeGiay } from "../service/DeGiayService";
 import { getKieuDang } from "../service/KieuDangService";
+import { getDanhMuc } from "../service/DanhMucService";
+import ConfirmModal from "../popupThemNhanhThuocTInh/ConfirmModal"; 
 import { getXuatXu } from "../service/XuatXuService";
 import TextArea from "antd/es/input/TextArea";
 import { Option } from "antd/es/mentions";
@@ -39,11 +53,14 @@ import {
   updateGiayChiTiet,
 } from "../service/GiayChiTietService";
 import { getMauSac } from "../service/MauSacService";
+import PopupThemNhanhMauSac from "../popupThemNhanhThuocTInh/PopupThemNhanhMauSac";
+import PopupThemNhanhKichCo from "../popupThemNhanhThuocTInh/PopupThemNhanhKichCo";
 
 const SanPham = () => {
   const [giay, setGiay] = useState([]);
+  const [editedData, setEditedData] = useState({});
   const [selectedRowKeys, setSelectedRowKeys] = useState([]);
-  const [value, setValue] = useState(1);
+  const [value, setValue] = useState(2);
   const [ten, setTen] = useState("");
   const [moTa, setMoTa] = useState("");
   const [giaNhap, setGiaNhap] = useState("");
@@ -56,9 +73,17 @@ const SanPham = () => {
   const [deGiayList, setDeGiayList] = useState([]);
   const [xuatXuList, setXuatXuList] = useState([]);
   const [kieuDangList, setKieuDangList] = useState([]);
+  const [danhMucList, setDanhMucList] = useState([]);
+  const [minPrice, setMinPrice] = useState(null);
+  const [maxPrice, setMaxPrice] = useState(null);
+  const [selectedColors, setSelectedColors] = useState([]); // Mảng chứa màu sắc được chọn
+  const [selectedSizes, setSelectedSizes] = useState([]);
   const [anhGiayList, setAnhGiayList] = useState([]);
   const [selectedThuongHieu, setSelectedThuongHieu] = useState();
   const [selectedChatLieu, setSelectedChatLieu] = useState();
+  const [selectedDanhMuc, setSelectedDanhMuc] = useState();
+  const [confirmOpen, setConfirmOpen] = useState(false);
+  const [selectedBrand, setSelectedBrand] = useState("");
   const [selectedDeGiay, setSelectedDeGiay] = useState();
   const [selectedXuatXu, setSelectedXuatXu] = useState();
   const [selectedKieuDang, setSelectedKieuDang] = useState();
@@ -77,12 +102,14 @@ const SanPham = () => {
   const [anhGiay, setAnhGiay] = useState([]);
   const [isChiTietModalVisible, setIsChiTietModalVisible] = useState(false);
   const [editingGiayChiTiet, setEditingGiayChiTiet] = useState(null);
-
+  const [searchTerm, setSearchTerm] = useState("");
+  const [filterStatus, setFilterStatus] = useState("all");
   const [selectedKichCo1, setSelectedKichCo1] = useState([]);
   const [selectedMauSac1, setSelectedMauSac1] = useState([]);
   const [selectedAnhGiay1, setSelectedAnhGiay1] = useState(null);
-
+  const [updatedDataChiTiet, setUpdatedDataChỉTiet] = useState({});
   const [danhSachChiTiet, setDanhSachChiTiet] = useState([]);
+  const [selectedCategory, setSelectedCategory] = useState("");
 
   const [soLuongTon1, setSoLuongTon1] = useState(null);
 
@@ -147,9 +174,9 @@ const SanPham = () => {
     setAnhGiay(activeanhGiay);
   };
   // logic cho bien the san pham
-  const fetchSanPhamChiTiet = async (data) => {
+  const fetchSanPhamChiTiet = async (data, showPopup = true) => {
     try {
-      const id = data.ID || data.id; // Lấy ID từ object (cả ID viết hoa hoặc thường)
+      const id = typeof data === "object" ? data.ID || data.id : data; // Xử lý ID từ object hoặc số
       if (!id) {
         console.error("Lỗi: ID không hợp lệ!", data);
         return null;
@@ -159,17 +186,15 @@ const SanPham = () => {
       const response = await getGiayChitietDetail1(id);
       console.log("Dữ liệu sản phẩm chi tiết:", response.data);
 
-      // Kiểm tra nếu dữ liệu là mảng
       if (!Array.isArray(response.data)) {
         console.error("Dữ liệu trả về không phải mảng!", response.data);
         return [];
       }
 
-      // Trích xuất dữ liệu từ danh sách sản phẩm chi tiết
       const danhSachChiTiet = response.data.map((item) => ({
         id: item.id,
         ten: item.giayEntity?.ten || "N/A",
-        anh: item.danhSachAnh.length > 0 ? item.danhSachAnh[0] : null, // Lấy ảnh đầu tiên hoặc null
+        anh: item.danhSachAnh.length > 0 ? item.danhSachAnh[0] : null,
         giaBan: item.giaBan || 0,
         mauSac: item.mauSacEntity?.ten || "Không có",
         kichCo: item.kichCoEntity?.ten || "Không có",
@@ -178,107 +203,45 @@ const SanPham = () => {
 
       console.log("Danh sách chi tiết sản phẩm:", danhSachChiTiet);
       setDanhSachChiTiet(danhSachChiTiet);
-      // Gọi hàm hiển thị popup
-      // showSanPhamChiTietPopup(danhSachChiTiet);
-      setIsChiTietModalVisible(true);
+
+      // Chỉ mở popup nếu showPopup = true
+      if (showPopup) {
+        setIsChiTietModalVisible(true);
+      }
+
       return danhSachChiTiet;
     } catch (error) {
       console.error("Lỗi khi lấy danh sách sản phẩm chi tiết:", error);
       return [];
     }
   };
-  const handleEdit = async (record) => {
-    try {
-      const response = await detailGiayChiTiet2(record.id);
 
-      const giayChiTiet = response.data;
-      console.log("🔍 Chi tiết giày:", giayChiTiet);
+  // const handleEditGiayChiTiet = async (record) => {
+  //   try {
+  //     const response = await detailGiayChiTiet2(record.id);
 
-      setEditingGiayChiTiet(giayChiTiet);
-      setGiaBan1(giayChiTiet.giaBan);
-      setSoLuongTon1(giayChiTiet.soLuongTon); // Cập nhật số lượng tồn cho sản phẩm 1
-      setValue(giayChiTiet.trangThai === 0 ? 1 : 2);
-      setSelectedMauSac1(
-        giayChiTiet.mauSacEntity ? giayChiTiet.mauSacEntity.id : null
-      );
-      setSelectedKichCo1(
-        giayChiTiet.kichCoEntity ? giayChiTiet.kichCoEntity.id : null
-      );
-      setSelectedGiay1(
-        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null,
-        giayChiTiet.giayEntity ? giayChiTiet.giayEntity.ten : null
-      );
-      setIsModalVisibleUpdateGiayChiTiet(true);
-    } catch (error) {
-      message.error("Lỗi khi detail giày chi tiết");
-    }
-  };
-  const handleUpdate = async (record) => {
-    if (!editingGiayChiTiet) {
-      message.error("❌ Không có dữ liệu sản phẩm chi tiết để cập nhật!");
-      return;
-    }
+  //     const giayChiTiet = response.data;
+  //     console.log("🔍 Chi tiết giày:", giayChiTiet);
 
-    // Kiểm tra xem sản phẩm có đúng với sản phẩm đang được xem không
-    if (editingGiayChiTiet?.id !== record.id) {
-      message.error(
-        "❌ Bạn đang chỉnh sửa một sản phẩm khác với sản phẩm trong chi tiết!"
-      );
-      return;
-    }
-
-    const updatedGiayChiTiet = {
-      id: editingGiayChiTiet?.id || null,
-      soLuongTon: soLuongTon1,
-      giaBan: giaBan1,
-      giayDto: selectedGiay1 ? { id: selectedGiay1 } : null,
-      trangThai: value === 1 ? 0 : 1,
-      mauSacDto: selectedMauSac1 ? { id: selectedMauSac1 } : null,
-      kichCoDto: selectedKichCo1 ? { id: selectedKichCo1 } : null,
-      danhSachAnh: selectedAnhGiay1
-        ? selectedAnhGiay1.map((id) => ({ id }))
-        : [],
-    };
-
-    console.log("🔍 Dữ liệu cập nhật gửi đi:", updatedGiayChiTiet);
-
-    try {
-      if (
-        !updatedGiayChiTiet.giayDto?.id ||
-        !updatedGiayChiTiet.mauSacDto?.id ||
-        !updatedGiayChiTiet.kichCoDto?.id
-      ) {
-        message.error(
-          "❌ Vui lòng chọn đầy đủ Giày, Màu sắc và Kích cỡ trước khi cập nhật!"
-        );
-        return;
-      }
-
-      const response = await updateGiayChiTiet(updatedGiayChiTiet);
-      message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
-
-      // Cập nhật danh sách sản phẩm chi tiết
-      fetchSanPhamChiTiet({ ID: selectedGiay1 });
-
-      // Cập nhật lại form với dữ liệu mới từ API
-      setSoLuongTon1("");
-      setGiaBan1("");
-      setSelectedMauSac1(response.data.mauSacDto?.id || null);
-      setSelectedKichCo1(response.data.kichCoDto?.id || null);
-      setSelectedGiay1(response.data.giayDto?.id || null);
-      selectedAnhGiay1(response.data.danhSachAnh || null);
-      setIsModalVisible(false);
-    } catch (error) {
-      console.error(
-        "❌ Lỗi cập nhật sản phẩm chi tiết:",
-        error.response?.data || error.message
-      );
-      message.error(
-        "❌ Lỗi cập nhật sản phẩm chi tiết: " +
-          (error.response?.data?.message || error.message)
-      );
-    }
-  };
+  //     setEditingGiayChiTiet(giayChiTiet);
+  //     setGiaBan1(giayChiTiet.giaBan);
+  //     setSoLuongTon1(giayChiTiet.soLuongTon); // Cập nhật số lượng tồn cho sản phẩm 1
+  //     setValue(giayChiTiet.trangThai === 0 ? 1 : 2);
+  //     setSelectedMauSac1(
+  //       giayChiTiet.mauSacEntity ? giayChiTiet.mauSacEntity.id : null
+  //     );
+  //     setSelectedKichCo1(
+  //       giayChiTiet.kichCoEntity ? giayChiTiet.kichCoEntity.id : null
+  //     );
+  //     setSelectedGiay1(
+  //       giayChiTiet.giayEntity ? giayChiTiet.giayEntity.id : null,
+  //       giayChiTiet.giayEntity ? giayChiTiet.giayEntity.ten : null
+  //     );
+  //     setIsModalVisibleUpdateGiayChiTiet(true);
+  //   } catch (error) {
+  //     message.error("Lỗi khi detail giày chi tiết");
+  //   }
+  // };
 
   const handleDelete = async (record) => {
     try {
@@ -297,14 +260,7 @@ const SanPham = () => {
 
   const handleAdd = async () => {
     const newTrangThai1 = value === 1 ? 0 : 1;
-  
-    console.log("🔹 Số lượng tồn:", soLuongTon1);
-    console.log("🔹 Giá bán:", giaBan1);
-    console.log("🔹 Giày đã chọn:", selectedGiay1);
-    console.log("🔹 Màu sắc đã chọn:", selectedMauSac1);
-    console.log("🔹 Kích cỡ đã chọn:", selectedKichCo1);
-    console.log("🔹 ảnh đã chọn:", selectedAnhGiay1);
-  
+
     try {
       // 🏀 Kiểm tra dữ liệu đầu vào trước khi gửi
       // if (
@@ -317,73 +273,156 @@ const SanPham = () => {
       //   message.error("Vui lòng nhập đầy đủ thông tin trước khi thêm!");
       //   return;
       // }
-  
+
       const newProduct = {
         soLuongTon: parseInt(soLuongTon1), // Ép kiểu số nguyên
         giaBan: parseFloat(giaBan1), // Ép kiểu số
         giayId: selectedGiay1, // Chuyển thành ID trực tiếp
         mauSacIds: selectedMauSac1, // Danh sách UUID
         kichCoIds: selectedKichCo1, // Danh sách UUID
-        danhSachAnh: selectedAnhGiay1 ? selectedAnhGiay1.map((id) => ({ id })) : [],
+        danhSachAnh: selectedAnhGiay1
+          ? selectedAnhGiay1.map((id) => ({ id }))
+          : [],
         trangThai: newTrangThai1,
       };
-  
-      console.log("📤 Dữ liệu gửi lên BE:", JSON.stringify(newProduct, null, 2));
-  
+
+      console.log(
+        "📤 Dữ liệu gửi lên BE:",
+        JSON.stringify(newProduct, null, 2)
+      );
+
       // 🏀 Gửi request thêm mới sản phẩm chi tiết
       const response = await addBienThe(newProduct);
-  
+
       console.log("📥 Phản hồi từ BE:", response);
       fetchSanPhamChiTiet({ ID: selectedGiay1 });
-  
+
       message.success("Thêm sản phẩm chi tiết mới thành công!");
-  
+
       // Reset form
       setTen("");
       setSoLuongTon1("");
       setGiaBan1("");
-      setSelectedMauSac1([]);  
-      setSelectedKichCo1([]);  
+      setSelectedMauSac1([]);
+      setSelectedKichCo1([]);
       setSelectedGiay1(null);
-      setValue(1);
+      setValue(2);
     } catch (error) {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error("Lỗi khi thực hiện thao tác: " + error.message);
     }
   };
-  
-  
+  const handleUpdateGiayChiTiet = async (record) => {
+    const updatedRecord = {
+      ...record,
+      ...editedData[record.id], // Lấy dữ liệu đã chỉnh sửa
+    };
+
+    const updatedGiayChiTiet = {
+      id: updatedRecord.id,
+      soLuongTon: Number(updatedRecord.soLuongTon) || 0,
+      giaBan: parseFloat(updatedRecord.giaBan) || 0,
+      trangThai: updatedRecord.trangThai === 0 ? 1 : 0,
+    };
+
+    console.log("📌 Dữ liệu gửi lên API:", updatedGiayChiTiet);
+
+    try {
+      const response = await updateGiayChiTiet(updatedGiayChiTiet);
+      message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
+
+      // Reset dữ liệu sau khi cập nhật
+      setEditedData((prev) => {
+        const newData = { ...prev };
+        delete newData[record.id]; // Xóa dữ liệu đã sửa sau khi gửi API
+        return newData;
+      });
+
+      fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
+    } catch (error) {
+      console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
+      message.error("❌ Lỗi cập nhật sản phẩm chi tiết!");
+    }
+  };
+  const handleAddImage = (record) => {
+    console.log("Thêm ảnh cho sản phẩm:", record);
+  };
+  const handleInputChange = (e, record, field) => {
+    const { value } = e.target;
+    setEditedData((prev) => ({
+      ...prev,
+      [record.id]: {
+        // Mỗi sản phẩm được lưu theo ID
+        ...prev[record.id],
+        [field]: value, // Cập nhật trường được chỉnh sửa
+      },
+    }));
+  };
 
   // Hàm hiển thị popup
   const columnsGiayChiTiet = [
-    // { title: "Tên", dataIndex: "ten", key: "ten" },
-    { title: "Ảnh", dataIndex: "anh", key: "anh" },
-    { title: "Giá Bán", dataIndex: "giaBan", key: "giaBan" },
-    { title: "Số Lượng Tồn", dataIndex: "soLuongTon", key: "soLuongTon" },
     {
-      title: "Màu Sắc",
-      dataIndex: "mauSac",
-      key: "mauSac",
+      title: "Tên",
+      dataIndex: "ten",
+      key: "ten",
+      render: (text, record) => (
+        <div>
+          <span>{text}</span>
+          <div style={{ fontSize: "12px", color: "#888", marginTop: 4 }}>
+            {record.mauSac} - Kích cỡ: {record.kichCo}
+          </div>
+        </div>
+      ),
     },
     {
-      title: "Kích Cỡ",
-      dataIndex: "kichCo",
-      key: "kichCo",
+      title: "Đơn giá",
+      dataIndex: "giaBan",
+      key: "giaBan",
+      render: (text, record) => (
+        <Input
+          defaultValue={text}
+          onChange={(e) => handleInputChange(e, record, "giaBan")}
+        />
+      ),
     },
     {
-      title: "Hành động",
+      title: "Số lượng",
+      dataIndex: "soLuongTon",
+      key: "soLuongTon",
+      render: (text, record) => (
+        <Input
+          defaultValue={text}
+          onChange={(e) => handleInputChange(e, record, "soLuongTon")}
+        />
+      ),
+    },
+    {
+      title: "Ảnh",
+      dataIndex: "anh",
+      key: "anh",
+      render: (text, record) => (
+        <Button
+          type="dashed"
+          icon={<PlusOutlined />}
+          onClick={() => handleAddImage(record)}
+        />
+      ),
+    },
+    {
+      title: "Thao tác",
       key: "action",
       render: (_, record) => (
         <div style={{ display: "flex", gap: "8px" }}>
-          <Button type="primary" onClick={() => handleEdit(record)}>
-            Detail
-          </Button>
-          <Button danger onClick={() => handleDelete(record)}>
-            Xóa
-          </Button>
-          <Button danger onClick={() => handleUpdate(record)}>
-            Update
-          </Button>
+          <Button
+            danger
+            onClick={() => handleDelete(record)}
+            icon={<DeleteOutlined />}
+          />
+          <Button
+            type="primary"
+            onClick={() => handleUpdateGiayChiTiet(record)}
+            icon={<EditOutlined />}
+          />
         </div>
       ),
     },
@@ -423,11 +462,13 @@ const SanPham = () => {
     getKieuDangList();
     getXuatXuList();
     getAnhGiayList();
+    getDanhMucList();
   }, []);
 
   const getAllGiay = async () => {
     try {
       const result = await getGiay();
+      console.log("Dữ liệu giày:", result);
 
       if (!result || !result.data) {
         console.error("Error: result.data is undefined or null");
@@ -448,6 +489,7 @@ const SanPham = () => {
         SOLUONGTON: item.soLuongTon,
         TRANG_THAI: item.trangThai,
         THUONG_HIEU: item.thuongHieu ? item.thuongHieu.ten : null,
+        DANH_MUC: item.danhMuc ? item.danhMuc.ten : null,
         CHAT_LIEU: item.chatLieu ? item.chatLieu.ten : null,
         DE_GIAY: item.deGiay ? item.deGiay.ten : null,
         XUAT_XU: item.xuatXu ? item.xuatXu.ten : null,
@@ -492,6 +534,10 @@ const SanPham = () => {
     const result = await getKieuDang();
     setKieuDangList(result.data.filter((item) => item.trangThai === 0));
   };
+  const getDanhMucList = async () => {
+    const result = await getDanhMuc();
+    setDanhMucList(result.data.filter((item) => item.trangThai === 0));
+  };
 
   const getAnhGiayList = async () => {
     const result = await getAnhGiay();
@@ -508,6 +554,10 @@ const SanPham = () => {
     setSelectedChatLieu(value);
   };
 
+  const handleDanhMucChange = (value) => {
+    console.log(value);
+    setSelectedDanhMuc(value);
+  };
   const handleDeGiayChange = (value) => {
     console.log(value);
     setSelectedDeGiay(value);
@@ -529,10 +579,10 @@ const SanPham = () => {
   };
 
   const creatGiay = async () => {
-    if (!ten || !giaBan) {
-      message.error("Không được để trống!");
-      return;
-    }
+    // if (!ten || !giaBan) {
+    //   message.error("Không được để trống!");
+    //   return;
+    // }
 
     const newTrangThai = value === 1 ? 1 : 0;
 
@@ -542,6 +592,7 @@ const SanPham = () => {
       giaBan: parseFloat(giaBan),
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
+      danhMucDto: selectedDanhMuc ? { id: selectedDanhMuc } : null,
       thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
       chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
       deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
@@ -573,6 +624,7 @@ const SanPham = () => {
       setValue(null);
       setSelectedChatLieu(null);
       setSelectedThuongHieu(null);
+      setSelectedDanhMuc(null);
       setSelectedDeGiay(null);
       setSelectedKieuDang(null);
       setSelectedXuatXu(null);
@@ -601,14 +653,27 @@ const SanPham = () => {
   };
 
   const detailGiay = async (record) => {
-    // Tạo đối tượng GiayDto từ thông tin của giày mà bạn có
+    console.log("Chi tiết sản phẩm:", record);
+
+    // Đóng popup danh sách sản phẩm chi tiết nếu đang mở
+    setIsChiTietModalVisible(false);
+
+    // Gọi fetch nhưng không mở popup danh sách sản phẩm
+    const danhSachChiTiet = await fetchSanPhamChiTiet(record, false);
+
+    // if (!danhSachChiTiet || danhSachChiTiet.length === 0) {
+    //   message.error("Không có sản phẩm chi tiết nào!");
+    //   return;
+    // }
+
     const giayDto = {
-      id: record.ID, // Nếu bạn muốn gửi ID cùng với các thông tin khác
+      id: record.ID,
       ten: record.ten,
       moTa: record.moTa,
       giaBan: record.giaBan,
       soLuongTon: record.soLuongTon,
       trangThai: record.trangThai,
+      danhMuc: record.danhMuc ? { id: record.danhMuc.id } : null,
       thuongHieu: record.thuongHieu ? { id: record.thuongHieu.id } : null,
       chatLieu: record.chatLieu ? { id: record.chatLieu.id } : null,
       deGiay: record.deGiay ? { id: record.deGiay.id } : null,
@@ -619,23 +684,22 @@ const SanPham = () => {
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
             id: ag.id,
-            tenUrl: ag.tenUrl, // ✅ Thêm đường dẫn ảnh vào object
+            tenUrl: ag.tenUrl,
           }))
         : [],
     };
 
     try {
-      // Gửi DTO qua API để lấy chi tiết giày
       const response = await getGiayDetail(giayDto);
       const giay = response.data;
 
-      // Cập nhật state với dữ liệu nhận được
       setEditingGiay(giay);
       setTen(giay.ten);
       setMoTa(giay.moTa);
       setGiaBan(giay.giaBan);
       setSoLuongTon(giay.soLuongTon);
       setValue(giay.trangThai === 0 ? 2 : 1);
+      setSelectedDanhMuc(giay.danhMuc ? giay.danhMuc.id : null);
       setSelectedThuongHieu(giay.thuongHieu ? giay.thuongHieu.id : null);
       setSelectedChatLieu(giay.chatLieu ? giay.chatLieu.id : null);
       setSelectedDeGiay(giay.deGiay ? giay.deGiay.id : null);
@@ -644,10 +708,32 @@ const SanPham = () => {
       setSelectedMauSac(giay.mauSac ? giay.mauSac.id : null);
       setSelectedKichCo(giay.kichCo ? giay.kichCo.id : null);
       setSelectedAnhGiay(giay.anhGiay ? giay.anhGiay.id : null);
+
+      // Mở modal chi tiết giày
       setIsModalVisible(true);
     } catch (error) {
       message.error("Lỗi khi lấy chi tiết giày: " + error.message);
     }
+  };
+  const handleCloseModal = () => {
+    setIsModalVisible(false);
+
+    // Reset dữ liệu sau khi popup đóng
+    setEditingGiay(null);
+    setTen("");
+    setMoTa("");
+    setGiaBan("");
+    setSoLuongTon("");
+    setValue(null);
+    setSelectedChatLieu(null);
+    setSelectedThuongHieu(null);
+    setSelectedDanhMuc(null);
+    setSelectedDeGiay(null);
+    setSelectedKieuDang(null);
+    setSelectedXuatXu(null);
+    setSelectedMauSac(null);
+    setSelectedKichCo(null);
+    setSelectedAnhGiay(null);
   };
 
   const editGiayButton = async () => {
@@ -666,6 +752,7 @@ const SanPham = () => {
       giaBan: parseFloat(giaBan),
       soLuongTon: parseFloat(soLuongTon),
       trangThai: newTrangThai,
+      danhMucDto: selectedDanhMuc ? { id: selectedDanhMuc } : null,
       thuongHieuDto: selectedThuongHieu ? { id: selectedThuongHieu } : null,
       chatLieuDto: selectedChatLieu ? { id: selectedChatLieu } : null,
       deGiayDto: selectedDeGiay ? { id: selectedDeGiay } : null,
@@ -715,12 +802,193 @@ const SanPham = () => {
     setEditingGiay(null);
   };
 
+  const handleChangeTrangThai = (record, checked) => {
+    console.log(
+      `Cập nhật trạng thái cho ID ${record.key}: ${checked ? "Bật" : "Tắt"}`
+    );
+    // Gửi request API hoặc cập nhật state tại đây
+  };
+  const filteredGiay = giay
+    .filter((item) =>
+      Object.values({
+        ten: item.TEN.toLowerCase(),
+        soLuong: item.SOLUONGTON?.toString() || "0",
+        thuongHieu: item.THUONG_HIEU.toLowerCase(),
+        giaBan: item.GIABAN?.toString() || "0",
+      }).some((value) => value.includes(searchTerm.toLowerCase()))
+    )
+    .filter((item) => {
+      if (filterStatus === "all") return true;
+      if (filterStatus === "selling") return item.TRANG_THAI === 0;
+      if (filterStatus === "stopped") return item.TRANG_THAI === 1;
+      return true;
+    })
+    .filter((item) => {
+      if (selectedBrand && item.THUONG_HIEU !== selectedBrand) return false;
+      return true;
+    })
+    .filter((item) => {
+      if (selectedCategory && item.DANH_MUC !== selectedCategory) return false;
+      return true;
+    })
+    .filter((item) => {
+      if (minPrice !== null && minPrice !== "" && item.GIABAN < minPrice)
+        return false;
+      if (maxPrice !== null && maxPrice !== "" && item.GIABAN > maxPrice)
+        return false;
+      return true;
+    });
+
   const [isModalVisible1, setIsModalVisible1] = useState(false);
+
+  const [isThemNhanhMausac, setIsThemNhanhMausac] = useState(false);
+  const [isThemNhanhKichCo, setIsThemNhanhKichCo] = useState(false);
+
+  const ThemNhanhMauSac = () => {
+    setIsThemNhanhMausac(true);
+  };
+  const ThemNhanhKichCo = () => {
+    setIsThemNhanhKichCo(true);
+  };
   return (
-    <div className="sanpham-container" scroll={{ x: 5000 }}>
-      <Button type="primary" onClick={() => setIsModalVisible1(true)}>
-        Thêm Giày
-      </Button>
+    <div
+      className="sanpham-container"
+      scroll={{ x: 5000 }}
+      style={{ width: "100%" }}
+    >
+      <h1>Danh sách Sản Phẩm</h1>
+
+      <div
+        style={{
+          display: "flex",
+          justifyContent: "space-between",
+          marginLeft: "10px",
+          float: "right",
+        }}
+      >
+        <Button type="primary" onClick={() => setIsModalVisible1(true)}>
+          Thêm Sản Phẩm
+        </Button>
+      </div>
+      {/* Bộ lọc trạng thái */}
+      <div
+        style={{
+          background: "#fff",
+          padding: "16px",
+          borderRadius: "8px",
+          boxShadow: "0 2px 8px rgba(0, 0, 0, 0.1)",
+          marginBottom: "16px",
+          display: "flex",
+          justifyContent: "flex-start",
+        }}
+      >
+        <div style={{ width: 250, marginTop: 5 }}>
+          <Input
+            placeholder="Tìm kiếm sản phẩm "
+            value={searchTerm}
+            onChange={(e) => setSearchTerm(e.target.value)}
+            style={{ width: 120, marginBottom: 20 }}
+          />
+        </div>
+        <div
+          style={{
+            display: "flex",
+            alignItems: "center",
+            gap: "24px",
+            flexWrap: "nowrap",
+            marginLeft: "30px",
+          }}
+        >
+          {/* Bộ lọc thương hiệu */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              Thương hiệu:
+            </span>
+            <Select
+              placeholder="Chọn thương hiệu"
+              value={selectedBrand}
+              onChange={(value) => setSelectedBrand(value)}
+              style={{ width: 180 }}
+              dropdownStyle={{ width: 250 }}
+            >
+              <Select.Option value="">Tất cả</Select.Option>
+              {thuongHieuList.map((brand) => (
+                <Select.Option key={brand.id} value={brand.ten}>
+                  {brand.ten}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Bộ lọc danh mục */}
+          <div style={{ display: "flex", gap: "8px" }}>
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              Danh mục:
+            </span>
+            <Select
+              placeholder="Chọn danh mục"
+              value={selectedCategory}
+              onChange={(value) => setSelectedCategory(value)}
+              style={{ width: 180 }}
+              dropdownStyle={{ width: 250 }}
+            >
+              <Select.Option value="">Tất cả</Select.Option>
+              {danhMucList.map((category) => (
+                <Select.Option key={category.id} value={category.ten}>
+                  {category.ten}
+                </Select.Option>
+              ))}
+            </Select>
+          </div>
+
+          {/* Lọc theo khoảng giá */}
+          <div style={{ display: "flex", gap: "8px", marginTop: "-10px" }}>
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              Giá từ:
+            </span>
+            <InputNumber
+              min={0}
+              value={minPrice}
+              onChange={setMinPrice}
+              style={{ width: 100 }}
+            />
+            <span
+              style={{
+                fontWeight: "bold",
+                whiteSpace: "nowrap",
+                marginTop: "5px",
+              }}
+            >
+              đến{" "}
+            </span>
+            <InputNumber
+              min={0}
+              value={maxPrice}
+              onChange={setMaxPrice}
+              style={{ width: 100 }}
+            />
+          </div>
+        </div>
+      </div>
+
       {/*chi tiet san pham  */}
       <Modal
         title="Chi Tiết Sản Phẩm"
@@ -731,21 +999,21 @@ const SanPham = () => {
             style={{ display: "flex", justifyContent: "flex-end", gap: "8px" }}
           >
             <Button type="primary" onClick={() => handleAdd()}>
-              Thêm
+              Add
             </Button>
             <Button
               type="default"
               onClick={() => setIsChiTietModalVisible(false)}
             >
-              OK
+              Cancel
             </Button>
           </div>
         }
-        width="auto"
-        style={{ maxWidth: "100vw" }}
+        width="80%"
+        centered
       >
         <div style={{ width: "100%" }}>
-          <div style={{ display: "flex", gap: "10px", marginBottom: "15px" }}>
+          <div style={{ gap: "30px", marginBottom: "15px" }}>
             {/* <Select
               mode="multiple"
               placeholder="Chọn Ảnh Giày"
@@ -890,9 +1158,24 @@ const SanPham = () => {
                         {kc.ten}
                       </button>
                     ))}
+                    <Button icon={<PlusOutlined />} onClick={ThemNhanhKichCo} />
                   </div>
+                  {/* Popup hiển thị khi gọi */}
+                  <Modal
+                    title="Thêm Nhanh Kích Cỡ"
+                    open={isThemNhanhKichCo}
+                    onCancel={() => setIsThemNhanhKichCo(false)}
+                    footer={null}
+                  >
+                    <div style={{ padding: "10px" }}>
+                      <PopupThemNhanhKichCo
+                        setIsThemNhanhKichCo={setIsThemNhanhKichCo}
+                        getKichCoList={getKichCoList}
+                      />
+                    </div>
+                  </Modal>
                 </div>
-                <div style={{ marginTop: 10 }}>
+                <div>
                   <h4>Chọn Màu Sắc</h4>
                   <div className="option-grid">
                     {mauSacList.map((ms) => (
@@ -906,13 +1189,30 @@ const SanPham = () => {
                         {ms.ten}
                       </button>
                     ))}
+                    <Button icon={<PlusOutlined />} onClick={ThemNhanhMauSac} />
                   </div>
+
+                  {/* Popup hiển thị khi gọi */}
+                  <Modal
+                    title="Thêm Nhanh Màu Sắc"
+                    open={isThemNhanhMausac}
+                    onCancel={() => setIsThemNhanhMausac(false)}
+                    footer={null}
+                  >
+                    <div style={{ padding: "10px" }}>
+                      <PopupThemNhanhMauSac
+                        setIsThemNhanhMausac={setIsThemNhanhMausac}
+                        getMauSacList={getMauSacList}
+                      />
+                    </div>
+                  </Modal>
                 </div>
               </Modal>
             </div>
           </div>
 
           <Table
+            className="no-border-table"
             columns={columnsGiayChiTiet}
             dataSource={danhSachChiTiet}
             rowKey="id"
@@ -923,227 +1223,215 @@ const SanPham = () => {
       </Modal>
       {/*  */}
       <Modal
-        title="Thêm Giày"
+        title="Thêm Sản Phẩm"
         visible={isModalVisible1}
         onOk={creatGiay}
         onCancel={() => setIsModalVisible1(false)}
         okText="Thêm"
         cancelText="Hủy"
       >
-        <div style={{ float: "left", width: "45%" }}>
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Thương Hiệu"
-            value={selectedThuongHieu}
-            onChange={handleThuongHieuChange}
-          >
-            {Array.isArray(thuongHieuList) &&
-              thuongHieuList.map((th) => (
-                <Option key={th.id} value={th.id}>
-                  {th.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Chất Liệu"
-            value={selectedChatLieu}
-            onChange={handleChatLieuChange}
-          >
-            {Array.isArray(chatLieuList) &&
-              chatLieuList.map((cl) => (
-                <Option key={cl.id} value={cl.id}>
-                  {cl.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Đế Giày"
-            value={selectedDeGiay}
-            onChange={handleDeGiayChange}
-          >
-            {Array.isArray(deGiayList) &&
-              deGiayList.map((deg) => (
-                <Option key={deg.id} value={deg.id}>
-                  {deg.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Xuất Xứ"
-            value={selectedXuatXu}
-            onChange={handleXuatXuChange}
-          >
-            {Array.isArray(xuatXuList) &&
-              xuatXuList.map((xx) => (
-                <Option key={xx.id} value={xx.id}>
-                  {xx.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-          <Select
-            style={{ width: "100%" }}
-            placeholder="Chọn Kiểu Dáng"
-            value={selectedKieuDang}
-            onChange={handleKieuDangChange}
-          >
-            {Array.isArray(kieuDangList) &&
-              kieuDangList.map((kd) => (
-                <Option key={kd.id} value={kd.id}>
-                  {kd.ten}
-                </Option>
-              ))}
-          </Select>
-          <br />
-          <br />
-        </div>
+        <Form layout="horizontal">
+          <Row gutter={16}>
+            {/* Cột bên trái */}
+            <Col span={12}>
+              <Form.Item
+                label="Tên Giày"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Input
+                  placeholder="Tên Giày"
+                  value={ten}
+                  onChange={(e) => setTen(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Giá Bán"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Input
+                  placeholder="Giá Bán"
+                  value={giaBan}
+                  onChange={(e) => setGiaBan(e.target.value)}
+                />
+              </Form.Item>
+              <Form.Item
+                label="Thương Hiệu"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Thương Hiệu"
+                  value={selectedThuongHieu}
+                  onChange={handleThuongHieuChange}
+                >
+                  {Array.isArray(thuongHieuList) &&
+                    thuongHieuList.map((th) => (
+                      <Option key={th.id} value={th.id}>
+                        {th.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
 
-        <div style={{ float: "right", width: "45%" }}>
-          <Select
-            mode="multiple"
-            style={{ width: "100%" }}
-            placeholder="Chọn Ảnh Giày"
-            value={selectedAnhGiay}
-            onChange={handleAnhGiayChange}
+              <Form.Item
+                label="Chất Liệu"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Chất Liệu"
+                  value={selectedChatLieu}
+                  onChange={handleChatLieuChange}
+                >
+                  {Array.isArray(chatLieuList) &&
+                    chatLieuList.map((cl) => (
+                      <Option key={cl.id} value={cl.id}>
+                        {cl.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+
+              <Form.Item
+                label="Xuất Xứ"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Xuất Xứ"
+                  value={selectedXuatXu}
+                  onChange={handleXuatXuChange}
+                >
+                  {Array.isArray(xuatXuList) &&
+                    xuatXuList.map((xx) => (
+                      <Option key={xx.id} value={xx.id}>
+                        {xx.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+            </Col>
+
+            {/* Cột bên phải */}
+            <Col span={12}>
+              <Form.Item
+                label="Ảnh Giày"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  mode="multiple"
+                  placeholder="Chọn Ảnh Giày"
+                  value={selectedAnhGiay}
+                  onChange={handleAnhGiayChange}
+                >
+                  {Array.isArray(anhGiayList) &&
+                    anhGiayList.map((ag) => (
+                      <Option key={ag.id} value={ag.id}>
+                        <img
+                          src={ag.tenUrl}
+                          alt="Ảnh giày"
+                          style={{ width: "80%", height: 150, marginLeft: 30 }}
+                        />
+                        {ag.tenUrl}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Đế Giày"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Đế Giày"
+                  value={selectedDeGiay}
+                  onChange={handleDeGiayChange}
+                >
+                  {Array.isArray(deGiayList) &&
+                    deGiayList.map((deg) => (
+                      <Option key={deg.id} value={deg.id}>
+                        {deg.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Kiểu Dáng"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Kiểu Dáng"
+                  value={selectedKieuDang}
+                  onChange={handleKieuDangChange}
+                >
+                  {Array.isArray(kieuDangList) &&
+                    kieuDangList.map((kd) => (
+                      <Option key={kd.id} value={kd.id}>
+                        {kd.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Danh Mục"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Select
+                  placeholder="Chọn Danh Mục"
+                  value={selectedDanhMuc}
+                  onChange={handleDanhMucChange}
+                >
+                  {Array.isArray(danhMucList) &&
+                    danhMucList.map((kd) => (
+                      <Option key={kd.id} value={kd.id}>
+                        {kd.ten}
+                      </Option>
+                    ))}
+                </Select>
+              </Form.Item>
+              <Form.Item
+                label="Trạng Thái"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Radio.Group onChange={onChange} value={value}>
+                  <Radio value={2}>Hoạt động</Radio>
+                  <Radio value={1}>Không hoạt động</Radio>
+                </Radio.Group>
+              </Form.Item>
+            </Col>
+          </Row>
+          <Form.Item
+            label="Mô Tả"
+            labelCol={{ span: 4 }}
+            wrapperCol={{ span: 20 }}
           >
-            {Array.isArray(anhGiayList) &&
-              anhGiayList.map((ag) => (
-                <Option key={ag.id} value={ag.id}>
-                  <img
-                    src={ag.tenUrl}
-                    alt="Ảnh giày"
-                    style={{
-                      width: "80%",
-                      height: 150,
-                      marginLeft: 30,
-                    }}
-                  />
-                  {ag.tenUrl}
-                </Option>
-              ))}
-          </Select>
-
-          <br />
-          <br />
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Tên Giày"
-            value={ten}
-            onChange={(e) => setTen(e.target.value)}
-          />
-          <br />
-          <br />
-
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Giá Bán ($)"
-            value={giaBan}
-            onChange={(e) => setGiaBan(e.target.value)}
-          />
-          <br />
-          <br />
-          <Input
-            style={{ width: "100%" }}
-            placeholder="Số Lượng Tồn"
-            value={soLuongTon}
-            onChange={(e) => setSoLuongTon(e.target.value)}
-          />
-          <br />
-          <br />
-          <Radio.Group onChange={onChange} value={value}>
-            <Radio value={1}>Không hoạt động</Radio>
-            <Radio value={2}>Hoạt động</Radio>
-          </Radio.Group>
-        </div>
-
-        <br />
-
-        <TextArea
-          rows={4}
-          placeholder="Mô Tả"
-          value={moTa}
-          onChange={(e) => setMoTa(e.target.value)}
-        />
-        <br />
-        <br />
+            <TextArea
+              rows={4}
+              placeholder="Mô Tả"
+              value={moTa}
+              onChange={(e) => setMoTa(e.target.value)}
+            />
+          </Form.Item>
+        </Form>
       </Modal>
 
       <Table
-        style={{ marginLeft: "150px" }}
-        pagination={{ pageSize: 5, defaultPageSize: 5 }}
-        rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
+        className="no-border-table"
+        pagination={{ pageSize: 5 }}
+        bordered={false}
         columns={[
           {
-            title: "Tên",
-            dataIndex: "TEN",
-            width: 150,
-            render: (text, record) => (
-              <span
-                style={{ cursor: "pointer", color: "blue" }}
-                onClick={() => fetchSanPhamChiTiet(record)}
-              >
-                {text}
-              </span>
-            ),
+            title: "#",
+            dataIndex: "stt",
+            width: 80,
+            render: (text, record, index) => <span>{index + 1}</span>,
           },
-          // {
-          //   title: "Giá bán",
-          //   dataIndex: "GIABAN",
-          //   width: 100,
-          //   render: (text) => {
-          //     // Kiểm tra nếu giá trị là số, rồi định dạng với toLocaleString
-          //     return Number(text).toLocaleString("vi-VN", {
-          //       style: "currency",
-          //       currency: "VND",
-          //     });
-          //   },
-          // },
-          // {
-          //   title: "Số Lượng",
-          //   dataIndex: "SOLUONGTON",
-          //   width: 100,
-          // },
-          {
-            title: "Trạng Thái",
-            dataIndex: "trang_thai",
-            width: 150,
-            render: (text, record) => trangThai(record.TRANG_THAI),
-          },
-          // {
-          //     title: 'THUONG_HIEU', dataIndex: 'THUONG_HIEU',
-          //     width: 150,
-          // },
-          // {
-          //     title: 'CHAT_LIEU',
-          //     dataIndex: 'CHAT_LIEU',
-          //     width: 150,
-          // },
-          // {
-          //     title: 'DE_GIAY',
-          //     dataIndex: 'DE_GIAY',
-          //     width: 150,
-          // },
-          // {
-          //     title: 'XUAT_XU',
-          //     dataIndex: 'XUAT_XU',
-          //     width: 150,
-          // },
-          // {
-          //     title: 'KIEU_DANG',
-          //     dataIndex: 'KIEU_DANG',
-          //     width: 150,
-          // },
-
           {
             title: "Ảnh",
             dataIndex: "ANH_GIAY",
@@ -1163,129 +1451,204 @@ const SanPham = () => {
                 "Không có ảnh"
               ),
           },
-
+          {
+            title: "Tên",
+            dataIndex: "TEN",
+            width: 150,
+            render: (text, record) => (
+              <span
+                style={{ cursor: "pointer", color: "blue" }}
+                onClick={() => fetchSanPhamChiTiet(record)}
+              >
+                {text}
+              </span>
+            ),
+          },
+          {
+            title: "Số lượng",
+            dataIndex: "SOLUONGTON",
+            width: 100,
+          },
+          {
+            title: "Danh mục",
+            dataIndex: "DANH_MUC",
+            width: 150,
+          },
+          {
+            title: "Thương hiệu",
+            dataIndex: "THUONG_HIEU",
+            width: 150,
+          },
+          {
+            title: "Trạng thái",
+            dataIndex: "trang_thai",
+            width: 150,
+            render: (text, record) => (
+              <Switch
+                checked={record.TRANG_THAI === 0}
+                disabled
+                checkedChildren="Hoạt động"
+                unCheckedChildren="Không hoạt động"
+              />
+            ),
+          },
           {
             title: "Thao tác",
             key: "action",
             width: 150,
             render: (text, record) => (
               <Space size="middle">
-                <Button onClick={() => detailGiay(record)}>Chi tiết</Button>
-                <Button onClick={() => removeGiay(record)}>Xóa</Button>
+                <EyeOutlined
+                  style={{ cursor: "pointer", color: "blue" }}
+                  onClick={() => detailGiay(record)}
+                />
+
+                <DeleteOutlined
+                  style={{ cursor: "pointer", color: "red" }}
+                  onClick={() => setConfirmOpen(true)} // Hiển thị hộp thoại xác nhận
+                />
+
+                {/* Hộp thoại xác nhận xóa */}
+                <ConfirmModal
+                  open={confirmOpen}
+                  onConfirm={() => {
+                    setConfirmOpen(false);
+                    removeGiay(record);
+                    console.log( record);
+                    
+                  
+                  }}
+                  onCancel={() => setConfirmOpen(false)}
+                  title="Xác nhận xóa"
+                  content={`Bạn có chắc muốn xóa giày "${record.TEN}" không?`}
+                />
               </Space>
             ),
           },
         ]}
-        dataSource={giay}
+        dataSource={filteredGiay} // Cập nhật bảng với danh sách lọc
       />
+
+      {/* thông tin sản phẩm */}
       <Modal
-        title="Update Sản Phẩm"
-        onOk={editGiayButton}
-        onCancel={() => setIsModalVisible(false)}
+        title="Thông tin  Sản Phẩm"
+        // onOk={editGiayButton}
+        onCancel={() => handleCloseModal()}
         visible={isModalVisible}
       >
-        <Form>
-          <Form.Item label="Tên Giày">
-            <Input value={ten} onChange={(e) => setTen(e.target.value)} />
-          </Form.Item>
-          <Form.Item label="Mô Tả">
-            <TextArea
-              rows={4}
-              value={moTa}
-              onChange={(e) => setMoTa(e.target.value)}
-            />
-          </Form.Item>
+        <div
+          style={{
+            display: "inline-block",
+            backgroundColor: "#f5f5f5",
+            padding: "16px",
+            borderRadius: "4px",
+          }}
+        >
+          <Row gutter={[16, 16]}>
+            {/* Cột bên trái */}
+            <Col span={12}>
+              <Form
+                layout="horizontal"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Form.Item label="Tên Giày">
+                  <Input value={ten} onChange={(e) => setTen(e.target.value)} />
+                </Form.Item>
+                <Form.Item label="Đế Giày">
+                  <Select value={selectedDeGiay} onChange={handleDeGiayChange}>
+                    {Array.isArray(deGiayList) &&
+                      deGiayList.map((deg) => (
+                        <Option key={deg.id} value={deg.id}>
+                          {deg.ten}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Xuất Xứ">
+                  <Select value={selectedXuatXu} onChange={handleXuatXuChange}>
+                    {Array.isArray(xuatXuList) &&
+                      xuatXuList.map((xx) => (
+                        <Option key={xx.id} value={xx.id}>
+                          {xx.ten}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+              </Form>
+            </Col>
 
-          <Form.Item label="Giá Bán">
-            <Input value={giaBan} onChange={(e) => setGiaBan(e.target.value)} />
-          </Form.Item>
-          <Form.Item label="Số Lượng Tồn">
-            <Input
-              value={soLuongTon}
-              onChange={(e) => setSoLuongTon(e.target.value)}
-            />
-          </Form.Item>
+            {/* Cột bên phải */}
+            <Col span={12}>
+              <Form
+                layout="horizontal"
+                labelCol={{ span: 8 }}
+                wrapperCol={{ span: 16 }}
+              >
+                <Form.Item label="Thương Hiệu">
+                  <Select
+                    value={selectedThuongHieu}
+                    onChange={handleThuongHieuChange}
+                  >
+                    {Array.isArray(thuongHieuList) &&
+                      thuongHieuList.map((th) => (
+                        <Option key={th.id} value={th.id}>
+                          {th.ten}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Chất Liệu">
+                  <Select
+                    value={selectedChatLieu}
+                    onChange={handleChatLieuChange}
+                  >
+                    {Array.isArray(chatLieuList) &&
+                      chatLieuList.map((cl) => (
+                        <Option key={cl.id} value={cl.id}>
+                          {cl.ten}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+                <Form.Item label="Danh Mục">
+                  <Select
+                    value={selectedDanhMuc}
+                    onChange={handleDanhMucChange}
+                  >
+                    {Array.isArray(danhMucList) &&
+                      danhMucList.map((cl) => (
+                        <Option key={cl.id} value={cl.id}>
+                          {cl.ten}
+                        </Option>
+                      ))}
+                  </Select>
+                </Form.Item>
+              </Form>
+            </Col>
+            <div
+              style={{
+                display: "flex",
+                justifyContent: "center",
+                marginLeft: "50%",
+              }}
+            >
+              <Button icon={<EditOutlined />} onClick={editGiayButton}></Button>
+            </div>
+          </Row>
+        </div>
 
-          <Form.Item label="Trạng Thái">
-            <Radio.Group onChange={onChange} value={value}>
-              <Radio value={1}>Không hoạt động</Radio>
-              <Radio value={2}>Hoạt động</Radio>
-            </Radio.Group>
-          </Form.Item>
-          <Form.Item label="Thương Hiệu">
-            <Select
-              value={selectedThuongHieu}
-              onChange={handleThuongHieuChange}
-            >
-              {Array.isArray(thuongHieuList) &&
-                thuongHieuList.map((th) => (
-                  <Option key={th.id} value={th.id}>
-                    {th.ten}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item label="Chất Liệu">
-            <Select value={selectedChatLieu} onChange={handleChatLieuChange}>
-              {Array.isArray(chatLieuList) &&
-                chatLieuList.map((cl) => (
-                  <Option key={cl.id} value={cl.id}>
-                    {cl.ten}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item label="Đế Giày">
-            <Select value={selectedDeGiay} onChange={handleDeGiayChange}>
-              {Array.isArray(deGiayList) &&
-                deGiayList.map((deg) => (
-                  <Option key={deg.id} value={deg.id}>
-                    {deg.ten}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item label="Xuất Xứ">
-            <Select value={selectedXuatXu} onChange={handleXuatXuChange}>
-              {Array.isArray(xuatXuList) &&
-                xuatXuList.map((xx) => (
-                  <Option key={xx.id} value={xx.id}>
-                    {xx.ten}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item label="Kiểu Dáng">
-            <Select value={selectedKieuDang} onChange={handleKieuDangChange}>
-              {Array.isArray(kieuDangList) &&
-                kieuDangList.map((kd) => (
-                  <Option key={kd.id} value={kd.id}>
-                    {kd.ten}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-          <Form.Item label="Ảnh Giày">
-            <Select
-              mode="multiple" // Nếu muốn chọn nhiều ảnh
-              value={selectedAnhGiay} // ✅ Bây giờ chứa danh sách `tenUrl`
-              onChange={handleAnhGiayChange}
-              style={{ width: "100%" }}
-            >
-              {Array.isArray(anhGiayList) &&
-                anhGiayList.map((ag) => (
-                  <Option key={ag.id} value={ag.tenUrl}>
-                    <img
-                      src={ag.tenUrl}
-                      alt="Ảnh giày"
-                      style={{ width: 50, height: 50, marginRight: 10 }}
-                    />
-                    {ag.tenUrl}
-                  </Option>
-                ))}
-            </Select>
-          </Form.Item>
-        </Form>
+        <div className="giaychitiet">
+          <p>Chi tiết sản phẩm </p>
+          <Table
+            className="no-border-table"
+            columns={columnsGiayChiTiet}
+            dataSource={danhSachChiTiet}
+            rowKey="id"
+            pagination={false}
+            bordered
+          />
+        </div>
       </Modal>
     </div>
   );

@@ -60,3 +60,6 @@ export const deleteAllHoaDonCho = (idHoaDons) => {
 export const deleteSanPhamHoaDonChiTiet = (idHoaDonChiTiet) => {
   return axios.delete(`${REST_API_BASE_URL}/delete-detail/${idHoaDonChiTiet}`);
 };
+export const scanQRCodeFromWebcam = () => {
+  return axios.get(`${REST_API_BASE_URL}/scan-webcam`);
+};

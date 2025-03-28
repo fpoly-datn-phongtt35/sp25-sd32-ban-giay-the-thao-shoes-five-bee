@@ -6,6 +6,8 @@ import java.util.Optional;
 import java.util.UUID;
 
 import com.example.demo.entity.GiayEntity;
+import com.example.demo.entity.KichCoEntity;
+import com.example.demo.entity.MauSacEntity;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
 import org.springframework.data.jpa.repository.Query;
@@ -57,4 +59,8 @@ public interface GiayChiTietRepository
   List<GiayChiTietEntity> findByMauSacEntityIdAndKichCoEntityId(UUID mauSacId, UUID kichCoId);
   List<GiayChiTietEntity> findByMauSacEntityIdAndKichCoEntityIdAndGiayEntity_ThuongHieu_Id(
           UUID mauSacId, UUID kichCoId, UUID thuongHieuId);
+
+  //bien the
+  Optional<GiayChiTietEntity> findByGiayEntityAndMauSacEntityAndKichCoEntity(GiayEntity giayEntity, MauSacEntity mauSacEntity, KichCoEntity kichCoEntity);
+
 }

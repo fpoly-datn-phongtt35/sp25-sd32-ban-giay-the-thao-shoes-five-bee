@@ -80,7 +80,7 @@ const ProductDetail = () => {
       message.warning("Vui lòng chọn kích thước và màu sắc!");
       return;
     }
-      const selectedVariant = bienTheList.find(
+    const selectedVariant = bienTheList.find(
       (item) =>
         item.tenMauSac === selectedColor && item.tenKichCo === selectedSize
     );
@@ -125,8 +125,8 @@ const ProductDetail = () => {
           <p className="product-title">{productGiay?.ten}</p>
           <p className="product-price">
             {selectedColor
-              ? currentPrice.toLocaleString()
-              : productGiay?.giaBan?.toLocaleString() || "0"}
+              ? Number(currentPrice).toLocaleString()
+              : Number(productGiay?.giaBan ?? 0).toLocaleString()}
             ₫
           </p>
         </div>
@@ -182,7 +182,7 @@ const ProductDetail = () => {
           </div>
 
           {/* Nút Mua ngay */}
-          <div className="buy-button"onClick={handleAddToCart}>
+          <div className="buy-button" onClick={handleAddToCart}>
             MUA NGAY VỚI GIÁ {""}
             {selectedColor
               ? currentPrice.toLocaleString()

@@ -21,8 +21,8 @@ export const addKhachHang = (khachHangData, file) => {
   });
 };
 
-export const deleteKhachHang = (id) =>
-  axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
+export const deleteKhachHang = ( khachHang) =>
+  axios.post(`${REST_API_BASE_URL}/delete`, khachHang);
 
 export const updateKhachHang = (khachHang, file) => {
   const formData = new FormData();

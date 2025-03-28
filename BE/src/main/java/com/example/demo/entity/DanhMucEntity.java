@@ -1,5 +1,7 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -27,5 +29,7 @@ public class DanhMucEntity {
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
     @OneToMany(mappedBy = "danhMuc", cascade = CascadeType.ALL, fetch = FetchType.LAZY)
+    @JsonIgnore
+
     private List<GiayEntity> giayEntities;
 }

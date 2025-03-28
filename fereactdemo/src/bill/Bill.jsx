@@ -1,7 +1,12 @@
 import React, { useState, useEffect } from "react";
 import "./bill.css";
 import { fetchCustomerId } from '../service/LoginService.js';
+<<<<<<< HEAD
 import { paymentOnline } from '../service/HoaDonService.js';
+=======
+import { getGiamGia } from '../service/GiamGiaHoaDonService.js';
+import { addHoaDon1, paymentOnline } from '../service/HoaDonService.js';
+>>>>>>> main
 import LoadThongTinKhachHangHoaDon from "../components/LoadThongTinKhachHangHoaDon.js";
 import LoadThongTinDiaChiHoaDon from "../components/LoadThongTinDiaChiHoaDon.js";
 import HoaDonCart from "../components/HoaDonCart.js";
@@ -15,6 +20,9 @@ export const Bill = () => {
   const [khachHangId, setKhachHangId] = useState(null);
   const navigate = useNavigate();
   const [selectedOption, setSelectedOption] = useState(null);
+  const [giamGia, setGiamGia] = useState(null);
+  const [maGiamGia, setMaGiamGia] = useState("");
+  const [thongBaoGiamGia, setThongBaoGiamGia] = useState("");
   const [order, setOrder] = useState({
     email: "",
     moTa: "",
@@ -29,6 +37,7 @@ export const Bill = () => {
     hinhThucThanhToan: selectedOption === "option1" ? 2 : selectedOption === "option3" ? 1 : 0,
     hinhThucNhanHang: 1,
     soTienGiam: 0,
+    idGiamGia: null,
     phiShip: 0,
     soDiemSuDung: 0,
     soTienQuyDoi: 0,
@@ -91,52 +100,97 @@ export const Bill = () => {
     }));
   };
 
-
-const handleSubmit = async (e) => {
-  e.preventDefault();
-  if (!khachHangId) {
-    console.error('Khach hang ID is not available');
-    return;
-  }
-  try {
-    console.log({ 
-      ...order, 
-      khachHangId,
-      idGiamGia: order.idGiamGia || null,
-      idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet") 
-    })
-    if (selectedOption === "option2"){
-    const response = await paymentOnline({ 
-      ...order, 
-      khachHangId,
-      idGiamGia: order.idGiamGia || null,
-      idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet") 
-    });
-  }else if(selectedOption === "option1"){
-    const response = await paymentOnline({
-      ...order,
-      khachHangId,
-      idGiamGia: order.idGiamGia || null,
-      idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet")
-    });
-    const { idHoaDon, tongTien } = response.data;
-    console.log("ID Hóa đơn:", idHoaDon, "Tổng tiền:", tongTien);
+  const timMaGiamGia = async () => {
     try {
-      const vnpayResponse = await createVNPayPayment(tongTien,idHoaDon);
-      if (vnpayResponse.data) {
-        window.location.href = vnpayResponse.data;
-        console.log("URL thanh toán VNPay:", vnpayResponse.data);
+      const response = await getGiamGia();
+      if (response.status === 200 && response.data) {
+        const giamGiaData = response.data;
+        if (order.tongTien >= giamGiaData.dieuKien) {
+          setGiamGia(giamGiaData);
+          
+          // Tính số tiền giảm dựa trên phần trăm
+          let soTienGiam = (order.tongTien * giamGiaData.phanTramGiam) / 100;
+          
+          // Kiểm tra nếu giảm vượt quá giới hạn tối đa
+          if (giamGiaData.soTienGiamMax && soTienGiam > giamGiaData.soTienGiamMax) {
+            soTienGiam = giamGiaData.soTienGiamMax;
+          }
+          
+          setOrder(prevOrder => ({
+            ...prevOrder,
+            soTienGiam: soTienGiam,
+            idGiamGia: giamGiaData.id
+          }));
+          
+          setThongBaoGiamGia(`Đã áp dụng mã giảm giá: ${giamGiaData.ten} - Giảm ${giamGiaData.phanTramGiam}% (tối đa ${giamGiaData.soTienGiamMax.toLocaleString()}₫)`);
+        } else {
+          setThongBaoGiamGia(`Mã giảm giá yêu cầu đơn hàng tối thiểu ${giamGiaData.dieuKien.toLocaleString()}₫`);
+        }
+      } else {
+        setThongBaoGiamGia("Không tìm thấy mã giảm giá phù hợp");
       }
     } catch (error) {
-      console.error("Lỗi khi tạo URL thanh toán VNPay:", error);
-      message.error("Không thể tạo liên kết thanh toán VNPay!");
+      console.error("Lỗi khi áp dụng mã giảm giá:", error);
+      setThongBaoGiamGia("Đã xảy ra lỗi khi áp dụng mã giảm giá");
     }
-  }
-    navigate('/orderStatusPage');
-  } catch (error) {
-    console.error("Lỗi khi tạo đơn hàng", error);
-  }
-};
+  };
+
+  const xoaMaGiamGia = () => {
+    setGiamGia(null);
+    setMaGiamGia("");
+    setThongBaoGiamGia("");
+    setOrder(prevOrder => ({
+      ...prevOrder,
+      soTienGiam: 0,
+      idGiamGia: null
+    }));
+  };
+
+  const handleSubmit = async (e) => {
+    e.preventDefault();
+    if (!khachHangId) {
+      console.error('Khach hang ID is not available');
+      return;
+    }
+    try {
+      console.log({ 
+        ...order, 
+        khachHangId,
+        idGiamGia: order.idGiamGia || null,
+        idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet") 
+      })
+      if (selectedOption === "option2"){
+      const response = await paymentOnline({ 
+        ...order, 
+        khachHangId,
+        idGiamGia: order.idGiamGia || null,
+        idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet") 
+      });
+    }else if(selectedOption === "option1"){
+      const response = await paymentOnline({
+        ...order,
+        khachHangId,
+        idGiamGia: order.idGiamGia || null,
+        idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet")
+      });
+      const { idHoaDon, tongTien } = response.data;
+      console.log("ID Hóa đơn:", idHoaDon, "Tổng tiền:", tongTien);
+      try {
+        const vnpayResponse = await createVNPayPayment(tongTien,idHoaDon);
+        if (vnpayResponse.data) {
+          window.location.href = vnpayResponse.data;
+          console.log("URL thanh toán VNPay:", vnpayResponse.data);
+        }
+      } catch (error) {
+        console.error("Lỗi khi tạo URL thanh toán VNPay:", error);
+        message.error("Không thể tạo liên kết thanh toán VNPay!");
+      }
+    }
+      navigate('/orderStatusPage');
+    } catch (error) {
+      console.error("Lỗi khi tạo đơn hàng", error);
+    }
+  };
 
   const exportToExcel = () => {
     const exportData = [{
@@ -222,6 +276,22 @@ const handleSubmit = async (e) => {
                 Thu hộ (COD)
               </div>
               {/* <h3></h3> */}
+            </div>
+            <div className="voucher_section">
+              <h3>Mã Giảm Giá</h3>
+              <button type="button" className="apply_best_voucher" onClick={timMaGiamGia}>
+                Áp dụng mã giảm giá
+              </button>
+              {thongBaoGiamGia && (
+                <div className={`applied_discount ${giamGia ? 'success' : 'error'}`}>
+                  {thongBaoGiamGia}
+                  {giamGia && (
+                    <button type="button" className="remove_voucher" onClick={xoaMaGiamGia}>
+                      ✕
+                    </button>
+                  )}
+                </div>
+              )}
             </div>
             <div className="order_summary">
               <div>Tổng tiền hàng: <span>{order.tongTien.toLocaleString()}₫</span></div>

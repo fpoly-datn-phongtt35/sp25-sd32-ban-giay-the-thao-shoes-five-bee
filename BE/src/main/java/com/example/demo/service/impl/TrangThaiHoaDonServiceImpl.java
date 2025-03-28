@@ -95,10 +95,6 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         }
     }
 
-
-
-
-
     @Override
     public HoaDonEntity huyHoaDon(UUID id) {
         Optional<HoaDonEntity> hoaDonOpt = hoaDonRepository.findById(id);
@@ -114,7 +110,40 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     @Override
     public List<HoaDonDto> getAllHoaDon() {
         List<HoaDonEntity> hoaDons = hoaDonRepository.findAll();
-        return hoaDons.stream().map(hd -> new HoaDonDto(
+        return hoaDons.stream().map(hd -> {
+            UserDto userDto = null;
+            if (hd.getUserEntity() != null) {
+                try {
+                    userDto = new UserDto(
+                        hd.getUserEntity().getId(),
+                        null, // Không cần ảnh
+                        hd.getUserEntity().getHoTen(),
+                        null, // Không cần ngày sinh
+                        hd.getUserEntity().getSoDienThoai(),
+                        hd.getUserEntity().getEmail(),
+                        null, // Không cần mật khẩu
+                        null, // Không cần isEnabled
+                        null, // Không cần roleNames
+                        null  // Không cần địa chỉ
+                    );
+                } catch (Exception e) {
+                    // Xử lý trường hợp không thể truy cập thông tin người dùng
+                    userDto = new UserDto(
+                        UUID.fromString("00000000-0000-0000-0000-000000000000"),
+                        null,
+                        "Người dùng không tồn tại",
+                        null,
+                        "N/A",
+                        "N/A",
+                        null,
+                        null,
+                        null,
+                        null
+                    );
+                }
+            }
+            
+            return new HoaDonDto(
                 hd.getId(),
                 hd.getMa(),
                 hd.getNgayTao(),
@@ -133,19 +162,9 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
                 hd.getSoTienGiam(),
                 hd.getPhiShip(),
                 hd.getTrangThai(),
-                hd.getUserEntity() != null ? new UserDto(
-                        hd.getUserEntity().getId(),
-                        null, // Không cần ảnh
-                        hd.getUserEntity().getHoTen(),
-                        null, // Không cần ngày sinh
-                        hd.getUserEntity().getSoDienThoai(),
-                        hd.getUserEntity().getEmail(),
-                        null, // Không cần mật khẩu
-                        null, // Không cần isEnabled
-                        null, // Không cần roleNames
-                        null  // Không cần địa chỉ
-                ) : null
-        )).collect(Collectors.toList());
+                userDto
+            );
+        }).collect(Collectors.toList());
     }
 
     @Override

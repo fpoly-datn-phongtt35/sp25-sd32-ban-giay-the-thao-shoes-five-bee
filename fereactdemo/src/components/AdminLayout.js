@@ -147,6 +147,11 @@ const AdminLayout = () => {
                                     label: 'Kiểu Dáng',
                                 },
                                 {
+                                    key: '/admin/danh-muc',
+
+                                    label: 'Danh mục',
+                                },
+                                {
                                     key: '/admin/de-giay',
 
                                     label: 'Đế Giày',

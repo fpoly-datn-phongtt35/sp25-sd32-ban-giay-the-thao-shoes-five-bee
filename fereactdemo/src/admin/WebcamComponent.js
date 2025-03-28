@@ -1,13 +1,17 @@
-import React, { useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
+import { scanQRCodeFromWebcam } from "../service/BanHangTaiQuay";
 
-const WebcamComponent = () => {
+const WebcamComponent = ({ onClose, onScanSuccess }) => {
   const videoRef = useRef(null);
   const [stream, setStream] = useState(null);
+  const [scanResult, setScanResult] = useState("");
 
   // Mở webcam
   const startWebcam = async () => {
     try {
-      const mediaStream = await navigator.mediaDevices.getUserMedia({ video: true });
+      const mediaStream = await navigator.mediaDevices.getUserMedia({
+        video: true,
+      });
       if (videoRef.current) {
         videoRef.current.srcObject = mediaStream;
       }
@@ -26,13 +30,37 @@ const WebcamComponent = () => {
     }
   };
 
+  // Gọi API scan QR khi mở popup
+  useEffect(() => {
+    startWebcam();
+
+    const scanQRCode = async () => {
+      try {
+        const response = await scanQRCodeFromWebcam();
+        setScanResult(response.data); // Cập nhật kết quả quét
+        onScanSuccess(response.data); // Trả kết quả về component cha
+      } catch (error) {
+        console.error("Lỗi khi quét QR:", error);
+        alert("Không thể quét QR từ webcam.");
+      }
+    };
+
+    scanQRCode(); // Gọi API scan QR khi webcam mở
+
+    return () => stopWebcam(); // Tắt webcam khi đóng popup
+  }, []);
+
   return (
-    <div>
-      <h2>Webcam Live</h2>
-      <video ref={videoRef} autoPlay playsInline style={{ width: "100%", maxWidth: "500px" }}></video>
-      <br />
-      <button onClick={startWebcam}>Mở Webcam</button>
-      <button onClick={stopWebcam} style={{ marginLeft: "10px" }}>Tắt Webcam</button>
+    <div className="popup_webcam">
+      <h2>Webcam</h2>
+      <video
+        ref={videoRef}
+        autoPlay
+        playsInline
+        style={{ width: "100%", maxWidth: "500px" }}
+      ></video>
+      {scanResult && <p>Kết quả quét: {scanResult}</p>}
+      <button onClick={onClose}>Đóng</button>
     </div>
   );
 };

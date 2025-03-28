@@ -79,21 +79,21 @@ const OrderItem = ({ order, onChangeData }) => {
   };
 
 
-  useEffect(() => {
-    if (order && order.trangThai && order.trangThai.toLocaleString() === "5") {
-      const fetchHoaDon = async () => {
-        try {
-          const response = await fetchOrderDetails(order.id);
-          setReturnOrder(response.data); // Giả sử API trả về dữ liệu hóa đơn
-        } catch (error) {
-          console.error("Lỗi khi fetch dữ liệu: ", error);
-          message.error("Lỗi khi tải dữ liệu!");
-        }
-      };
+  // useEffect(() => {
+  //   if (order && order.trangThai && order.trangThai.toLocaleString() === "5") {
+  //     const fetchHoaDon = async () => {
+  //       try {
+  //         const response = await fetchOrderDetails(order.id);
+  //         setReturnOrder(response.data); // Giả sử API trả về dữ liệu hóa đơn
+  //       } catch (error) {
+  //         console.error("Lỗi khi fetch dữ liệu: ", error);
+  //         message.error("Lỗi khi tải dữ liệu!");
+  //       }
+  //     };
 
-      fetchHoaDon();
-    }
-  }, [order]);
+  //     fetchHoaDon();
+  //   }
+  // }, [order]);
   return (
     <div className="order-item" >
       <div className="order-header">
@@ -142,7 +142,7 @@ const OrderItem = ({ order, onChangeData }) => {
           {order.trangThai.toLocaleString() === "0" && <button className="cancel-order-btn" onClick={() => handleChangeStatus("4")}>Hủy Đơn Hàng</button>}
           {order.trangThai.toLocaleString() === "1" && <button className="contact-seller-btn" onClick={() => handleViewOrderDetail(order)} >Xem Chi Tiết</button>}
           {order.trangThai.toLocaleString() === "1" && <ReturnRequestModal orderDetails={order} onAddReturnRequest={handleChangeReturnStatus}>Yêu Cầu Trả Hàng/Hoàn Tiền</ReturnRequestModal>}
-          {order.trangThai.toLocaleString() === "2" && <button onClick={() => handleChangeStatus("3")} className="contact-seller-btn">Đã Nhận Hàng</button>}
+          {/* {order.trangThai.toLocaleString() === "2" && <button onClick={() => handleChangeStatus("3")} className="contact-seller-btn">Đã Nhận Hàng</button>} */}
           {order.trangThai.toLocaleString() === "2" && <ReturnRequestModal orderDetails={order} onAddReturnRequest={handleChangeReturnStatus}>Yêu Cầu Trả Hàng/Hoàn Tiền</ReturnRequestModal>}
           {/* {order.trangThai.toLocaleString() === "3" && <button className="contact-seller-btn">Đánh Giá</button>} */}
           {order.trangThai.toLocaleString() === "3" && <ReturnRequestModal orderDetails={order} onAddReturnRequest={handleChangeReturnStatus}>Yêu Cầu Trả Hàng/Hoàn Tiền</ReturnRequestModal>}

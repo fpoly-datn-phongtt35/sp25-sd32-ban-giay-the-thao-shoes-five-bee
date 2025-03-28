@@ -177,3 +177,99 @@
     content: "🚚 ";
   }
   
+  .applied_discount {
+    background-color: #f8f8f8;
+    padding: 8px 12px;
+    border-radius: 4px;
+    margin-bottom: 10px;
+    border-left: 3px solid #FFB700;
+  }
+  
+  .applied_discount span {
+    color: #4caf50;
+    font-weight: 600;
+  }
+  
+  .voucher_section {
+    margin: 20px 0;
+  }
+  
+  .voucher_input {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 10px;
+  }
+  
+  .voucher_input input {
+    flex: 1;
+    padding: 8px 12px;
+    border: 1px solid #ddd;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .voucher_input button {
+    padding: 8px 15px;
+    background-color: #FFB700;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+  }
+  
+  .applied_discount {
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    padding: 10px 15px;
+    margin: 10px 0;
+    border-radius: 4px;
+    font-size: 14px;
+  }
+  
+  .applied_discount.success {
+    background-color: #e9f7ef;
+    border-left: 3px solid #4caf50;
+    color: #2e7d32;
+  }
+  
+  .applied_discount.error {
+    background-color: #fdecea;
+    border-left: 3px solid #f44336;
+    color: #d32f2f;
+  }
+  
+  .remove_voucher {
+    background: none;
+    border: none;
+    color: #666;
+    font-size: 16px;
+    cursor: pointer;
+    padding: 0 5px;
+  }
+  
+  .remove_voucher:hover {
+    color: #f44336;
+  }
+  
+  .apply_best_voucher {
+    width: 100%;
+    padding: 10px 15px;
+    background-color: #FFB700;
+    color: white;
+    border: none;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    font-weight: 600;
+    transition: background-color 0.2s;
+  }
+  
+  .apply_best_voucher:hover {
+    background-color: #e6a500;
+  }
+  
+  .apply_best_voucher:active {
+    transform: scale(0.98);
+  }
+  

@@ -50,7 +50,7 @@ const KhachHang = () => {
         try {
             const result = await getAllKhachHang();
             console.log(result);
-            
+
             const loadTable = result.data
                 .filter(item => item.userRoleEntities.some(role => role.roleEntity.ten === 'ROLE_USER')) // Lọc ROLE_USER
                 .map((item, index) => ({
@@ -65,12 +65,12 @@ const KhachHang = () => {
                     NGAYSINH: item.ngaySinh,
                     ANH: item.anh
                 }));
-            
+
             console.log(loadTable);
             const activeChatLieuData = loadTable.filter(item => item.TRANG_THAI === 0);
             setActiveChatLieu(activeChatLieuData);
             setKhachHang(loadTable);
-            
+
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu khách hàng");
         }
@@ -107,11 +107,22 @@ const KhachHang = () => {
 
     const removeKhachHang = async (record) => {
         try {
-            await deleteKhachHang(record.ID);
+            const userDto = {
+                id: record.ID,
+                hoTen: record.HOTEN,
+                email: record.EMAIL,
+                matKhau: record.MATKHAU,
+                trangThai: record.TRANG_THAI,
+                soDienThoai: record.SODIENTHOAI,
+                ngaySinh: record.NGAYSINH,
+                anh: record.ANH
+            };
+
+            await deleteKhachHang(userDto);
             message.success("Xóa thành công!");
             getKhachHangData();
         } catch (error) {
-            message.error("Lỗi khi xóa khách hàng");
+            message.error("Lỗi khi xóa khách hàng: " + (error.response?.data?.message || error.message));
         }
     };
 
@@ -406,8 +417,8 @@ const KhachHang = () => {
                     </Form.Item>
                     <Form.Item label="Trạng thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={1}>Đang sử dụng</Radio>
-                            <Radio value={0}>Không sử dụng</Radio>
+                            <Radio value={0}>Đang sử dụng</Radio>
+                            <Radio value={1}>Không sử dụng</Radio>
                         </Radio.Group>
                     </Form.Item>
                 </Form>
