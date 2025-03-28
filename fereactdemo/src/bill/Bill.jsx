@@ -1,15 +1,14 @@
 import React, { useState, useEffect } from "react";
 import "./bill.css";
 import { fetchCustomerId } from '../service/LoginService.js';
+import { paymentOnline } from '../service/HoaDonService.js';
 import { getGiamGia } from '../service/GiamGiaHoaDonService.js';
-import { addHoaDon1, paymentOnline } from '../service/HoaDonService.js';
 import LoadThongTinKhachHangHoaDon from "../components/LoadThongTinKhachHangHoaDon.js";
 import LoadThongTinDiaChiHoaDon from "../components/LoadThongTinDiaChiHoaDon.js";
 import HoaDonCart from "../components/HoaDonCart.js";
 import * as XLSX from 'xlsx';
 import { saveAs } from 'file-saver';
 import { useNavigate } from "react-router-dom";
-import { getGioHangChiTietCheckOut } from "../service/GioHangChiTietService.js";
 import { message } from "antd";
 import { createVNPayPayment } from "../service/VnpayService.js";
 
@@ -229,7 +228,6 @@ export const Bill = () => {
       <HoaDonCart customerId={khachHangId} onSetTongTienHang={setTongTienHang} />
         <div className="bill_left">
           <section className="customer_info">
-            <h3>Thông tin khách hàng</h3>
             <div className="section_content">
               {khachHangId ? (
                 <>

@@ -1,86 +1,50 @@
 import React, { useState, useEffect } from 'react';
-import { detailKhachHang } from '../service/KhachHangService.js';
+import { Card, Form, Input, Row, Col, Spin, message } from 'antd';
+import { detailKhachHang } from '../service/KhachHangService';
 
 const CustomerInfo = ({ customerId, onCustomerDataChange }) => {
-  const [customerData, setCustomerData] = useState({
-    email: '',
-    hoTen: '',
-    soDienThoai: ''
-  });
+  const [customerData, setCustomerData] = useState({});
   const [loading, setLoading] = useState(true);
-  const [error, setError] = useState(null);
 
   useEffect(() => {
-    const fetchCustomerData = async () => {
+    const fetchCustomer = async () => {
       try {
         const response = await detailKhachHang(customerId);
         setCustomerData(response.data);
-        onCustomerDataChange(response.data); // Gọi hàm callback khi dữ liệu được tải về
-        // console.log(response.data);
-      } catch (error) {
-        setError(error.message);
+        onCustomerDataChange(response.data);
+      } catch (err) {
+        message.error('Lỗi khi lấy thông tin khách hàng!');
       } finally {
         setLoading(false);
       }
     };
-
-    fetchCustomerData();
+    fetchCustomer();
   }, [customerId]);
 
-  const handleChange = (e) => {
-    const { name, value } = e.target;
-    setCustomerData(prevData => {
-      const updatedData = { ...prevData, [name]: value };
-      onCustomerDataChange(updatedData); // Gọi hàm callback khi có thay đổi
-      return updatedData;
-    });
-    console.log(customerData);
-  };
-
-  if (loading) return <p>Đang tải...</p>;
-  if (error) return <p>Lỗi: {error}</p>;
+  if (loading) return <Spin tip="Đang tải thông tin khách hàng..." />;
 
   return (
-    <div className="section">
-      <div className="section_item">
-        <div><label htmlFor="email">Email:</label></div>     
-      <div><input
-          name="email"
-          id="email"
-          type="email"
-          placeholder="Email"
-          value={customerData.email}
-          onChange={handleChange}
-          readOnly
-        /></div>       
-      </div>
-
-      <div className="section_item">
-        <div><label htmlFor="hoTen">Họ Tên:</label></div>      
-      <div><input
-          name="hoTen"
-          id="fullName"
-          type="text"
-          placeholder="Họ và tên"
-          value={customerData.hoTen}
-          onChange={handleChange}
-          readOnly
-        /></div>       
-      </div>
-
-      <div className="section_item">
-        <div><label htmlFor="soDienThoai">SĐT:</label></div>
-      <div><input
-          name="soDienThoai"
-          id="phoneNumber"
-          type="text"
-          placeholder="Số điện thoại (tùy chọn)"
-          value={customerData.soDienThoai}
-          onChange={handleChange}
-          readOnly
-        /></div>
-      </div> 
-    </div>
+    <Card title="Thông Tin Khách Hàng" bordered={false} style={{ marginBottom: 20 }}>
+      <Form layout="vertical">
+        <Row gutter={16}>
+          <Col span={12}>
+            <Form.Item label="Email">
+              <Input value={customerData.email} readOnly />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Họ và tên">
+              <Input value={customerData.hoTen} readOnly />
+            </Form.Item>
+          </Col>
+          <Col span={12}>
+            <Form.Item label="Số điện thoại">
+              <Input value={customerData.soDienThoai} readOnly />
+            </Form.Item>
+          </Col>
+        </Row>
+      </Form>
+    </Card>
   );
 };
 
