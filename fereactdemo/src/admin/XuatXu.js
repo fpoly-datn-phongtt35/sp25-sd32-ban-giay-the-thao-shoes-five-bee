@@ -142,7 +142,7 @@ const XuatXu = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
-
+                <h1>Quản lý xuất xứ</h1>
                 <Input placeholder='Tên Xuất Xứ' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
@@ -151,7 +151,7 @@ const XuatXu = () => {
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={creatXuatXu}>
-                    Add
+                    Thêm
                 </Button>
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[

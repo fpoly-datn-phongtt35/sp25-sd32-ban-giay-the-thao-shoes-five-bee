@@ -132,7 +132,7 @@ const SanPhamChiTiet = () => {
             setSelectedGiay2(null);
             setValue(1);
         } catch (error) {
-            message.error("Lỗi khi thực hiện thao tác: " + error.message);
+            message.error("Lỗi khi thực hiện thao tác: " + error);
         }
     };
     const deleteGiayChiTiet = async (record) => {

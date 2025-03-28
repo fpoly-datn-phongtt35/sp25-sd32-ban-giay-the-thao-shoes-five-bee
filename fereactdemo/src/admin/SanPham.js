@@ -309,7 +309,7 @@ const SanPham = () => {
       setValue(2);
     } catch (error) {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
-      message.error("Lỗi khi thực hiện thao tác: " + error.message);
+      message.error("Lỗi khi thực hiện thao tác: " + (error.response?.data?.message || error.message));
     }
   };
   const handleUpdateGiayChiTiet = async (record) => {
