@@ -27,6 +27,21 @@ export const updateGiayChiTiet = (giayChiTiet) =>
     },
   });
 
+export const updateBienThe = async (id, soLuong, giaBan) => {
+  try {
+    const response = await axios.put(`/api/giay/update-bien-the/${id}`, null, {
+      params: {
+        soLuong: soLuong,
+        giaBan: giaBan
+      }
+    });
+
+    return response.data;
+  } catch (error) {
+    console.error('Lỗi khi cập nhật biến thể:', error);
+    throw error;
+  }
+};
 
 
 export const getGiayChiTiet = (mauSacId, kichCoId) =>

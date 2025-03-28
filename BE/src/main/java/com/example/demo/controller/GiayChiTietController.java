@@ -18,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 public class GiayChiTietController {
   private final GiayChiTietService giayChiTietService;
 
-  @PutMapping("/update-bien-the")
+  @PutMapping("/update-bien-the/{id}")
   public ResponseEntity<?> updateBienThe(
       @PathVariable UUID id, @RequestParam Integer soLuong, @RequestParam BigDecimal giaBan) {
     return ResponseEntity.ok(giayChiTietService.updateSoLuongVaGaiaBan(id, soLuong, giaBan));
