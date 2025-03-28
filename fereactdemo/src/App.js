@@ -40,7 +40,6 @@ import Statistics from "./admin/ThongKe";
 import { ProfileUser } from "./profile/ProfileUser";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider } from "./cart/CartContext";
-import HoaDonChiTiet from "./admin/HoaDonChiTiet";
 import ThongKe from "./admin/ThongKe";
 import ThongKeSanPham from "./admin/ThongKeSanPham";
 import GiamGiaHoaDon from "./admin/GiamGiaHoaDon";
@@ -90,7 +89,6 @@ function App() {
               <Route path="ban-hang-tai-quay" element={<BanHangTaiQuay />} />
               <Route path="Thong-Ke" element={<ThongKe />} />
               <Route path="Thong-Ke-San-Pham" element={<ThongKeSanPham />} />
-              <Route path="hoa-don-chi-tiet" element={<HoaDonChiTiet />} />
               <Route path="quan-ly-hoa-don" element={<QuanLyHoaDon />} />
               <Route path="tra-hang" element={<ReturnOrderStatusPage />} />
               <Route path="san-pham" element={<SanPham />} />

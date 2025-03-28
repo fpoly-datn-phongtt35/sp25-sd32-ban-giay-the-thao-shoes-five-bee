@@ -6,6 +6,7 @@ import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
+import com.fasterxml.jackson.annotation.JsonBackReference;
 
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -32,6 +33,7 @@ public class GiamGiaHoaDonChiTietEntity {
     private Integer trangThai;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_HOA_DON",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
+    @JsonBackReference
     private HoaDonEntity hoaDonEntity;
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_HOA_DON",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))

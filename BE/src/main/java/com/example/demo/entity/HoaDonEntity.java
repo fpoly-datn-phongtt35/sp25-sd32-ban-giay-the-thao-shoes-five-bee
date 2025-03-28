@@ -91,5 +91,6 @@ public class HoaDonEntity {
     private List<HoaDonChiTietEntity> items;
 
     @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
     private List<GiamGiaHoaDonChiTietEntity> chuongTrinhGiamGiaChiTietHoaDons;
 }
