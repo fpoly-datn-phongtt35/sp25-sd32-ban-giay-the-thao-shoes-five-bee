@@ -38,7 +38,7 @@ import { getChatLieu } from "../service/ChatLieuService";
 import { getDeGiay } from "../service/DeGiayService";
 import { getKieuDang } from "../service/KieuDangService";
 import { getDanhMuc } from "../service/DanhMucService";
-import ConfirmModal from "../popupThemNhanhThuocTInh/ConfirmModal"; 
+import ConfirmModal from "../popupThemNhanhThuocTInh/ConfirmModal";
 import { getXuatXu } from "../service/XuatXuService";
 import TextArea from "antd/es/input/TextArea";
 import { Option } from "antd/es/mentions";
@@ -330,7 +330,7 @@ const SanPham = () => {
     try {
       const response = await updateGiayChiTiet(updatedGiayChiTiet);
       message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
-
+      getAllGiay();
       // Reset dữ liệu sau khi cập nhật
       setEditedData((prev) => {
         const newData = { ...prev };
@@ -683,9 +683,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-            id: ag.id,
-            tenUrl: ag.tenUrl,
-          }))
+          id: ag.id,
+          tenUrl: ag.tenUrl,
+        }))
         : [],
     };
 
@@ -780,7 +780,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -1150,9 +1150,8 @@ const SanPham = () => {
                     {kichCoList.map((kc) => (
                       <button
                         key={kc.id}
-                        className={`option-btn ${
-                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectKichCo(kc.id)}
                       >
                         {kc.ten}
@@ -1181,9 +1180,8 @@ const SanPham = () => {
                     {mauSacList.map((ms) => (
                       <button
                         key={ms.id}
-                        className={`option-btn ${
-                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectMauSac(ms.id)}
                       >
                         {ms.ten}
@@ -1514,9 +1512,9 @@ const SanPham = () => {
                   onConfirm={() => {
                     setConfirmOpen(false);
                     removeGiay(record);
-                    console.log( record);
-                    
-                  
+                    console.log(record);
+
+
                   }}
                   onCancel={() => setConfirmOpen(false)}
                   title="Xác nhận xóa"
