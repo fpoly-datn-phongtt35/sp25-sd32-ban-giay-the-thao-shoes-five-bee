@@ -736,6 +736,12 @@ const BanHangTaiQuay = () => {
         );
         if (vnpayResponse.data) {
           await thanhToanTaiQuay(selectedHoaDonId, hoaDonRequest);
+
+          // Lưu URL VNPAY trước khi reset state
+          const paymentUrl = vnpayResponse.data;
+
+          // Reset state trước khi chuyển hướng
+          resetState();
           window.location.href = vnpayResponse.data;
         }
       }
@@ -757,6 +763,7 @@ const BanHangTaiQuay = () => {
     setIsKhachLe(true);
     setPageCounter(2);
     setTotalAmount(0);
+    setTotalHoaDon(0); // Reset total amount
     setChangeAmount(0);
     setSelectedOption(null);
     setSelectedGiamGia(null);
@@ -764,6 +771,10 @@ const BanHangTaiQuay = () => {
     setSoTienGiam(0);
     setSelectedMaGiamGia(null);
     setGiaTriGiam(0);
+    setTenMaGiamGia(""); // Reset discount code name
+    setLoaiGiamGia("VNĐ"); // Reset discount type
+    setIsGiaoHang(false); // Reset delivery option
+    setSelectedPaymentMethod(null); // Reset payment method
   };
   const addChuongTrinhGiamGiaHoaDonChiTiet = async (
     hoaDonId,
@@ -896,31 +907,22 @@ const BanHangTaiQuay = () => {
 
       if (remainingPages.length === 0) {
         // Nếu không còn trang nào, reset counter về 1
-        setPageCounter(1);
-        setSelectedPage(1);
-        setSelectedProducts({});
-        setSelectedKhachHang(null);
-        setHoTen("");
-        setSoDienThoai("");
-        setDiaChi("");
-        setSelectedGiamGia(null);
-        setCustomerMoney("");
-        setChangeAmount(0);
-        setTotalAmount(0);
-        setSoTienGiam(0);
-        setAppliedGiamGia(null);
-        setSelectedOption(null);
+        resetState();
       } else {
         // Nếu trang bị xóa là trang đang được chọn, chọn trang đầu tiên còn lại
         if (selectedPage === pageId) {
-          setSelectedPage(remainingPages[0].id);
+          const newSelectedPage = remainingPages[0].id;
+          const newSelectedHoaDonId = remainingPages[0].hoaDonId;
+          setSelectedPage(newSelectedPage);
+          setSelectedHoaDonId(newSelectedHoaDonId);
+
+          // Cập nhật danh sách sản phẩm và tổng tiền cho trang mới được chọn
+          fetchSanPhamTrongHoaDon(newSelectedHoaDonId);
         }
       }
 
-      // Cập nhật danh sách số thứ tự có thể sử dụng
       setAvailablePageNumbers((prevNumbers) => [...prevNumbers, pageId].sort());
       getAllGiay();
-      setTotalHoaDon(0);
     } catch (error) {
       console.error("Lỗi khi xóa hóa đơn:", error);
       message.error("Không thể xóa hóa đơn");
@@ -988,14 +990,26 @@ const BanHangTaiQuay = () => {
           message.success('Xóa hóa đơn thành công!');
 
           // Cập nhật lại danh sách hóa đơn
-          fetchHoaDonCho();
+          const updatedPages = pages.filter(page => page.hoaDonId !== hoaDonId);
+          setPages(updatedPages);
+
 
           // Nếu hóa đơn đang được chọn bị xóa, chọn hóa đơn khác
           if (selectedHoaDonId === hoaDonId) {
-            setSelectedHoaDonId(null);
-            setSelectedPage(null);
+            if (updatedPages.length > 0) {
+              // Chọn hóa đơn đầu tiên trong danh sách còn lại
+              setSelectedHoaDonId(updatedPages[0].hoaDonId);
+              setSelectedPage(updatedPages[0].id);
+              // Cập nhật sản phẩm và tổng tiền cho hóa đơn mới
+              fetchSanPhamTrongHoaDon(updatedPages[0].hoaDonId);
+            } else {
+              // Nếu không còn hóa đơn nào, reset toàn bộ state
+              resetState();
+            }
           }
+          fetchHoaDonCho()
         }
+
       });
     } catch (error) {
       console.error('Lỗi khi xóa hóa đơn:', error);
