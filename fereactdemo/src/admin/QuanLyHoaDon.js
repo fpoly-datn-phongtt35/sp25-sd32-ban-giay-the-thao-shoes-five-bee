@@ -17,6 +17,7 @@ import {
   deleteHoaDon,
   detailHoaDon,
   getHoaDon,
+  getHoaDonById1,
   printfHoaDon,
   updateHoaDon,
   xacNhanHoaDon,
@@ -84,41 +85,46 @@ const QuanLyHoaDon = () => {
         setData([]);
         return;
       }
-      // hinh thuc mua 0 tien mat 1 vnpay 2 thanh toan khi giao
-      // 1 tại quầy 2 online
-      const formattedData = result.data.map((item) => ({
-        key: item.id, // ID hóa đơn
-        order_id: item.id,
-        ma: item.ma, // Mã hóa đơn
-        user: item.tenNguoiNhan || (item.userDto?.hoTen ?? "Khách lẻ"), // Tên người nhận hoặc user
-        user_phone: item.sdtNguoiNhan || (item.userDto?.soDienThoai ?? "N/A"), // Số điện thoại
-        order_on: item.ngayTao
-          ? moment(item.ngayTao).format("DD/MM/YYYY")
-          : "N/A", // Ngày tạo đơn
-        status: mapTrangThai(item.trangThai), // Trạng thái đơn hàng
-        trangThai: item.trangThai,
-        diaChi: item.diaChi || "Không có địa chỉ", // Địa chỉ đơn hàng
-        hinhThucMua: item.hinhThucMua === 1 ? "Tại Quầy" : "Online",
-        hinhThucThanhToan:
-          item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
-        phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
-        soTienGiam: item.soTienGiam ?? 0, // Số tiền giảm giá
-        tongTien: item.tongTien, // Tổng tiền thanh toán
-        products:
-          item.items?.map((product) => ({
-            id: product.id,
-            tenGiay: product.giayChiTietEntity.giayEntity.ten,
-            mauSac: product.giayChiTietEntity.mauSacEntity.ten,
-            kichCo: product.giayChiTietEntity.kichCoEntity.ten,
-            soLuong: product.soLuong,
-            giaBan: product.giaBan,
-            hinhAnh:
-              product.giayChiTietEntity.giayEntity.anhGiayEntities?.[0]
-                ?.tenUrl ?? "", // Lấy ảnh đầu tiên nếu có
-          })) ?? [],
-      }));
 
-      // console.log("Dữ liệu đã định dạng:", formattedData);
+      const formattedData = result.data.map((item) => {
+        // Tổng tiền thanh toán là số tiền từ API
+        const tongTienThanhToan = item.tongTien;
+
+        return {
+          key: item.id, // ID hóa đơn
+          order_id: item.id,
+          ma: item.ma, // Mã hóa đơn
+          user: item.tenNguoiNhan || (item.userDto?.hoTen ?? "Khách lẻ"), // Tên người nhận hoặc user
+          user_phone: item.sdtNguoiNhan || (item.userDto?.soDienThoai ?? "N/A"), // Số điện thoại
+          order_on: item.ngayTao
+            ? moment(item.ngayTao).format("DD/MM/YYYY")
+            : "N/A", // Ngày tạo đơn
+          status: mapTrangThai(item.trangThai), // Trạng thái đơn hàng
+          trangThai: item.trangThai,
+          diaChi: item.diaChi || "Không có địa chỉ", // Địa chỉ đơn hàng
+          hinhThucMua: item.hinhThucMua === 1 ? "Tại Quầy" : "Online",
+          hinhThucThanhToan:
+            item.hinhThucThanhToan === 0 ? "Tiền mặt" :
+              item.hinhThucThanhToan === 1 ? "Chuyển khoản" : "VNPay",
+          phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
+          soTienGiam: item.soTienGiam ?? 0, // Số tiền giảm giá
+          tongTien: tongTienThanhToan, // Tổng tiền thanh toán
+          products:
+            item.items?.map((product) => ({
+              id: product.id,
+              tenGiay: product.giayChiTietEntity.giayEntity.ten,
+              mauSac: product.giayChiTietEntity.mauSacEntity.ten,
+              kichCo: product.giayChiTietEntity.kichCoEntity.ten,
+              soLuong: product.soLuong,
+              giaBan: product.giaBan,
+              hinhAnh:
+                product.giayChiTietEntity.giayEntity.anhGiayEntities?.[0]
+                  ?.tenUrl ?? "", // Lấy ảnh đầu tiên nếu có
+            })) ?? [],
+          chuongTrinhGiamGiaChiTietHoaDons: item.chuongTrinhGiamGiaChiTietHoaDons || [],
+        };
+      });
+
       setData(formattedData);
     } catch (error) {
       console.error("Lỗi khi fetch dữ liệu: ", error);
@@ -129,62 +135,49 @@ const QuanLyHoaDon = () => {
     if (dataHoaDonChiTiet.length > 0) {
       togglePopup();
     }
-  }, [dataHoaDonChiTiet]); 
+  }, [dataHoaDonChiTiet]);
   const fetchHoaDonChiTiet = async (id) => {
-    if (!id) {
-      console.error("ID hóa đơn không hợp lệ!");
-      message.error("Không tìm thấy ID hóa đơn!");
-      return;
-    }
-
     try {
-      const result = await detailHoaDon(id);
-      console.log("Dữ liệu từ API hóa đơn chi tiết:", result);
+      const response = await getHoaDonById1(id);
+      console.log("Chi tiết hóa đơn:", response.data);
 
-      if (!result || !Array.isArray(result.items)) {
-        console.error("Dữ liệu không hợp lệ hoặc không phải mảng.");
-        setDataHoaDonChiTiet([]);
-        return;
-      }
+      // Tính tổng tiền sản phẩm từ items
+      const tongTienSanPham = response.data.items.reduce(
+        (total, item) => total + (item.giaBan * item.soLuong),
+        0
+      );
 
-      // Format dữ liệu
-      const formattedData = {
-        key: result.id,
-        order_id: result.id,
-        ma: result.ma,
-        user: result.tenNguoiNhan || (result.userDto?.hoTen ?? "Khách lẻ"),
-        user_phone:
-          result.sdtNguoiNhan || (result.userDto?.soDienThoai ?? "N/A"),
-        order_on: result.ngayTao
-          ? moment(result.ngayTao).format("DD/MM/YYYY")
-          : "N/A",
-        status: mapTrangThai(result.trangThai),
-        trangThai: result.trangThai,
-        diaChi: result.diaChi || "Không có địa chỉ",
-        hinhThucMua: result.hinhThucMua === 1 ? "Tại Quầy" : "Online",
-        hinhThucThanhToan:
-          result.hinhThucThanhToan === 0 ? "Tiền mặt" : "chuyển khoản",
-        phiShip: result.phiShip ?? 0,
-        soTienGiam: result.soTienGiam ?? 0,
-        tongTien: result.tongTien,
-        products: result.items.map((product) => ({
-          id: product.id,
-          tenGiay: product.giayChiTietEntity.giayEntity.ten,
-          mauSac: product.giayChiTietEntity.mauSacEntity.ten,
-          kichCo: product.giayChiTietEntity.kichCoEntity.ten,
-          soLuong: product.soLuong,
-          giaBan: product.giaBan,
-          hinhAnh:
-            product.giayChiTietEntity.giayEntity.anhGiayEntities?.[0]?.tenUrl ??
-            "",
+      // Xử lý dữ liệu hóa đơn
+      const hoaDonData = {
+        id: response.data.id,
+        ma: response.data.ma,
+        order_on: response.data.ngayTao,
+        user: response.data.tenNguoiNhan,
+        user_phone: response.data.sdtNguoiNhan,
+        diaChi: response.data.diaChi || "Tại Quầy",
+        tongTienGoc: tongTienSanPham, // Tổng tiền sản phẩm
+        soTienGiam: response.data.soTienGiam || 0, // Số tiền giảm giá
+        tongTien: response.data.tongTien, // Tổng tiền thanh toán từ API
+        hinhThucMua: response.data.hinhThucMua === 1 ? "Tại quầy" : "Online",
+        hinhThucThanhToan: getPaymentMethodText(response.data.hinhThucThanhToan),
+        products: response.data.items.map(item => ({
+          id: item.id,
+          tenGiay: item.giayChiTietEntity?.giayEntity?.ten,
+          mauSac: item.giayChiTietEntity?.mauSacEntity?.ten,
+          kichCo: item.giayChiTietEntity?.kichCoEntity?.ten,
+          giaBan: item.giaBan,
+          soLuong: item.soLuong,
+          hinhAnh: item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl
         })),
+        // Thêm thông tin giảm giá
+        chuongTrinhGiamGiaChiTietHoaDons: response.data.chuongTrinhGiamGiaChiTietHoaDons || []
       };
-      console.log("formattedData:", formattedData);
 
-      setDataHoaDonChiTiet(formattedData); // Chuyển thành mảng chứa 1 đối tượng
+      setDataHoaDonChiTiet(hoaDonData);
+      setIsPopupVisible(true);
     } catch (error) {
-      console.error("Lỗi khi fetch dữ liệu:", error);
-      message.error("Lỗi khi tải dữ liệu hóa đơn!");
+      console.error("Lỗi khi lấy chi tiết hóa đơn:", error);
+      message.error("Không thể lấy thông tin chi tiết hóa đơn!");
     }
   };
   const handleOrderClick = async (orderId) => {
@@ -572,6 +565,40 @@ const QuanLyHoaDon = () => {
       ...getColumnSearchProps("status"),
     },
     {
+      title: "Tổng tiền",
+      dataIndex: "tongTien",
+      key: "tongTien",
+      render: (text, record) => {
+        // Tính tổng tiền gốc từ danh sách sản phẩm
+        const tongTienGoc = record.products && record.products.length > 0
+          ? record.products.reduce(
+            (total, product) => total + product.soLuong * product.giaBan,
+            0
+          )
+          : record.tongTien + (record.soTienGiam || 0); // Nếu không có products, tính ngược từ tổng tiền và số tiền giảm
+
+        // Nếu có giảm giá, hiển thị cả giá gốc và giá sau giảm
+        if (record.soTienGiam > 0) {
+          return (
+            <div>
+              <div className="original-price">
+                {tongTienGoc.toLocaleString("vi-VN")}đ
+              </div>
+              <div className="discounted-price">
+                {record.tongTien.toLocaleString("vi-VN")}đ
+              </div>
+              <div className="discount-amount">
+                (Giảm: {record.soTienGiam.toLocaleString("vi-VN")}đ)
+              </div>
+            </div>
+          );
+        }
+        // Nếu không có giảm giá, chỉ hiển thị giá gốc
+        return <span>{record.tongTien.toLocaleString("vi-VN")}đ</span>;
+      },
+      sorter: (a, b) => a.tongTien - b.tongTien,
+    },
+    {
       title: "Action",
       key: "action",
       width: 120,
@@ -632,7 +659,21 @@ const QuanLyHoaDon = () => {
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
   };
-  const handlePhoneSearch = (value) => {};
+  const handlePhoneSearch = (value) => { };
+
+  // Hàm hỗ trợ để hiển thị phương thức thanh toán
+  const getPaymentMethodText = (method) => {
+    switch (method) {
+      case 0:
+        return "Tiền mặt";
+      case 1:
+        return "Chuyển khoản";
+      case 2:
+        return "VNPay";
+      default:
+        return "Không xác định";
+    }
+  };
 
   return (
     <div className="main-container">
@@ -757,17 +798,43 @@ const QuanLyHoaDon = () => {
                   Hình Thức Mua: {dataHoaDonChiTiet?.hinhThucMua || "N/A"}
                 </h6>
                 <h6>
-                  HÌnh Thức Thanh Toán :{" "}
+                  Hình Thức Thanh Toán:{" "}
                   {dataHoaDonChiTiet?.hinhThucThanhToan || "N/A"}
                 </h6>
 
-                <h6>
-                  Tổng Tiền:{" "}
-                  {dataHoaDonChiTiet?.tongTien?.toLocaleString("vi-VN", {
-                    style: "currency",
-                    currency: "VND",
-                  }) || "N/A"}
-                </h6>
+                {dataHoaDonChiTiet?.soTienGiam > 0 ? (
+                  <>
+                    <h6>
+                      Tổng Tiền Gốc:{" "}
+                      {dataHoaDonChiTiet?.tongTienGoc?.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }) || "N/A"}
+                    </h6>
+                    <h6>
+                      Số Tiền Giảm:{" "}
+                      {dataHoaDonChiTiet?.soTienGiam?.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }) || "N/A"}
+                    </h6>
+                    <h6 className="total-after-discount">
+                      Tổng Tiền Thanh Toán:{" "}
+                      {dataHoaDonChiTiet?.tongTien?.toLocaleString("vi-VN", {
+                        style: "currency",
+                        currency: "VND",
+                      }) || "N/A"}
+                    </h6>
+                  </>
+                ) : (
+                  <h6>
+                    Tổng Tiền:{" "}
+                    {dataHoaDonChiTiet?.tongTien?.toLocaleString("vi-VN", {
+                      style: "currency",
+                      currency: "VND",
+                    }) || "N/A"}
+                  </h6>
+                )}
               </div>
               <div className="phai">
                 <h4>Thông tin khách hàng</h4>
@@ -775,6 +842,28 @@ const QuanLyHoaDon = () => {
                 <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
                 <h6>Địa Chỉ: {dataHoaDonChiTiet?.diaChi || "Tại Quầy"}</h6>
               </div>
+
+              {/* Thêm phần hiển thị thông tin giảm giá */}
+              {dataHoaDonChiTiet?.chuongTrinhGiamGiaChiTietHoaDons &&
+                dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.length > 0 && (
+                  <div className="giamgia">
+                    <h4>Thông tin giảm giá</h4>
+                    {dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.map((giamGia, index) => (
+                      <div key={index}>
+                        <h6>Mã giảm giá: {giamGia.chuongTrinhGiamGiaHoaDonEntity?.ten || "N/A"}</h6>
+                        <h6>Phần trăm giảm: {giamGia.chuongTrinhGiamGiaHoaDonEntity?.phanTramGiam || 0}%</h6>
+                        <h6>Số tiền đã giảm: {giamGia.soTienDaGiam?.toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }) || "N/A"}</h6>
+                        <h6>Điều kiện áp dụng: {giamGia.chuongTrinhGiamGiaHoaDonEntity?.dieuKien?.toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        }) || "N/A"}</h6>
+                      </div>
+                    ))}
+                  </div>
+                )}
             </div>
 
             {/* Thông tin các sản phẩm trong đơn hàng */}
@@ -832,23 +921,47 @@ const QuanLyHoaDon = () => {
                 <tfoot>
                   <tr>
                     <td colSpan="5" style={{ textAlign: "right" }}>
-                      <strong>Tổng cộng:</strong>
+                      <strong>Tổng tiền hàng:</strong>
                     </td>
                     <td>
                       <strong>
-                        {dataHoaDonChiTiet?.products
-                          .reduce(
-                            (total, product) =>
-                              total + product.soLuong * product.giaBan,
-                            0
-                          )
-                          .toLocaleString("vi-VN", {
-                            style: "currency",
-                            currency: "VND",
-                          })}
+                        {dataHoaDonChiTiet?.tongTienGoc?.toLocaleString("vi-VN", {
+                          style: "currency",
+                          currency: "VND",
+                        })}
                       </strong>
                     </td>
                   </tr>
+                  {dataHoaDonChiTiet?.soTienGiam > 0 && (
+                    <>
+                      <tr>
+                        <td colSpan="5" style={{ textAlign: "right" }}>
+                          <span>Giảm giá:</span>
+                        </td>
+                        <td>
+                          <span className="discount-amount-table">
+                            -{dataHoaDonChiTiet.soTienGiam.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                          </span>
+                        </td>
+                      </tr>
+                      <tr className="total-after-discount-row">
+                        <td colSpan="5" style={{ textAlign: "right" }}>
+                          <strong>Thành tiền:</strong>
+                        </td>
+                        <td>
+                          <strong className="final-total">
+                            {dataHoaDonChiTiet.tongTien.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            })}
+                          </strong>
+                        </td>
+                      </tr>
+                    </>
+                  )}
                 </tfoot>
               </table>
             </div>
