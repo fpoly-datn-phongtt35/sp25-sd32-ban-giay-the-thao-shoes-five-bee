@@ -46,19 +46,36 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final AnhGiayRepository anhGiayRepository;
     private final AnhGiayService anhGiayService;
 
-  @Override
-  public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
+    @Override
+    public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
         GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(id).orElse(null);
 
+        if (giayChiTiet == null) {
+            throw new RuntimeException("Không tìm thấy giày chi tiết");
+        }
+
+        // Lấy sản phẩm gốc
+        GiayEntity giay = giayChiTiet.getGiayEntity();
+
+        if (giay == null) {
+            throw new RuntimeException("Không tìm thấy sản phẩm");
+        }
+
+        // Cập nhật số lượng và giá bán của biến thể
         giayChiTiet.setSoLuongTon(soLuong);
         giayChiTiet.setGiaBan(giaBan);
 
-        GiayEntity giay = giayRepository.findById(giayChiTiet.getGiayEntity().getId()).orElse(null);
+        // Tính tổng số lượng của tất cả các biến thể
+        List<GiayChiTietEntity> listBienThe = giayChiTietRepository.findByGiayEntityId(giay.getId());
+        int tongSoLuongBienThe = listBienThe.stream()
+                .mapToInt(GiayChiTietEntity::getSoLuongTon)
+                .sum();
 
-        giay.setSoLuongTon(giay.getSoLuongTon() - 1 + soLuong);
+        // Cập nhật tổng số lượng cho sản phẩm
+        giay.setSoLuongTon(tongSoLuongBienThe);
 
+        // Lưu lại sản phẩm và biến thể
         giayRepository.save(giay);
-
         return giayChiTietRepository.save(giayChiTiet);
     }
 
