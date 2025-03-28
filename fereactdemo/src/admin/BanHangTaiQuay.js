@@ -112,6 +112,9 @@ const BanHangTaiQuay = () => {
   };
   const [vnpayUrl, setVnpayUrl] = useState("");
 
+  // Thêm state để theo dõi số lượng sản phẩm trong mỗi hóa đơn
+  const [invoiceProductCounts, setInvoiceProductCounts] = useState({});
+
   const handleInputChange = (event) => {
     const rawValue = event.target.value.replace(/\D/g, ""); // Chỉ lấy số
     const parsedMoney = parseInt(rawValue, 10) || 0; // Chuyển thành số
@@ -142,8 +145,8 @@ const BanHangTaiQuay = () => {
     try {
       await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
 
-      // ✅ Gọi API ngay lập tức để cập nhật danh sách sản phẩm
-      fetchSanPhamTrongHoaDon(idHoaDon, setSelectedProducts);
+      // Cập nhật danh sách sản phẩm và số lượng
+      fetchSanPhamTrongHoaDon(idHoaDon);
       getAllGiay();
       message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
     } catch (error) {
@@ -179,8 +182,9 @@ const BanHangTaiQuay = () => {
       await deleteSanPhamHoaDonChiTiet(productId);
       message.success("Xóa sản phẩm thành công!");
       getAllGiay();
-      // Load lại sản phẩm trong hóa đơn đó
-      fetchHoaDonCho(hoaDonId);
+
+      // Cập nhật lại số lượng sản phẩm trong hóa đơn
+      fetchSanPhamTrongHoaDon(hoaDonId);
     } catch (error) {
       console.error("Lỗi khi xóa sản phẩm:", error);
       message.error("Không thể xóa sản phẩm!");
@@ -475,15 +479,24 @@ const BanHangTaiQuay = () => {
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            ID: item.id,
-            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-            SOLUONG: item.soLuong,
-            GIABAN: item.giayChiTietEntity?.giaBan || 0,
-            ANH_GIAY:
-              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
-                ?.tenUrl || "https://via.placeholder.com/150",
-          }))
+          ID: item.id,
+          TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+          SOLUONG: item.soLuong,
+          GIABAN: item.giayChiTietEntity?.giaBan || 0,
+          ANH_GIAY:
+            item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+              ?.tenUrl || "https://via.placeholder.com/150",
+          KICH_CO: item.kichCoEntity?.ten ?? "N/A",
+          MÀU_SAC: item.mauSacEntity?.ten ?? "N/A",
+          TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+        }))
         : [];
+
+      // Cập nhật số lượng sản phẩm trong hóa đơn
+      setInvoiceProductCounts(prev => ({
+        ...prev,
+        [idHoaDon]: formattedData.length
+      }));
 
       setSelectedProducts((prev) => {
         const updatedProducts = {
@@ -491,14 +504,14 @@ const BanHangTaiQuay = () => {
           [idHoaDon]: formattedData,
         };
 
-        // 🔥 Tính tổng tiền ngay sau khi cập nhật sản phẩm
+        // Tính tổng tiền ngay sau khi cập nhật sản phẩm
         const newTotalAmount = formattedData.reduce((total, product) => {
           const giaBan = product.GIABAN ?? 0;
           const soLuong = product.SOLUONG ?? 0;
           return total + giaBan * soLuong;
         }, 0);
 
-        setTotalHoaDon(newTotalAmount); // ✅ Cập nhật state tổng tiền
+        setTotalHoaDon(newTotalAmount);
         console.log(`💰 Tổng tiền của hóa đơn ${idHoaDon}:`, newTotalAmount);
 
         return updatedProducts;
@@ -597,21 +610,17 @@ const BanHangTaiQuay = () => {
       // Lọc giày có trạng thái Đang bán
       const dataGiay = result.data
         .filter((item) => item.trangThai === 0) // Chỉ lấy giày có trạng thái Đang bán
-        .map((item, index) => ({
-          ID: item.id ?? index,
-          TEN: `${item.giayEntity?.ten ?? "N/A"} (Size: ${
-            item.kichCoEntity?.ten ?? "N/A"
-          }, Màu: ${item.mauSacEntity?.ten ?? "N/A"})`,
-          ANH_GIAY:
-            item.giayEntity?.anhGiayEntities?.length > 0
-              ? item.giayEntity.anhGiayEntities[0].tenUrl
-              : null,
-          GIABAN: item.giaBan ?? 0,
-          SOLUONG: item.soLuongTon ?? 0,
-          MO_TA: item.giayEntity?.moTa ?? "Không có mô tả",
-          KiCH_CO: item.kichCoEntity?.ten ?? "N/A",
-          MAU_SAC: item.mauSacEntity?.ten ?? "N/A",
-          TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+        .map((item) => ({
+          ID: item.id,
+          TEN: item.giayEntity ? item.giayEntity.ten : null,
+          GIABAN: item.giaBan,
+          SOLUONG: item.soLuongTon,
+          KICH_CO: item.kichCoEntity ? item.kichCoEntity.ten : "N/A",
+          MAU_SAC: item.mauSacEntity ? item.mauSacEntity.ten : "N/A",
+          TRANG_THAI: item.trangThai === 0 ? "Hoạt động" : "Không hoạt động",
+          ANH_GIAY: item.danhSachAnh && item.danhSachAnh.length > 0
+            ? item.danhSachAnh[0].tenUrl
+            : null,
         }));
 
       setGiay(dataGiay);
@@ -626,20 +635,20 @@ const BanHangTaiQuay = () => {
       const result = await getHoaDon();
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            key: item.id,
-            order_id: item.id,
-            user: item.khachHang ? item.khachHang.hoTen : null,
-            user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
-            order_on: item.ngayTao
-              ? moment(item.ngayTao).format("DD/MM/YYYY")
-              : "N/A",
-            status: mapTrangThai(item.trangThai),
-            trangThai: item.trangThai,
-            tongTien: item.tongTien,
-            hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
-            hinhThucThanhToan:
-              item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
-          }))
+          key: item.id,
+          order_id: item.id,
+          user: item.khachHang ? item.khachHang.hoTen : null,
+          user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
+          order_on: item.ngayTao
+            ? moment(item.ngayTao).format("DD/MM/YYYY")
+            : "N/A",
+          status: mapTrangThai(item.trangThai),
+          trangThai: item.trangThai,
+          tongTien: item.tongTien,
+          hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
+          hinhThucThanhToan:
+            item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+        }))
         : [];
       setData(formattedData);
     } catch (error) {
@@ -845,6 +854,12 @@ const BanHangTaiQuay = () => {
       const createdHoaDonId = response.data.id;
       console.log("Hóa đơn mới tạo:", createdHoaDonId);
 
+      // Khởi tạo số lượng sản phẩm là 0 cho hóa đơn mới
+      setInvoiceProductCounts(prev => ({
+        ...prev,
+        [createdHoaDonId]: 0
+      }));
+
       // Tìm số thứ tự nhỏ nhất có thể dùng (1 - 5)
       const usedIds = pages.map((page) => page.id);
       let nextPageId = 1;
@@ -928,8 +943,8 @@ const BanHangTaiQuay = () => {
       ten: item.TEN.toLowerCase(),
       giaBan: item.GIABAN.toString(), // Chuyển giá bán thành chuỗi
       soLuong: item.SOLUONG.toString(), // Chuyển số lượng thành chuỗi
-      kichCo: item.KiCH_CO.toString(), // Chuyển kích cỡ thành chuỗi
-      mauSac: item.MAU_SAC.toLowerCase(),
+      kichCo: item.KICH_CO ? item.KICH_CO.toString() : "", // Chuyển kích cỡ thành chuỗi
+      mauSac: item.MAU_SAC ? item.MAU_SAC.toLowerCase() : "", // Màu sắc lowercase
     }).some((value) => value.includes(searchTerm.toLowerCase()))
   );
   useEffect(() => {
@@ -958,37 +973,73 @@ const BanHangTaiQuay = () => {
     }
   };
 
+  // Thêm hàm xử lý xóa hóa đơn
+  const handleDeletePage = async (hoaDonId) => {
+    try {
+      // Hiển thị xác nhận trước khi xóa
+      Modal.confirm({
+        title: 'Xác nhận xóa hóa đơn',
+        content: 'Bạn có chắc chắn muốn xóa hóa đơn này không?',
+        okText: 'Xóa',
+        okType: 'danger',
+        cancelText: 'Hủy',
+        onOk: async () => {
+          await deleteHoaDonCho(hoaDonId);
+          message.success('Xóa hóa đơn thành công!');
+
+          // Cập nhật lại danh sách hóa đơn
+          fetchHoaDonCho();
+
+          // Nếu hóa đơn đang được chọn bị xóa, chọn hóa đơn khác
+          if (selectedHoaDonId === hoaDonId) {
+            setSelectedHoaDonId(null);
+            setSelectedPage(null);
+          }
+        }
+      });
+    } catch (error) {
+      console.error('Lỗi khi xóa hóa đơn:', error);
+      message.error('Không thể xóa hóa đơn!');
+    }
+  };
+
   return (
     <div className="quay_container">
       <div className="left">
         <div className="product_list_hd">
           <div style={{ display: "flex", justifyContent: "space-between" }}>
             <div>
-              {pages.map((page) => (
-                <div
-                  key={page.id}
-                  style={{ display: "inline-block", marginRight: "10px" }}
-                >
-                  <Button
-                    className={
-                      page.id === selectedPage
-                        ? "page_button selected"
-                        : "page_button"
-                    }
-                    onClick={() => handleSelectPage(page.id, page.hoaDonId)}
-                  >
-                    Hóa Đơn {page.id}
-                  </Button>
-
-                  <Button
-                    onClick={() => handleRemovePage(page.id)}
-                    style={{ marginLeft: "5px", color: "red" }}
-                  >
-                    x
-                  </Button>
-                </div>
-              ))}
-              <Button onClick={handleAddPage}>+</Button>
+              <div className="page_buttons">
+                {pages.map((page) => (
+                  <div key={page.id} className="page_button_container">
+                    <button
+                      className={`page_button ${selectedPage === page.id ? 'selected' : ''} ${invoiceProductCounts[page.hoaDonId] > 0 ? 'has-products' : 'empty-invoice'
+                        }`}
+                      onClick={() => handleSelectPage(page.id, page.hoaDonId)}
+                    >
+                      HD {page.id}
+                      {invoiceProductCounts[page.hoaDonId] > 0 && (
+                        <span className="product-count"> ({invoiceProductCounts[page.hoaDonId]})</span>
+                      )}
+                    </button>
+                    <button
+                      className="delete_page_button"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleDeletePage(page.hoaDonId);
+                      }}
+                      title="Xóa hóa đơn"
+                    >
+                      ×
+                    </button>
+                  </div>
+                ))}
+                {pages.length < 5 && (
+                  <button className="add_page_button" onClick={handleAddPage}>
+                    +
+                  </button>
+                )}
+              </div>
             </div>
             <div>
               <Button onClick={() => setShowPopupwebcam(true)}>
@@ -1009,8 +1060,7 @@ const BanHangTaiQuay = () => {
           </div>
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
-            {selectedProducts[selectedHoaDonId] &&
-            selectedProducts[selectedHoaDonId].length > 0 ? (
+            {selectedHoaDonId && selectedProducts[selectedHoaDonId] && selectedProducts[selectedHoaDonId].length > 0 ? (
               selectedProducts[selectedHoaDonId].map((product) => (
                 <div key={product.ID} className="selected_product">
                   {product.ANH_GIAY && (
@@ -1047,7 +1097,13 @@ const BanHangTaiQuay = () => {
                 </div>
               ))
             ) : (
-              <div></div>
+              <div className="empty-invoice-message">
+                <div className="empty-icon">
+                  <i className="fas fa-shopping-cart"></i>
+                </div>
+                <p>Chưa có sản phẩm nào trong hóa đơn</p>
+                <p className="empty-hint">Vui lòng chọn sản phẩm từ danh sách bên dưới</p>
+              </div>
             )}
           </div>
         </div>
@@ -1083,8 +1139,8 @@ const BanHangTaiQuay = () => {
                 <th style={{ width: "300px" }}>Tên</th>
                 <th>Giá Bán</th>
                 <th>Số Lượng</th>
-                {/* <th>Kích Cỡ</th>
-                <th>Màu Sắc</th> */}
+                <th>Kích Cỡ</th>
+                <th>Màu Sắc</th>
                 <th>Trạng Thái</th>
               </tr>
             </thead>
@@ -1096,9 +1152,9 @@ const BanHangTaiQuay = () => {
                   style={{
                     backgroundColor:
                       Array.isArray(selectedProducts[selectedPage]) &&
-                      selectedProducts[selectedPage].some(
-                        (product) => product.ID === item.ID
-                      )
+                        selectedProducts[selectedPage].some(
+                          (product) => product.ID === item.ID
+                        )
                         ? "#e0f7fa"
                         : "transparent",
                     opacity: item.SOLUONG === 0 ? 0.5 : 1,
@@ -1129,8 +1185,8 @@ const BanHangTaiQuay = () => {
                   </td>
                   <td>{item.GIABAN.toLocaleString("vi-VN")} đ</td>
                   <td>{item.SOLUONG}</td>
-                  {/* <td>{item.KiCH_CO}</td>
-                  <td>{item.MAU_SAC}</td> */}
+                  <td>{item.KICH_CO}</td>
+                  <td>{item.MAU_SAC}</td>
                   <td>{item.TRANG_THAI}</td>
                 </tr>
               ))}
@@ -1230,6 +1286,11 @@ const BanHangTaiQuay = () => {
               </Option>
             ))}
         </Select>
+        {tenMaGiamGia && (
+          <div style={{ color: 'green', marginTop: '5px' }}>
+            <i className="fas fa-check-circle"></i> Đã áp dụng mã giảm giá tốt nhất: {tenMaGiamGia} ({giaTriGiam.toLocaleString('vi-VN')} VNĐ)
+          </div>
+        )}
         <p>Tiền Khách Phải Trả: {formatCurrency(totalHoaDon)} VND</p>
         {selectedPaymentMethod === 0 && (
           <div>
