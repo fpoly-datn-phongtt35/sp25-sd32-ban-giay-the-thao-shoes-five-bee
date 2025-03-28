@@ -174,28 +174,20 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
 
             o.setTrangThai(giayChiTietDto.getTrangThai());
 
-            // Kiểm tra giày có tồn tại không
             GiayEntity giay = o.getGiayEntity();
             if (giay != null) {
-                // Lấy danh sách tất cả các biến thể của giày
                 List<GiayChiTietEntity> listBienThe = giayChiTietRepository.findByGiayEntityId(giay.getId());
 
-                // Tính tổng số lượng của tất cả các biến thể
                 int tongSoLuongBienThe = listBienThe.stream()
                         .mapToInt(GiayChiTietEntity::getSoLuongTon)
                         .sum();
 
-                // Cập nhật tổng số lượng cho sản phẩm
                 giay.setSoLuongTon(tongSoLuongBienThe);
-
-                // Lưu lại sản phẩm
                 giayRepository.save(giay);
             }
-
             return giayChiTietRepository.save(o);
         }).orElse(null);
     }
-
 
   @Override
   public GiayChiTietEntity detail(GiayChiTietDto giayChiTietDto) {
