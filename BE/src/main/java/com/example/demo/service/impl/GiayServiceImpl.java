@@ -82,8 +82,8 @@ public class GiayServiceImpl implements GiayService {
 
         if (existingGiayChiTiet.isPresent()) {
           // Nếu đã tồn tại, thông báo rằng kết hợp màu sắc và kích cỡ đã tồn tại
-          System.out.println("Kết hợp màu sắc và kích cỡ đã tồn tại.");
-          continue;  // Bỏ qua vòng lặp này và không tạo GiayChiTietEntity
+          throw new RuntimeException("Kết hợp màu sắc và kích cỡ đã tồn tại");
+
         }
 
         tongSoLuong++;  // Tăng số lượng tồn lên 1 cho mỗi kết hợp

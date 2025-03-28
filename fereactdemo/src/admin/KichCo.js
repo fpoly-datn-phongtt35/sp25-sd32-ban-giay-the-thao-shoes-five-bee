@@ -148,7 +148,7 @@ const KichCo = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
-
+                <h1>Quản lý kích cỡ</h1>
                 <Input placeholder='Tên Kích Cỡ' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
@@ -157,7 +157,7 @@ const KichCo = () => {
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={handleAdd}>
-                    Add
+                    Thêm
                 </Button>
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[

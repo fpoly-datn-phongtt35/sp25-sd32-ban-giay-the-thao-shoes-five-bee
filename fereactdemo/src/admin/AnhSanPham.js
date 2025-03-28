@@ -71,8 +71,8 @@ const AnhSanPham = () => {
 
   const creatAnhGiay = async () => {
     if (!file) {
-        message.error("Lỗi chưa chọn file ảnh");
-        return;
+      message.error("Lỗi chưa chọn file ảnh");
+      return;
     }
 
     const formData = new FormData();
@@ -82,17 +82,17 @@ const AnhSanPham = () => {
     console.log("FormData contents:", [...formData.entries()]); // Kiểm tra dữ liệu
 
     try {
-        const result = await addAnhGiay(formData);
-        console.log("API response:", result);
-        message.success("Thêm ảnh giày thành công!");
-        getAllAnhGiay();
-        setFile(null);
-        setValue(1);
+      const result = await addAnhGiay(formData);
+      console.log("API response:", result);
+      message.success("Thêm ảnh giày thành công!");
+      getAllAnhGiay();
+      setFile(null);
+      setValue(1);
     } catch (error) {
-        console.error("Error:", error.response?.data || error.message);
-        message.error("Có lỗi xảy ra!");
+      console.error("Error:", error.response?.data || error.message);
+      message.error("Có lỗi xảy ra!");
     }
-};
+  };
 
 
 
@@ -142,7 +142,7 @@ const AnhSanPham = () => {
     <div style={{ display: "flex", justifyContent: "center" }}>
       <div style={{ width: "100%", marginLeft: "150px" }}>
         <Upload onChange={handleUploadChange}>
-          <Button icon={<UploadOutlined />}>Click to Upload TENURL</Button>
+          <Button icon={<UploadOutlined />}>Ấn vào để thêm ảnh</Button>
         </Upload>
         <br />
         <br />
@@ -153,7 +153,7 @@ const AnhSanPham = () => {
         <br />
         <br />
         <Button type="primary" onClick={creatAnhGiay}>
-          Add
+          Thêm
         </Button>
         <br />
         <br />

@@ -67,12 +67,12 @@ const NhanVien = () => {
             const loadTable = result.data
                 .filter(item => {
                     // Kiểm tra xem người dùng có vai trò ROLE_STAFF không
-                    return item.userRoleEntities && 
-                           Array.isArray(item.userRoleEntities) && 
-                           item.userRoleEntities.some(role => 
-                               role.roleEntity && 
-                               role.roleEntity.ten === 'ROLE_STAFF'
-                           );
+                    return item.userRoleEntities &&
+                        Array.isArray(item.userRoleEntities) &&
+                        item.userRoleEntities.some(role =>
+                            role.roleEntity &&
+                            role.roleEntity.ten === 'ROLE_STAFF'
+                        );
                 })
                 .map((item, index) => ({
                     key: index,
@@ -198,6 +198,7 @@ const NhanVien = () => {
     return (
         <div style={{ display: 'flex' }}>
             <div style={{ width: '60%', marginLeft: '200px', overflow: 'auto' }}>
+                <h1>Quản lý nhân viên</h1>
                 <Input placeholder='Tên Nhân Viên' value={hoTen} onChange={(e) => setHoTen(e.target.value)} />
                 <br /><br />
                 <Input placeholder='Email@...' value={email} onChange={(e) => setEmail(e.target.value)} />
@@ -233,7 +234,7 @@ const NhanVien = () => {
                 </Radio.Group>
                 <br /><br />
                 <Button type="primary" onClick={createNhanVien}>
-                    Add
+                    Thêm
                 </Button>
                 <Button type="default" href="/excel/Import_User.xlsx" download style={{ marginLeft: '8px', textDecoration: 'none' }}>
                     Tải xuống mẫu Excel

@@ -139,7 +139,7 @@ const ThuongHieu = () => {
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
-
+                <h1>Quản lý thương hiệu</h1>
                 <Input placeholder='Tên Thương Hiệu' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 {<Radio.Group onChange={onChange} value={value}>
@@ -148,7 +148,7 @@ const ThuongHieu = () => {
                 </Radio.Group>}
                 <br /><br />
                 <Button type="primary" onClick={creatThuongHieu}>
-                    Add
+                    Thêm
                 </Button>
                 <br /><br />
                 <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
