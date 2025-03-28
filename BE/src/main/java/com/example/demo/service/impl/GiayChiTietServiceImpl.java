@@ -159,7 +159,7 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
             o.setGiaBan(giayChiTietDto.getGiaBan());
             o.setSoLuongTon(giayChiTietDto.getSoLuongTon());
 
-            // Kiểm tra null trước khi gọi .getId()
+            // Cập nhật các thuộc tính liên quan nếu không null
             if (giayChiTietDto.getMauSacDto() != null) {
                 o.setMauSacEntity(mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null));
             }
@@ -174,10 +174,20 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
 
             o.setTrangThai(giayChiTietDto.getTrangThai());
 
+            GiayEntity giay = o.getGiayEntity();
+            if (giay != null) {
+                List<GiayChiTietEntity> listBienThe = giayChiTietRepository.findByGiayEntityId(giay.getId());
+
+                int tongSoLuongBienThe = listBienThe.stream()
+                        .mapToInt(GiayChiTietEntity::getSoLuongTon)
+                        .sum();
+
+                giay.setSoLuongTon(tongSoLuongBienThe);
+                giayRepository.save(giay);
+            }
             return giayChiTietRepository.save(o);
         }).orElse(null);
     }
-
 
   @Override
   public GiayChiTietEntity detail(GiayChiTietDto giayChiTietDto) {
