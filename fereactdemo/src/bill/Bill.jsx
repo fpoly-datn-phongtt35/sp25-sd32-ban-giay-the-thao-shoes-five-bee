@@ -1,12 +1,8 @@
 import React, { useState, useEffect } from "react";
 import "./bill.css";
 import { fetchCustomerId } from '../service/LoginService.js';
-<<<<<<< HEAD
 import { paymentOnline } from '../service/HoaDonService.js';
-=======
 import { getGiamGia } from '../service/GiamGiaHoaDonService.js';
-import { addHoaDon1, paymentOnline } from '../service/HoaDonService.js';
->>>>>>> main
 import LoadThongTinKhachHangHoaDon from "../components/LoadThongTinKhachHangHoaDon.js";
 import LoadThongTinDiaChiHoaDon from "../components/LoadThongTinDiaChiHoaDon.js";
 import HoaDonCart from "../components/HoaDonCart.js";
