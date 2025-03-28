@@ -134,7 +134,6 @@ export const ProductAll = () => {
 
   return (
     <div className="productAll_container">
-  
       {/* <div className="banner_productAll">
         <img src="banner_3.jpg" alt="" />
       </div> */}
@@ -269,7 +268,6 @@ export const ProductAll = () => {
                 />
                 Từ 3 triệu - 4 triệu
               </div>
-              
             </div>
           </div>
         </div>
@@ -291,7 +289,7 @@ export const ProductAll = () => {
 
                   <h3 className="product_name">{item.TEN}</h3>
                   <p className="product_price">
-                    {item.GIABAN.toLocaleString()} <sup>đ</sup>
+                    {item.GIABAN?.toLocaleString() || "0"} <sup>đ</sup>
                   </p>
 
                   <button

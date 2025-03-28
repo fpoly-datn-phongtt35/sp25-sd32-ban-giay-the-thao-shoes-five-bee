@@ -56,7 +56,7 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
                 src={product.anhGiayUrl || '/placeholder.jpg'}
                 alt={product.tenGiay || 'Hình ảnh sản phẩm'}
               />
-              <div style={{ marginTop: "20px" }}>
+              <div style={{ display: 'flex', justifyContent: 'center',alignItems: 'center' }}>
                 <p>{product.tenGiay || 'Sản phẩm không xác định'}</p>
               </div>
             </div>
