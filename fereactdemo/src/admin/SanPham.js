@@ -330,7 +330,7 @@ const SanPham = () => {
     try {
       const response = await updateGiayChiTiet(updatedGiayChiTiet);
       message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
-
+      getAllGiay();
       // Reset dữ liệu sau khi cập nhật
       setEditedData((prev) => {
         const newData = { ...prev };

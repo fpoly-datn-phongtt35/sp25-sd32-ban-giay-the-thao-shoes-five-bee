@@ -111,6 +111,18 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
                     ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2)  // Trạng thái là 3 nếu là Tiền mặt hoặc Chuyển khoản, 2 nếu là thanh toán khi giao hàng
                     : 2  // Nếu không giao hàng, trạng thái là 2
     );
+    // - số lượng tồn kho của sản phẩm**
+    for (HoaDonChiTietEntity hoaDonChiTiet : danhSachSanPham) {
+      GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
+      int soLuongMua = hoaDonChiTiet.getSoLuong();
+
+      if (giayChiTiet.getSoLuongTon() < soLuongMua) {
+        throw new IllegalArgumentException("Số lượng sản phẩm " + giayChiTiet.getId() + " không đủ để thanh toán");
+      }
+
+      giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - soLuongMua);
+      giayChiTietRepository.save(giayChiTiet);
+    }
 
     hoaDon.setUserEntity(user);
 
@@ -189,8 +201,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .giayChiTietEntity(giayChiTiet)
             .build();
 
-    giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
-    giayChiTietRepository.save(giayChiTiet);
     return hoaDonChiTietRepository.save(hoaDonChiTietEntity);
   }
 
@@ -201,26 +211,17 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .findById(idHoaDonChiTiet)
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn chi tiết không tồn tại"));
 
-    GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
     int soLuongHienTai = hoaDonChiTiet.getSoLuong();
-    int soLuongTon = giayChiTiet.getSoLuongTon();
 
     if (isIncrease) {
-      if (soLuongTon <= 0) {
-        throw new IllegalStateException("Không đủ hàng để tăng số lượng");
-      }
       hoaDonChiTiet.setSoLuong(soLuongHienTai + 1);
-      giayChiTiet.setSoLuongTon(soLuongTon - 1);
     } else {
       if (soLuongHienTai <= 1) {
         throw new IllegalStateException("Số lượng không thể nhỏ hơn 1");
       }
       hoaDonChiTiet.setSoLuong(soLuongHienTai - 1);
-      giayChiTiet.setSoLuongTon(soLuongTon + 1);
     }
 
-    // **Lưu lại vào database**
-    giayChiTietRepository.save(giayChiTiet);
     return hoaDonChiTietRepository.save(hoaDonChiTiet);
   }
 
