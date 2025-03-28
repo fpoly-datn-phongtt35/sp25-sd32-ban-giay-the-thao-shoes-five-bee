@@ -1201,7 +1201,8 @@ const BanHangTaiQuay = () => {
                   <td>{item.SOLUONG}</td>
                   <td>{item.KICH_CO}</td>
                   <td>{item.MAU_SAC}</td>
-                  <td>{item.TRANG_THAI}</td>
+                  <td>{item.SOLUONG === 0 ? "Hết hàng" : item.TRANG_THAI}</td>
+
                 </tr>
               ))}
             </tbody>
