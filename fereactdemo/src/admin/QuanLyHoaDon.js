@@ -517,7 +517,7 @@ const QuanLyHoaDon = () => {
     },
 
     {
-      title: "User Name",
+      title: "Tên khách hàng",
       dataIndex: "user",
       key: "user",
       width: 150,
@@ -525,7 +525,7 @@ const QuanLyHoaDon = () => {
       ellipsis: true,
     },
     {
-      title: "User Phone",
+      title: "Số điện thoại",
       dataIndex: "user_phone",
       key: "user_phone",
       width: 120,
@@ -686,7 +686,7 @@ const QuanLyHoaDon = () => {
           <div className="filter">
             <p>Lọc theo trạng thái</p>
             <Select
-              defaultValue="---All---"
+              defaultValue="Tất cả"
               style={{ width: 120 }}
               onChange={handleStatusChange}
               options={[
