@@ -27,7 +27,7 @@ public class BanHangOnlineServiceImpl implements BanHangService {
   private final UsersService usersService;
   private final UserRepository userRepository;
   private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
-  private final GiamGiaHoaDonChiTietService giamGiaHoaDonChiTietService;
+  private final GiayRepository giayRepository;
 
   @Override
   @Transactional
@@ -145,10 +145,20 @@ public class BanHangOnlineServiceImpl implements BanHangService {
                                         giayChiTietRepository
                                                 .findById(gioHangChiTietEntity.getGiayChiTietEntity().getId())
                                                 .orElse(null);
+
+                                if(giayChiTiet != null){
                                 giayChiTiet.setSoLuongTon(
                                         giayChiTiet.getSoLuongTon() - gioHangChiTietEntity.getSoLuong());
                                 giayChiTietRepository.save(giayChiTiet);
-
+                                // lấy sản phẩm tổng (giày entity)
+                                    GiayEntity giayEntity = giayChiTiet.getGiayEntity();
+                                    if (giayEntity != null){
+                                        // tính tổng lại số lượng từ tất cả biến thể của sản phẩm
+                                        int tongSoLuong = giayChiTietRepository.sumSoLuongTonByGiay(giayEntity.getId());
+                                        giayEntity.setSoLuongTon(tongSoLuong);
+                                        giayRepository.save(giayEntity);
+                                    }
+                                }
                                 });
       hoaDonEntity.setTrangThai(3);
     }else {

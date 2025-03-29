@@ -2,11 +2,9 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.HoaDonDto;
 import com.example.demo.dto.request.UserDto;
-import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.GioHangChiTietEntity;
-import com.example.demo.entity.HoaDonChiTietEntity;
-import com.example.demo.entity.HoaDonEntity;
+import com.example.demo.entity.*;
 import com.example.demo.repository.GiayChiTietRepository;
+import com.example.demo.repository.GiayRepository;
 import com.example.demo.repository.GioHangChiTietRepository;
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.GioHangChiTietService;
@@ -34,6 +32,8 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     private GioHangChiTietRepository gioHangChiTietRepository;
     @Autowired
     private GiayChiTietRepository giayChiTietRepository;
+    @Autowired
+    private GiayRepository giayRepository;
 
     @Override
     public HoaDonEntity xacNhanHoaDon(UUID id) {
@@ -92,7 +92,21 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
 
             giayChiTiet.setSoLuongTon(remainingStock);
             giayChiTietRepository.save(giayChiTiet);
+
+            updateTotalStock(giayChiTiet.getGiayEntity().getId());
         }
+    }
+
+    private void updateTotalStock(UUID idGiayEntity){
+        List<GiayChiTietEntity> giayChiTietEntities = giayChiTietRepository.findByGiayEntityId(idGiayEntity);
+
+        int totalStock = giayChiTietEntities.stream()
+                .mapToInt(GiayChiTietEntity::getSoLuongTon)
+                .sum();
+        GiayEntity giayEntity = giayRepository.findById(idGiayEntity)
+                .orElseThrow(() -> new RuntimeException("không tìm thấy sản phẩm "));
+        giayEntity.setSoLuongTon(totalStock);
+        giayRepository.save(giayEntity);
     }
 
     @Override
