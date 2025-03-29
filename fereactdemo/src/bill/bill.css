@@ -1,275 +1,337 @@
 .bill_container {
-    display: flex;
-    flex-direction: column;
-    padding: 20px;
-    font-family: Arial, sans-serif;
-  }
+  display: flex;
+  flex-direction: column;
+  padding: 20px;
+  font-family: Arial, sans-serif;
+}
+
+.bill_form {
+  display: flex;
+  justify-content: space-between;
+}
+
+.bill_left {
+  /* flex: 2;  */
+  padding-right: 40px;
+  width: 35%;
+  /* Tăng chiều rộng của phần bên trái */
+  /* padding: 20px; */
+  border-right: 1px solid #ccc;
+}
+
+.customer_info {
+  border: 1px solid #ccc;
+  border-radius: 15px;
+}
+
+.section_content {
+  margin-top: 10px;
+}
+
+.shipping_fee input {
+  font-size: 16px;
+  padding: 8px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  width: 100%;
+}
+
+.payment_methods {
+  margin-top: 10px;
+}
+
+.payment_option {
+  margin-bottom: 10px;
+}
+
+.order_summary {
+  margin-top: 20px;
+}
+
+.order_summary div {
+  margin-bottom: 8px;
+}
+
+.buttons {
+  display: flex;
+  gap: 15px;
+  /* Khoảng cách giữa các nút */
+}
+
+.buttons button {
+  background-color: #FFB700;
+  /* Màu nền của nút */
+  color: white;
+  /* Màu chữ của nút */
+  border: none;
+  /* Xóa đường viền mặc định */
+  border-radius: 5px;
+  /* Bo góc nút */
+  padding: 12px 20px;
+  /* Khoảng cách bên trong nút */
+  cursor: pointer;
+  /* Con trỏ khi di chuột qua nút */
+  font-size: 16px;
+  /* Kích thước chữ */
+  transition: background-color 0.3s, transform 0.2s;
+  /* Hiệu ứng chuyển động */
+}
+
+.buttons button:hover {
+  background-color: #FFB700;
+  /* Màu nền khi di chuột qua nút */
+}
+
+.buttons button:active {
+  transform: scale(0.98);
+  /* Hiệu ứng khi nhấn nút */
+}
+
+.buttons button a {
+  color: white;
+  /* Màu chữ của liên kết trong nút */
+  text-decoration: none;
+  /* Xóa gạch chân của liên kết */
+}
+
+.buttons button a:hover {
+  text-decoration: underline;
+  /* Gạch chân khi di chuột qua liên kết */
+}
+
+.payment_methods input[type="radio"] {
+  margin-right: 10px;
+}
+
+.payment_methods label {
+  margin-left: 5px;
+  font-size: 16px;
+}
+
+.payment_methods .payment_option {
+  display: flex;
+  align-items: center;
+}
+
+.bill_left h3 {
+  font-size: 18px;
+  margin-bottom: 10px;
+}
+
+.bill_left .customer_info h3,
+.bill_left .payment_info h3 {
+  border-bottom: 2px solid #FFB700;
+  padding-bottom: 5px;
+  margin-bottom: 20px;
+}
+
+.bill_left .customer_info p,
+.bill_left .payment_info p {
+  font-size: 16px;
+}
+
+.order_summary div {
+  font-size: 18px;
+}
+
+.order_summary span {
+  font-weight: bold;
+}
+
+.order_summary .order_summary_total span {
+  color: #ee4d2d;
+  font-weight: bold;
+}
+
+.order_summary strong {
+  font-size: 20px;
+}
+
+.hoa_don_cart {
+  flex: 1;
+  padding-left: 20px;
+}
+
+.hoa_don_cart table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.hoa_don_cart th,
+.hoa_don_cart td {
+  border: 1px solid #ddd;
+  padding: 10px;
+  text-align: left;
+}
+
+.hoa_don_cart th {
+  background-color: #f4f4f4;
+}
+
+.hoa_don_cart tr:nth-child(even) {
+  background-color: #f9f9f9;
+}
+
+.shipping_fee {
+  margin-bottom: 16px;
+}
+
+.shipping_badge {
+  padding: 6px 12px;
+  border-radius: 8px;
+  font-weight: 600;
+  color: #fff;
+  display: inline-block;
+  background-color: #ff9800;
+}
+
+.shipping_badge.freeship {
+  background-color: #4caf50;
+  /* Màu xanh lá cho freeship */
+}
+
+.shipping_badge.freeship::before {
+  content: "🚚 ";
+}
+
+.applied_discount {
+  background-color: #f8f8f8;
+  padding: 8px 12px;
+  border-radius: 4px;
+  margin-bottom: 10px;
+  border-left: 3px solid #FFB700;
+}
+
+.applied_discount span {
+  color: #4caf50;
+  font-weight: 600;
+}
+
+.voucher_section {
+  margin: 20px 0;
+}
+
+.voucher_input {
+  display: flex;
+  gap: 10px;
+  margin-bottom: 10px;
+}
+
+.voucher_input input {
+  flex: 1;
+  padding: 8px 12px;
+  border: 1px solid #ddd;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.voucher_input button {
+  padding: 8px 15px;
+  background-color: #FFB700;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.applied_discount {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 10px 15px;
+  margin: 10px 0;
+  border-radius: 4px;
+  font-size: 14px;
+}
+
+.applied_discount.success {
+  background-color: #e9f7ef;
+  border-left: 3px solid #4caf50;
+  color: #2e7d32;
+}
+
+.applied_discount.error {
+  background-color: #fdecea;
+  border-left: 3px solid #f44336;
+  color: #d32f2f;
+}
+
+.remove_voucher {
+  background: none;
+  border: none;
+  color: #666;
+  font-size: 16px;
+  cursor: pointer;
+  padding: 0 5px;
+}
+
+.remove_voucher:hover {
+  color: #f44336;
+}
+
+.apply_best_voucher {
+  width: 100%;
+  padding: 10px 15px;
+  background-color: #FFB700;
+  color: white;
+  border: none;
+  border-radius: 4px;
+  cursor: pointer;
+  font-size: 14px;
+  font-weight: 600;
+  transition: background-color 0.2s;
+}
+
+.apply_best_voucher:hover {
+  background-color: #e6a500;
+}
+
+.apply_best_voucher:active {
+  transform: scale(0.98);
+}
+
+.bill_container {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+}
+
+.bill_form {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: space-between;
+  align-items: flex-start;
+  width: 100%;
+}
+
+.bill_left {
+  width: 100%;
+  display: flex;
+  margin-left: 80px;
+  gap: 30px;
+}
+
+
+
+/* Nếu cần căn giữa nội dung trong bill_right */
+.payment_info {
+  width: 30%;
+  background: white;
+  padding: 50px ;
+  border-radius: 8px;
+  box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
   
+}
+
+/* Đảm bảo bố cục đẹp trên mobile */
+@media (max-width: 768px) {
   .bill_form {
-    display: flex;
-    justify-content: space-between;
-  }
-  
-  .bill_left {
-     /* flex: 2;  */
-     padding-right: 40px;
-     width: 35%; /* Tăng chiều rộng của phần bên trái */
-     /* padding: 20px; */
-     border-right: 1px solid #ccc;
-  }
-  
-  .customer_info,
-  .payment_info {
-    margin-bottom: 20px;
-  }
-  
-  .section_content {
-    margin-top: 10px;
-  }
-  
-  .shipping_fee input {
-    font-size: 16px;
-    padding: 8px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    width: 100%;
-  }
-  
-  .payment_methods {
-    margin-top: 10px;
-  }
-  
-  .payment_option {
-    margin-bottom: 10px;
-  }
-  
-  .order_summary {
-    margin-top: 20px;
-  }
-  
-  .order_summary div {
-    margin-bottom: 8px;
-  }
-  
-  .buttons {
-    display: flex;
-    gap: 15px; /* Khoảng cách giữa các nút */
-  }
-  
-  .buttons button {
-    background-color: #FFB700; /* Màu nền của nút */
-    color: white; /* Màu chữ của nút */
-    border: none; /* Xóa đường viền mặc định */
-    border-radius: 5px; /* Bo góc nút */
-    padding: 12px 20px; /* Khoảng cách bên trong nút */
-    cursor: pointer; /* Con trỏ khi di chuột qua nút */
-    font-size: 16px; /* Kích thước chữ */
-    transition: background-color 0.3s, transform 0.2s; /* Hiệu ứng chuyển động */
-  }
-  
-  .buttons button:hover {
-    background-color: #FFB700; /* Màu nền khi di chuột qua nút */
-  }
-  
-  .buttons button:active {
-    transform: scale(0.98); /* Hiệu ứng khi nhấn nút */
-  }
-  
-  .buttons button a {
-    color: white; /* Màu chữ của liên kết trong nút */
-    text-decoration: none; /* Xóa gạch chân của liên kết */
-  }
-  
-  .buttons button a:hover {
-    text-decoration: underline; /* Gạch chân khi di chuột qua liên kết */
-  }
-  
-  .payment_methods input[type="radio"] {
-    margin-right: 10px;
-  }
-  
-  .payment_methods label {
-    margin-left: 5px;
-    font-size: 16px;
-  }
-  
-  .payment_methods .payment_option {
-    display: flex;
-    align-items: center;
-  }
-  
-  .bill_left h3 {
-    font-size: 18px;
-    margin-bottom: 10px;
-  }
-  
-  .bill_left .customer_info h3,
-  .bill_left .payment_info h3 {
-    border-bottom: 2px solid #FFB700;
-    padding-bottom: 5px;
-    margin-bottom: 20px;
-  }
-  
-  .bill_left .customer_info p,
-  .bill_left .payment_info p {
-    font-size: 16px;
-  }
-  
-  .order_summary div {
-    font-size: 18px;
-  }
-  
-  .order_summary span {
-    font-weight: bold;
+    flex-direction: column;
   }
 
-  .order_summary .order_summary_total span {
-    color: #ee4d2d;
-    font-weight: bold;
-  }
-  
-  .order_summary strong {
-    font-size: 20px;
-  }
-  
-  .hoa_don_cart {
-    flex: 1;
-    padding-left: 20px;
-  }
-  
-  .hoa_don_cart table {
+  .bill_left,
+  .bill_right {
     width: 100%;
-    border-collapse: collapse;
+    margin-left: 0;
   }
-  
-  .hoa_don_cart th, .hoa_don_cart td {
-    border: 1px solid #ddd;
-    padding: 10px;
-    text-align: left;
-  }
-  
-  .hoa_don_cart th {
-    background-color: #f4f4f4;
-  }
-  
-  .hoa_don_cart tr:nth-child(even) {
-    background-color: #f9f9f9;
-  }
-
-  .shipping_fee {
-    margin-bottom: 16px;
-  }
-  
-  .shipping_badge {
-    padding: 6px 12px;
-    border-radius: 8px;
-    font-weight: 600;
-    color: #fff;
-    display: inline-block;
-    background-color: #ff9800;
-  }
-  
-  .shipping_badge.freeship {
-    background-color: #4caf50; /* Màu xanh lá cho freeship */
-  }
-  
-  .shipping_badge.freeship::before {
-    content: "🚚 ";
-  }
-  
-  .applied_discount {
-    background-color: #f8f8f8;
-    padding: 8px 12px;
-    border-radius: 4px;
-    margin-bottom: 10px;
-    border-left: 3px solid #FFB700;
-  }
-  
-  .applied_discount span {
-    color: #4caf50;
-    font-weight: 600;
-  }
-  
-  .voucher_section {
-    margin: 20px 0;
-  }
-  
-  .voucher_input {
-    display: flex;
-    gap: 10px;
-    margin-bottom: 10px;
-  }
-  
-  .voucher_input input {
-    flex: 1;
-    padding: 8px 12px;
-    border: 1px solid #ddd;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  
-  .voucher_input button {
-    padding: 8px 15px;
-    background-color: #FFB700;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-  }
-  
-  .applied_discount {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 10px 15px;
-    margin: 10px 0;
-    border-radius: 4px;
-    font-size: 14px;
-  }
-  
-  .applied_discount.success {
-    background-color: #e9f7ef;
-    border-left: 3px solid #4caf50;
-    color: #2e7d32;
-  }
-  
-  .applied_discount.error {
-    background-color: #fdecea;
-    border-left: 3px solid #f44336;
-    color: #d32f2f;
-  }
-  
-  .remove_voucher {
-    background: none;
-    border: none;
-    color: #666;
-    font-size: 16px;
-    cursor: pointer;
-    padding: 0 5px;
-  }
-  
-  .remove_voucher:hover {
-    color: #f44336;
-  }
-  
-  .apply_best_voucher {
-    width: 100%;
-    padding: 10px 15px;
-    background-color: #FFB700;
-    color: white;
-    border: none;
-    border-radius: 4px;
-    cursor: pointer;
-    font-size: 14px;
-    font-weight: 600;
-    transition: background-color 0.2s;
-  }
-  
-  .apply_best_voucher:hover {
-    background-color: #e6a500;
-  }
-  
-  .apply_best_voucher:active {
-    transform: scale(0.98);
-  }
-  
+}

@@ -813,7 +813,6 @@ const SanPham = () => {
       Object.values({
         ten: item.TEN.toLowerCase(),
         soLuong: item.SOLUONGTON?.toString() || "0",
-        thuongHieu: item.THUONG_HIEU.toLowerCase(),
         giaBan: item.GIABAN?.toString() || "0",
       }).some((value) => value.includes(searchTerm.toLowerCase()))
     )

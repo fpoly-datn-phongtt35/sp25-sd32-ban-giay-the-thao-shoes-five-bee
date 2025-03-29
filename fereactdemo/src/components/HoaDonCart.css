@@ -5,14 +5,14 @@
 }
 
 .cart {
-    width: 80%;
-
+    width: calc(100% - 280px);
     background-color: white;
     margin-top: 20px;
-    margin-left: 40px;
+    margin-left: 70px;
     display: flex;
     flex-direction: column;
     border: solid 1px rgb(232, 229, 229);
+    border-radius: 15px;
 }
 
 .cart_content {
@@ -20,17 +20,20 @@
     height: 30px;
     display: flex;
     justify-content: space-around;
+    margin-left: 20px;
 }
 
 .prouduct_cart {
     width: calc(100% - 50px);
     height: 120px;
     background-color: white;
-    margin: 0 auto;
+    margin-left: 40px;
     display: flex;
     align-items: center;
     border: solid 1px rgb(232, 229, 229);
     margin-top: 10px;
+    justify-content: center;
+    border-radius: 15px;
 }
 
 
@@ -38,6 +41,7 @@
 .prouduct_cart_name {
     display: flex;
     width: 38%;
+    gap: 10px;
 
 }
 
@@ -137,6 +141,7 @@
 
 .total_value_total {
     display: flex;
-    justify-content: space-between;
+    justify-content: flex-start;
+    gap: 20px;
 
 }

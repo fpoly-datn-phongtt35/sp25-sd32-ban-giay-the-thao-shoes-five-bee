@@ -8,7 +8,7 @@ import {
 import { getGiayDetail } from "../service/GiayService";
 import "./sanphamchitiet.css";
 import { addToCart } from "../service/GioHangChiTietService";
-import { message } from "antd";
+import { Button, message } from "antd";
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -174,15 +174,15 @@ const ProductDetail = () => {
           {/* Số lượng */}
           <div className="quantity">
             <strong>Số lượng:</strong>
-            <button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+            <Button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
               -
-            </button>
+            </Button>
             <span>{quantity}</span>
-            <button onClick={() => setQuantity(quantity + 1)}>+</button>
+            <Button onClick={() => setQuantity(quantity + 1)}>+</Button>
           </div>
 
           {/* Nút Mua ngay */}
-          <div className="buy-button" onClick={handleAddToCart}>
+          <div className="buy-button" onClick={handleAddToCart} style={{borderRadius: "15px"}}> 
             MUA NGAY VỚI GIÁ {""}
             {selectedColor
               ? currentPrice.toLocaleString()
