@@ -144,8 +144,6 @@ const BanHangTaiQuay = () => {
 
     try {
       await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
-
-      // Cập nhật danh sách sản phẩm và số lượng
       fetchSanPhamTrongHoaDon(idHoaDon);
       getAllGiay();
       message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);

@@ -23,22 +23,36 @@ export const createHoaDonBanHangTaiQuay = () => {
   return axios.post(`${REST_API_BASE_URL}/create`);
 };
 
-export const themSanPhamVaoHoaDon = (idHoaDon, idSanPham) => {
-  return axios.post(
-    `${REST_API_BASE_URL}/add-product/${idHoaDon}`,
-    null, // Không gửi body
-    { params: { idSanPham } } // Gửi idSanPham trong query params
-  );
+export const themSanPhamVaoHoaDon = async (idHoaDon, idSanPham) => {
+  try {
+    const response = await axios.post(
+      `${REST_API_BASE_URL}/add-product/${idHoaDon}`,
+      null,
+      { params: { idSanPham } }
+    );
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data);
+    }
+    throw new Error("Lỗi khi thêm sản phẩm vào hóa đơn");
+  }
 };
 
-export const updateSoLuongGiay = (idHoaDonChiTiet, isIncrease) => {
-  return axios.put(
-    `${REST_API_BASE_URL}/update-quantity/${idHoaDonChiTiet}`,
-    null,
-    {
-      params: { isIncrease },
-    }
-  );
+export const updateSoLuongGiay = async (idHoaDonChiTiet, isIncrease) => {
+  try {
+    const response = await axios.put(
+      `${REST_API_BASE_URL}/update-quantity/${idHoaDonChiTiet}`,
+      null,
+      {
+        params: { isIncrease },
+      }
+    );
+    return response.data;
+  } catch (error) {
+    console.error("Lỗi khi cập nhật số lượng giày:", error);
+    throw error;
+  }
 };
 
 export const getListHoaDonCho = () => {
