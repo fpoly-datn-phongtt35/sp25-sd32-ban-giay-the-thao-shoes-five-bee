@@ -594,7 +594,7 @@ const QuanLyHoaDon = () => {
           );
         }
         // Nếu không có giảm giá, chỉ hiển thị giá gốc
-        return <span>{record.tongTien.toLocaleString("vi-VN")}đ</span>;
+        return <span>{record.tongTien?.toLocaleString("vi-VN")}đ</span>;
       },
       sorter: (a, b) => a.tongTien - b.tongTien,
     },
