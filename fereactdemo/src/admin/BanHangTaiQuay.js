@@ -1217,7 +1217,7 @@ const BanHangTaiQuay = () => {
       </div>
       <div className="right">
         <div>
-          <span>Số điện thoại:</span>
+          <span>Tìm khách hàng theo số điện thoại:</span>
           <Select
             allowClear
             showSearch
