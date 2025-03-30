@@ -11,15 +11,11 @@ import com.example.demo.repository.GioHangRepository;
 import com.example.demo.repository.UserRepository;
 import com.example.demo.service.GioHangService;
 import com.example.demo.service.UsersService;
-
-import java.math.BigDecimal;
 import java.sql.Date;
-import java.sql.Timestamp;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
@@ -76,9 +72,11 @@ public class GioHangServiceImpl implements GioHangService {
                         item.getGiayChiTietEntity().getGiayEntity().getTen(),
                         item.getGiayChiTietEntity()
                             .getGiayEntity()
-                            .getAnhGiayEntities()
+                            .getAnhGiayEntities() != null ? item.getGiayChiTietEntity()
+                                .getGiayEntity()
+                                .getAnhGiayEntities()
                             .get(0)
-                            .getTenUrl(),
+                            .getTenUrl() : null,
                         item.getGiayChiTietEntity().getMauSacEntity().getTen(),
                         item.getGiayChiTietEntity().getKichCoEntity().getTen(),
                         item.getGiayChiTietEntity().getGiaBan(),
