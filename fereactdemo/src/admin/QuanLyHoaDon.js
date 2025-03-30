@@ -51,7 +51,7 @@ const QuanLyHoaDon = () => {
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
-        return "chờ xác nhận";
+        return "Chờ xác nhận";
       case 1:
         return "Hóa đơn chờ thanh toán";
       case 2:
@@ -517,7 +517,7 @@ const QuanLyHoaDon = () => {
     },
 
     {
-      title: "User Name",
+      title: "Tên khách hàng",
       dataIndex: "user",
       key: "user",
       width: 150,
@@ -525,7 +525,7 @@ const QuanLyHoaDon = () => {
       ellipsis: true,
     },
     {
-      title: "User Phone",
+      title: "Số điện thoại",
       dataIndex: "user_phone",
       key: "user_phone",
       width: 120,
@@ -551,14 +551,14 @@ const QuanLyHoaDon = () => {
     //     },
     // },
     {
-      title: "Ordered On",
+      title: "Ngày đặt",
       dataIndex: "order_on",
       key: "order_on",
       width: 100,
       ...getColumnSearchProps("order_on"),
     },
     {
-      title: "Status",
+      title: "Trạng thái",
       dataIndex: "status",
       key: "status",
       width: 100,
@@ -599,7 +599,7 @@ const QuanLyHoaDon = () => {
       sorter: (a, b) => a.tongTien - b.tongTien,
     },
     {
-      title: "Action",
+      title: "Thao tác",
       key: "action",
       width: 120,
       render: (_, record) => (
@@ -684,26 +684,30 @@ const QuanLyHoaDon = () => {
       <div className="action_hoadon">
         <div style={{ display: "flex", gap: "30px" }}>
           <div className="filter">
-            <p>Filter by Status</p>
+            <p>Lọc theo trạng thái</p>
             <Select
-              defaultValue="---All---"
+              defaultValue="Tất cả"
               style={{ width: 120 }}
               onChange={handleStatusChange}
               options={[
-                { value: "Đã đặt", label: "Đã đặt" },
-                { value: "Đã đóng gói", label: "Đã đóng gói" },
-                { value: "Đang giao", label: "Đang giao" },
-                { value: "Đã thanh toán", label: "Đã thanh toán" },
+                { value: "Chờ xác nhận", label: "Chờ xác nhận" },
+                { value: "Hóa đơn chờ thanh toán", label: "Hóa đơn chờ thanh toán" },
+                { value: "Đã xác nhận", label: "Đã xác nhận" },
+                { value: "Chờ vận chuyển", label: "Chờ vận chuyển" },
+                { value: "Đang vận chuyển", label: "Đang vận chuyển" },
+                { value: "Đã vận chuyển", label: "Đã vận chuyển" },
+                { value: "Hoàn thành", label: "Hoàn thành" },
+                { value: "Trả hàng", label: "Trả hàng" },
                 { value: "Đã hủy", label: "Đã hủy" },
               ]}
             />
           </div>
           <div className="filter">
-            <p>Filter by Date</p>
+            <p>Lọc theo ngày</p>
             <DatePicker onChange={handleDateChange} format="DD/MM/YYYY" />
           </div>
           <div className="filter">
-            <p>Filter by Phone</p>
+            <p>Lọc theo số điện thoại</p>
             <Input
               placeholder="Nhập số điện thoại"
               value={phoneFilter}
@@ -749,7 +753,7 @@ const QuanLyHoaDon = () => {
         onCancel={() => setIsModalVisible(false)}
       >
         <Form form={form} layout="vertical">
-          <Form.Item name="status" label="Trạng thái">
+          <Form.Item name="status" label="Trạng thái hiện tại:">
             <Select
               options={[
                 { value: "cho xac nhan", label: "Chờ xác nhận" },

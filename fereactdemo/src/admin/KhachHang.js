@@ -49,7 +49,7 @@ const KhachHang = () => {
     const getKhachHangData = async () => {
         try {
             const result = await getAllKhachHang();
-            console.log(result);
+            console.log(result); // Kiểm tra dữ liệu trả về từ API
 
             const loadTable = result.data
                 .filter(item => item.userRoleEntities.some(role => role.roleEntity.ten === 'ROLE_USER')) // Lọc ROLE_USER
@@ -60,21 +60,18 @@ const KhachHang = () => {
                     HOTEN: item.hoTen,
                     MATKHAU: item.matKhau,
                     EMAIL: item.email,
-                    TRANG_THAI: item.trangThai || 0, // Mặc định là 0 nếu null
+                    TRANG_THAI: item.trangThai || 0,
                     SODIENTHOAI: item.soDienThoai,
                     NGAYSINH: item.ngaySinh,
                     ANH: item.anh
                 }));
 
-            console.log(loadTable);
-            const activeChatLieuData = loadTable.filter(item => item.TRANG_THAI === 0);
-            setActiveChatLieu(activeChatLieuData);
             setKhachHang(loadTable);
-
         } catch (error) {
             message.error("Lỗi khi tải dữ liệu khách hàng");
         }
     };
+
 
     const createKhachHang = async () => {
         if (!hoTen || !matKhau || !email) {
@@ -98,7 +95,7 @@ const KhachHang = () => {
         try {
             await addKhachHang(newData, selectedFile);
             message.success("Thêm khách hàng thành công!");
-            getKhachHangData();
+            await getKhachHangData(); // Đảm bảo hàm này trả về dữ liệu đúng
             resetForm();
         } catch (error) {
             message.error("Lỗi khi thêm khách hàng");
@@ -284,6 +281,7 @@ const KhachHang = () => {
             }}>
                 <h2 style={{ marginBottom: '20px' }}>Danh sách khách hàng</h2>
                 <Table
+                    rowKey="ID"
                     pagination={{ pageSize: 5, defaultPageSize: 5 }}
                     rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
                     columns={[
@@ -441,8 +439,8 @@ const KhachHang = () => {
                     </Form.Item>
                     <Form.Item label="Trạng Thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={1}>Đang sử dụng</Radio>
-                            <Radio value={2}>Không sử dụng</Radio>
+                            <Radio value={0}>Đang sử dụng</Radio>
+                            <Radio value={1}>Không sử dụng</Radio>
                         </Radio.Group>
                     </Form.Item>
                     <Form.Item label="Số Điện Thoại">

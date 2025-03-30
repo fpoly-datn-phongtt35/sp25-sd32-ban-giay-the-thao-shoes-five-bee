@@ -2,28 +2,25 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.HoaDonDto;
 import com.example.demo.dto.request.UserDto;
-import com.example.demo.entity.GiayChiTietEntity;
-import com.example.demo.entity.GioHangChiTietEntity;
-import com.example.demo.entity.HoaDonChiTietEntity;
-import com.example.demo.entity.HoaDonEntity;
+import com.example.demo.entity.*;
 import com.example.demo.repository.GiayChiTietRepository;
+import com.example.demo.repository.GiayRepository;
 import com.example.demo.repository.GioHangChiTietRepository;
 import com.example.demo.repository.HoaDonRepository;
-import com.example.demo.service.GioHangChiTietService;
+import com.example.demo.service.LichSuHoaDonService;
 import com.example.demo.service.TrangThaiHoaDonService;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
-import lombok.AllArgsConstructor;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.stereotype.Service;
-
 import java.io.ByteArrayOutputStream;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
 import java.util.stream.Collectors;
+import lombok.AllArgsConstructor;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
 
 @Service
 @AllArgsConstructor
@@ -34,6 +31,9 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     private GioHangChiTietRepository gioHangChiTietRepository;
     @Autowired
     private GiayChiTietRepository giayChiTietRepository;
+    @Autowired
+    private GiayRepository giayRepository;
+    @Autowired private LichSuHoaDonService lichSuHoaDonService;
 
     @Override
     public HoaDonEntity xacNhanHoaDon(UUID id) {
@@ -60,18 +60,23 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
                 hoaDon.setTrangThai(3); // Chờ xác nhận → Đã xác nhận
                 // Trừ số lượng tồn kho khi chuyển từ "Chờ xác nhận" sang "Đã xác nhận"
                 updateStockAfterOrderConfirmed(hoaDon);
+                lichSuHoaDonService.createLichSuHoaDon(id, 3,0);
                 break;
             case 3:
                 hoaDon.setTrangThai(4); // Đã xác nhận → Chờ vận chuyển
+                lichSuHoaDonService.createLichSuHoaDon(id, 4,3);
                 break;
             case 4:
                 hoaDon.setTrangThai(5); // Chờ vận chuyển → Đang vận chuyển
+                lichSuHoaDonService.createLichSuHoaDon(id, 5,4);
                 break;
             case 5:
                 hoaDon.setTrangThai(6); // Đang vận chuyển → Đã giao hàng
+                lichSuHoaDonService.createLichSuHoaDon(id, 6,5);
                 break;
             case 6:
                 hoaDon.setTrangThai(2); // Đã giao hàng → Hoàn thành
+                lichSuHoaDonService.createLichSuHoaDon(id, 2,6);
                 break;
             default:
                 throw new RuntimeException("Trạng thái hiện tại không thể xác nhận tiếp.");
@@ -92,7 +97,21 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
 
             giayChiTiet.setSoLuongTon(remainingStock);
             giayChiTietRepository.save(giayChiTiet);
+
+            updateTotalStock(giayChiTiet.getGiayEntity().getId());
         }
+    }
+
+    private void updateTotalStock(UUID idGiayEntity){
+        List<GiayChiTietEntity> giayChiTietEntities = giayChiTietRepository.findByGiayEntityId(idGiayEntity);
+
+        int totalStock = giayChiTietEntities.stream()
+                .mapToInt(GiayChiTietEntity::getSoLuongTon)
+                .sum();
+        GiayEntity giayEntity = giayRepository.findById(idGiayEntity)
+                .orElseThrow(() -> new RuntimeException("không tìm thấy sản phẩm "));
+        giayEntity.setSoLuongTon(totalStock);
+        giayRepository.save(giayEntity);
     }
 
     @Override
@@ -100,6 +119,7 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         Optional<HoaDonEntity> hoaDonOpt = hoaDonRepository.findById(id);
         if (hoaDonOpt.isPresent()) {
             HoaDonEntity hoaDon = hoaDonOpt.get();
+            lichSuHoaDonService.createLichSuHoaDon(id,8,hoaDon.getTrangThai());
             hoaDon.setTrangThai(8); // Đã hủy
             return hoaDonRepository.save(hoaDon);
         } else {

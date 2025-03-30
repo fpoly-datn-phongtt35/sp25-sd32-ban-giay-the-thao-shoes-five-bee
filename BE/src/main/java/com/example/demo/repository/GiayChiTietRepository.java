@@ -18,6 +18,8 @@ import org.springframework.stereotype.Repository;
 public interface GiayChiTietRepository
     extends JpaRepository<GiayChiTietEntity, UUID>, JpaSpecificationExecutor<GiayChiTietEntity> {
 
+  @Query("SELECT COALESCE(SUM(g.soLuongTon), 0) FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId")
+  int sumSoLuongTonByGiay(@Param("giayId") UUID giayId);
 
   List<GiayChiTietEntity> findByGiayEntity(GiayEntity giay);
 
