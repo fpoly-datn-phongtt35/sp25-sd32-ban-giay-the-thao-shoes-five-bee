@@ -503,7 +503,7 @@ const QuanLyHoaDon = () => {
 
   const columns = [
     {
-      title: "Order ID",
+      title: "Xem chi tiết hóa đơn",
       dataIndex: "order_id",
       key: "order_id",
       width: 120,
