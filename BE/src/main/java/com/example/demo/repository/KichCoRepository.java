@@ -9,4 +9,7 @@ import java.util.UUID;
 
 @Repository
 public interface KichCoRepository extends JpaRepository<KichCoEntity, UUID>, JpaSpecificationExecutor<KichCoEntity> {
+    public boolean existsByTenIgnoreCase(String ten);
+
+
 }

@@ -9,4 +9,7 @@ import java.util.UUID;
 
 @Repository
 public interface MauSacRepository extends JpaRepository<MauSacEntity, UUID>, JpaSpecificationExecutor<MauSacEntity> {
+    public boolean existsByTenIgnoreCase(String ten);
+
+
 }

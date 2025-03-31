@@ -27,15 +27,15 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
   @Override
   public void thanhToanTaiQuay(
-      UUID idHoaDon,
-      UUID idGiamGia,
-      Integer hinhThucThanhToan,
-      Boolean isGiaoHang,
-      HoaDonRequest hoaDonRequest) {
+          UUID idHoaDon,
+          UUID idGiamGia,
+          Integer hinhThucThanhToan,
+          Boolean isGiaoHang,
+          HoaDonRequest hoaDonRequest) {
     HoaDonEntity hoaDon =
-        hoaDonRepository
-            .findById(idHoaDon)
-            .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+            hoaDonRepository
+                    .findById(idHoaDon)
+                    .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
 
     // Kiểm tra người dùng đã mua hàng chưa
     UserEntity user = userRepository.findBySoDienThoai(hoaDonRequest.getSdtNguoiNhan());
@@ -53,23 +53,23 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
     // Tổng tiền sản phẩm gốc
     BigDecimal tongTienSanPhamGoc =
-        danhSachSanPham.stream()
-            .map(
-                hoaDonChiTiet ->
-                    hoaDonChiTiet
-                        .getGiaBan()
-                        .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            danhSachSanPham.stream()
+                    .map(
+                            hoaDonChiTiet ->
+                                    hoaDonChiTiet
+                                            .getGiaBan()
+                                            .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    // Tổng tiền saản phẩm có khuyễn mãi sản phẩm
+    // Tổng tiền saản phẩm có khuyến mãi sản phẩm
     BigDecimal tongTienSanPhamKhiGiam =
-        danhSachSanPham.stream()
-            .map(
-                hoaDonChiTiet ->
-                    hoaDonChiTiet
-                        .getDonGia()
-                        .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
-            .reduce(BigDecimal.ZERO, BigDecimal::add);
+            danhSachSanPham.stream()
+                    .map(
+                            hoaDonChiTiet ->
+                                    hoaDonChiTiet
+                                            .getDonGia()
+                                            .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
+                    .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     BigDecimal soTienGiamKhiApMa = BigDecimal.ZERO;
     if (idGiamGia != null) {
@@ -77,12 +77,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
       // Nếu mã giảm giá tồn tại, kiểm tra điều kiện áp dụng
       if (giamGia != null
-          && giamGia.getSoLuong() > 0
-          && tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0
-          && giamGia.getTrangThai() == 0) {
+              && giamGia.getSoLuong() > 0
+              && tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0
+              && giamGia.getTrangThai() == 0) {
         soTienGiamKhiApMa =
-            giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
-                idHoaDon, giamGia, tongTienSanPhamKhiGiam);
+                giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
+                        idHoaDon, giamGia, tongTienSanPhamKhiGiam);
       }
     }
 
@@ -93,9 +93,9 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setNgayThanhToan(new Date());
     hoaDon.setMoTa(hoaDonRequest.getMoTa());
     hoaDon.setTenNguoiNhan(
-        (user != null || hoaDonRequest.getTenNguoiNhan() != null)
-            ? hoaDonRequest.getTenNguoiNhan()
-            : "Khách lẻ");
+            (user != null || hoaDonRequest.getTenNguoiNhan() != null)
+                    ? hoaDonRequest.getTenNguoiNhan()
+                    : "Khách lẻ");
     hoaDon.setSdtNguoiNhan(hoaDonRequest.getSdtNguoiNhan());
     hoaDon.setXa(hoaDonRequest.getXa());
     hoaDon.setHuyen(hoaDonRequest.getHuyen());
@@ -106,28 +106,38 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setSoTienGiam(soTienGiam.add(soTienGiamKhiApMa));
     hoaDon.setPhiShip(phiShip);
     hoaDon.setHinhThucNhanHang(isGiaoHang ? 1 : 2);
-    hoaDon.setTrangThai(
-            isGiaoHang
-                    ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2)  // Trạng thái là 3 nếu là Tiền mặt hoặc Chuyển khoản, 2 nếu là thanh toán khi giao hàng
-                    : 2  // Nếu không giao hàng, trạng thái là 2
-    );
-    // - số lượng tồn kho của sản phẩm**
-    for (HoaDonChiTietEntity hoaDonChiTiet : danhSachSanPham) {
-      GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
-      int soLuongMua = hoaDonChiTiet.getSoLuong();
 
-      if (giayChiTiet.getSoLuongTon() < soLuongMua) {
-        throw new IllegalArgumentException("Số lượng sản phẩm " + giayChiTiet.getId() + " không đủ để thanh toán");
+    // Cập nhật trạng thái hóa đơn
+    if (hinhThucThanhToan == 2) {
+      hoaDon.setTrangThai(0);  // Hóa đơn chờ thanh toán khi giao hàng
+    } else {
+      hoaDon.setTrangThai(
+              isGiaoHang
+                      ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2)  // Trạng thái là 3 nếu là Tiền mặt hoặc Chuyển khoản, 2 nếu là thanh toán khi giao hàng
+                      : 2  // Nếu không giao hàng, trạng thái là 2
+      );
+    }
+
+    // Kiểm tra và trừ số lượng tồn kho, chỉ khi không phải thanh toán khi giao hàng (hình thức thanh toán khác 2)
+    if (hinhThucThanhToan != 2) {
+      for (HoaDonChiTietEntity hoaDonChiTiet : danhSachSanPham) {
+        GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
+        int soLuongMua = hoaDonChiTiet.getSoLuong();
+
+        if (giayChiTiet.getSoLuongTon() < soLuongMua) {
+          throw new IllegalArgumentException("Số lượng sản phẩm " + giayChiTiet.getId() + " không đủ để thanh toán");
+        }
+
+        giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - soLuongMua);
+        giayChiTietRepository.save(giayChiTiet);
       }
-
-      giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - soLuongMua);
-      giayChiTietRepository.save(giayChiTiet);
     }
 
     hoaDon.setUserEntity(user);
-
     hoaDonRepository.save(hoaDon);
   }
+
+
 
   @Override
   public HoaDonEntity createHoaDonBanHangTaiQuay() {
