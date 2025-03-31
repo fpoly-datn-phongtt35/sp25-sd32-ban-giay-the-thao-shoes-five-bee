@@ -174,9 +174,9 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       }
 
       hoaDonChiTiet.setSoLuong(newSoLuong);
-      giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
-
-      giayChiTietRepository.save(giayChiTiet);
+//      giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
+//
+//      giayChiTietRepository.save(giayChiTiet);
       return hoaDonChiTietRepository.save(hoaDonChiTiet);
     }
 
@@ -247,12 +247,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
     List<HoaDonChiTietEntity> hoaDonChiTietList = hoaDonChiTietRepository.findByHoaDon(hoaDon);
 
-    hoaDonChiTietList.forEach(
-        chiTiet -> {
-          GiayChiTietEntity giayChiTiet = chiTiet.getGiayChiTietEntity();
-          giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + chiTiet.getSoLuong());
-          giayChiTietRepository.save(giayChiTiet);
-        });
+//    hoaDonChiTietList.forEach(
+//        chiTiet -> {
+//          GiayChiTietEntity giayChiTiet = chiTiet.getGiayChiTietEntity();
+////          giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + chiTiet.getSoLuong());
+////          giayChiTietRepository.save(giayChiTiet);
+//        });
 
     hoaDonChiTietRepository.deleteAll(hoaDonChiTietList);
 
