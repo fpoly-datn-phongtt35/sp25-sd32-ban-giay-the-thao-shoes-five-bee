@@ -1,12 +1,25 @@
 import React, { useState, useEffect } from "react";
 import "./GiamGiaSanPham.css";
-import { Space, Table, Button, Input, message, Modal, Form } from "antd";
+import {
+  Space,
+  Table,
+  Button,
+  Input,
+  message,
+  Modal,
+  Form,
+  Select,
+  DatePicker,
+  Row,
+  Col,
+} from "antd";
 import {
   addPhieuGiamGia,
   deletePhieuGiamGia,
   getPhieuGiamGia,
   updatePhieuGiamGia,
 } from "../service/PhieuGiamGiaService";
+import { FilterOutlined } from "@ant-design/icons";
 
 const DotGiamGia = () => {
   const [ma, setMa] = useState("");
@@ -21,6 +34,46 @@ const DotGiamGia = () => {
   const [editingDotGiamGia, setEditingDotGiamGia] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
+  const { RangePicker } = DatePicker;
+
+  const [filters, setFilters] = useState({
+    ten: "",
+    phanTramGiam: "",
+    tuNgay: null,
+    denNgay: null,
+    trangThai: "all",
+  });
+
+  const handleChange = (key, value) => {
+    setFilters((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const handleReset = () => {
+    setFilters({
+      ten: "",
+      phanTramGiam: "",
+      tuNgay: null,
+      denNgay: null,
+      trangThai: "all",
+    });
+    loadDotGiamGia();
+  };
+
+  const handleApply = () => {
+    let newData = dotGiamGia.filter((item) => {
+      return (
+        (filters.ten === "" || item.TEN.includes(filters.ten)) &&
+        (filters.phanTramGiam === "" ||
+          item.PHAN_TRAM_GIAM.toString() === filters.phanTramGiam) &&
+        (filters.tuNgay === null ||
+          new Date(item.NGAY_BAT_DAU) >= filters.tuNgay) &&
+        (filters.denNgay === null ||
+          new Date(item.NGAY_KET_THUC) <= filters.denNgay) &&
+        (filters.trangThai === "all" || item.TRANG_THAI === filters.trangThai)
+      );
+    });
+    setDotGiamGia(newData);
+  };
 
   const loadDotGiamGia = async () => {
     try {
@@ -159,7 +212,8 @@ const DotGiamGia = () => {
       title: "Trạng Thái",
       dataIndex: "TRANG_THAI",
       key: "TRANG_THAI",
-      render: (text) => (text === 0 ? "Hoạt động" : text === 1 ? "Không hoạt động" : "Đang chờ"),
+      render: (text) =>
+        text === 0 ? "Hoạt động" : text === 1 ? "Không hoạt động" : "Đang chờ",
     },
     {
       title: "Thao tác",
@@ -208,6 +262,71 @@ const DotGiamGia = () => {
     <div className="dot-giam-gia">
       <h1>Quản lý giảm giá sản phẩm</h1>
       <Button onClick={handleAdd}>Thêm Phiếu Giảm Giá</Button>
+
+      {/* bộ lọc */}
+      <div style={{ border: "1px solid #ddd", padding: 20, borderRadius: 5, marginLeft: 200 }}>
+        <h3>
+          <FilterOutlined /> Bộ lọc
+        </h3>
+        <Row gutter={[16, 16]}>
+          <Col span={8}>
+            <label>Tên:</label>
+            <Input
+              placeholder="Tìm kiếm"
+              value={filters.ten}
+              onChange={(e) => handleChange("ten", e.target.value)}
+            />
+          </Col>
+          <Col span={8}>
+            <label>Phần trăm giảm:</label>
+            <Input
+              placeholder="Nhập phần trăm giảm"
+              value={filters.phanTramGiam}
+              onChange={(e) => handleChange("phanTramGiam", e.target.value)}
+            />
+          </Col>
+          <Col span={8}>
+            <label>Từ ngày:</label>
+            <DatePicker
+              style={{ width: "100%" }}
+              placeholder="Tìm kiếm"
+              value={filters.tuNgay}
+              onChange={(date) => handleChange("tuNgay", date)}
+            />
+          </Col>
+          <Col span={8}>
+            <label>Đến ngày:</label>
+            <DatePicker
+              style={{ width: "100%" }}
+              placeholder="Tìm kiếm"
+              value={filters.denNgay}
+              onChange={(date) => handleChange("denNgay", date)}
+            />
+          </Col>
+          <Col span={8}>
+            <label>Trạng thái:</label>
+            <Select
+              style={{ width: "100%" }}
+              value={filters.trangThai}
+              onChange={(value) => handleChange("trangThai", value)}
+            >
+              <Select.Option value="all">Tất cả</Select.Option>
+              <Select.Option value={0}>Hoạt động</Select.Option>
+              <Select.Option value={1}>Không hoạt động</Select.Option>
+              <Select.Option value={2}>Đang chờ</Select.Option>
+            </Select>
+          </Col>
+        </Row>
+        <div style={{ marginTop: 20, textAlign: "center" }}>
+          <Button onClick={handleReset} style={{ marginRight: 10 }}>
+            Làm mới
+          </Button>
+          <Button type="primary" onClick={handleApply}>
+            Áp dụng
+          </Button>
+        </div>
+      </div>
+
       <Table
         columns={columns}
         dataSource={dotGiamGia}
