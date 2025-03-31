@@ -139,6 +139,11 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
         .orElse(null);
   }
 
+  private String generateMa() {
+    return "GG" + System.currentTimeMillis();
+  }
+
+
   @Override
   public GiamGiaSanPhamEntity detail(GiamGiaSanPhamDto giamGiaSanPhamDto) {
     Optional<GiamGiaSanPhamEntity> optional =

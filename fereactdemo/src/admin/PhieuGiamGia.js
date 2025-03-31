@@ -141,10 +141,8 @@ const DotGiamGia = () => {
   };
 
   const columns = [
-    // { title: "ID", dataIndex: "ID", key: "ID" },
-    // { title: "Mã", dataIndex: "MA", key: "MA" },
     { title: "Tên", dataIndex: "TEN", key: "TEN" },
-
+    { title: "Mã", dataIndex: "MA", key: "MA" },
     { title: "Ngày Bắt Đầu", dataIndex: "NGAY_BAT_DAU", key: "NGAY_BAT_DAU" },
     {
       title: "Ngày Kết Thúc",
@@ -263,9 +261,9 @@ const DotGiamGia = () => {
         onCancel={handleModalCancel}
       >
         <Form layout="vertical">
-          <Form.Item label="Mã">
+          {/* <Form.Item label="Mã">
             <Input value={ma} onChange={(e) => setMa(e.target.value)} />
-          </Form.Item>
+          </Form.Item> */}
           <Form.Item label="Tên">
             <Input value={ten} onChange={(e) => setTen(e.target.value)} />
           </Form.Item>
