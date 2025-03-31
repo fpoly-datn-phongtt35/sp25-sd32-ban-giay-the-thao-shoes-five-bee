@@ -4,16 +4,15 @@ import com.fasterxml.jackson.annotation.JsonFormat;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonManagedReference;
 import jakarta.persistence.*;
+import java.math.BigDecimal;
+import java.util.Date;
+import java.util.List;
+import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
-
-import java.math.BigDecimal;
-import java.util.Date;
-import java.util.List;
-import java.util.UUID;
 
 @Table(name = "HOA_DON")
 @Entity
@@ -93,4 +92,8 @@ public class HoaDonEntity {
     @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
     @JsonManagedReference
     private List<GiamGiaHoaDonChiTietEntity> chuongTrinhGiamGiaChiTietHoaDons;
+
+    @OneToMany(mappedBy = "hoaDonEntity", cascade = CascadeType.ALL, orphanRemoval = true)
+    @JsonManagedReference
+    private List<LichSuHoaDonEntity> lichSuHoaDonEntities;
 }

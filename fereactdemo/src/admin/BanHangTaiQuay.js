@@ -53,6 +53,8 @@ const BanHangTaiQuay = () => {
   const [selectedOption, setSelectedOption] = useState(null);
   const [customerMoney, setCustomerMoney] = useState("");
   const [giay, setGiay] = useState([]);
+  const [sdtNguoiNhan, setSdtNguoiNhan] = useState("");
+
   const [selectedProducts, setSelectedProducts] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalHoaDon, setTotalHoaDon] = useState(0);
@@ -697,7 +699,12 @@ const BanHangTaiQuay = () => {
       ma: `HD${moment().format("YYYYMMDDHHmmss")}`,
       moTa: isGiaoHang ? "Giao hàng" : "Thanh toán tại quầy",
       tenNguoiNhan: hoTen || "Khách lẻ",
-      sdtNguoiNhan: soDienThoai || null,
+      sdtNguoiNhan:
+        selectedKhachHang
+          ? soDienThoai
+          : sdtNguoiNhan?.trim() !== ""
+            ? sdtNguoiNhan
+            : null,
       tongTien: totalHoaDon,
       diaChi: isGiaoHang ? diaChi : null,
       idGiamGia: selectedMaGiamGia || null,
@@ -948,20 +955,20 @@ const BanHangTaiQuay = () => {
     }).some((value) => value.includes(searchTerm.toLowerCase()))
   );
   useEffect(() => {
-    if (soDienThoai.trim() === "") {
+    if (!soDienThoai || soDienThoai.trim() === "") {
       setSuggestions([]);
       setSelectedKhachHang(null);
       setHoTen("");
       return;
     }
 
-    // Lọc khách hàng có số điện thoại chứa chuỗi nhập vào
     const filteredKhachHang = khachHangList.filter(
-      (kh) => kh.soDienThoai.startsWith(soDienThoai) // Kiểm tra số bắt đầu bằng chuỗi nhập
+      (kh) => kh.soDienThoai.startsWith(soDienThoai)
     );
 
     setSuggestions(filteredKhachHang);
   }, [soDienThoai, khachHangList]);
+
 
   // Khi chọn khách hàng từ danh sách gợi ý
   const handleSelectKhachHang = (value) => {
@@ -972,6 +979,7 @@ const BanHangTaiQuay = () => {
       setSelectedKhachHang(foundKhachHang.id);
     }
   };
+
 
   // Thêm hàm xử lý xóa hóa đơn
   const handleDeletePage = async (hoaDonId) => {
@@ -1209,54 +1217,51 @@ const BanHangTaiQuay = () => {
       </div>
       <div className="right">
         <div>
-          <span>Số Điện Thoại :</span>
+          <span>Tìm khách hàng theo số điện thoại:</span>
           <Select
+            allowClear
             showSearch
             value={soDienThoai}
             placeholder="Nhập số điện thoại khách hàng"
-            onSearch={(value) => setSoDienThoai(value)} // Nhập để gợi ý
-            onChange={(value) => setSoDienThoai(value)} // Chọn gợi ý sẽ điền vào ô nhập
-            style={{ width: "100%" }}
-            filterOption={false} // Không cần lọc mặc định, đã lọc bằng useEffect
+            onSearch={(value) => setSoDienThoai(value)}
+            onChange={(value) => {
+              setSoDienThoai(value);
+              setSdtNguoiNhan(value);
+              const selected = khachHangList.find((kh) => kh.soDienThoai === value);
+              if (selected) {
+                setHoTen(selected.hoTen);
+                setSelectedKhachHang(selected.id);
+                setDiaChi(selected.diaChi || "");
+              }
+            }}
+            style={{ width: "100%", marginBottom: "10px" }}
+            filterOption={false}
+            onClear={handleClear}
           >
             {suggestions.map((kh) => (
-              <Option
-                key={kh.id}
-                value={kh.soDienThoai}
-                onClick={() => handleSelectKhachHang(kh.id)}
-              >
+              <Option key={kh.id} value={kh.soDienThoai}>
                 {kh.soDienThoai} - {kh.hoTen}
               </Option>
             ))}
           </Select>
 
-          {selectedKhachHang && (
-            <>
-              <br />
-              <span>Họ Tên Khách Hàng :</span>
-              <Input
-                type="text"
-                value={hoTen}
-                readOnly
-                placeholder="Tên khách hàng"
-              />
-              {/* 
-              <br />
-              <span>Chọn Khách Hàng:</span>
-              <Select
-                placeholder="Chọn Khách Hàng"
-                value={selectedKhachHang}
-                onChange={handleSelectKhachHang}
-                style={{ width: "100%" }}
-              >
-                {khachHangList.map((hkh) => (
-                  <Option key={hkh.id} value={hkh.id}>
-                    {hkh.hoTen}
-                  </Option>
-                ))}
-              </Select> */}
-            </>
-          )}
+          <span>Họ tên:</span>
+          <Input
+            type="text"
+            value={hoTen}
+            onChange={(e) => setHoTen(e.target.value)}
+            placeholder="Nhập họ tên khách hàng"
+            style={{ marginBottom: "10px" }}
+          />
+          <span>SĐT người nhận:</span>
+          <Input
+            type="text"
+            value={sdtNguoiNhan}
+            onChange={(e) => setSdtNguoiNhan(e.target.value)}
+            placeholder="Nhập số điện thoại người nhận"
+            style={{ marginBottom: "10px" }}
+          />
+
         </div>
         {isGiaoHang && (
           <div>

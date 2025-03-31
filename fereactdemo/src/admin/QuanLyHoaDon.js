@@ -503,7 +503,7 @@ const QuanLyHoaDon = () => {
 
   const columns = [
     {
-      title: "Order ID",
+      title: "Xem chi tiết hóa đơn",
       dataIndex: "order_id",
       key: "order_id",
       width: 120,
@@ -517,7 +517,7 @@ const QuanLyHoaDon = () => {
     },
 
     {
-      title: "User Name",
+      title: "Tên khách hàng",
       dataIndex: "user",
       key: "user",
       width: 150,
@@ -525,7 +525,7 @@ const QuanLyHoaDon = () => {
       ellipsis: true,
     },
     {
-      title: "User Phone",
+      title: "Số điện thoại",
       dataIndex: "user_phone",
       key: "user_phone",
       width: 120,
@@ -594,7 +594,7 @@ const QuanLyHoaDon = () => {
           );
         }
         // Nếu không có giảm giá, chỉ hiển thị giá gốc
-        return <span>{record.tongTien.toLocaleString("vi-VN")}đ</span>;
+        return <span>{record.tongTien?.toLocaleString("vi-VN")}đ</span>;
       },
       sorter: (a, b) => a.tongTien - b.tongTien,
     },
@@ -686,7 +686,7 @@ const QuanLyHoaDon = () => {
           <div className="filter">
             <p>Lọc theo trạng thái</p>
             <Select
-              defaultValue="---All---"
+              defaultValue="Tất cả"
               style={{ width: 120 }}
               onChange={handleStatusChange}
               options={[

@@ -9,10 +9,12 @@ const KichCo = () => {
     const [selectedRowKeys, setSelectedRowKeys] = useState([]);
     const [editingSize, setEditingSize] = useState(null);
     const [isModalVisible, setIsModalVisible] = useState(null);
-    const [activeChatLieu, setActiveChatLieu] = useState([]);
+    const [searchTerm, setSearchTerm] = useState(''); // Thêm state cho từ khóa tìm kiếm
+
     const getActiveChatLieu = () => {
         return size.filter(item => item.TRANG_THAI === 0);
     }
+
     const convertTrangThai = (status) => {
         return status === 0 ? "Hoạt động" : "Không hoạt động";
     };
@@ -27,12 +29,9 @@ const KichCo = () => {
             const sizeData = result.data.map((item, index) => ({
                 key: index,
                 ID: item.id,
-
                 TEN: item.ten,
                 TRANG_THAI: item.trangThai,
             }));
-            const activeChatLieuData = sizeData.filter(item => item.TRANG_THAI === 0);
-            setActiveChatLieu(activeChatLieuData);
             setSize(sizeData);
         } catch (error) {
             console.error("Lỗi khi tải dữ liệu kích cỡ:", error);
@@ -74,9 +73,9 @@ const KichCo = () => {
     };
 
     const onSelectChange = (newSelectedRowKeys) => {
-        console.log('selectedRowKeys changed: ', newSelectedRowKeys);
         setSelectedRowKeys(newSelectedRowKeys);
     };
+
     const handleUpdate = (record) => {
         setEditingSize(record);
         setTen(record.TEN);
@@ -102,20 +101,19 @@ const KichCo = () => {
 
         const updatedTrangThai = value === 1 ? 0 : 1;
 
-        // Đảm bảo ID tồn tại trước khi gửi request
         if (!editingSize?.ID) {
             message.error("Không tìm thấy ID của kích cỡ cần cập nhật!");
             return;
         }
 
         const updatedSize = {
-            id: editingSize.ID, // Thêm ID vào DTO
-            ten: sizeValue, // Chuyển về số thay vì string
+            id: editingSize.ID,
+            ten: sizeValue,
             trangThai: updatedTrangThai,
         };
 
         try {
-            await updateSize(updatedSize); // Không truyền ID vào URL nữa
+            await updateSize(updatedSize);
             message.success("Cập nhật kích cỡ thành công!");
             loadSize();
             setIsModalVisible(false);
@@ -128,7 +126,6 @@ const KichCo = () => {
         }
     };
 
-
     const handleDelete = async (record) => {
         try {
             await deleteSize(record.ID);
@@ -140,16 +137,17 @@ const KichCo = () => {
     };
 
     const onChange = (e) => {
-        console.log('radio checked', e.target.value);
         setValue(e.target.value);
     };
 
+    // Lọc danh sách kích cỡ theo tên
+    const filteredSize = size.filter(item => item.TEN.toLowerCase().includes(searchTerm.toLowerCase()));
 
     return (
         <div style={{ display: 'flex', justifyContent: 'center' }}>
             <div style={{ width: '100%', marginLeft: '350px' }}>
                 <h1>Quản lý kích cỡ</h1>
-                <Input placeholder='Tên Kích Cỡ' value={ten} onChange={(e) => setTen(e.target.value)} />
+                <Input placeholder='Nhập kích cỡ để thêm' value={ten} onChange={(e) => setTen(e.target.value)} />
                 <br /><br />
                 <Radio.Group onChange={onChange} value={value}>
                     <Radio value={1}>Hoạt động</Radio>
@@ -160,27 +158,41 @@ const KichCo = () => {
                     Thêm
                 </Button>
                 <br /><br />
-                <Table pagination={{ pageSize: 5, defaultPageSize: 5 }} rowSelection={{ selectedRowKeys, onChange: onSelectChange }} columns={[
-                    {
-                        title: 'Tên Kích Cỡ',
-                        dataIndex: 'TEN',
-                    },
-                    {
-                        title: 'Trạng thái',
-                        dataIndex: 'TRANG_THAI',
-                        render: (text, record) => convertTrangThai(record.TRANG_THAI),
-                    },
-                    {
-                        title: 'Thao tác',
-                        key: 'action',
-                        render: (text, record) => (
-                            <Space size="middle">
-                                <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
-                                <Button onClick={() => handleDelete(record)}>Xóa</Button>
-                            </Space>
-                        ),
-                    },
-                ]} dataSource={size} />
+
+                {/* Tìm kiếm theo tên kích cỡ */}
+                <Input
+                    placeholder="Tìm kiếm kích cỡ"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                />
+                <br /><br />
+
+                <Table
+                    pagination={{ pageSize: 5, defaultPageSize: 5 }}
+                    rowSelection={{ selectedRowKeys, onChange: onSelectChange }}
+                    columns={[
+                        {
+                            title: 'Tên Kích Cỡ',
+                            dataIndex: 'TEN',
+                        },
+                        {
+                            title: 'Trạng thái',
+                            dataIndex: 'TRANG_THAI',
+                            render: (text, record) => convertTrangThai(record.TRANG_THAI),
+                        },
+                        {
+                            title: 'Thao tác',
+                            key: 'action',
+                            render: (text, record) => (
+                                <Space size="middle">
+                                    <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
+                                    <Button onClick={() => handleDelete(record)}>Xóa</Button>
+                                </Space>
+                            ),
+                        },
+                    ]}
+                    dataSource={filteredSize} // Sử dụng dữ liệu đã lọc
+                />
             </div>
             <Modal title="Update Kích Cỡ" open={isModalVisible} onOk={handleUpdateSubmit} onCancel={() => setIsModalVisible(false)}>
                 <Form>
