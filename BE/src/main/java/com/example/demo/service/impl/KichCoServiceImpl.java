@@ -36,12 +36,23 @@ public class KichCoServiceImpl implements KichCoService {
 
     @Override
     public KichCoEntity add(KichCoDto kichCoDto) {
+        // Trim khoảng trắng và chuyển tên kích cỡ về chữ thường để so sánh không phân biệt chữ hoa và chữ thường
+        String tenKichCo = kichCoDto.getTen().trim().toLowerCase();
+
+        // Kiểm tra xem tên kích cỡ đã tồn tại chưa
+        if (kichCoRepository.existsByTenIgnoreCase(tenKichCo)) {
+            throw new IllegalArgumentException("Tên kích cỡ đã tồn tại");
+        }
+
         KichCoEntity kichCoEntity = new KichCoEntity();
         kichCoEntity.setMa(kichCoDto.getMa());
         kichCoEntity.setTen(kichCoDto.getTen());
         kichCoEntity.setTrangThai(kichCoDto.getTrangThai());
+
         return kichCoRepository.save(kichCoEntity);
     }
+
+
 
     @Override
     public KichCoEntity addNhanh(KichCoDto kichCoDto) {

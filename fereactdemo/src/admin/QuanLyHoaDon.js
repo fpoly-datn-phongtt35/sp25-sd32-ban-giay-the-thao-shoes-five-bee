@@ -21,7 +21,12 @@ import {
   printfHoaDon,
   updateHoaDon,
   xacNhanHoaDon,
+
 } from "../service/HoaDonService";
+import {
+  getLichSuHoaDon
+
+} from "../service/LichSuHoaDonService";
 import moment from "moment";
 import {
   deleteHoaDonChiTiet,
@@ -48,6 +53,8 @@ const QuanLyHoaDon = () => {
   const [selectedOrder, setSelectedOrder] = useState();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [phoneFilter, setPhoneFilter] = useState("");
+  const [isHistoryPopupVisible, setIsHistoryPopupVisible] = useState(false);
+  const [lichSuHoaDon, setLichSuHoaDon] = useState([]);
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -74,6 +81,24 @@ const QuanLyHoaDon = () => {
   useEffect(() => {
     fetchHoaDon();
   }, [statusFilter, dateFilter]);
+
+  const fetchLichSuHoaDon = async () => {
+    try {
+      const response = await getLichSuHoaDon(); // Gọi API getAll từ backend
+      console.log("Lịch sử hóa đơn:", response.data); // Kiểm tra dữ liệu trả về
+      setLichSuHoaDon(response.data); // Cập nhật dữ liệu vào state
+      setIsHistoryPopupVisible(true); // Mở popup nếu có dữ liệu
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch sử hóa đơn:", error);
+      message.error("Không thể lấy lịch sử hóa đơn!");
+    }
+  };
+
+  const handleHistoryClick = () => {
+    fetchLichSuHoaDon(); // Gọi API để fetch dữ liệu lịch sử hóa đơn
+    setIsHistoryPopupVisible(true); // Mở popup sau khi dữ liệu được fetch
+  };
+
 
   const fetchHoaDon = async () => {
     try {
@@ -103,9 +128,14 @@ const QuanLyHoaDon = () => {
           trangThai: item.trangThai,
           diaChi: item.diaChi || "Không có địa chỉ", // Địa chỉ đơn hàng
           hinhThucMua: item.hinhThucMua === 1 ? "Tại Quầy" : "Online",
-          hinhThucThanhToan:
-            item.hinhThucThanhToan === 0 ? "Tiền mặt" :
-              item.hinhThucThanhToan === 1 ? "Chuyển khoản" : "VNPay",
+          hinhThucThanhToan: item.hinhThucThanhToan === 0
+            ? "Tiền mặt"
+            : item.hinhThucThanhToan === 1
+              ? "Chuyển khoản"
+              : item.hinhThucThanhToan === 2
+                ? "Thanh toán khi nhận hàng"
+                : "VNPay",
+
           phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
           soTienGiam: item.soTienGiam ?? 0, // Số tiền giảm giá
           tongTien: tongTienThanhToan, // Tổng tiền thanh toán
@@ -669,7 +699,7 @@ const QuanLyHoaDon = () => {
       case 1:
         return "Chuyển khoản";
       case 2:
-        return "VNPay";
+        return "Thanh toán khi nhận hàng";
       default:
         return "Không xác định";
     }
@@ -717,6 +747,13 @@ const QuanLyHoaDon = () => {
           </div>
         </div>
         <div className="filter_right">
+          <Button
+            type="default"
+            size="small"
+            onClick={handleHistoryClick}
+          >
+            Lịch sử
+          </Button>
           <Button
             type="primary"
             onClick={handlePrint}
@@ -772,7 +809,42 @@ const QuanLyHoaDon = () => {
             />
           </Form.Item>
         </Form>
+
+
+
       </Modal>
+      {isHistoryPopupVisible && (
+        <div className="popup-overlay" onClick={() => setIsHistoryPopupVisible(false)}>
+          <div className="popup-content" onClick={(e) => e.stopPropagation()}>
+            <div className="history-popup">
+              <h1>Lịch sử hóa đơn</h1>
+              <Button style={{ float: "right" }} onClick={() => setIsHistoryPopupVisible(false)}>
+                Đóng
+              </Button>
+              <table border="1" style={{ width: "100%", borderCollapse: "collapse" }}>
+                <thead>
+                  <tr>
+                    <th>Ngày cập nhật</th>
+                    <th>Trạng thái cũ</th>
+                    <th>Trạng thái mới</th>
+                    <th>Người cập nhật</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {lichSuHoaDon.map((historyItem, index) => (
+                    <tr key={index}>
+                      <td>{moment(historyItem.thoiGianCapNhat).format("DD/MM/YYYY")}</td>
+                      <td>{mapTrangThai(historyItem.trangThaiCu)}</td>
+                      <td>{mapTrangThai(historyItem.trangThaiMoi)}</td>
+                      <td>{historyItem.nguoiCapNhat}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      )}
 
       {/* ĐÂY LÀ CODE CỦA PHẦN HÓA ĐƠN CHI TIẾT NHA MỌI NGƯỜI  */}
 
@@ -784,6 +856,13 @@ const QuanLyHoaDon = () => {
             </div>
             <Button style={{ float: "right" }} onClick={togglePopup}>
               Back
+            </Button>
+            <Button
+              type="default"
+              size="small"
+              onClick={handleHistoryClick}
+            >
+              Lịch sử
             </Button>
             <Button
               style={{ float: "right", marginRight: "10px" }}
