@@ -4,7 +4,7 @@ import {
 } from "antd";
 import { Modal, Button, Form } from 'react-bootstrap';
 import 'bootstrap/dist/css/bootstrap.min.css';
-import { createReturnRequest, fetchOrderDetails } from '../service/ReturnOrderService';  // API tạo yêu cầu trả hàng
+import { createReturnOrder } from '../service/ReturnOrderService';  // API tạo yêu cầu trả hàng
 
 function ReturnRequestModal({ onAddReturnRequest, orderDetails }) {
   const [show, setShow] = useState(false);
@@ -23,15 +23,7 @@ function ReturnRequestModal({ onAddReturnRequest, orderDetails }) {
     // fetchOrderData();  // Lấy chi tiết đơn hàng
   };
 
-  // Fetch chi tiết đơn hàng
-  //   const fetchOrderData = async () => {
-  //     try {
-  //       const response = await fetchOrderDetails(orderId);
-  //       setOrderDetails(response.data);  // Giả sử API trả về object chi tiết đơn hàng
-  //     } catch (error) {
-  //       console.error("Lỗi khi lấy chi tiết đơn hàng", error);
-  //     }
-  //   };
+
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -41,18 +33,6 @@ function ReturnRequestModal({ onAddReturnRequest, orderDetails }) {
     }));
   };
 
-  //   const handleItemSelection = (e, itemId) => {
-  //     const isChecked = e.target.checked;
-  //     setReturnRequest(prevState => {
-  //       let updatedItems = prevState.returnItems;
-  //       if (isChecked) {
-  //         updatedItems = [...updatedItems, itemId];
-  //       } else {
-  //         updatedItems = updatedItems.filter(id => id !== itemId);
-  //       }
-  //       return { ...prevState, returnItems: updatedItems };
-  //     });
-  //   };
 
   const handleItemSelection = (e, itemId) => {
     const isChecked = e.target.checked;
@@ -69,17 +49,17 @@ function ReturnRequestModal({ onAddReturnRequest, orderDetails }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    try {
-      console.log(returnRequest);
-      const response = await createReturnRequest(returnRequest);
-      if (response.data) {
-        onAddReturnRequest(response.data);  // Gọi callback để cập nhật danh sách yêu cầu trả hàng
-      }
-      message.success("Gửi yêu cầu thành công!");
-      handleClose();  // Đóng modal sau khi hoàn thành
-    } catch (error) {
-      console.error("Lỗi khi tạo yêu cầu trả hàng", error);
-      message.error("Lỗi khi tải dữ liệu!");
+    const returnItems = returnRequest.returnItems.map(itemId => ({
+      hoaDonChiTietId: itemId,
+      soLuongTra: 1
+    }));
+
+    const response = await createReturnOrder(returnRequest.orderId, returnItems);
+
+    // Xử lý phản hồi
+    if (response) {
+      message.success("Yêu cầu trả hàng đã được tạo");
+      handleClose();
     }
   };
 
@@ -123,9 +103,9 @@ function ReturnRequestModal({ onAddReturnRequest, orderDetails }) {
                   <Form.Check
                     key={item.id}
                     type="checkbox"
-                    label={`${item.ten} - Số lượng: ${item.soLuong}`}
+                    label={`${item.giay} - Số lượng: ${item.soLuong}`}
                     checked={returnRequest.returnItems.includes(item.id)}  // Mặc định được chọn
-                  // onChange={(e) => handleItemSelection(e, item.id)}
+                    onChange={(e) => handleItemSelection(e, item.id)} // Cập nhật trạng thái khi chọn/mở chọn
                   />
                 ))}
               </Form.Group>

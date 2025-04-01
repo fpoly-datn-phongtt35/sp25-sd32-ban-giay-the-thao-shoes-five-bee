@@ -184,9 +184,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       }
 
       hoaDonChiTiet.setSoLuong(newSoLuong);
-//      giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - 1);
-//
-//      giayChiTietRepository.save(giayChiTiet);
       return hoaDonChiTietRepository.save(hoaDonChiTiet);
     }
 
@@ -222,8 +219,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn chi tiết không tồn tại"));
 
     int soLuongHienTai = hoaDonChiTiet.getSoLuong();
+    int soLuongTon = hoaDonChiTiet.getGiayChiTietEntity().getSoLuongTon();
 
     if (isIncrease) {
+      if (soLuongHienTai + 1 > soLuongTon) {
+        throw new IllegalStateException("Số lượng không thể vượt quá số lượng tồn của sản phẩm");
+      }
       hoaDonChiTiet.setSoLuong(soLuongHienTai + 1);
     } else {
       if (soLuongHienTai <= 1) {
@@ -232,7 +233,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       hoaDonChiTiet.setSoLuong(soLuongHienTai - 1);
     }
 
-    return hoaDonChiTietRepository.save(hoaDonChiTiet);
+    HoaDonChiTietEntity updated = hoaDonChiTietRepository.save(hoaDonChiTiet);
+    if (updated == null) {
+      throw new RuntimeException("❌ Lỗi khi cập nhật số lượng");
+    }
+
+    return updated;
   }
 
   @Override

@@ -7,5 +7,6 @@ import java.util.List;
 import java.util.UUID;
 
 public interface TraHangService {
+    List<TraHangEntity> getAll();
     TraHangEntity traHang(UUID hoaDonId, List<TraHangChiTietResDto> traHangChiTietResDtos);
 }
