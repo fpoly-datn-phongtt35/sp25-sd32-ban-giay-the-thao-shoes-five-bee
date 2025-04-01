@@ -203,11 +203,11 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
     BigDecimal giaSauGiam = giaBanGoc;
 
-    GiamGiaChiTietSanPhamEntity giamGiaOpt =
+    List<GiamGiaChiTietSanPhamEntity> giamGiaOpt =
         giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
 
     if (giamGiaOpt != null) {
-      BigDecimal soTienDaGiam = giamGiaOpt.getSoTienDaGiam();
+      BigDecimal soTienDaGiam = giamGiaOpt.get(0).getSoTienDaGiam();
       giaSauGiam = giaBanGoc.subtract(soTienDaGiam);
     }
 

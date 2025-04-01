@@ -75,11 +75,13 @@ public class QRCodeServiceImpl implements QRCodeService {
 
         // 📌 Lấy giá bán gốc
         BigDecimal giaBanGoc = giayChiTiet.getGiaBan();
-        BigDecimal giaSauGiam = Optional.ofNullable(
-                        giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId()))
+        BigDecimal giaSauGiam = giamGiaChiTietSanPhamRepository
+                .findByGiayChiTiet(giayChiTiet.getId())
+                .stream()
+                .findFirst()
                 .map(GiamGiaChiTietSanPhamEntity::getSoTienDaGiam)
                 .map(giaBanGoc::subtract)
-                .orElse(giaBanGoc);; // Tạm thời bỏ qua giảm giá
+                .orElse(giaBanGoc); // Tạm thời bỏ qua giảm giá
 
         if (hoaDonChiTiet != null) {
             // 📌 Nếu sản phẩm đã có, tăng số lượng

@@ -44,6 +44,9 @@ public class GiayChiTietEntity {
   @Column(name = "GIA_BAN")
   private BigDecimal giaBan;
 
+  @Column(name = "GIA_KHI_GIAM")
+  private BigDecimal giaKhiGiam;
+
   @Column(name = "SO_LUONG_TON")
   private Integer soLuongTon;
 
