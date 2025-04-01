@@ -733,6 +733,7 @@ const BanHangTaiQuay = () => {
               ? "Hóa đơn đã tạo, chờ thanh toán khi giao hàng!"
               : "Thanh toán thành công!"
           );
+          await getAllGiay();
           resetState();
           fetchHoaDonCho();
         }
@@ -744,6 +745,7 @@ const BanHangTaiQuay = () => {
         );
         if (vnpayResponse.data) {
           await thanhToanTaiQuay(selectedHoaDonId, hoaDonRequest);
+
 
           // Lưu URL VNPAY trước khi reset state
           const paymentUrl = vnpayResponse.data;
