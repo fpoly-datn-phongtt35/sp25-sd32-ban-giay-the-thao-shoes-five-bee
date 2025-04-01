@@ -1,5 +1,6 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.util.UUID;
@@ -28,6 +29,7 @@ public class GiamGiaChiTietSanPhamEntity {
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_GIAY_CHI_TIET",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private GiayChiTietEntity giayChiTiet;

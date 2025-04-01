@@ -35,12 +35,23 @@ public class MauSacServiceImpl implements MauSacService {
 
     @Override
     public MauSacEntity add(MauSacDto mauSacDto) {
+        // Trim khoảng trắng và chuyển tên màu về chữ thường để so sánh không phân biệt chữ hoa và chữ thường
+        String tenMau = mauSacDto.getTen().trim().toLowerCase();
+
+        // Kiểm tra xem tên màu đã tồn tại chưa
+        if (mauSacRepository.existsByTenIgnoreCase(tenMau)) {
+            throw new IllegalArgumentException("Tên màu đã tồn tại");
+        }
+
         MauSacEntity mauSacEntity = new MauSacEntity();
         mauSacEntity.setMa(mauSacDto.getMa());
         mauSacEntity.setTen(mauSacDto.getTen());
         mauSacEntity.setTrangThai(mauSacDto.getTrangThai());
+
         return mauSacRepository.save(mauSacEntity);
     }
+
+
 
     @Override
     public MauSacEntity addNhanh(MauSacDto mauSacDto) {

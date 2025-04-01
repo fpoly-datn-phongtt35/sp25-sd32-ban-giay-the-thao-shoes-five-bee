@@ -33,6 +33,11 @@ public class TraHangServiceImpl implements TraHangService {
     private UserRepository userRepository;
 
     @Override
+    public List<TraHangEntity> getAll() {
+        return traHangEntityRepository.findAll();
+    }
+
+    @Override
     @Transactional
     public TraHangEntity traHang(UUID hoaDonId, List<TraHangChiTietResDto> traHangChiTietResDtos) {
         String email = usersService.getAuthenticatedUserEmail();

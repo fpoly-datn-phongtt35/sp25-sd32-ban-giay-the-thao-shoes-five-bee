@@ -1,6 +1,6 @@
 import axios from "../axiosConfig";
 
-const REST_API_BASE_URL = "/api/ban-hang-tai-quay";
+const REST_API_BASE_URL = "http://localhost:5000/api/ban-hang-tai-quay";
 
 export const thanhToanTaiQuay = (idHoaDon, hoaDonRequest) => {
   // Chỉ thêm idGiamGia vào params nếu nó tồn tại
@@ -41,16 +41,29 @@ export const themSanPhamVaoHoaDon = async (idHoaDon, idSanPham) => {
 
 export const updateSoLuongGiay = async (idHoaDonChiTiet, isIncrease) => {
   try {
-    const response = await axios.put(
-      `${REST_API_BASE_URL}/update-quantity/${idHoaDonChiTiet}`,
-      null,
+    const response = await fetch(
+      `${REST_API_BASE_URL}/update-quantity/${idHoaDonChiTiet}?isIncrease=${isIncrease}`,
       {
-        params: { isIncrease },
+        method: "PUT",
+        headers: {
+          "Content-Type": "application/json",
+        },
       }
     );
-    return response.data;
+
+    console.log("📌 API Raw Response:", response);
+
+    if (!response.ok) {
+      const errorText = await response.text();
+      throw new Error(`API lỗi: ${response.status} - ${errorText}`);
+    }
+
+    const data = await response.json();
+    console.log("📌 API JSON Response:", data);
+
+    return data;
   } catch (error) {
-    console.error("Lỗi khi cập nhật số lượng giày:", error);
+    console.error("❌ Lỗi API:", error);
     throw error;
   }
 };

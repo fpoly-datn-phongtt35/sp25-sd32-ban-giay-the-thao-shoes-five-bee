@@ -1,12 +1,14 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.HoaDonRequest;
+import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.service.BanHangTaiQuayService;
 import com.example.demo.service.QRCodeService;
 import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 import lombok.RequiredArgsConstructor;
+import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
@@ -50,9 +52,19 @@ public class BanHangTaiQuayController {
 
   @PutMapping("/update-quantity/{idHoaDonChiTiet}")
   public ResponseEntity<?> updateSoLuongGiay(
-      @PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet, @RequestParam boolean isIncrease) {
-
-    return ResponseEntity.ok(banHangTaiQuayService.updateSoLuongGiay(idHoaDonChiTiet, isIncrease));
+          @PathVariable("idHoaDonChiTiet") UUID idHoaDonChiTiet,
+          @RequestParam boolean isIncrease
+  ) {
+    try {
+      HoaDonChiTietEntity updated = banHangTaiQuayService.updateSoLuongGiay(idHoaDonChiTiet, isIncrease);
+      return ResponseEntity.ok(updated);
+    } catch (IllegalArgumentException e) {
+      return ResponseEntity.status(HttpStatus.NOT_FOUND).body("⚠️ Lỗi: " + e.getMessage());
+    } catch (IllegalStateException e) {
+      return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("⚠️ Lỗi: " + e.getMessage());
+    } catch (Exception e) {
+      return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).body("❌ Lỗi hệ thống: " + e.getMessage());
+    }
   }
 
   @GetMapping("/list")
