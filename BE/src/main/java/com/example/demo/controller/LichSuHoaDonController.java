@@ -1,8 +1,13 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.LichSuHoaDonDto;
+import com.example.demo.entity.LichSuHoaDonEntity;
 import com.example.demo.service.LichSuHoaDonService;
+
+import java.util.List;
 import java.util.UUID;
+import java.util.stream.Collectors;
+
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -18,8 +23,29 @@ public class LichSuHoaDonController {
 
   @GetMapping("/getAll")
   public ResponseEntity<?> getAll() {
-    return ResponseEntity.ok(lichSuHoaDonService.getAll());
+    // Lấy tất cả lịch sử hóa đơn từ service
+    List<LichSuHoaDonEntity> lichSuList = lichSuHoaDonService.getAll();
+
+    // Chuyển đổi entity thành DTO và thêm mã hóa đơn
+    List<LichSuHoaDonDto> lichSuDTOs = lichSuList.stream()
+            .map(entity -> {
+              LichSuHoaDonDto dto = new LichSuHoaDonDto();
+              dto.setId(entity.getId());
+              dto.setTrangThaiCu(entity.getTrangThaiCu());
+              dto.setTrangThaiMoi(entity.getTrangThaiMoi());
+              dto.setNguoiCapNhat(entity.getNguoiCapNhat());
+              dto.setThoiGianCapNhat(entity.getThoiGianCapNhat());
+              dto.setGhiChu(entity.getGhiChu());
+              // Lấy mã hóa đơn từ HoaDonEntity
+              dto.setMaHoaDon(entity.getHoaDonEntity().getMa());  // Mã hóa đơn
+              return dto;
+            })
+            .collect(Collectors.toList());
+
+    // Trả về danh sách DTO
+    return ResponseEntity.ok(lichSuDTOs);
   }
+
 
   @GetMapping("/search")
   public ResponseEntity<?> findAndPageLichSuHoaDon(@RequestBody LichSuHoaDonDto lichSuHoaDonDto) {
@@ -46,9 +72,28 @@ public class LichSuHoaDonController {
   public ResponseEntity<?> delete(@PathVariable("id") UUID id) {
     return ResponseEntity.ok(lichSuHoaDonService.delete(id));
   }
-
   @GetMapping("/hoa-don")
   public ResponseEntity<?> getLichSuHoaDonByHoaDonId(@RequestParam UUID hoaDonId) {
-    return ResponseEntity.ok(lichSuHoaDonService.getListLichSuHoaDonByHoaDonId(hoaDonId));
+    // Lấy danh sách lịch sử hóa đơn từ service
+    List<LichSuHoaDonEntity> lichSuList = lichSuHoaDonService.getListLichSuHoaDonByHoaDonId(hoaDonId);
+
+    // Chuyển đổi thành DTO và thêm mã hóa đơn
+    List<LichSuHoaDonDto> lichSuDTOs = lichSuList.stream()
+            .map(entity -> {
+              LichSuHoaDonDto dto = new LichSuHoaDonDto();
+              dto.setId(entity.getId());
+              dto.setTrangThaiCu(entity.getTrangThaiCu());
+              dto.setTrangThaiMoi(entity.getTrangThaiMoi());
+              dto.setNguoiCapNhat(entity.getNguoiCapNhat());
+              dto.setThoiGianCapNhat(entity.getThoiGianCapNhat());
+              dto.setGhiChu(entity.getGhiChu());
+              // Lấy mã hóa đơn từ HoaDonEntity
+              dto.setMaHoaDon(entity.getHoaDonEntity().getMa());  // Mã hóa đơn
+              return dto;
+            })
+            .collect(Collectors.toList());
+
+    return ResponseEntity.ok(lichSuDTOs);  // Trả về danh sách DTO
   }
+
 }
