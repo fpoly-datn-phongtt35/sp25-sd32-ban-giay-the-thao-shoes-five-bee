@@ -54,7 +54,7 @@ const BanHangTaiQuay = () => {
   const [customerMoney, setCustomerMoney] = useState("");
   const [giay, setGiay] = useState([]);
   const [sdtNguoiNhan, setSdtNguoiNhan] = useState("");
-
+  const [hoaDonChiTiet, setHoaDonChiTiet] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalHoaDon, setTotalHoaDon] = useState(0);
@@ -194,11 +194,13 @@ const BanHangTaiQuay = () => {
   const increaseQuantity = async (productId, hoaDonId) => {
     try {
       const response = await updateSoLuongGiay(productId, true);
-      if (response.status !== 200) {
-        throw new Error("API không cập nhật số lượng thành công!");
+      if (!response) {
+        throw new Error("Không nhận được phản hồi từ API");
       }
 
       await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
+        console.log("📡 Danh sách sản phẩm sau cập nhật:", updatedProducts);
+
         if (!updatedProducts) {
           console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
           return;
@@ -215,9 +217,8 @@ const BanHangTaiQuay = () => {
           0
         );
 
+        console.log("💰 Tổng tiền mới:", newTotalAmount);
         setTotalAmount(newTotalAmount);
-        setChangeAmount();
-        // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
         handleInputChange();
       });
 
@@ -231,11 +232,14 @@ const BanHangTaiQuay = () => {
   const decreaseQuantity = async (productId, hoaDonId) => {
     try {
       const response = await updateSoLuongGiay(productId, false);
-      if (response.status !== 200) {
-        throw new Error("API không cập nhật số lượng thành công!");
+      if (!response) {
+        throw new Error("Không nhận được phản hồi từ API");
       }
 
+
       await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
+        console.log("📡 Danh sách sản phẩm sau cập nhật:", updatedProducts);
+
         if (!updatedProducts) {
           console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
           return;
@@ -252,16 +256,15 @@ const BanHangTaiQuay = () => {
           0
         );
 
+        console.log("💰 Tổng tiền mới:", newTotalAmount);
         setTotalAmount(newTotalAmount);
-
-        // 🔥 Gọi lại handleInputChange để cập nhật tiền thừa
-        handleInputChange({ target: { value: customerMoney } });
+        handleInputChange();
       });
 
       getAllGiay();
     } catch (error) {
-      console.error("❌ Lỗi khi giảm số lượng:", error);
-      message.error("Không thể giảm số lượng!");
+      console.error("❌ Lỗi khi tăng số lượng:", error);
+      message.error("Không thể tăng số lượng!");
     }
   };
 
