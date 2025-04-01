@@ -24,6 +24,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   private final GiamGiaChiTietSanPhamRepository giamGiaChiTietSanPhamRepository;
   private final UserRepository userRepository;
   private final GiamGiaHoaDonRepository giamGiaHoaDonRepository;
+  private final GiayRepository giayRepository;
 
   @Override
   public void thanhToanTaiQuay(
@@ -130,6 +131,18 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
         giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - soLuongMua);
         giayChiTietRepository.save(giayChiTiet);
+
+
+        GiayEntity giayEntity = giayChiTiet.getGiayEntity();
+        if (giayEntity != null) {
+            int tongSoLuongMoi = giayEntity.getSoLuongTon() - soLuongMua;
+            if (tongSoLuongMoi < 0 ){
+                tongSoLuongMoi = 0;
+            }
+            giayEntity.setSoLuongTon(tongSoLuongMoi);
+            giayRepository.save(giayEntity);
+        }
+
       }
     }
 
@@ -306,10 +319,10 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .findById(idHoaDonChiTiet)
             .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn chi tiết"));
 
-    GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
-    giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + hoaDonChiTiet.getSoLuong());
-
-    giayChiTietRepository.save(giayChiTiet);
+//    GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
+//    giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + hoaDonChiTiet.getSoLuong());
+//
+//    giayChiTietRepository.save(giayChiTiet);
 
     hoaDonChiTietRepository.delete(hoaDonChiTiet);
   }

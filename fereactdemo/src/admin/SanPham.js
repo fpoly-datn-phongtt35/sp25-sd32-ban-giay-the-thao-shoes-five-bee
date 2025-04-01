@@ -286,10 +286,10 @@ const SanPham = () => {
         trangThai: newTrangThai1,
       };
 
-      console.log(
-        "📤 Dữ liệu gửi lên BE:",
-        JSON.stringify(newProduct, null, 2)
-      );
+      // console.log(
+      //   "📤 Dữ liệu gửi lên BE:",
+      //   JSON.stringify(newProduct, null, 2)
+      // );
 
       // 🏀 Gửi request thêm mới sản phẩm chi tiết
       const response = await addBienThe(newProduct);

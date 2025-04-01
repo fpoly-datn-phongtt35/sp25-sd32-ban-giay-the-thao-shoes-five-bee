@@ -1,4 +1,5 @@
-import axios from "axios";
+import axios from "../axiosConfig";
+
 
 const REST_API_BASE_URL = "/giam-gia-ct-sp";
 
