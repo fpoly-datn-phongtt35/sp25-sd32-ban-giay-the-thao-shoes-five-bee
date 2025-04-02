@@ -3,11 +3,20 @@ import { Card, Form, Input, Row, Col, Button, Spin, message } from 'antd';
 import { getDiaChiByKhachHangId } from '../service/DiaChiService';
 import AddressModal from '../address/AddressModal';
 
-const DataCustomerInfo = ({ customerId, onDiaChiChange }) => {
+// Thêm prop moTa để nhận dữ liệu từ component Bill
+const DataCustomerInfo = ({ customerId, onDiaChiChange, moTa }) => {
   const [customerData, setCustomerData] = useState([]);
-  const [ghiChu, setGhiChu] = useState('');
+  // Thay đổi state để sử dụng giá trị từ prop
+  const [ghiChu, setGhiChu] = useState(moTa || '');
   const [loading, setLoading] = useState(true);
   const [diaChiList, setDiaChiList] = useState([]);
+
+  // Cập nhật giá trị ghiChu khi prop moTa thay đổi
+  useEffect(() => {
+    if (moTa !== undefined) {
+      setGhiChu(moTa);
+    }
+  }, [moTa]);
 
   const handleAddAddress = (newAddress) => {
     setDiaChiList([...diaChiList, newAddress]);
@@ -37,7 +46,8 @@ const DataCustomerInfo = ({ customerId, onDiaChiChange }) => {
 
   const handleChange = (e) => {
     setGhiChu(e.target.value);
-    onDiaChiChange((prev) => ({ ...prev, moTa: e.target.value }));
+    // Chỉ gửi moTa lên component cha, không gửi diaChi
+    onDiaChiChange({ moTa: e.target.value });
   };
 
   if (loading) return <Spin tip="Đang tải thông tin..." />;
