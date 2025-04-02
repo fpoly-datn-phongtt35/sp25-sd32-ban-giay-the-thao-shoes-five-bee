@@ -10,7 +10,7 @@ import {
   Form,
   message,
 } from "antd";
-import { SearchOutlined } from "@ant-design/icons";
+import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import "./quanlyhoadon.css";
 import {
@@ -532,19 +532,19 @@ const QuanLyHoaDon = () => {
   };
 
   const columns = [
-    {
-      title: "Xem chi tiết hóa đơn",
-      dataIndex: "order_id",
-      key: "order_id",
-      width: 120,
-      ...getColumnSearchProps("order_id"),
-      ellipsis: true,
-      render: (text, record) => (
-        <a href="#" onClick={() => handleOrderClick(record.order_id)}>
-          {record.order_id.slice(0, 12)}... {/* Chỉ hiển thị 8 ký tự đầu */}
-        </a>
-      ),
-    },
+    // {
+    //   title: "Xem chi tiết hóa đơn",
+    //   dataIndex: "order_id",
+    //   key: "order_id",
+    //   width: 120,
+    //   ...getColumnSearchProps("order_id"),
+    //   ellipsis: true,
+    //   render: (text, record) => (
+    //     <a href="#" onClick={() => handleOrderClick(record.order_id)}>
+    //       {record.order_id.slice(0, 12)}... {/* Chỉ hiển thị 8 ký tự đầu */}
+    //     </a>
+    //   ),
+    // },
 
     {
       title: "Tên khách hàng",
@@ -588,6 +588,13 @@ const QuanLyHoaDon = () => {
       ...getColumnSearchProps("order_on"),
     },
     {
+      title: "Hình thức mua",
+      dataIndex: "hinhThucMua",
+      key: "hinhThucMua",
+      width: 100,
+      ...getColumnSearchProps("hinhThucMua"),
+    },
+    {
       title: "Trạng thái",
       dataIndex: "status",
       key: "status",
@@ -598,6 +605,7 @@ const QuanLyHoaDon = () => {
       title: "Tổng tiền",
       dataIndex: "tongTien",
       key: "tongTien",
+      width: 100,
       render: (text, record) => {
         // Tính tổng tiền gốc từ danh sách sản phẩm
         const tongTienGoc = record.products && record.products.length > 0
@@ -632,19 +640,25 @@ const QuanLyHoaDon = () => {
       title: "Thao tác",
       key: "action",
       width: 120,
+
       render: (_, record) => (
-        <Space size="small">
-          <Button
-            type="primary"
-            size="small"
-            onClick={() => handleEdit(record)}
-          >
-            Sửa
-          </Button>
-          {/* <Button type="danger" size="small" onClick={() => handleDeleteSingle(record)}>
-                        Xóa
-                    </Button> */}
-        </Space>
+
+        <><Button
+          type="primary"
+          icon={<EditOutlined />}
+          onClick={() => handleEdit(record)}
+          style={{ marginRight: "8px" }}
+        >
+        </Button><Button
+          type="primary"
+          icon={<FileTextOutlined />}
+          onClick={() => handleOrderClick(record.order_id)}
+        >
+          </Button></>
+        // {/* <Button type="danger" size="small" onClick={() => handleDeleteSingle(record)}>
+        //               Xóa
+        //           </Button> */}
+
       ),
     },
   ];
@@ -748,11 +762,10 @@ const QuanLyHoaDon = () => {
         </div>
         <div className="filter_right">
           <Button
-            type="default"
-            size="small"
+            type="primary"
+            icon={<HistoryOutlined />}
             onClick={handleHistoryClick}
           >
-            Lịch sử
           </Button>
           <Button
             type="primary"
@@ -771,7 +784,7 @@ const QuanLyHoaDon = () => {
           columns={columns}
           dataSource={getFilteredData()}
           rowKey="key" // Đảm bảo mỗi đối tượng trong dataSource có thuộc tính "key"
-          scroll={{ x: 1250 }}
+          scroll={{ x: 1000 }}
           rowSelection={{
             selectedRowKeys,
             onChange: (keys) => {

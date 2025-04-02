@@ -124,8 +124,15 @@ const OrderItem = ({ order, onChangeData }) => {
         <div className="product-info">
           <p className="product-name">Mã hóa đơn: {order.ma}</p>
           <p className="product-category">Ngày mua: {order.ngayTao.split('T')[0]}</p>
-          <p className="product-quantity">Hình Thức Thanh Toán: {order?.hinhThucThanhToan.toLocaleString() === "2" ? "Thu hộ (COD)" : "Chuyển khoản" || 'N/A'}</p>
-          <p className="product-category">Địa chỉ nhận hàng: {order.diaChi}</p>
+          <p className="product-quantity">
+            Hình Thức Thanh Toán :
+            {order?.hinhThucThanhToan.toLocaleString() === "2"
+              ? "Thu hộ (COD)"
+              : order?.hinhThucThanhToan.toLocaleString() === "0"
+                ? "Tiền mặt"
+                : "Chuyển khoản" || 'N/A'}
+          </p>
+          <p className="product-category">Địa chỉ nhận hàng: {order.diaChi || 'Tại quầy'}</p>
           <p className="return-policy">{returnPolicy}</p>
         </div>
         {/* <div className="product-price">

@@ -1292,8 +1292,8 @@ const BanHangTaiQuay = () => {
           disabled={!hoTen || !soDienThoai}
         >
           Thêm Khách Hàng Mới
-        </Button> */}
-        <br />
+        </Button>
+        <br /> */}
 
         <Select
           placeholder="Chọn Mã Giảm Giá"

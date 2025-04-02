@@ -9,7 +9,7 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
   const [khachHangId, setKhachHangId] = useState(null);
   const [isModalVisible, setIsModalVisible] = useState(false);
   const [addresses, setAddresses] = useState([]);
-  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [selectedAddressId, setSelectedAddressId] = useState(null); 
   const [updatedOrder, setUpdatedOrder] = useState(selectedOrder);
 
   useEffect(() => {
@@ -106,18 +106,18 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
               <h4>Chi Tiết Đơn Hàng </h4>
               <h6>Mã Hóa Đơn: {selectedOrder?.ma || 'N/A'}</h6>
               <h6>Ngày Mua: {selectedOrder?.ngayTao.split('T')[0] || 'N/A'}</h6>
-              <h6>Hình Thức Mua: {selectedOrder?.hinhThucMua === 2 ? "Online" : selectedOrder?.hinhThucMua === 1 ? "Online" : 'N/A'}</h6>
-              <h6>Hình Thức Thanh Toán: {selectedOrder?.hinhThucThanhToan === 1 ? "VNpay" : selectedOrder?.hinhThucThanhToan === 2 ? "Thu hộ (COD)" : 'N/A'}</h6>
+              <h6>Hình Thức Mua: {selectedOrder?.hinhThucMua === 2 ? "Online" : selectedOrder?.hinhThucMua === 1 ? "Tại quầy" : 'N/A'}</h6>
+              <h6>Hình Thức Thanh Toán: {selectedOrder?.hinhThucThanhToan === 0 ? "Tiền mặt" : selectedOrder?.hinhThucThanhToan === 1 ? "VNpay" : selectedOrder?.hinhThucThanhToan === 2 ? "Thu hộ (COD)" : 'N/A'}</h6>
               <h6>Tổng Tiền: {selectedOrder?.tongTien?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}</h6>
             </div>
             <div className="phai">
               <h4>Thông tin khách hàng</h4>
-              <h6>Tên Khách Hàng: {selectedOrder?.tenNguoiNhan || 'N/A'}</h6>
-              <h6>Số Điện Thoại: {selectedOrder?.sdtNguoiNhan || 'N/A'}</h6>
-              <h6>Địa Chỉ: 
+              <h6>Tên Khách Hàng : {selectedOrder?.tenNguoiNhan || 'N/A'}</h6>
+              <h6>Số Điện Thoại : {selectedOrder?.sdtNguoiNhan || 'N/A'}</h6>
+              <h6>Địa Chỉ : 
               {selectedOrder?.diaChi 
               ? `${selectedOrder.diaChi || ''}, ${selectedOrder.xa || ''}, ${selectedOrder.huyen || ''}, ${selectedOrder.tinh || ''}` 
-              : 'N/A'}
+              : 'Tại quầy'}
               </h6>         
               {selectedOrder?.trangThai === 0 && (
                 <Button type="primary" onClick={handleEditAddress}>
