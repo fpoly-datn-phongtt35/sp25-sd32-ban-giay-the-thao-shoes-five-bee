@@ -9,6 +9,7 @@ import lombok.NoArgsConstructor;
 import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @AllArgsConstructor
@@ -31,4 +32,6 @@ public class GiayChiTietDto extends PageDto {
   private Integer trangThai;
 
   private GiayDto giayDto;
+
+  private List<AnhGiayDto> anhGiayDtos;
 }
