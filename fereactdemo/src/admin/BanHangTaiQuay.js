@@ -837,16 +837,18 @@ const BanHangTaiQuay = () => {
     }
   };
   const handleAddKhachHang = async () => {
-    if (!hoTen || !soDienThoai) {
+    if (!hoTen || !sdtNguoiNhan) {
       message.error("Vui lòng nhập đầy đủ thông tin khách hàng!");
       return;
     }
+    
     const newData = {
       hoTen,
-      soDienThoai,
+      sdtNguoiNhan,
     };
+  
     try {
-      await addKhachHang(newData);
+      await addKhachHang(newData);  // Chỉ gửi tên và số điện thoại
       message.success("Thêm khách hàng thành công!");
       getAllKhachHangData();
       handleClear("");
@@ -854,6 +856,8 @@ const BanHangTaiQuay = () => {
       message.error("Lỗi khi thêm khách hàng");
     }
   };
+  
+
   const handleAddPage = async () => {
     if (pages.length >= 5) {
       message.warning("Tối đa tạo hóa đơn chờ là 5");
@@ -1291,15 +1295,15 @@ const BanHangTaiQuay = () => {
             />
           </div>
         )}
-        {/* <Button
+        <Button
           type="primary"
           onClick={handleAddKhachHang}
           style={{ marginTop: "10px" }}
-          disabled={!hoTen || !soDienThoai}
+          disabled={!hoTen || !sdtNguoiNhan}
         >
           Thêm Khách Hàng Mới
         </Button>
-        <br /> */}
+        <br />
 
         <Select
           placeholder="Chọn Mã Giảm Giá"

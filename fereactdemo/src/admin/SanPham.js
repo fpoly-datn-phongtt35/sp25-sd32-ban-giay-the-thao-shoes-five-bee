@@ -55,6 +55,7 @@ import {
 import { getMauSac } from "../service/MauSacService";
 import PopupThemNhanhMauSac from "../popupThemNhanhThuocTInh/PopupThemNhanhMauSac";
 import PopupThemNhanhKichCo from "../popupThemNhanhThuocTInh/PopupThemNhanhKichCo";
+import PopupThemaAnh from "../popupThemNhanhThuocTInh/PopupThemaAnh";
 
 const SanPham = () => {
   const [giay, setGiay] = useState([]);
@@ -110,9 +111,12 @@ const SanPham = () => {
   const [updatedDataChiTiet, setUpdatedDataChỉTiet] = useState({});
   const [danhSachChiTiet, setDanhSachChiTiet] = useState([]);
   const [selectedCategory, setSelectedCategory] = useState("");
+  const [selectedCapNhatAnhBienThe, setSelectedCapNhatAnhBienThe] =
+    useState("");
+  const [selectedGiayIds, setSelectedGiayIds] = useState([]);
 
   const [soLuongTon1, setSoLuongTon1] = useState(null);
-
+  const [selectedRecord, setSelectedRecord] = useState(null);
   const [giaBan1, setGiaBan1] = useState(null);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [selectedGiay1, setSelectedGiay1] = useState(null);
@@ -153,6 +157,13 @@ const SanPham = () => {
     setSelectedMauSac1(tempSelectedMauSac);
     setIsPopupOpen(false);
   };
+  const CapNhatAnhBienThe = () => {
+    // Log danh sách ID giày được chọn từ selectedGiayIds
+    console.log("Danh sách ID giày đã chọn:", selectedGiayIds);
+
+    // Tiến hành các thao tác khác nếu cần
+    setIsThemNhanhAnh(false); // Đóng modal hoặc xử lý thêm các bước khác nếu cần
+  };
 
   const getMauSacList = async () => {
     const result = await getMauSac();
@@ -184,7 +195,6 @@ const SanPham = () => {
       setSelectedGiay1(id);
 
       const response = await getGiayChitietDetail1(id);
-      console.log("Dữ liệu sản phẩm chi tiết:", response.data);
 
       if (!Array.isArray(response.data)) {
         console.error("Dữ liệu trả về không phải mảng!", response.data);
@@ -201,7 +211,6 @@ const SanPham = () => {
         soLuongTon: item.soLuongTon || 0,
       }));
 
-      console.log("Danh sách chi tiết sản phẩm:", danhSachChiTiet);
       setDanhSachChiTiet(danhSachChiTiet);
 
       // Chỉ mở popup nếu showPopup = true
@@ -309,43 +318,65 @@ const SanPham = () => {
       setValue(2);
     } catch (error) {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
-      message.error("Lỗi khi thực hiện thao tác: " + (error.response?.data?.message || error.message));
+      message.error(
+        "Lỗi khi thực hiện thao tác: " +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
+
   const handleUpdateGiayChiTiet = async (record) => {
     const updatedRecord = {
       ...record,
-      ...editedData[record.id], // Lấy dữ liệu đã chỉnh sửa
+      ...editedData[record.id],
     };
+
+    console.log("updatedRecord:", updatedRecord);
+
+    const danhSachAnh = Array.isArray(selectedGiayIds)
+      ? selectedGiayIds.map((item) => ({
+          id: item.id,
+          tenUrl: item.tenUrl,
+        }))
+      : [];
+    console.log("danhsachanh", danhSachAnh);
 
     const updatedGiayChiTiet = {
       id: updatedRecord.id,
       soLuongTon: Number(updatedRecord.soLuongTon) || 0,
       giaBan: parseFloat(updatedRecord.giaBan) || 0,
       trangThai: updatedRecord.trangThai === 0 ? 1 : 0,
+      danhSachAnh:
+        danhSachAnh.length > 0 ? danhSachAnh : updatedRecord.danhSachAnh || [], // Kiểm tra danhSachAnh
     };
 
-    console.log("📌 Dữ liệu gửi lên API:", updatedGiayChiTiet);
+    console.log("📌 Dữ liệu cập nhật gửi lên API:", updatedGiayChiTiet);
 
     try {
-      const response = await updateGiayChiTiet(updatedGiayChiTiet);
+   
+      await updateGiayChiTiet(updatedGiayChiTiet);
       message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
+
       getAllGiay();
-      // Reset dữ liệu sau khi cập nhật
+
       setEditedData((prev) => {
         const newData = { ...prev };
-        delete newData[record.id]; // Xóa dữ liệu đã sửa sau khi gửi API
+        delete newData[record.id]; 
         return newData;
       });
 
+    
       fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
     } catch (error) {
+  
       console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
       message.error("❌ Lỗi cập nhật sản phẩm chi tiết!");
     }
   };
+
   const handleAddImage = (record) => {
-    console.log("Thêm ảnh cho sản phẩm:", record);
+    setSelectedRecord(record);
+    setIsThemNhanhAnh(true);
   };
   const handleInputChange = (e, record, field) => {
     const { value } = e.target;
@@ -398,8 +429,8 @@ const SanPham = () => {
     },
     {
       title: "Ảnh",
-      dataIndex: "anh",
-      key: "anh",
+      dataIndex: "danhSachAnh",
+      key: "danhSachAnh",
       render: (text, record) => (
         <Button
           type="dashed"
@@ -468,7 +499,6 @@ const SanPham = () => {
   const getAllGiay = async () => {
     try {
       const result = await getGiay();
-      console.log("Dữ liệu giày:", result);
 
       if (!result || !result.data) {
         console.error("Error: result.data is undefined or null");
@@ -683,9 +713,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-          id: ag.id,
-          tenUrl: ag.tenUrl,
-        }))
+            id: ag.id,
+            tenUrl: ag.tenUrl,
+          }))
         : [],
     };
 
@@ -780,7 +810,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-        (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message)
       );
     }
   };
@@ -842,12 +872,16 @@ const SanPham = () => {
 
   const [isThemNhanhMausac, setIsThemNhanhMausac] = useState(false);
   const [isThemNhanhKichCo, setIsThemNhanhKichCo] = useState(false);
+  const [isThemNhanhAnh, setIsThemNhanhAnh] = useState(false);
 
   const ThemNhanhMauSac = () => {
     setIsThemNhanhMausac(true);
   };
   const ThemNhanhKichCo = () => {
     setIsThemNhanhKichCo(true);
+  };
+  const ThemNhanhAnh = () => {
+    setIsThemNhanhAnh(true);
   };
   return (
     <div
@@ -1149,8 +1183,9 @@ const SanPham = () => {
                     {kichCoList.map((kc) => (
                       <button
                         key={kc.id}
-                        className={`option-btn ${tempSelectedKichCo.includes(kc.id) ? "selected" : ""
-                          }`}
+                        className={`option-btn ${
+                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                        }`}
                         onClick={() => handleSelectKichCo(kc.id)}
                       >
                         {kc.ten}
@@ -1179,8 +1214,9 @@ const SanPham = () => {
                     {mauSacList.map((ms) => (
                       <button
                         key={ms.id}
-                        className={`option-btn ${tempSelectedMauSac.includes(ms.id) ? "selected" : ""
-                          }`}
+                        className={`option-btn ${
+                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                        }`}
                         onClick={() => handleSelectMauSac(ms.id)}
                       >
                         {ms.ten}
@@ -1213,9 +1249,31 @@ const SanPham = () => {
             columns={columnsGiayChiTiet}
             dataSource={danhSachChiTiet}
             rowKey="id"
-            pagination={false}
+            pagination={{ pageSize: 5 }}
             bordered
           />
+
+          {/* Kiểm tra isThemNhanhAnh & selectedRecord trước khi render Popup */}
+          {isThemNhanhAnh && selectedRecord && (
+            <Modal
+              title="Thêm Ảnh Cho Sản Phẩm"
+              open={isThemNhanhAnh}
+              onCancel={() => setIsThemNhanhAnh(false)} // Đóng modal
+              footer={[
+                <Button key="cancel" onClick={() => setIsThemNhanhAnh(false)}>
+                  Hủy
+                </Button>,
+                <Button key="ok" type="primary" onClick={CapNhatAnhBienThe}>
+                  OK
+                </Button>,
+              ]}
+            >
+              <PopupThemaAnh
+                selectedGiayIds={selectedGiayIds || []} // Nếu undefined thì dùng mảng trống
+                setSelectedGiayIds={setSelectedGiayIds}
+              />
+            </Modal>
+          )}
         </div>
       </Modal>
       {/*  */}
@@ -1512,8 +1570,6 @@ const SanPham = () => {
                     setConfirmOpen(false);
                     removeGiay(record);
                     console.log(record);
-
-
                   }}
                   onCancel={() => setConfirmOpen(false)}
                   title="Xác nhận xóa"
