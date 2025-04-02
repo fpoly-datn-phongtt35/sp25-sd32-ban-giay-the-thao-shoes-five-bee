@@ -100,8 +100,45 @@ const BanHangTaiQuay = () => {
   const [availablePageNumbers, setAvailablePageNumbers] = useState([
     1, 2, 3, 4, 5,
   ]);
+  useEffect(() => {
+    getAllGiay();
+    getAllKhachHangData();
+    getChuongTrinhGiamGia();
+    fetchHoaDonCho();
+    getAllMaGiamGiaData();
+  }, []);
+  const getAllGiay = async () => {
+    try {
+      const result = await getAllGiayChiTiet();
+      console.log("Dữ liệu giày:", result.data);
 
-  const [isOpen, setIsOpen] = useState(false);
+      if (!result || !Array.isArray(result.data)) {
+        throw new Error("Dữ liệu trả về không hợp lệ");
+      }
+
+      // Lọc giày có trạng thái Đang bán
+      const dataGiay = result.data
+        .filter((item) => item.trangThai === 0) // Chỉ lấy giày có trạng thái Đang bán
+        .map((item) => ({
+          ID: item.id,
+          TEN: item.giayEntity ? item.giayEntity.ten : null,
+          GIABAN: item.giaBan,
+          SOLUONG: item.soLuongTon,
+          KICH_CO: item.kichCoEntity ? item.kichCoEntity.ten : "N/A",
+          MAU_SAC: item.mauSacEntity ? item.mauSacEntity.ten : "N/A",
+          TRANG_THAI: item.trangThai === 0 ? "Hoạt động" : "Không hoạt động",
+          ANH_GIAY:
+          item.giayEntity?.anhGiayEntities?.length > 0
+            ? item.giayEntity.anhGiayEntities[0].tenUrl
+            : null,
+        }));
+
+      setGiay(dataGiay);
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu giày:", error);
+      message.error(`Lỗi khi lấy dữ liệu: ${error.message}`);
+    }
+  }; 
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -482,23 +519,23 @@ const BanHangTaiQuay = () => {
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-          ID: item.id,
-          TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-          SOLUONG: item.soLuong,
-          GIABAN: item.giayChiTietEntity?.giaBan || 0,
-          ANH_GIAY:
-            item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
-              ?.tenUrl || "https://via.placeholder.com/150",
-          KICH_CO: item.kichCoEntity?.ten ?? "N/A",
-          MÀU_SAC: item.mauSacEntity?.ten ?? "N/A",
-          TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
-        }))
+            ID: item.id,
+            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+            SOLUONG: item.soLuong,
+            GIABAN: item.giayChiTietEntity?.giaBan || 0,
+            ANH_GIAY:
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+                ?.tenUrl || "https://via.placeholder.com/150",
+            KICH_CO: item.kichCoEntity?.ten ?? "N/A",
+            MÀU_SAC: item.mauSacEntity?.ten ?? "N/A",
+            TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+          }))
         : [];
 
       // Cập nhật số lượng sản phẩm trong hóa đơn
-      setInvoiceProductCounts(prev => ({
+      setInvoiceProductCounts((prev) => ({
         ...prev,
-        [idHoaDon]: formattedData.length
+        [idHoaDon]: formattedData.length,
       }));
 
       setSelectedProducts((prev) => {
@@ -524,14 +561,6 @@ const BanHangTaiQuay = () => {
       message.error("Lỗi khi tải danh sách sản phẩm!");
     }
   };
-
-  useEffect(() => {
-    getAllGiay();
-    getAllKhachHangData();
-    getChuongTrinhGiamGia();
-    fetchHoaDonCho();
-    getAllMaGiamGiaData();
-  }, []);
 
   useEffect(() => {
     if (selectedHoaDonId) {
@@ -601,57 +630,25 @@ const BanHangTaiQuay = () => {
     updateTotalAmount();
   }, [selectedProducts, selectedPage, soTienGiam]);
 
-  const getAllGiay = async () => {
-    try {
-      const result = await getAllGiayChiTiet();
-      console.log("Dữ liệu giày:", result.data);
-
-      if (!result || !Array.isArray(result.data)) {
-        throw new Error("Dữ liệu trả về không hợp lệ");
-      }
-
-      // Lọc giày có trạng thái Đang bán
-      const dataGiay = result.data
-        .filter((item) => item.trangThai === 0) // Chỉ lấy giày có trạng thái Đang bán
-        .map((item) => ({
-          ID: item.id,
-          TEN: item.giayEntity ? item.giayEntity.ten : null,
-          GIABAN: item.giaBan,
-          SOLUONG: item.soLuongTon,
-          KICH_CO: item.kichCoEntity ? item.kichCoEntity.ten : "N/A",
-          MAU_SAC: item.mauSacEntity ? item.mauSacEntity.ten : "N/A",
-          TRANG_THAI: item.trangThai === 0 ? "Hoạt động" : "Không hoạt động",
-          ANH_GIAY: item.danhSachAnh && item.danhSachAnh.length > 0
-            ? item.danhSachAnh[0].tenUrl
-            : null,
-        }));
-
-      setGiay(dataGiay);
-    } catch (error) {
-      console.error("Lỗi khi lấy dữ liệu giày:", error);
-      message.error(`Lỗi khi lấy dữ liệu: ${error.message}`);
-    }
-  };
-
   const fetchHoaDon = async () => {
     try {
       const result = await getHoaDon();
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-          key: item.id,
-          order_id: item.id,
-          user: item.khachHang ? item.khachHang.hoTen : null,
-          user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
-          order_on: item.ngayTao
-            ? moment(item.ngayTao).format("DD/MM/YYYY")
-            : "N/A",
-          status: mapTrangThai(item.trangThai),
-          trangThai: item.trangThai,
-          tongTien: item.tongTien,
-          hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
-          hinhThucThanhToan:
-            item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
-        }))
+            key: item.id,
+            order_id: item.id,
+            user: item.khachHang ? item.khachHang.hoTen : null,
+            user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
+            order_on: item.ngayTao
+              ? moment(item.ngayTao).format("DD/MM/YYYY")
+              : "N/A",
+            status: mapTrangThai(item.trangThai),
+            trangThai: item.trangThai,
+            tongTien: item.tongTien,
+            hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
+            hinhThucThanhToan:
+              item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+          }))
         : [];
       setData(formattedData);
     } catch (error) {
@@ -702,12 +699,11 @@ const BanHangTaiQuay = () => {
       ma: `HD${moment().format("YYYYMMDDHHmmss")}`,
       moTa: isGiaoHang ? "Giao hàng" : "Thanh toán tại quầy",
       tenNguoiNhan: hoTen || "Khách lẻ",
-      sdtNguoiNhan:
-        selectedKhachHang
-          ? soDienThoai
-          : sdtNguoiNhan?.trim() !== ""
-            ? sdtNguoiNhan
-            : null,
+      sdtNguoiNhan: selectedKhachHang
+        ? soDienThoai
+        : sdtNguoiNhan?.trim() !== ""
+        ? sdtNguoiNhan
+        : null,
       tongTien: totalHoaDon,
       diaChi: isGiaoHang ? diaChi : null,
       idGiamGia: selectedMaGiamGia || null,
@@ -876,9 +872,9 @@ const BanHangTaiQuay = () => {
       console.log("Hóa đơn mới tạo:", createdHoaDonId);
 
       // Khởi tạo số lượng sản phẩm là 0 cho hóa đơn mới
-      setInvoiceProductCounts(prev => ({
+      setInvoiceProductCounts((prev) => ({
         ...prev,
-        [createdHoaDonId]: 0
+        [createdHoaDonId]: 0,
       }));
 
       // Tìm số thứ tự nhỏ nhất có thể dùng (1 - 5)
@@ -967,13 +963,12 @@ const BanHangTaiQuay = () => {
       return;
     }
 
-    const filteredKhachHang = khachHangList.filter(
-      (kh) => kh.soDienThoai.startsWith(soDienThoai)
+    const filteredKhachHang = khachHangList.filter((kh) =>
+      kh.soDienThoai.startsWith(soDienThoai)
     );
 
     setSuggestions(filteredKhachHang);
   }, [soDienThoai, khachHangList]);
-
 
   // Khi chọn khách hàng từ danh sách gợi ý
   const handleSelectKhachHang = (value) => {
@@ -985,25 +980,25 @@ const BanHangTaiQuay = () => {
     }
   };
 
-
   // Thêm hàm xử lý xóa hóa đơn
   const handleDeletePage = async (hoaDonId) => {
     try {
       // Hiển thị xác nhận trước khi xóa
       Modal.confirm({
-        title: 'Xác nhận xóa hóa đơn',
-        content: 'Bạn có chắc chắn muốn xóa hóa đơn này không?',
-        okText: 'Xóa',
-        okType: 'danger',
-        cancelText: 'Hủy',
+        title: "Xác nhận xóa hóa đơn",
+        content: "Bạn có chắc chắn muốn xóa hóa đơn này không?",
+        okText: "Xóa",
+        okType: "danger",
+        cancelText: "Hủy",
         onOk: async () => {
           await deleteHoaDonCho(hoaDonId);
-          message.success('Xóa hóa đơn thành công!');
+          message.success("Xóa hóa đơn thành công!");
 
           // Cập nhật lại danh sách hóa đơn
-          const updatedPages = pages.filter(page => page.hoaDonId !== hoaDonId);
+          const updatedPages = pages.filter(
+            (page) => page.hoaDonId !== hoaDonId
+          );
           setPages(updatedPages);
-
 
           // Nếu hóa đơn đang được chọn bị xóa, chọn hóa đơn khác
           if (selectedHoaDonId === hoaDonId) {
@@ -1018,13 +1013,12 @@ const BanHangTaiQuay = () => {
               resetState();
             }
           }
-          fetchHoaDonCho()
-        }
-
+          fetchHoaDonCho();
+        },
       });
     } catch (error) {
-      console.error('Lỗi khi xóa hóa đơn:', error);
-      message.error('Không thể xóa hóa đơn!');
+      console.error("Lỗi khi xóa hóa đơn:", error);
+      message.error("Không thể xóa hóa đơn!");
     }
   };
 
@@ -1038,13 +1032,21 @@ const BanHangTaiQuay = () => {
                 {pages.map((page) => (
                   <div key={page.id} className="page_button_container">
                     <button
-                      className={`page_button ${selectedPage === page.id ? 'selected' : ''} ${invoiceProductCounts[page.hoaDonId] > 0 ? 'has-products' : 'empty-invoice'
-                        }`}
+                      className={`page_button ${
+                        selectedPage === page.id ? "selected" : ""
+                      } ${
+                        invoiceProductCounts[page.hoaDonId] > 0
+                          ? "has-products"
+                          : "empty-invoice"
+                      }`}
                       onClick={() => handleSelectPage(page.id, page.hoaDonId)}
                     >
                       HD {page.id}
                       {invoiceProductCounts[page.hoaDonId] > 0 && (
-                        <span className="product-count"> ({invoiceProductCounts[page.hoaDonId]})</span>
+                        <span className="product-count">
+                          {" "}
+                          ({invoiceProductCounts[page.hoaDonId]})
+                        </span>
                       )}
                     </button>
                     <button
@@ -1085,7 +1087,9 @@ const BanHangTaiQuay = () => {
           </div>
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
-            {selectedHoaDonId && selectedProducts[selectedHoaDonId] && selectedProducts[selectedHoaDonId].length > 0 ? (
+            {selectedHoaDonId &&
+            selectedProducts[selectedHoaDonId] &&
+            selectedProducts[selectedHoaDonId].length > 0 ? (
               selectedProducts[selectedHoaDonId].map((product) => (
                 <div key={product.ID} className="selected_product">
                   {product.ANH_GIAY && (
@@ -1127,7 +1131,9 @@ const BanHangTaiQuay = () => {
                   <i className="fas fa-shopping-cart"></i>
                 </div>
                 <p>Chưa có sản phẩm nào trong hóa đơn</p>
-                <p className="empty-hint">Vui lòng chọn sản phẩm từ danh sách bên dưới</p>
+                <p className="empty-hint">
+                  Vui lòng chọn sản phẩm từ danh sách bên dưới
+                </p>
               </div>
             )}
           </div>
@@ -1177,9 +1183,9 @@ const BanHangTaiQuay = () => {
                   style={{
                     backgroundColor:
                       Array.isArray(selectedProducts[selectedPage]) &&
-                        selectedProducts[selectedPage].some(
-                          (product) => product.ID === item.ID
-                        )
+                      selectedProducts[selectedPage].some(
+                        (product) => product.ID === item.ID
+                      )
                         ? "#e0f7fa"
                         : "transparent",
                     opacity: item.SOLUONG === 0 ? 0.5 : 1,
@@ -1213,7 +1219,6 @@ const BanHangTaiQuay = () => {
                   <td>{item.KICH_CO}</td>
                   <td>{item.MAU_SAC}</td>
                   <td>{item.SOLUONG === 0 ? "Hết hàng" : item.TRANG_THAI}</td>
-
                 </tr>
               ))}
             </tbody>
@@ -1232,7 +1237,9 @@ const BanHangTaiQuay = () => {
             onChange={(value) => {
               setSoDienThoai(value);
               setSdtNguoiNhan(value);
-              const selected = khachHangList.find((kh) => kh.soDienThoai === value);
+              const selected = khachHangList.find(
+                (kh) => kh.soDienThoai === value
+              );
               if (selected) {
                 setHoTen(selected.hoTen);
                 setSelectedKhachHang(selected.id);
@@ -1266,7 +1273,6 @@ const BanHangTaiQuay = () => {
             placeholder="Nhập số điện thoại người nhận"
             style={{ marginBottom: "10px" }}
           />
-
         </div>
         {isGiaoHang && (
           <div>
@@ -1310,8 +1316,9 @@ const BanHangTaiQuay = () => {
             ))}
         </Select>
         {tenMaGiamGia && (
-          <div style={{ color: 'green', marginTop: '5px' }}>
-            <i className="fas fa-check-circle"></i> Đã áp dụng mã giảm giá tốt nhất: {tenMaGiamGia} ({giaTriGiam.toLocaleString('vi-VN')} VNĐ)
+          <div style={{ color: "green", marginTop: "5px" }}>
+            <i className="fas fa-check-circle"></i> Đã áp dụng mã giảm giá tốt
+            nhất: {tenMaGiamGia} ({giaTriGiam.toLocaleString("vi-VN")} VNĐ)
           </div>
         )}
         <p>Tiền Khách Phải Trả: {formatCurrency(totalHoaDon)} VND</p>

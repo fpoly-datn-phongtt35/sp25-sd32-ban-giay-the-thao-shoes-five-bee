@@ -18,10 +18,8 @@ import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.math.BigDecimal;
 import java.math.RoundingMode;
-import java.util.ArrayList;
-import java.util.Date;
-import java.util.List;
-import java.util.Optional;
+import java.util.*;
+import java.util.stream.Collectors;
 import lombok.RequiredArgsConstructor;
 import org.apache.poi.ss.usermodel.Cell;
 import org.apache.poi.ss.usermodel.Row;
@@ -49,6 +47,31 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
         gg -> {
           if (gg.getNgayKetThuc().before(now)) {
             gg.setTrangThai(1);
+
+            List<GiayChiTietEntity> sanPhamBiAnhHuong =
+                giamGiaChiTietSanPhamRepository
+                    .findByGiayChiTietByGiamGiaSanPham(gg.getId())
+                    .stream()
+                    .map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet)
+                    .collect(Collectors.toList());
+
+            for (GiayChiTietEntity sanPham : sanPhamBiAnhHuong) {
+              List<GiamGiaChiTietSanPhamEntity> giamGiaGanNhat =
+                  giamGiaChiTietSanPhamRepository.findByGiayChiTiet(sanPham.getId());
+
+              if (!giamGiaGanNhat.isEmpty()) {
+                if (giamGiaGanNhat.size() > 1) {
+                  BigDecimal soTienDaGiam = giamGiaGanNhat.get(1).getSoTienDaGiam();
+                  sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienDaGiam));
+                } else if (giamGiaGanNhat.size() <= 1) {
+                  sanPham.setGiaKhiGiam(BigDecimal.ZERO);
+                }
+              } else {
+                sanPham.setGiaKhiGiam(null);
+              }
+
+              giayChiTietRepository.save(sanPham);
+            }
           } else if (gg.getNgayBatDau().after(now)) {
             gg.setTrangThai(0);
           }
@@ -65,6 +88,17 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
       throw new IllegalArgumentException("Vui lòng truyền vào điều kiện để tạo giảm giá.");
     }
 
+    Integer trangThai;
+    Date now = new Date();
+    if (!now.before(giamGiaChiTietSanPhamRequest.getNgayBatDau())
+        && !now.after(giamGiaChiTietSanPhamRequest.getNgayKetThuc())) {
+      trangThai = 0;
+    } else if (now.before(giamGiaChiTietSanPhamRequest.getNgayKetThuc())) {
+      trangThai = 2;
+    } else {
+      trangThai = 1;
+    }
+
     GiamGiaSanPhamEntity giamGiaSanPham =
         GiamGiaSanPhamEntity.builder()
             .ma(giamGiaChiTietSanPhamRequest.getMa())
@@ -72,7 +106,7 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
             .phanTramGiam(giamGiaChiTietSanPhamRequest.getPhanTramGiam())
             .ngayBatDau(giamGiaChiTietSanPhamRequest.getNgayBatDau())
             .ngayKetThuc(giamGiaChiTietSanPhamRequest.getNgayKetThuc())
-            .trangThai(1)
+            .trangThai(trangThai)
             .build();
     giamGiaSanPhamRepository.save(giamGiaSanPham);
 
@@ -83,6 +117,9 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
     // Áp dụng giảm giá
     giayChiTietEntities.forEach(
         sanPham -> {
+          List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntity =
+              giamGiaChiTietSanPhamRepository.findByGiayChiTiet(sanPham.getId());
+
           BigDecimal soTienDaGiam =
               sanPham
                   .getGiaBan()
@@ -92,11 +129,32 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
           GiamGiaChiTietSanPhamEntity chiTietGiamGia =
               GiamGiaChiTietSanPhamEntity.builder()
                   .soTienDaGiam(soTienDaGiam)
-                  .trangThai(1)
+                  .trangThai(trangThai)
                   .giayChiTiet(sanPham)
+                  .ngayBatDau(giamGiaChiTietSanPhamRequest.getNgayBatDau())
+                  .ngayKetThuc(giamGiaChiTietSanPhamRequest.getNgayKetThuc())
                   .chuongTrinhGiamSanPhamEntity(giamGiaSanPham)
                   .build();
 
+          if (giamGiaChiTietSanPhamEntity.isEmpty()) {
+            if (trangThai == 2) {
+              sanPham.setGiaKhiGiam(BigDecimal.ZERO);
+            } else {
+              sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienDaGiam));
+            }
+          } else {
+            if (giamGiaChiTietSanPhamRequest
+                .getNgayBatDau()
+                .before(giamGiaChiTietSanPhamEntity.get(0).getNgayBatDau())) {
+              sanPham.setGiaKhiGiam(
+                  sanPham
+                      .getGiaBan()
+                      .subtract(giamGiaChiTietSanPhamEntity.get(0).getSoTienDaGiam()));
+            } else {
+              sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienDaGiam));
+            }
+          }
+          giayChiTietRepository.save(sanPham);
           giamGiaChiTietSanPhamRepository.save(chiTietGiamGia);
         });
 
@@ -143,7 +201,6 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
     return "GG" + System.currentTimeMillis();
   }
 
-
   @Override
   public GiamGiaSanPhamEntity detail(GiamGiaSanPhamDto giamGiaSanPhamDto) {
     Optional<GiamGiaSanPhamEntity> optional =
@@ -153,16 +210,40 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
   @Override
   public GiamGiaSanPhamEntity delete(GiamGiaSanPhamDto giamGiaSanPhamDto) {
-    Optional<GiamGiaSanPhamEntity> optional =
-        giamGiaSanPhamRepository.findById(giamGiaSanPhamDto.getId());
-    return optional
-        .map(
-            o -> {
-              giamGiaSanPhamRepository.delete(o);
-              return o;
-            })
-        .orElse(null);
+    GiamGiaSanPhamEntity giamGiaSanPhamEntity =
+        giamGiaSanPhamRepository.findById(giamGiaSanPhamDto.getId()).orElse(null);
+
+    List<GiayChiTietEntity> sanPhamBiAnhHuong =
+        giamGiaChiTietSanPhamRepository
+            .findByGiayChiTietByGiamGiaSanPham(giamGiaSanPhamDto.getId())
+            .stream()
+            .map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet)
+            .collect(Collectors.toList());
+
+    for (GiayChiTietEntity sanPham : sanPhamBiAnhHuong) {
+      List<GiamGiaChiTietSanPhamEntity> giamGiaGanNhat =
+          giamGiaChiTietSanPhamRepository.findByGiayChiTiet(sanPham.getId());
+
+      if (!giamGiaGanNhat.isEmpty()) {
+        if (giamGiaGanNhat.size() > 1) {
+          BigDecimal soTienDaGiam = giamGiaGanNhat.get(1).getSoTienDaGiam();
+          sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienDaGiam));
+        } else if (giamGiaGanNhat.size() <= 1) {
+          sanPham.setGiaKhiGiam(BigDecimal.ZERO);
+        }
+      } else {
+        sanPham.setGiaKhiGiam(null);
+      }
+
+      giayChiTietRepository.save(sanPham);
+    }
+    giamGiaSanPhamRepository.delete(giamGiaSanPhamEntity);
+    return giamGiaSanPhamEntity;
   }
+
+  //
+  //              giamGiaChiTietSanPhamRepository.deleteByGiamGiaSanPhamId(o.getId());
+  //              giamGiaSanPhamRepository.deleteById(giamGiaSanPhamDto.getId());
 
   @Override
   public PageResponse<GiamGiaSanPhamEntity> findByPagingCriteria(

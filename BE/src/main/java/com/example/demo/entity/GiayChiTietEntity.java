@@ -44,6 +44,9 @@ public class GiayChiTietEntity {
   @Column(name = "GIA_BAN")
   private BigDecimal giaBan;
 
+  @Column(name = "GIA_KHI_GIAM")
+  private BigDecimal giaKhiGiam;
+
   @Column(name = "SO_LUONG_TON")
   private Integer soLuongTon;
 
@@ -61,6 +64,7 @@ public class GiayChiTietEntity {
   //  @JsonIgnore
   @OneToMany(mappedBy = "giayChiTietEntity", cascade = CascadeType.ALL, orphanRemoval = true, fetch = FetchType.LAZY)
   private List<AnhGiayEntity> danhSachAnh = new ArrayList<>();
+
 
   @OneToMany(mappedBy = "giayChiTiet", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
   private List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntities = new ArrayList<>();

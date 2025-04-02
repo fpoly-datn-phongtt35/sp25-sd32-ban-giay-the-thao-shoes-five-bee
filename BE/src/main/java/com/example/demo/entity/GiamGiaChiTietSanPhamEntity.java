@@ -1,7 +1,10 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
+import java.sql.Date;
 import java.util.UUID;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -25,9 +28,18 @@ public class GiamGiaChiTietSanPhamEntity {
     @Column(name = "SO_TIEN_DA_GIAM")
     private BigDecimal soTienDaGiam;
 
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
+    @Column(name = "NGAY_BAT_DAU")
+    private Date ngayBatDau;
+
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
+    @Column(name = "NGAY_KET_THUC")
+    private Date ngayKetThuc;
+
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
 
+    @JsonBackReference
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_GIAY_CHI_TIET",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private GiayChiTietEntity giayChiTiet;

@@ -43,11 +43,12 @@ public class GioHangChiTietServiceImpl implements GioHangChiTietService {
                       .map(list -> list.get(0).getTenUrl())
                       .orElse(null); // URL mặc định nếu không có ảnh
 
-              BigDecimal soTienDaGiam =
-                  Optional.ofNullable(
-                          giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId()))
-                      .map(GiamGiaChiTietSanPhamEntity::getSoTienDaGiam)
-                      .orElse(BigDecimal.ZERO);
+                BigDecimal soTienDaGiam = giamGiaChiTietSanPhamRepository
+                        .findByGiayChiTiet(giayChiTiet.getId())
+                        .stream()
+                        .findFirst()
+                        .map(GiamGiaChiTietSanPhamEntity::getSoTienDaGiam)
+                        .orElse(BigDecimal.ZERO);
 
               return GioHangChiTietResponse.builder()
                   .id(gioHangChiTietEntity.getId())
