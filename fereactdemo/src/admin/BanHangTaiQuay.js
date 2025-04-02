@@ -128,9 +128,9 @@ const BanHangTaiQuay = () => {
           MAU_SAC: item.mauSacEntity ? item.mauSacEntity.ten : "N/A",
           TRANG_THAI: item.trangThai === 0 ? "Hoạt động" : "Không hoạt động",
           ANH_GIAY:
-          item.giayEntity?.anhGiayEntities?.length > 0
-            ? item.giayEntity.anhGiayEntities[0].tenUrl
-            : null,
+            item.giayEntity?.anhGiayEntities?.length > 0
+              ? item.giayEntity.anhGiayEntities[0].tenUrl
+              : null,
         }));
 
       setGiay(dataGiay);
@@ -138,7 +138,7 @@ const BanHangTaiQuay = () => {
       console.error("Lỗi khi lấy dữ liệu giày:", error);
       message.error(`Lỗi khi lấy dữ liệu: ${error.message}`);
     }
-  }; 
+  };
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -519,17 +519,17 @@ const BanHangTaiQuay = () => {
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            ID: item.id,
-            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-            SOLUONG: item.soLuong,
-            GIABAN: item.giayChiTietEntity?.giaBan || 0,
-            ANH_GIAY:
-              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
-                ?.tenUrl || "https://via.placeholder.com/150",
-            KICH_CO: item.kichCoEntity?.ten ?? "N/A",
-            MÀU_SAC: item.mauSacEntity?.ten ?? "N/A",
-            TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
-          }))
+          ID: item.id,
+          TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+          SOLUONG: item.soLuong,
+          GIABAN: item.giayChiTietEntity?.giaBan || 0,
+          ANH_GIAY:
+            item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+              ?.tenUrl || "https://via.placeholder.com/150",
+          KICH_CO: item.kichCoEntity?.ten ?? "N/A",
+          MÀU_SAC: item.mauSacEntity?.ten ?? "N/A",
+          TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+        }))
         : [];
 
       // Cập nhật số lượng sản phẩm trong hóa đơn
@@ -635,20 +635,20 @@ const BanHangTaiQuay = () => {
       const result = await getHoaDon();
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            key: item.id,
-            order_id: item.id,
-            user: item.khachHang ? item.khachHang.hoTen : null,
-            user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
-            order_on: item.ngayTao
-              ? moment(item.ngayTao).format("DD/MM/YYYY")
-              : "N/A",
-            status: mapTrangThai(item.trangThai),
-            trangThai: item.trangThai,
-            tongTien: item.tongTien,
-            hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
-            hinhThucThanhToan:
-              item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
-          }))
+          key: item.id,
+          order_id: item.id,
+          user: item.khachHang ? item.khachHang.hoTen : null,
+          user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
+          order_on: item.ngayTao
+            ? moment(item.ngayTao).format("DD/MM/YYYY")
+            : "N/A",
+          status: mapTrangThai(item.trangThai),
+          trangThai: item.trangThai,
+          tongTien: item.tongTien,
+          hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
+          hinhThucThanhToan:
+            item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+        }))
         : [];
       setData(formattedData);
     } catch (error) {
@@ -702,8 +702,8 @@ const BanHangTaiQuay = () => {
       sdtNguoiNhan: selectedKhachHang
         ? soDienThoai
         : sdtNguoiNhan?.trim() !== ""
-        ? sdtNguoiNhan
-        : null,
+          ? sdtNguoiNhan
+          : null,
       tongTien: totalHoaDon,
       diaChi: isGiaoHang ? diaChi : null,
       idGiamGia: selectedMaGiamGia || null,
@@ -764,6 +764,7 @@ const BanHangTaiQuay = () => {
     setHoTen("");
     setSoDienThoai("");
     setDiaChi("");
+    setSdtNguoiNhan("")
     setPages([]);
     setSelectedPage(1);
     setIsKhachLe(true);
@@ -1032,13 +1033,11 @@ const BanHangTaiQuay = () => {
                 {pages.map((page) => (
                   <div key={page.id} className="page_button_container">
                     <button
-                      className={`page_button ${
-                        selectedPage === page.id ? "selected" : ""
-                      } ${
-                        invoiceProductCounts[page.hoaDonId] > 0
+                      className={`page_button ${selectedPage === page.id ? "selected" : ""
+                        } ${invoiceProductCounts[page.hoaDonId] > 0
                           ? "has-products"
                           : "empty-invoice"
-                      }`}
+                        }`}
                       onClick={() => handleSelectPage(page.id, page.hoaDonId)}
                     >
                       HD {page.id}
@@ -1088,8 +1087,8 @@ const BanHangTaiQuay = () => {
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
             {selectedHoaDonId &&
-            selectedProducts[selectedHoaDonId] &&
-            selectedProducts[selectedHoaDonId].length > 0 ? (
+              selectedProducts[selectedHoaDonId] &&
+              selectedProducts[selectedHoaDonId].length > 0 ? (
               selectedProducts[selectedHoaDonId].map((product) => (
                 <div key={product.ID} className="selected_product">
                   {product.ANH_GIAY && (
@@ -1183,9 +1182,9 @@ const BanHangTaiQuay = () => {
                   style={{
                     backgroundColor:
                       Array.isArray(selectedProducts[selectedPage]) &&
-                      selectedProducts[selectedPage].some(
-                        (product) => product.ID === item.ID
-                      )
+                        selectedProducts[selectedPage].some(
+                          (product) => product.ID === item.ID
+                        )
                         ? "#e0f7fa"
                         : "transparent",
                     opacity: item.SOLUONG === 0 ? 0.5 : 1,

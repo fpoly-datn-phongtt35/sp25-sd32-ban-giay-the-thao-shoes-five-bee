@@ -686,8 +686,20 @@ const QuanLyHoaDon = () => {
           type="primary"
           icon={<FileTextOutlined />}
           onClick={() => handleOrderClick(record.order_id)}
+          style={{ marginRight: "8px" }}
         >
-          </Button></>
+
+          </Button>
+
+          <Button
+            type="primary"
+            icon={<HistoryOutlined />}
+            onClick={() => fetchLichSuHoaDonById(record.order_id)} // Gọi hàm với hoaDonId
+          >
+
+          </Button>
+        </>
+
         // {/* <Button type="danger" size="small" onClick={() => handleDeleteSingle(record)}>
         //               Xóa
         //           </Button> */}
@@ -904,13 +916,6 @@ const QuanLyHoaDon = () => {
             </div>
             <Button style={{ float: "right" }} onClick={togglePopup}>
               Back
-            </Button>
-            <Button
-              type="default"
-              size="small"
-              onClick={handleHistoryClick}
-            >
-              Lịch sử
             </Button>
             <Button
               style={{ float: "right", marginRight: "10px" }}
