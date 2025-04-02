@@ -320,7 +320,7 @@ const SanPham = () => {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error(
         "Lỗi khi thực hiện thao tác: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -335,9 +335,9 @@ const SanPham = () => {
 
     const danhSachAnh = Array.isArray(selectedGiayIds)
       ? selectedGiayIds.map((item) => ({
-          id: item.id,
-          tenUrl: item.tenUrl,
-        }))
+        id: item.id,
+        tenUrl: item.tenUrl,
+      }))
       : [];
     console.log("danhsachanh", danhSachAnh);
 
@@ -353,7 +353,7 @@ const SanPham = () => {
     console.log("📌 Dữ liệu cập nhật gửi lên API:", updatedGiayChiTiet);
 
     try {
-   
+
       await updateGiayChiTiet(updatedGiayChiTiet);
       message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
 
@@ -361,14 +361,14 @@ const SanPham = () => {
 
       setEditedData((prev) => {
         const newData = { ...prev };
-        delete newData[record.id]; 
+        delete newData[record.id];
         return newData;
       });
 
-    
+
       fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
     } catch (error) {
-  
+
       console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
       message.error("❌ Lỗi cập nhật sản phẩm chi tiết!");
     }
@@ -713,9 +713,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-            id: ag.id,
-            tenUrl: ag.tenUrl,
-          }))
+          id: ag.id,
+          tenUrl: ag.tenUrl,
+        }))
         : [],
     };
 
@@ -810,7 +810,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -1183,9 +1183,8 @@ const SanPham = () => {
                     {kichCoList.map((kc) => (
                       <button
                         key={kc.id}
-                        className={`option-btn ${
-                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectKichCo(kc.id)}
                       >
                         {kc.ten}
@@ -1214,9 +1213,8 @@ const SanPham = () => {
                     {mauSacList.map((ms) => (
                       <button
                         key={ms.id}
-                        className={`option-btn ${
-                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectMauSac(ms.id)}
                       >
                         {ms.ten}
@@ -1449,7 +1447,7 @@ const SanPham = () => {
                     ))}
                 </Select>
               </Form.Item>
-              <Form.Item
+              {/* <Form.Item
                 label="Trạng Thái"
                 labelCol={{ span: 8 }}
                 wrapperCol={{ span: 16 }}
@@ -1458,7 +1456,7 @@ const SanPham = () => {
                   <Radio value={2}>Hoạt động</Radio>
                   <Radio value={1}>Không hoạt động</Radio>
                 </Radio.Group>
-              </Form.Item>
+              </Form.Item> */}
             </Col>
           </Row>
           <Form.Item

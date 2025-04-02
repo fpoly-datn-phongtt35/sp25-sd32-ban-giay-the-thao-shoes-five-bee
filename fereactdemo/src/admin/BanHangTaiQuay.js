@@ -518,20 +518,26 @@ const BanHangTaiQuay = () => {
       console.log("Dữ liệu sản phẩm trong hóa đơn:", result.data);
 
       const formattedData = Array.isArray(result.data)
-        ? result.data.map((item) => ({
-          ID: item.id,
-          TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-          SOLUONG: item.soLuong,
-          GIABAN: item.giayChiTietEntity?.giaBan || 0,
-          ANH_GIAY:
-            item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
-              ?.tenUrl || "https://via.placeholder.com/150",
-          KICH_CO: item.kichCoEntity?.ten ?? "N/A",
-          MÀU_SAC: item.mauSacEntity?.ten ?? "N/A",
-          TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
-        }))
+        ? result.data.map((item) => {
+          const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
+          const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
+
+          return {
+            ID: item.id,
+            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+            SOLUONG: item.soLuong,
+            GIABAN: item.giayChiTietEntity?.giaBan || 0,
+            ANH_GIAY:
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl ||
+              "https://via.placeholder.com/150",
+            KICH_CO: kichCo,  // Lưu vào biến kích cỡ
+            MAU_SAC: mauSac,  // Lưu vào biến màu sắc
+            TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+          };
+        })
         : [];
 
+      console.log("dsadasqewrq", formattedData)
       // Cập nhật số lượng sản phẩm trong hóa đơn
       setInvoiceProductCounts((prev) => ({
         ...prev,
@@ -1098,7 +1104,16 @@ const BanHangTaiQuay = () => {
                   {product.ANH_GIAY && (
                     <img src={product.ANH_GIAY} alt={product.TEN} />
                   )}
-                  <div>{product.TEN}</div>
+                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                    <div>{product.TEN}</div>
+                    <div style={{ marginLeft: '10px', fontSize: '0.9em' }}>
+                      <span style={{ fontWeight: 'bold' }}>Kích cỡ:</span> ({product.KICH_CO})
+                    </div>
+                    <div style={{ marginLeft: '10px', fontSize: '0.9em' }}>
+                      <span style={{ fontWeight: 'bold' }}>Màu sắc:</span> ({product.MAU_SAC})
+                    </div>
+                  </div>
+
                   <div>{product.GIABAN}</div>
                   <div className="quantity_controls">
                     <Button

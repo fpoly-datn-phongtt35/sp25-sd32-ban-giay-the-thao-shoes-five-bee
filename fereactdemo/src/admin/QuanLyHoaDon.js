@@ -864,6 +864,7 @@ const QuanLyHoaDon = () => {
                 { value: "tra hang", label: "Trả hàng" },
                 { value: "huy", label: "Đã Hủy" },
               ]}
+              disabled={true}
             />
           </Form.Item>
         </Form>

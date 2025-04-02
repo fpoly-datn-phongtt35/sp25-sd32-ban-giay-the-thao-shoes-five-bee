@@ -1,7 +1,7 @@
 import { Button, Input, Radio, message } from "antd";
 import React, { useState } from "react";
 import { addMauSac } from "../service/MauSacService";
-import ConfirmModal from "./ConfirmModal"; 
+import ConfirmModal from "./ConfirmModal";
 const PopupThemNhanhMauSac = ({ setIsThemNhanhMausac, getMauSacList }) => {
   const [value, setValue] = useState(1);
   const [ten, setTen] = useState("");
@@ -35,7 +35,7 @@ const PopupThemNhanhMauSac = ({ setIsThemNhanhMausac, getMauSacList }) => {
       setTen("");
       setValue(1);
     } catch (error) {
-      message.error("Thêm màu sắc thất bại");
+      message.error("Màu sắc này đã tồn tại");
     }
   };
 

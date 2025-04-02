@@ -31,7 +31,7 @@ const PopupThemNhanhKichCo = ({ setIsThemNhanhKichCo, getKichCoList }) => {
       setTen("");
       setValue(1);
     } catch (error) {
-      message.error("Thêm kích cỡ thất bại");
+      message.error("Kích cỡ này đã tồn tại");
     }
   };
 
