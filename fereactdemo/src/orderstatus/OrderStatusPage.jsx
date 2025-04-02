@@ -15,7 +15,6 @@ export const OrderStatusPage = () => {
     { id: "5", label: "Đang Vận Chuyển" },
     { id: "6", label: "Đã Giao Hàng" },
     { id: "2", label: "Hoàn Thành" },
-    { id: "9", label: "Sản Phẩm Chưa Trả" },
     { id: "7", label: "Trả Hàng"},
     { id: "8", label: "Đã Hủy" },
   ];
