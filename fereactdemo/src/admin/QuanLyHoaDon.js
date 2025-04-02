@@ -24,7 +24,8 @@ import {
 
 } from "../service/HoaDonService";
 import {
-  getLichSuHoaDon
+  getLichSuHoaDon,
+  getLichSuHoaDonById,
 
 } from "../service/LichSuHoaDonService";
 import moment from "moment";
@@ -85,14 +86,45 @@ const QuanLyHoaDon = () => {
   const fetchLichSuHoaDon = async () => {
     try {
       const response = await getLichSuHoaDon(); // Gọi API getAll từ backend
-      console.log("Lịch sử hóa đơn:", response.data); // Kiểm tra dữ liệu trả về
-      setLichSuHoaDon(response.data); // Cập nhật dữ liệu vào state
-      setIsHistoryPopupVisible(true); // Mở popup nếu có dữ liệu
+
+      if (response.data && response.data.length > 0) {
+        console.log("Lịch sử hóa đơn:", response.data); // Kiểm tra dữ liệu trả về
+        setLichSuHoaDon(response.data); // Cập nhật dữ liệu vào state
+        setIsHistoryPopupVisible(true); // Mở popup nếu có dữ liệu
+      } else {
+        console.log("Không có lịch sử hóa đơn");
+        setLichSuHoaDon([]); // Đảm bảo cập nhật state khi không có dữ liệu
+        setIsHistoryPopupVisible(false); // Ẩn popup nếu không có dữ liệu
+      }
     } catch (error) {
       console.error("Lỗi khi lấy lịch sử hóa đơn:", error);
       message.error("Không thể lấy lịch sử hóa đơn!");
+      setLichSuHoaDon([]); // Đảm bảo cập nhật state khi có lỗi
+      setIsHistoryPopupVisible(false); // Ẩn popup nếu có lỗi
     }
   };
+
+
+  const fetchLichSuHoaDonById = async (hoaDonId) => {
+    try {
+      const response = await getLichSuHoaDonById(hoaDonId); // Gọi API với hoaDonId
+      console.log("Lịch sử hóa đơn theo ID:", response.data); // Kiểm tra dữ liệu trả về
+
+      // Map qua dữ liệu và lấy mã hóa đơn (maHoaDon)
+      const lichSuData = response.data.map(item => ({
+        ...item,
+        maHoaDon: item.maHoaDon  // Mã hóa đơn
+      }));
+
+      setLichSuHoaDon(lichSuData); // Cập nhật dữ liệu vào state
+      setIsHistoryPopupVisible(true); // Mở popup nếu có dữ liệu
+    } catch (error) {
+      console.error("Lỗi khi lấy lịch sử hóa đơn theo ID:", error);
+      message.error("Không thể lấy lịch sử hóa đơn theo ID!");
+    }
+  };
+
+
 
   const handleHistoryClick = () => {
     fetchLichSuHoaDon(); // Gọi API để fetch dữ liệu lịch sử hóa đơn
@@ -627,6 +659,7 @@ const QuanLyHoaDon = () => {
         return <span>{record.tongTien?.toLocaleString("vi-VN")}đ</span>;
       },
       sorter: (a, b) => a.tongTien - b.tongTien,
+      width: 120,
     },
     {
       title: "Thao tác",
@@ -640,6 +673,13 @@ const QuanLyHoaDon = () => {
             onClick={() => handleEdit(record)}
           >
             Sửa
+          </Button>
+          <Button
+            type="default"
+            size="small"
+            onClick={() => fetchLichSuHoaDonById(record.order_id)} // Gọi hàm với hoaDonId
+          >
+            Lịch sử hóa đơn
           </Button>
           {/* <Button type="danger" size="small" onClick={() => handleDeleteSingle(record)}>
                         Xóa
@@ -752,7 +792,7 @@ const QuanLyHoaDon = () => {
             size="small"
             onClick={handleHistoryClick}
           >
-            Lịch sử
+            Lịch sử chung
           </Button>
           <Button
             type="primary"
@@ -828,6 +868,7 @@ const QuanLyHoaDon = () => {
                     <th>Trạng thái cũ</th>
                     <th>Trạng thái mới</th>
                     <th>Người cập nhật</th>
+                    <th>Mã Hóa Đơn</th>
                   </tr>
                 </thead>
                 <tbody>
@@ -837,6 +878,7 @@ const QuanLyHoaDon = () => {
                       <td>{mapTrangThai(historyItem.trangThaiCu)}</td>
                       <td>{mapTrangThai(historyItem.trangThaiMoi)}</td>
                       <td>{historyItem.nguoiCapNhat}</td>
+                      <td>{historyItem.maHoaDon}</td> {/* Hiển thị mã hóa đơn */}
                     </tr>
                   ))}
                 </tbody>

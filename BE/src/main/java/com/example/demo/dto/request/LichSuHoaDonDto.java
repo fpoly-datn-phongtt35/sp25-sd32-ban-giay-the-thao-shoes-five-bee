@@ -34,4 +34,6 @@ public class LichSuHoaDonDto extends PageDto {
   private Date thoiGianCapNhat;
 
   private String ghiChu;
+
+  private String maHoaDon;
 }
