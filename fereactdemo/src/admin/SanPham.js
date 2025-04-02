@@ -333,21 +333,21 @@ const SanPham = () => {
 
     console.log("updatedRecord:", updatedRecord);
 
-    const danhSachAnh = Array.isArray(selectedGiayIds)
+    const anhGiayDtos = Array.isArray(selectedGiayIds)
       ? selectedGiayIds.map((item) => ({
         id: item.id,
         tenUrl: item.tenUrl,
       }))
       : [];
-    console.log("danhsachanh", danhSachAnh);
+    console.log("anhGiayDtos", anhGiayDtos);
 
     const updatedGiayChiTiet = {
       id: updatedRecord.id,
       soLuongTon: Number(updatedRecord.soLuongTon) || 0,
       giaBan: parseFloat(updatedRecord.giaBan) || 0,
       trangThai: updatedRecord.trangThai === 0 ? 1 : 0,
-      danhSachAnh:
-        danhSachAnh.length > 0 ? danhSachAnh : updatedRecord.danhSachAnh || [], // Kiểm tra danhSachAnh
+      anhGiayDtos:
+      anhGiayDtos.length > 0 ? anhGiayDtos : updatedRecord.anhGiayDtos || [], // Kiểm tra danhSachAnh
     };
 
     console.log("📌 Dữ liệu cập nhật gửi lên API:", updatedGiayChiTiet);
