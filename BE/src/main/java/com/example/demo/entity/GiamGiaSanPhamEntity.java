@@ -46,7 +46,7 @@ public class GiamGiaSanPhamEntity {
     private UserEntity userEntity;
 
     @OneToMany(mappedBy = "chuongTrinhGiamSanPhamEntity", cascade = CascadeType.ALL, orphanRemoval = true)
-    @JsonManagedReference
+    @JsonManagedReference(value = "chuongTrinh-giamGia")
     private List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntities;
 
 }
