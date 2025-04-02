@@ -2,6 +2,7 @@ package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -39,11 +40,12 @@ public class GiamGiaChiTietSanPhamEntity {
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
 
-    @JsonBackReference
+    @JsonBackReference(value = "giayChiTiet-giamGia")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_GIAY_CHI_TIET",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private GiayChiTietEntity giayChiTiet;
 
+    @JsonBackReference(value = "chuongTrinh-giamGia")
     @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "ID_CHUONG_TRINH_GIAM_GIA_SAN_PHAM",foreignKey = @ForeignKey(value = ConstraintMode.NO_CONSTRAINT))
     private GiamGiaSanPhamEntity chuongTrinhGiamSanPhamEntity;
