@@ -62,22 +62,29 @@ export const Bill = () => {
   };
 
   const handleDiaChiChange = (data) => {
-    const { diaChi } = data;
-
-    const parts = diaChi.split(",");
-    const diaChiCuThe = parts[0] || "";        
-    const xa = parts[1] ? parts[1].trim() : ""; 
-    const huyen = parts[2] ? parts[2].trim() : ""; 
-    const tinh = parts[3] ? parts[3].trim() : ""; 
-  
-    setOrder((prevOrder) => ({
-      ...prevOrder,
-      xa,
-      huyen,
-      tinh,
-      diaChi: diaChiCuThe,
-      moTa: data.moTa,
-    }));
+    // Kiểm tra xem có thuộc tính diaChi hay không
+    if (data.diaChi) {
+      const parts = data.diaChi.split(",");
+      const diaChiCuThe = parts[0] || "";        
+      const xa = parts[1] ? parts[1].trim() : ""; 
+      const huyen = parts[2] ? parts[2].trim() : ""; 
+      const tinh = parts[3] ? parts[3].trim() : ""; 
+    
+      setOrder((prevOrder) => ({
+        ...prevOrder,
+        xa,
+        huyen,
+        tinh,
+        diaChi: diaChiCuThe,
+        moTa: data.moTa || prevOrder.moTa,
+      }));
+    } else {
+      // Nếu chỉ có moTa được cập nhật (khi thay đổi ghi chú)
+      setOrder((prevOrder) => ({
+        ...prevOrder,
+        moTa: data.moTa || prevOrder.moTa,
+      }));
+    }
   };
 
   const setTongTienHang = (data) => {
