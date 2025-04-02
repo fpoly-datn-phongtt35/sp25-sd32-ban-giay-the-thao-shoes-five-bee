@@ -206,7 +206,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     List<GiamGiaChiTietSanPhamEntity> giamGiaOpt =
         giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
 
-    if (giamGiaOpt != null) {
+    if (giamGiaOpt != null && !giamGiaOpt.isEmpty()) {
       BigDecimal soTienDaGiam = giamGiaOpt.get(0).getSoTienDaGiam();
       giaSauGiam = giaBanGoc.subtract(soTienDaGiam);
     }

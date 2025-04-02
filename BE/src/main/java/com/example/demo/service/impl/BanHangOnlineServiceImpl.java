@@ -62,7 +62,7 @@ public class BanHangOnlineServiceImpl implements BanHangService {
                   List<GiamGiaChiTietSanPhamEntity> giamGiaOpt =
                       giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
                   BigDecimal soTienDaGiam =
-                      giamGiaOpt != null ? giamGiaOpt.get(0).getSoTienDaGiam() : BigDecimal.ZERO;
+                      giamGiaOpt != null &&  !giamGiaOpt.isEmpty() ? giamGiaOpt.get(0).getSoTienDaGiam() : BigDecimal.ZERO;
                   BigDecimal donGia = giayChiTiet.getGiaBan().subtract(soTienDaGiam);
 
 
