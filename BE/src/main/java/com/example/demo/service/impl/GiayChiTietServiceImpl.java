@@ -1,8 +1,8 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.request.AnhGiayDto;
 import com.example.demo.dto.request.GiayChiTietDto;
 import com.example.demo.dto.response.PageResponse;
-import com.example.demo.entity.AnhGiayEntity;
 import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.*;
@@ -17,7 +17,6 @@ import jakarta.persistence.criteria.CriteriaBuilder;
 import jakarta.persistence.criteria.CriteriaQuery;
 import jakarta.persistence.criteria.Predicate;
 import jakarta.persistence.criteria.Root;
-
 import java.io.File;
 import java.io.IOException;
 import java.math.BigDecimal;
@@ -27,7 +26,7 @@ import java.util.ArrayList;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
+import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
@@ -45,6 +44,7 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final KichCoRepository kichCoRepository;
   private final AnhGiayRepository anhGiayRepository;
     private final AnhGiayService anhGiayService;
+    private final GiayServiceImpl giayServiceImpl;
 
     @Override
     public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
@@ -185,6 +185,9 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
                 giay.setSoLuongTon(tongSoLuongBienThe);
                 giayRepository.save(giay);
             }
+            UUID idGiay = giayChiTietDto.getId();
+            List<UUID> ids = giayChiTietDto.getAnhGiayDtos().stream().map(AnhGiayDto::getId).collect(Collectors.toList());
+            this.assignAnhGiay(idGiay,ids);
             return giayChiTietRepository.save(o);
         }).orElse(null);
     }
