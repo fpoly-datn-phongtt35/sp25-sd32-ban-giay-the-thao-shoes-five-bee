@@ -32,8 +32,17 @@ const Statistics = () => {
     try {
       const response = await topSelling();  // Gọi API
       console.log("Dữ liệu trả về từ API: ", response);  // Kiểm tra dữ liệu
+
       if (response && Array.isArray(response.data)) {
-        setTopSellingProducts(response.data);  // Lấy mảng từ "data"
+        // Xử lý dữ liệu trước khi cập nhật state
+        const formattedData = response.data.map(item => ({
+          ...item,
+          // Kiểm tra và thay thế các giá trị null/undefined với giá trị mặc định
+          danhMuc: item.danhMuc ? item.danhMuc : "Chưa có danh mục",
+          thuongHieu: item.thuongHieu ? item.thuongHieu : "Chưa có thương hiệu"
+        }));
+
+        setTopSellingProducts(formattedData);  // Lấy mảng đã được xử lý
       } else {
         console.error("Dữ liệu trả về không đúng cấu trúc:", response);
       }
@@ -43,6 +52,7 @@ const Statistics = () => {
       setLoading(false);  // Dừng loading nếu có lỗi
     }
   };
+
 
 
   // Hàm tạo dữ liệu cho biểu đồ
