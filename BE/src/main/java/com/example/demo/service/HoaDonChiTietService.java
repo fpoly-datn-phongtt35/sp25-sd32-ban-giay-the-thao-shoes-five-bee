@@ -1,5 +1,6 @@
 package com.example.demo.service;
 
+import com.example.demo.dto.request.BestSellingProductDTO;
 import com.example.demo.dto.request.UpdateAddressBillRequest;
 import com.example.demo.dto.request.UpdateQuantityRequest;
 import com.example.demo.entity.HoaDonChiTietEntity;
@@ -14,4 +15,5 @@ public interface HoaDonChiTietService {
     List<HoaDonChiTietEntity> findByHoaDonGetChiTiet(HoaDonEntity hoaDon);
     public byte[] printHoaDonChiTiet(UUID id);
     boolean capNhatDiaChi(UUID hoaDonId,UUID diaChiId);
+    List<BestSellingProductDTO> findTopSellingProductsWithVariants();
 }

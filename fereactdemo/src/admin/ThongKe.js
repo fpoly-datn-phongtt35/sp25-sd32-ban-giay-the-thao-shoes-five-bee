@@ -6,6 +6,8 @@ import "./thongke.css";
 import {
   getAllGiayChiTiet,
 } from "../service/GiayChiTietService";
+
+import { topSelling } from "../service/HoaDonService";
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 const Statistics = () => {
@@ -21,9 +23,27 @@ const Statistics = () => {
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
   const [giayChiTietList, setGiayChiTietList] = useState([]);
+  const [topSellingProducts, setTopSellingProducts] = useState([]);
 
   // Format date chuẩn YYYY-MM-DD
   const formatDate = (date) => new Date(date).toISOString().split("T")[0];
+
+  const fetchTopSellingProducts = async () => {
+    try {
+      const response = await topSelling();  // Gọi API
+      console.log("Dữ liệu trả về từ API: ", response);  // Kiểm tra dữ liệu
+      if (response && Array.isArray(response.data)) {
+        setTopSellingProducts(response.data);  // Lấy mảng từ "data"
+      } else {
+        console.error("Dữ liệu trả về không đúng cấu trúc:", response);
+      }
+      setLoading(false);  // Đặt loading thành false khi có dữ liệu
+    } catch (error) {
+      console.error("Lỗi khi lấy dữ liệu sản phẩm bán chạy:", error);
+      setLoading(false);  // Dừng loading nếu có lỗi
+    }
+  };
+
 
   // Hàm tạo dữ liệu cho biểu đồ
   const createChartData = (label, data, color) => ({
@@ -139,6 +159,7 @@ const Statistics = () => {
   useEffect(() => {
     fetchAllGiayChiTiet();
     fetchAllRevenueData();
+    fetchTopSellingProducts();
   }, []);
 
   return (
@@ -148,6 +169,7 @@ const Statistics = () => {
         <p>Đang tải dữ liệu...</p>
       ) : (
         <div>
+          {/* Các bộ lọc và biểu đồ doanh thu */}
           <div className="filters-container">
             <div>
               <label>Năm:</label>
@@ -198,9 +220,9 @@ const Statistics = () => {
               <h2 style={{ color: "#FFCE56" }}>Doanh Thu Theo Ngày</h2>
               <Doughnut data={doanhThuNgay} />
             </div>
-
-
           </div>
+
+          {/* Danh sách sản phẩm sắp hết */}
           <div className="product-table-container">
             <h2>Danh sách sản phẩm sắp hết</h2>
             <table>
@@ -243,10 +265,58 @@ const Statistics = () => {
               </tbody>
             </table>
           </div>
+
+          {/* Thêm bảng "Top 5 Sản Phẩm Khách Hàng Hay Mua" vào cuối */}
+          <div className="product-table-container">
+            <h2>Top 5 Sản Phẩm Khách Hàng Hay Mua</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Ảnh giày</th>
+                  <th>Tên Giày</th>
+                  <th>Màu Sắc</th>
+                  <th>Kích cỡ</th>
+                  <th>Danh mục</th>
+                  <th>Thương hiệu</th>
+                  <th>Số Lượng Đã Bán</th>
+                </tr>
+              </thead>
+              <tbody>
+                {topSellingProducts.map((item, index) => (  // Dữ liệu lấy từ API topSelling
+                  <tr key={index}>
+                    <td style={{ textAlign: "center", padding: "10px" }}>
+                      {/* Kiểm tra xem có URL ảnh không, nếu có thì hiển thị ảnh, nếu không thì hiển thị văn bản */}
+                      {item.tenUrl ? (
+                        <img
+                          src={item.tenUrl}
+                          alt="Giày"
+                          style={{
+                            width: "50px",
+                            height: "50px",
+                            objectFit: "cover",
+                            borderRadius: "5px",  // Tùy chỉnh bo tròn ảnh
+                          }}
+                        />
+                      ) : (
+                        <p style={{ color: "gray" }}>Không có ảnh</p>  // Văn bản hiển thị khi không có ảnh
+                      )}
+                    </td>
+                    <td>{item.tenGiay}</td>
+                    <td>{item.mauSac}</td>
+                    <td>{item.danhMuc}</td>
+                    <td>{item.thuongHieu}</td>
+                    <td>{item.kichCo}</td>
+                    <td>{item.soLuongBan}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
         </div>
       )}
     </div>
   );
+
 };
 
 export default Statistics;
