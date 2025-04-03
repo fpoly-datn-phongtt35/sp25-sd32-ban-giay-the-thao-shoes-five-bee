@@ -19,6 +19,13 @@ const ProductDetail = () => {
   const [quantity, setQuantity] = useState(1);
   const [bienTheList, setBienTheList] = useState([]);
   const [currentPrice, setCurrentPrice] = useState(productGiay?.giaBan || 0);
+  const [selectedVariantDetails, setSelectedVariantDetails] = useState(null);
+  const [sizeList, setSizeList] = useState([]);
+  const [anhCHiTiet, setanhCHiTiet] = useState([]);
+  const [soLuongChitiet, setSoLuongChiTiet] = useState([]);
+  const [totalQuantity, setTotalQuantity] = useState(0); // Thêm dòng này để khai báo totalQuantity
+
+  console.log("anh chi tiet", anhCHiTiet);
 
   useEffect(() => {
     fetchProductDetail();
@@ -31,27 +38,28 @@ const ProductDetail = () => {
       const giayResponse = await getGiayDetail(giayDto);
       const giayChiTietResponse = await getGiayChitietDetail1(id); // Lấy danh sách chi tiết giày
 
-      console.log("Kết quả từ getGiayDetail:", giayResponse.data);
+      // console.log("Kết quả từ getGiayDetail:", giayResponse.data);
       console.log("Kết quả từ getAllGiayChiTiet:", giayChiTietResponse.data);
 
       if (
         Array.isArray(giayChiTietResponse.data) &&
         giayChiTietResponse.data.length > 0
       ) {
-        // Trích xuất màu sắc, kích cỡ và thông tin liên quan
         const bienTheSanPham = giayChiTietResponse.data.map((item) => ({
           idMauSac: item.mauSacEntity?.id, // ID màu sắc
           tenMauSac: item.mauSacEntity?.ten, // Tên màu sắc
-          idGiayChiTiet: item.id, // ID giày chi tiết
-          giaBan: item.giaBan, // Giá bán
-          idKichCo: item.kichCoEntity?.id, // ID kích cỡ
-          tenKichCo: item.kichCoEntity?.ten, // Tên kích cỡ
+          idGiayChiTiet: item.id,
+          giaBan: item.giaBan,
+          idKichCo: item.kichCoEntity?.id,
+          tenKichCo: item.kichCoEntity?.ten,
+          soLuong: item.soLuongTon,
+          anh: item.danhSachAnh,
         }));
 
         console.log("Danh sách biến thể sản phẩm:", bienTheSanPham);
-        setBienTheList(bienTheSanPham); // Cập nhật state
+        setBienTheList(bienTheSanPham);
       } else {
-        setBienTheList([]); // Nếu không có dữ liệu, gán mảng rỗng
+        setBienTheList([]);
       }
 
       setProductGiay(giayResponse.data);
@@ -65,13 +73,62 @@ const ProductDetail = () => {
   const handleColorSelect = (color) => {
     setSelectedColor(color);
 
-    // Tìm biến thể đầu tiên có màu sắc được chọn
-    const selectedVariant = bienTheList.find(
+    const variantsWithSameColor = bienTheList.filter(
       (item) => item.tenMauSac === color
+    );
+    console.log("aaa", variantsWithSameColor);
+
+    if (variantsWithSameColor.length > 0) {
+      const sizeList = variantsWithSameColor.map(
+        (variant) => variant.tenKichCo
+      );
+      setSizeList(sizeList);
+      setCurrentPrice(variantsWithSameColor[0].giaBan);
+
+      // Lấy danh sách URL ảnh từ tất cả biến thể có cùng màu
+      const imageList = variantsWithSameColor.flatMap((variant) =>
+        variant.anh ? variant.anh.map((img) => img.tenUrl) : []
+      );
+      setanhCHiTiet(imageList);
+
+      // Lấy danh sách số lượng từ các biến thể có cùng màu và kích cỡ
+      const quantityList = variantsWithSameColor.map(
+        (variant) => variant.soLuong
+      );
+      setSoLuongChiTiet(quantityList); // Lưu danh sách số lượng vào state
+
+      // Tính tổng số lượng khi chưa chọn kích cỡ
+      const totalQuantity = quantityList.reduce((acc, qty) => acc + qty, 0);
+      setTotalQuantity(totalQuantity); // Cập nhật tổng số lượng vào state
+
+      // Lưu danh sách kích cỡ, ảnh và số lượng
+      setSelectedVariantDetails({
+        tenMauSac: color,
+        sizes: sizeList,
+        images: imageList, // Thêm danh sách ảnh
+        quantities: quantityList, // Thêm danh sách số lượng
+      });
+
+      console.log("Danh sách kích cỡ:", sizeList);
+      console.log("Danh sách ảnh:", imageList);
+      console.log("Danh sách số lượng:", quantityList); // Kiểm tra số lượng
+      console.log("Tổng số lượng:", totalQuantity); // Kiểm tra tổng số lượng
+    } else {
+      console.log("Không tìm thấy biến thể nào có màu sắc được chọn");
+    }
+  };
+
+  // Hàm xử lý khi chọn kích cỡ
+  const handleSizeSelect = (size) => {
+    // Tìm số lượng tương ứng với kích cỡ đã chọn
+    const selectedVariant = bienTheList.find(
+      (variant) =>
+        variant.tenMauSac === selectedColor && variant.tenKichCo === size
     );
 
     if (selectedVariant) {
-      setCurrentPrice(selectedVariant.giaBan); // Cập nhật giá
+      setSoLuongChiTiet(selectedVariant.soLuong); // Lưu số lượng tương ứng với kích cỡ đã chọn
+      console.log("Số lượng của kích cỡ đã chọn:", selectedVariant.soLuong);
     }
   };
 
@@ -106,11 +163,20 @@ const ProductDetail = () => {
     <div className="product-detail">
       <div className="left">
         <div className="product-images">
-          {productGiay.anhGiayEntities?.length > 0 ? (
+          {anhCHiTiet.length > 0 ? (
+            anhCHiTiet.map((url, index) => (
+              <img
+                key={index}
+                src={url || "default_image.jpg"} // Nếu URL không có thì dùng ảnh mặc định
+                alt={productGiay.ten}
+                style={{ width: "600px", height: "600px", margin: "5px" }}
+              />
+            ))
+          ) : productGiay.anhGiayEntities?.length > 0 ? (
             productGiay.anhGiayEntities.map((anh, index) => (
               <img
                 key={anh.id || index}
-                src={anh.tenUrl || "default_image.jpg"}
+                src={anh.tenUrl || "default_image.jpg"} // Nếu URL không có thì dùng ảnh mặc định
                 alt={productGiay.ten}
                 style={{ width: "600px", height: "600px", margin: "5px" }}
               />
@@ -135,19 +201,20 @@ const ProductDetail = () => {
           <div>
             <strong>Kích thước:</strong>
             <div className="size-options">
-              {[...new Set(bienTheList.map((item) => item.tenKichCo))].map(
-                (size) => (
-                  <div
-                    key={size}
-                    className={`size-box ${
-                      selectedSize === size ? "active" : ""
-                    }`}
-                    onClick={() => setSelectedSize(size)}
-                  >
-                    {size}
-                  </div>
-                )
-              )}
+              {sizeList.map((size) => (
+                <div
+                  key={size}
+                  className={`size-box ${
+                    selectedSize === size ? "active" : ""
+                  }`}
+                  onClick={() => {
+                    setSelectedSize(size); // Cập nhật kích cỡ đã chọn
+                    handleSizeSelect(size); // Gọi hàm xử lý khi chọn kích cỡ
+                  }}
+                >
+                  {size}
+                </div>
+              ))}
             </div>
           </div>
 
@@ -173,16 +240,27 @@ const ProductDetail = () => {
 
           {/* Số lượng */}
           <div className="quantity">
-            <strong>Số lượng:</strong>
-            <Button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
-              -
-            </Button>
-            <span>{quantity}</span>
-            <Button onClick={() => setQuantity(quantity + 1)}>+</Button>
+            <div>
+              <strong>Số lượng:</strong>
+              <Button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
+                -
+              </Button>
+              <span>{quantity}</span>
+              <Button onClick={() => setQuantity(quantity + 1)}>+</Button>
+            </div>
+            {(selectedSize ? soLuongChitiet : totalQuantity) > 0 && (
+              <p style={{ color: "red", fontSize: "10px" }}>
+                ( Số Lượng: {selectedSize ? soLuongChitiet : totalQuantity} )
+              </p>
+            )}
           </div>
 
           {/* Nút Mua ngay */}
-          <div className="buy-button" onClick={handleAddToCart} style={{borderRadius: "15px"}}> 
+          <div
+            className="buy-button"
+            onClick={handleAddToCart}
+            style={{ borderRadius: "15px" }}
+          >
             MUA NGAY VỚI GIÁ {""}
             {selectedColor
               ? currentPrice.toLocaleString()

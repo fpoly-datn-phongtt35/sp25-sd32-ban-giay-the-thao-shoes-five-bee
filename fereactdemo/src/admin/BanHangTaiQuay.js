@@ -97,6 +97,10 @@ const BanHangTaiQuay = () => {
   const [initialTotalHoaDon, setInitialTotalHoaDon] = useState(totalHoaDon);
   const [hoaDonCho, setHoaDonCho] = useState([]);
   const [scanResult, setScanResult] = useState("");
+  const [selectedSize, setSelectedSize] = useState(""); // Lọc kích cỡ
+  const [selectedColor, setSelectedColor] = useState("");
+  const [minPrice, setMinPrice] = useState("");
+  const [maxPrice, setMaxPrice] = useState("");
   const [availablePageNumbers, setAvailablePageNumbers] = useState([
     1, 2, 3, 4, 5,
   ]);
@@ -272,7 +276,6 @@ const BanHangTaiQuay = () => {
       if (!response) {
         throw new Error("Không nhận được phản hồi từ API");
       }
-
 
       await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
         console.log("📡 Danh sách sản phẩm sau cập nhật:", updatedProducts);
@@ -519,25 +522,25 @@ const BanHangTaiQuay = () => {
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => {
-          const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
-          const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
+            const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
+            const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
 
-          return {
-            ID: item.id,
-            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-            SOLUONG: item.soLuong,
-            GIABAN: item.giayChiTietEntity?.giaBan || 0,
-            ANH_GIAY:
-              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl ||
-              "https://via.placeholder.com/150",
-            KICH_CO: kichCo,  // Lưu vào biến kích cỡ
-            MAU_SAC: mauSac,  // Lưu vào biến màu sắc
-            TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
-          };
-        })
+            return {
+              ID: item.id,
+              TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+              SOLUONG: item.soLuong,
+              GIABAN: item.giayChiTietEntity?.giaBan || 0,
+              ANH_GIAY:
+                item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+                  ?.tenUrl || "https://via.placeholder.com/150",
+              KICH_CO: kichCo, // Lưu vào biến kích cỡ
+              MAU_SAC: mauSac, // Lưu vào biến màu sắc
+              TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+            };
+          })
         : [];
 
-      console.log("dsadasqewrq", formattedData)
+      console.log("dsadasqewrq", formattedData);
       // Cập nhật số lượng sản phẩm trong hóa đơn
       setInvoiceProductCounts((prev) => ({
         ...prev,
@@ -641,20 +644,20 @@ const BanHangTaiQuay = () => {
       const result = await getHoaDon();
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-          key: item.id,
-          order_id: item.id,
-          user: item.khachHang ? item.khachHang.hoTen : null,
-          user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
-          order_on: item.ngayTao
-            ? moment(item.ngayTao).format("DD/MM/YYYY")
-            : "N/A",
-          status: mapTrangThai(item.trangThai),
-          trangThai: item.trangThai,
-          tongTien: item.tongTien,
-          hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
-          hinhThucThanhToan:
-            item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
-        }))
+            key: item.id,
+            order_id: item.id,
+            user: item.khachHang ? item.khachHang.hoTen : null,
+            user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
+            order_on: item.ngayTao
+              ? moment(item.ngayTao).format("DD/MM/YYYY")
+              : "N/A",
+            status: mapTrangThai(item.trangThai),
+            trangThai: item.trangThai,
+            tongTien: item.tongTien,
+            hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
+            hinhThucThanhToan:
+              item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+          }))
         : [];
       setData(formattedData);
     } catch (error) {
@@ -708,8 +711,8 @@ const BanHangTaiQuay = () => {
       sdtNguoiNhan: selectedKhachHang
         ? soDienThoai
         : sdtNguoiNhan?.trim() !== ""
-          ? sdtNguoiNhan
-          : null,
+        ? sdtNguoiNhan
+        : null,
       tongTien: totalHoaDon,
       diaChi: isGiaoHang ? diaChi : null,
       idGiamGia: selectedMaGiamGia || null,
@@ -748,7 +751,6 @@ const BanHangTaiQuay = () => {
         if (vnpayResponse.data) {
           await thanhToanTaiQuay(selectedHoaDonId, hoaDonRequest);
 
-
           // Lưu URL VNPAY trước khi reset state
           const paymentUrl = vnpayResponse.data;
 
@@ -770,7 +772,7 @@ const BanHangTaiQuay = () => {
     setHoTen("");
     setSoDienThoai("");
     setDiaChi("");
-    setSdtNguoiNhan("")
+    setSdtNguoiNhan("");
     setPages([]);
     setSelectedPage(1);
     setIsKhachLe(true);
@@ -848,14 +850,14 @@ const BanHangTaiQuay = () => {
       message.error("Vui lòng nhập đầy đủ thông tin khách hàng!");
       return;
     }
-    
+
     const newData = {
       hoTen,
       sdtNguoiNhan,
     };
-  
+
     try {
-      await addKhachHang(newData);  // Chỉ gửi tên và số điện thoại
+      await addKhachHang(newData); // Chỉ gửi tên và số điện thoại
       message.success("Thêm khách hàng thành công!");
       getAllKhachHangData();
       handleClear("");
@@ -863,7 +865,6 @@ const BanHangTaiQuay = () => {
       message.error("Lỗi khi thêm khách hàng");
     }
   };
-  
 
   const handleAddPage = async () => {
     if (pages.length >= 5) {
@@ -957,15 +958,27 @@ const BanHangTaiQuay = () => {
     setSoDienThoai("");
     setDiaChi("");
   };
-  const filteredGiay = giay.filter((item) =>
-    Object.values({
-      ten: item.TEN.toLowerCase(),
-      giaBan: item.GIABAN.toString(), // Chuyển giá bán thành chuỗi
-      soLuong: item.SOLUONG.toString(), // Chuyển số lượng thành chuỗi
-      kichCo: item.KICH_CO ? item.KICH_CO.toString() : "", // Chuyển kích cỡ thành chuỗi
-      mauSac: item.MAU_SAC ? item.MAU_SAC.toLowerCase() : "", // Màu sắc lowercase
-    }).some((value) => value.includes(searchTerm.toLowerCase()))
-  );
+  const danhSachKichCo = [...new Set(giay.map((item) => item.KICH_CO))];
+  const danhSachMauSac = [...new Set(giay.map((item) => item.MAU_SAC))];
+  const filteredGiay = giay.filter((item) => {
+    const searchStr = searchTerm.toLowerCase();
+    const matchSearch = ["TEN", "GIABAN", "SOLUONG", "KICH_CO", "MAU_SAC"].some(
+      (key) =>
+        item[key]
+          ? item[key].toString().toLowerCase().includes(searchStr)
+          : false
+    );
+
+    const matchSize = selectedSize ? item.KICH_CO === selectedSize : true;
+    const matchColor = selectedColor ? item.MAU_SAC === selectedColor : true;
+
+    const matchPrice =
+      (!minPrice || item.GIABAN >= parseFloat(minPrice)) &&
+      (!maxPrice || item.GIABAN <= parseFloat(maxPrice));
+
+    return matchSearch && matchSize && matchColor && matchPrice;
+  });
+
   useEffect(() => {
     if (!soDienThoai || soDienThoai.trim() === "") {
       setSuggestions([]);
@@ -1043,11 +1056,13 @@ const BanHangTaiQuay = () => {
                 {pages.map((page) => (
                   <div key={page.id} className="page_button_container">
                     <button
-                      className={`page_button ${selectedPage === page.id ? "selected" : ""
-                        } ${invoiceProductCounts[page.hoaDonId] > 0
+                      className={`page_button ${
+                        selectedPage === page.id ? "selected" : ""
+                      } ${
+                        invoiceProductCounts[page.hoaDonId] > 0
                           ? "has-products"
                           : "empty-invoice"
-                        }`}
+                      }`}
                       onClick={() => handleSelectPage(page.id, page.hoaDonId)}
                     >
                       HD {page.id}
@@ -1097,20 +1112,22 @@ const BanHangTaiQuay = () => {
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
             {selectedHoaDonId &&
-              selectedProducts[selectedHoaDonId] &&
-              selectedProducts[selectedHoaDonId].length > 0 ? (
+            selectedProducts[selectedHoaDonId] &&
+            selectedProducts[selectedHoaDonId].length > 0 ? (
               selectedProducts[selectedHoaDonId].map((product) => (
                 <div key={product.ID} className="selected_product">
                   {product.ANH_GIAY && (
                     <img src={product.ANH_GIAY} alt={product.TEN} />
                   )}
-                  <div style={{ display: 'flex', alignItems: 'center' }}>
+                  <div style={{ display: "flex", alignItems: "center" }}>
                     <div>{product.TEN}</div>
-                    <div style={{ marginLeft: '10px', fontSize: '0.9em' }}>
-                      <span style={{ fontWeight: 'bold' }}>Kích cỡ:</span> ({product.KICH_CO})
+                    <div style={{ marginLeft: "10px", fontSize: "0.9em" }}>
+                      <span style={{ fontWeight: "bold" }}>Kích cỡ:</span> (
+                      {product.KICH_CO})
                     </div>
-                    <div style={{ marginLeft: '10px', fontSize: '0.9em' }}>
-                      <span style={{ fontWeight: 'bold' }}>Màu sắc:</span> ({product.MAU_SAC})
+                    <div style={{ marginLeft: "10px", fontSize: "0.9em" }}>
+                      <span style={{ fontWeight: "bold" }}>Màu sắc:</span> (
+                      {product.MAU_SAC})
                     </div>
                   </div>
 
@@ -1158,27 +1175,85 @@ const BanHangTaiQuay = () => {
         </div>
         <div className="product_list_tt">
           {/* Ô tìm kiếm */}
-          <div
-            style={{
-              // position: "sticky",
-              top: 0,
-              background: "white",
-              zIndex: 1000,
-              padding: "10px",
-            }}
-          >
-            <input
-              type="text"
-              placeholder="Tìm kiếm..."
-              value={searchTerm}
-              onChange={(e) => setSearchTerm(e.target.value)}
+          <div style={{ display: "flex" }}>
+            {/* Ô tìm kiếm */}
+            <div
               style={{
-                padding: "8px",
-                width: "100%",
-                borderRadius: "15px",
-                border: "1px solid #ccc",
+                top: 0,
+                background: "white",
+                zIndex: 1000,
+                padding: "10px",
               }}
-            />
+            >
+              <input
+                type="text"
+                placeholder="Tìm kiếm..."
+                value={searchTerm}
+                onChange={(e) => setSearchTerm(e.target.value)}
+                style={{
+                  padding: "8px",
+                  width: "100%",
+                  borderRadius: "15px",
+                  border: "1px solid #ccc",
+                }}
+              />
+            </div>
+
+            {/* Bộ lọc kích cỡ */}
+            <select
+              value={selectedSize}
+              onChange={(e) => setSelectedSize(e.target.value)}
+              style={{ margin: "10px", padding: "5px", borderRadius: "15px" }}
+            >
+              <option value="">Tất cả kích cỡ</option>
+              {danhSachKichCo.map((size) => (
+                <option key={size} value={size}>
+                  {size}
+                </option>
+              ))}
+            </select>
+
+            {/* Bộ lọc màu sắc */}
+            <select
+              value={selectedColor}
+              onChange={(e) => setSelectedColor(e.target.value)}
+              style={{ margin: "10px", padding: "5px", borderRadius: "15px" }}
+            >
+              <option value="">Tất cả màu sắc</option>
+              {danhSachMauSac.map((color) => (
+                <option key={color} value={color}>
+                  {color}
+                </option>
+              ))}
+            </select>
+
+            <div style={{ display: "flex", gap: "10px", margin: "10px 0" }}>
+              {/* <p>Lọc theo khoảng giá</p> */}
+              <input
+                type="number"
+                placeholder="Giá tối thiểu"
+                value={minPrice}
+                onChange={(e) => setMinPrice(e.target.value)}
+                style={{
+                  padding: "5px",
+                  width: "120px",
+                  borderRadius: "15px",
+                  border: "1px solid #ccc",
+                }}
+              />
+              <input
+                type="number"
+                placeholder="Giá tối đa"
+                value={maxPrice}
+                onChange={(e) => setMaxPrice(e.target.value)}
+                style={{
+                  padding: "5px",
+                  width: "120px",
+                  borderRadius: "15px",
+                  border: "1px solid #ccc",
+                }}
+              />
+            </div>
           </div>
 
           <table className="product_table">
@@ -1201,9 +1276,9 @@ const BanHangTaiQuay = () => {
                   style={{
                     backgroundColor:
                       Array.isArray(selectedProducts[selectedPage]) &&
-                        selectedProducts[selectedPage].some(
-                          (product) => product.ID === item.ID
-                        )
+                      selectedProducts[selectedPage].some(
+                        (product) => product.ID === item.ID
+                      )
                         ? "#e0f7fa"
                         : "transparent",
                     opacity: item.SOLUONG === 0 ? 0.5 : 1,
