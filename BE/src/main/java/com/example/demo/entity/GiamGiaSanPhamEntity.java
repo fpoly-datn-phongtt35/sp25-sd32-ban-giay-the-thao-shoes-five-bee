@@ -32,11 +32,11 @@ public class GiamGiaSanPhamEntity {
     @Column(name = "PHAN_TRAM_GIAM")
     private Integer phanTramGiam;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd" )
     @Column(name = "NGAY_BAT_DAU")
     private Date ngayBatDau;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "NGAY_KET_THUC")
     private Date ngayKetThuc;
     @Column(name = "TRANG_THAI")

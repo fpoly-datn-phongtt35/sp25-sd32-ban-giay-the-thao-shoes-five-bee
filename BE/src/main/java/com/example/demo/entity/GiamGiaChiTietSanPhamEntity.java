@@ -29,11 +29,11 @@ public class GiamGiaChiTietSanPhamEntity {
     @Column(name = "SO_TIEN_DA_GIAM")
     private BigDecimal soTienDaGiam;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "NGAY_BAT_DAU")
     private Date ngayBatDau;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd", timezone = "Asia/Ho_Chi_Minh")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
     @Column(name = "NGAY_KET_THUC")
     private Date ngayKetThuc;
 
