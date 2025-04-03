@@ -1527,10 +1527,19 @@ const SanPham = () => {
             dataIndex: "DANH_MUC",
             width: 150,
           },
+
           {
             title: "Thương hiệu",
             dataIndex: "THUONG_HIEU",
             width: 150,
+          },
+          {
+            title: "Giá bán",
+            dataIndex: "GIABAN",
+            width: 150,
+            render: (text) => {
+              return text.toLocaleString("vi-VN"); // Định dạng giá trị theo kiểu Việt Nam
+            },
           },
           {
             title: "Trạng thái",

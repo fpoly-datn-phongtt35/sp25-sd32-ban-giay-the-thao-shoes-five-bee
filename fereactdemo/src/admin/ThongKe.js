@@ -3,7 +3,9 @@ import { Doughnut } from "react-chartjs-2";
 import { Chart as ChartJS, Title, Tooltip, Legend, ArcElement } from "chart.js";
 import ChartDataLabels from "chartjs-plugin-datalabels";
 import "./thongke.css";
-
+import {
+  getAllGiayChiTiet,
+} from "../service/GiayChiTietService";
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 const Statistics = () => {
@@ -18,6 +20,7 @@ const Statistics = () => {
   const [selectedDate, setSelectedDate] = useState("");
   const [startDate, setStartDate] = useState("");
   const [endDate, setEndDate] = useState("");
+  const [giayChiTietList, setGiayChiTietList] = useState([]);
 
   // Format date chuẩn YYYY-MM-DD
   const formatDate = (date) => new Date(date).toISOString().split("T")[0];
@@ -31,6 +34,10 @@ const Statistics = () => {
         backgroundColor: [color],
         borderColor: [color],
         borderWidth: 1,
+        // Định dạng số hiển thị trên biểu đồ
+        datalabels: {
+          formatter: (value) => value.toLocaleString("vi-VN"),
+        },
       },
     ],
   });
@@ -117,7 +124,20 @@ const Statistics = () => {
     }
   };
 
+  const fetchAllGiayChiTiet = async () => {
+    try {
+      const response = await getAllGiayChiTiet();
+      setGiayChiTietList(response.data); // Giả sử API trả về dữ liệu trong `response.data`
+    } catch (error) {
+      console.error("Lỗi khi lấy giày chi tiết:", error);
+    }
+  };
+  const filteredGiayChiTietList = giayChiTietList.filter(
+    (item) => item.soLuongTon <= 50
+  );
+
   useEffect(() => {
+    fetchAllGiayChiTiet();
     fetchAllRevenueData();
   }, []);
 
@@ -178,6 +198,50 @@ const Statistics = () => {
               <h2 style={{ color: "#FFCE56" }}>Doanh Thu Theo Ngày</h2>
               <Doughnut data={doanhThuNgay} />
             </div>
+
+
+          </div>
+          <div className="product-table-container">
+            <h2>Danh sách sản phẩm sắp hết</h2>
+            <table>
+              <thead>
+                <tr>
+                  <th>Ảnh giày</th>
+                  <th>Tên Giày</th>
+                  <th>Màu Sắc</th>
+                  <th>Thương hiệu</th>
+                  <th>Danh mục</th>
+                  <th>Kích Cỡ</th>
+                  <th>Giá Bán</th>
+                  <th>Số Lượng Tồn</th>
+                </tr>
+              </thead>
+              <tbody>
+                {filteredGiayChiTietList.map((item) => (
+                  <tr key={item.id}>
+                    <td>
+                      {/* Hiển thị ảnh giày */}
+                      {item.giayEntity.anhGiayEntities.length > 0 ? (
+                        <img
+                          src={item.giayEntity.anhGiayEntities[0].tenUrl}
+                          alt="Giày"
+                          style={{ width: "50px", height: "50px", objectFit: "cover" }}
+                        />
+                      ) : (
+                        <p>Không có ảnh</p>
+                      )}
+                    </td>
+                    <td>{item.giayEntity.ten}</td>
+                    <td>{item.mauSacEntity.ten}</td>
+                    <td>{item.giayEntity.thuongHieu.ten}</td>
+                    <td>{item.giayEntity.danhMuc.ten}</td>
+                    <td>{item.kichCoEntity.ten}</td>
+                    <td>{item.giaBan.toLocaleString("vi-VN")} VND</td>
+                    <td>{item.soLuongTon}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
           </div>
         </div>
       )}
