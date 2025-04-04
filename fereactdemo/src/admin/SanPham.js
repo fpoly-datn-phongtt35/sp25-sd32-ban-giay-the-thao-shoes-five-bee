@@ -162,7 +162,8 @@ const SanPham = () => {
     console.log("Danh sách ID giày đã chọn:", selectedGiayIds);
 
     // Tiến hành các thao tác khác nếu cần
-    setIsThemNhanhAnh(false); // Đóng modal hoặc xử lý thêm các bước khác nếu cần
+    setIsThemNhanhAnh(false); 
+  // Reset danh sách ID giày đã chọn
   };
 
   const getMauSacList = async () => {
@@ -204,12 +205,14 @@ const SanPham = () => {
       const danhSachChiTiet = response.data.map((item) => ({
         id: item.id,
         ten: item.giayEntity?.ten || "N/A",
-        anh: item.danhSachAnh.length > 0 ? item.danhSachAnh[0] : null,
+        danhSachAnh:
+          item.danhSachAnh.length > 0 ? item.danhSachAnh[0].tenUrl : null,
         giaBan: item.giaBan || 0,
         mauSac: item.mauSacEntity?.ten || "Không có",
         kichCo: item.kichCoEntity?.ten || "Không có",
         soLuongTon: item.soLuongTon || 0,
       }));
+      console.log("Danh sách chi tiết:", danhSachChiTiet);
 
       setDanhSachChiTiet(danhSachChiTiet);
 
@@ -257,7 +260,7 @@ const SanPham = () => {
       await removeGiayChiTiet(record.id);
       message.success("Xóa sản phẩm chi tiết thành công!");
 
-      // 🌀 Cập nhật danh sách ngay lập tức bằng cách lọc bỏ sản phẩm vừa xóa
+
       setDanhSachChiTiet((prevList) =>
         prevList.filter((item) => item.id !== record.id)
       );
@@ -320,7 +323,7 @@ const SanPham = () => {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error(
         "Lỗi khi thực hiện thao tác: " +
-        (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message)
       );
     }
   };
@@ -335,9 +338,9 @@ const SanPham = () => {
 
     const anhGiayDtos = Array.isArray(selectedGiayIds)
       ? selectedGiayIds.map((item) => ({
-        id: item.id,
-        tenUrl: item.tenUrl,
-      }))
+          id: item.id,
+          tenUrl: item.tenUrl,
+        }))
       : [];
     console.log("anhGiayDtos", anhGiayDtos);
 
@@ -347,13 +350,12 @@ const SanPham = () => {
       giaBan: parseFloat(updatedRecord.giaBan) || 0,
       trangThai: updatedRecord.trangThai === 0 ? 1 : 0,
       anhGiayDtos:
-      anhGiayDtos.length > 0 ? anhGiayDtos : updatedRecord.anhGiayDtos || [], // Kiểm tra danhSachAnh
+        anhGiayDtos.length > 0 ? anhGiayDtos : updatedRecord.anhGiayDtos || [], // Kiểm tra danhSachAnh
     };
 
     console.log("📌 Dữ liệu cập nhật gửi lên API:", updatedGiayChiTiet);
 
     try {
-
       await updateGiayChiTiet(updatedGiayChiTiet);
       message.success("✅ Cập nhật sản phẩm chi tiết thành công!");
 
@@ -365,10 +367,8 @@ const SanPham = () => {
         return newData;
       });
 
-
       fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
     } catch (error) {
-
       console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
       message.error("❌ Lỗi cập nhật sản phẩm chi tiết!");
     }
@@ -431,14 +431,24 @@ const SanPham = () => {
       title: "Ảnh",
       dataIndex: "danhSachAnh",
       key: "danhSachAnh",
-      render: (text, record) => (
-        <Button
-          type="dashed"
-          icon={<PlusOutlined />}
-          onClick={() => handleAddImage(record)}
-        />
-      ),
+      render: (text, record) => {
+        const tenUrl = record.danhSachAnh;
+        return tenUrl ? (
+          <img
+            src={tenUrl}
+            alt="Ảnh sản phẩm"
+            style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
+          />
+        ) : (
+          <Button
+            type="dashed"
+            icon={<PlusOutlined />}
+            onClick={() => handleAddImage(record)}
+          />
+        );
+      },
     },
+    
     {
       title: "Thao tác",
       key: "action",
@@ -713,9 +723,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-          id: ag.id,
-          tenUrl: ag.tenUrl,
-        }))
+            id: ag.id,
+            tenUrl: ag.tenUrl,
+          }))
         : [],
     };
 
@@ -810,7 +820,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-        (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message)
       );
     }
   };
@@ -1183,8 +1193,9 @@ const SanPham = () => {
                     {kichCoList.map((kc) => (
                       <button
                         key={kc.id}
-                        className={`option-btn ${tempSelectedKichCo.includes(kc.id) ? "selected" : ""
-                          }`}
+                        className={`option-btn ${
+                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                        }`}
                         onClick={() => handleSelectKichCo(kc.id)}
                       >
                         {kc.ten}
@@ -1213,8 +1224,9 @@ const SanPham = () => {
                     {mauSacList.map((ms) => (
                       <button
                         key={ms.id}
-                        className={`option-btn ${tempSelectedMauSac.includes(ms.id) ? "selected" : ""
-                          }`}
+                        className={`option-btn ${
+                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                        }`}
                         onClick={() => handleSelectMauSac(ms.id)}
                       >
                         {ms.ten}

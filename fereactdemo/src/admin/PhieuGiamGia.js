@@ -49,7 +49,12 @@ const DotGiamGia = () => {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedSize, setSelectedSize] = useState(""); // Lọc kích cỡ
   const [selectedColor, setSelectedColor] = useState("");
-  const [selectedBrand, setSelectedBrand] = useState(""); // Lưu thương hiệu đã chọn
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedSl, setSelectedSL] = useState(""); // Lưu thương hiệu đã chọn
+  // Lưu thương hiệu đã chọn
+  const [stockMin, setStockMin] = useState();
+  const [stockMax, setStockMax] = useState();
+
   const [filteredByBrand, setFilteredByBrand] = useState([]);
   const [filters, setFilters] = useState({
     ten: "",
@@ -416,6 +421,9 @@ const DotGiamGia = () => {
   };
 
   const handleAddModalCancel = () => {
+
+    setStockMin("");
+    setStockMax("");
     setIsAddModalVisible(false);
   };
   const danhSachKichCo = [
@@ -427,21 +435,46 @@ const DotGiamGia = () => {
   const danhSachThuongHieu = [
     ...new Set(giayChiTietAll.map((item) => item.THUONG_HIEU)), // Lấy các thương hiệu không trùng lặp
   ];
+  const soLuongTon = [
+    ...new Set(giayChiTietAll.map((item) => item.SOLUONGTON)), // Lấy các thương hiệu không trùng lặp
+  ];
 
-  const filteredGiay = giay.filter((item) => {
-    const searchStr = searchTerm.toLowerCase();
-    const matchSearch = ["TEN", "GIABAN", "SOLUONG", "KICH_CO", "MAU_SAC"].some(
-      (key) =>
-        item[key]
-          ? item[key].toString().toLowerCase().includes(searchStr)
-          : false
+  // const filteredGiay = giay.filter((item) => {
+  //   const searchStr = searchTerm.toLowerCase();
+  //   const matchSearch = ["TEN", "GIABAN", "SOLUONG", "KICH_CO", "MAU_SAC"].some(
+  //     (key) =>
+  //       item[key]
+  //         ? item[key].toString().toLowerCase().includes(searchStr)
+  //         : false
+  //   );
+
+  //   const matchSize = selectedSize ? item.KICH_CO === selectedSize : true;
+  //   const matchColor = selectedColor ? item.MAU_SAC === selectedColor : true;
+
+  //   return matchSearch && matchSize && matchColor;
+  // });
+  const handleStockRangeFilter = () => {
+    const filtered = giayChiTietAll.filter(
+      (item) => item.SOLUONGTON >= stockMin && item.SOLUONGTON <= stockMax
     );
 
-    const matchSize = selectedSize ? item.KICH_CO === selectedSize : true;
-    const matchColor = selectedColor ? item.MAU_SAC === selectedColor : true;
+    const giayChiTiet = filtered.map((item) => ({
+      ID: item.ID,
+      ten: item.TEN,
+      mauSac: item.MAU_SAC,
+      kichCo: item.KICH_CO,
+      thuongHieu: item.THUONG_HIEU,
+      soLuongTon: item.SOLUONGTON,
+      giaBan: item.GIABAN,
+      anh: item.ANH_GIAY,
+    }));
 
-    return matchSearch && matchSize && matchColor;
-  });
+    console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
+
+    setGiayChiTiet(giayChiTiet);
+    setFilteredByBrand(filtered);
+  };
+
   const handleBrandChange = (e) => {
     const brand = e.target.value; // Lấy thương hiệu đã chọn
     setSelectedBrand(brand); // Lưu thương hiệu đã chọn vào state
@@ -500,6 +533,29 @@ const DotGiamGia = () => {
     setGiayChiTiet(giayChiTiet); // Cập nhật giày chi tiết đã lọc vào state
     setFilteredByColor(filtered);
   };
+  useEffect(() => {
+    // Lọc giày theo khoảng số lượng tồn
+    const filtered = giayChiTietAll.filter(
+      (item) => item.SOLUONGTON >= stockMin && item.SOLUONGTON <= stockMax
+    );
+
+    const giayChiTiet = filtered.map((item) => ({
+      ID: item.ID,
+      ten: item.TEN,
+      mauSac: item.MAU_SAC,
+      kichCo: item.KICH_CO,
+      thuongHieu: item.THUONG_HIEU,
+      soLuongTon: item.SOLUONGTON,
+      giaBan: item.GIABAN,
+      anh: item.ANH_GIAY,
+    }));
+
+    console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
+
+    setGiayChiTiet(giayChiTiet);
+    setFilteredByBrand(filtered);
+  }, [stockMin, stockMax, giayChiTietAll]); // Lọc lại khi stockMin, stockMax thay đổi
+
   return (
     <div className="dot-giam-gia">
       <h1>Quản lý giảm giá sản phẩm</h1>
@@ -709,7 +765,7 @@ const DotGiamGia = () => {
               <h3>Danh sách sản phẩm chi tiết</h3>
               <div style={{ display: "flex" }}>
                 {/* Ô tìm kiếm */}
-                <div
+                {/* <div
                   style={{
                     top: 0,
                     background: "white",
@@ -729,9 +785,9 @@ const DotGiamGia = () => {
                       border: "1px solid #ccc",
                     }}
                   />
-                </div>
+                </div> */}
 
-                {/* Bộ lọc kích cỡ */}
+                {/* Bộ lọc thương hiệu*/}
                 <select
                   value={selectedBrand}
                   onChange={handleBrandChange}
@@ -766,6 +822,31 @@ const DotGiamGia = () => {
                     </option>
                   ))}
                 </select>
+                {/* Bộ lọc số lượng */}
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <label>Từ:</label>
+                  <input
+                    type="number"
+                    style={{
+                      margin: "10px",
+                      padding: "5px",
+                      borderRadius: "15px",
+                    }}
+                    value={stockMin}
+                    onChange={(e) => setStockMin(Number(e.target.value))}
+                  />
+                  <label>Đến:</label>
+                  <input
+                    type="number"
+                    value={stockMax}
+                    style={{
+                      margin: "10px",
+                      padding: "5px",
+                      borderRadius: "15px",
+                    }}
+                    onChange={(e) => setStockMax(Number(e.target.value))}
+                  />
+                </div>
               </div>
 
               <Table
