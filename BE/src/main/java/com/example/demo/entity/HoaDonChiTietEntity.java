@@ -9,6 +9,7 @@ import lombok.Setter;
 import lombok.experimental.SuperBuilder;
 
 import java.math.BigDecimal;
+import java.util.List;
 import java.util.UUID;
 
 @Table(name = "HOA_DON_CHI_TIET")
@@ -44,4 +45,7 @@ public class HoaDonChiTietEntity {
     @ManyToOne
     @JoinColumn(name = "ID_GIAY_CHI_TIET")
     private GiayChiTietEntity giayChiTietEntity;
+
+    @OneToMany(mappedBy = "hoaDonChiTietEntity", cascade = CascadeType.ALL)
+    private List<DanhGiaEntity> danhGiaEntities;
 }
