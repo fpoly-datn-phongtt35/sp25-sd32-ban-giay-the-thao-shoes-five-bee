@@ -119,6 +119,7 @@ const BanHangTaiQuay = () => {
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu trả về không hợp lệ");
       }
+      console.log(result.data);
 
       // Lọc giày có trạng thái Đang bán
       const dataGiay = result.data
@@ -128,6 +129,7 @@ const BanHangTaiQuay = () => {
           TEN: item.giayEntity ? item.giayEntity.ten : null,
           GIABAN: item.giaBan,
           SOLUONG: item.soLuongTon,
+          GIA_KHI_GIAM: item.giaKhiGiam, // Giá khi giảm
           KICH_CO: item.kichCoEntity ? item.kichCoEntity.ten : "N/A",
           MAU_SAC: item.mauSacEntity ? item.mauSacEntity.ten : "N/A",
           TRANG_THAI: item.trangThai === 0 ? "Hoạt động" : "Không hoạt động",
@@ -185,11 +187,24 @@ const BanHangTaiQuay = () => {
       return;
     }
 
+    // Kiểm tra nếu có GIA_KHI_GIAM thì dùng GIA_KHI_GIAM, nếu không thì dùng GIABAN
+    const giaSanPham = product.GIA_KHI_GIAM
+      ? product.GIA_KHI_GIAM
+      : product.GIABAN;
+
     try {
-      await themSanPhamVaoHoaDon(idHoaDon, idSanPham);
+      await themSanPhamVaoHoaDon(idHoaDon, idSanPham, giaSanPham); // Truyền giá vào hàm themSanPhamVaoHoaDon
       fetchSanPhamTrongHoaDon(idHoaDon);
       getAllGiay();
       message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
+
+      // Log thông tin sản phẩm vừa được thêm vào hóa đơn
+      console.log("Sản phẩm vừa được thêm vào hóa đơn:", {
+        idHoaDon,
+        idSanPham,
+        tenSanPham: product.TEN,
+        giaSanPham,
+      });
     } catch (error) {
       console.error("❌ Lỗi khi thêm sản phẩm vào hóa đơn:", error);
       message.error("Không thể thêm sản phẩm vào hóa đơn.");
@@ -309,8 +324,12 @@ const BanHangTaiQuay = () => {
   };
 
   const calculateTotal = (product) => {
-    return product.GIABAN * product.SOLUONG;
+    
+    
+    const price = product.GIA_KHI_GIAM && product.GIA_KHI_GIAM !== 0 ? product.GIA_KHI_GIAM : product.GIABAN;
+    return price * product.SOLUONG;
   };
+  
   const getAllMaGiamGiaData = async () => {
     try {
       const result = await getGiamGia(); // Thay đổi từ getGiamGiaHoaDon sang getGiamGia
@@ -524,11 +543,11 @@ const BanHangTaiQuay = () => {
         ? result.data.map((item) => {
             const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
             const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
-
             return {
               ID: item.id,
               TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
               SOLUONG: item.soLuong,
+              GIA_KHI_GIAM:item.donGia,
               GIABAN: item.giayChiTietEntity?.giaBan || 0,
               ANH_GIAY:
                 item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
@@ -555,7 +574,7 @@ const BanHangTaiQuay = () => {
 
         // Tính tổng tiền ngay sau khi cập nhật sản phẩm
         const newTotalAmount = formattedData.reduce((total, product) => {
-          const giaBan = product.GIABAN ?? 0;
+          const giaBan = product.GIA_KHI_GIAM ?? product.GIABAN ?? 0;
           const soLuong = product.SOLUONG ?? 0;
           return total + giaBan * soLuong;
         }, 0);
@@ -1114,52 +1133,59 @@ const BanHangTaiQuay = () => {
             {selectedHoaDonId &&
             selectedProducts[selectedHoaDonId] &&
             selectedProducts[selectedHoaDonId].length > 0 ? (
-              selectedProducts[selectedHoaDonId].map((product) => (
-                <div key={product.ID} className="selected_product">
-                  {product.ANH_GIAY && (
-                    <img src={product.ANH_GIAY} alt={product.TEN} />
-                  )}
-                  <div style={{ display: "flex", alignItems: "center" }}>
-                    <div>{product.TEN}</div>
-                    <div style={{ marginLeft: "10px", fontSize: "0.9em" }}>
-                      <span style={{ fontWeight: "bold" }}>Kích cỡ:</span> (
-                      {product.KICH_CO})
+              selectedProducts[selectedHoaDonId].map((product) => {
+                console.log("aaaaaa",product);  // Log dữ liệu của từng sản phẩm
+                return (
+                  <div key={product.ID} className="selected_product">
+                    {product.ANH_GIAY && (
+                      <img src={product.ANH_GIAY} alt={product.TEN} />
+                    )}
+                    <div style={{ display: "flex", alignItems: "center" }}>
+                      <div>{product.TEN}</div>
+                      <div style={{ marginLeft: "10px", fontSize: "0.9em" }}>
+                        <span style={{ fontWeight: "bold" }}>Kích cỡ:</span> ({product.KICH_CO})
+                      </div>
+                      <div style={{ marginLeft: "10px", fontSize: "0.9em" }}>
+                        <span style={{ fontWeight: "bold" }}>Màu sắc:</span> ({product.MAU_SAC})
+                      </div>
                     </div>
-                    <div style={{ marginLeft: "10px", fontSize: "0.9em" }}>
-                      <span style={{ fontWeight: "bold" }}>Màu sắc:</span> (
-                      {product.MAU_SAC})
+              
+                    <div>
+                      {product.GIA_KHI_GIAM && product.GIA_KHI_GIAM !== 0
+                        ? product.GIA_KHI_GIAM
+                        : product.GIABAN}
                     </div>
-                  </div>
-
-                  <div>{product.GIABAN}</div>
-                  <div className="quantity_controls">
+              
+                    <div className="quantity_controls">
+                      <Button
+                        onClick={() =>
+                          decreaseQuantity(product.ID, selectedHoaDonId)
+                        }
+                      >
+                        -
+                      </Button>
+                      <span>{product.SOLUONG}</span>
+                      <Button
+                        onClick={() =>
+                          increaseQuantity(product.ID, selectedHoaDonId)
+                        }
+                      >
+                        +
+                      </Button>
+                    </div>
+                    <div className="total_price">
+                      {formatCurrency(calculateTotal(product))}
+                    </div>
                     <Button
-                      onClick={() =>
-                        decreaseQuantity(product.ID, selectedHoaDonId)
-                      }
+                      className="remove_button"
+                      onClick={() => handleRemoveProduct(product.ID)}
                     >
-                      -
-                    </Button>
-                    <span>{product.SOLUONG}</span>
-                    <Button
-                      onClick={() =>
-                        increaseQuantity(product.ID, selectedHoaDonId)
-                      }
-                    >
-                      +
+                      Xóa
                     </Button>
                   </div>
-                  <div className="total_price">
-                    {formatCurrency(calculateTotal(product))}
-                  </div>
-                  <Button
-                    className="remove_button"
-                    onClick={() => handleRemoveProduct(product.ID)}
-                  >
-                    Xóa
-                  </Button>
-                </div>
-              ))
+                );
+              })
+              
             ) : (
               <div className="empty-invoice-message">
                 <div className="empty-icon">
@@ -1307,7 +1333,27 @@ const BanHangTaiQuay = () => {
                   >
                     {item.TEN}
                   </td>
-                  <td>{item.GIABAN.toLocaleString("vi-VN")} đ</td>
+                  <td>
+                    {item.GIA_KHI_GIAM ? (
+                      <>
+                        <span style={{ color: "green", marginRight: "5px" }}>
+                          {item.GIA_KHI_GIAM.toLocaleString("vi-VN")} đ
+                        </span>
+                        <span
+                          style={{
+                            color: "red",
+                            textDecoration: "line-through",
+                            fontSize: "0.7em",
+                          }}
+                        >
+                          {item.GIABAN.toLocaleString("vi-VN")} đ
+                        </span>
+                      </>
+                    ) : (
+                      <span>{item.GIABAN.toLocaleString("vi-VN")} đ</span>
+                    )}
+                  </td>
+
                   <td>{item.SOLUONG}</td>
                   <td>{item.KICH_CO}</td>
                   <td>{item.MAU_SAC}</td>
