@@ -59,6 +59,7 @@ public class DanhGiaServiceImpl implements DanhGiaService {
                 dg.getId(),
                 dg.getHoaDonChiTietEntity().getId(),
                 dg.getUserEntity().getId(),
+                dg.getUserEntity().getHoTen(),
                 dg.getSaoDanhGia(),
                 dg.getNhanXet(),
                 dg.getNgayNhanXet()
@@ -83,6 +84,7 @@ public class DanhGiaServiceImpl implements DanhGiaService {
                 danhGia.getId(),
                 danhGia.getHoaDonChiTietEntity().getId(),
                 danhGia.getUserEntity().getId(),
+                danhGia.getUserEntity().getHoTen(),
                 danhGia.getSaoDanhGia(),
                 danhGia.getNhanXet(),
                 danhGia.getNgayNhanXet()

@@ -8,4 +8,4 @@ export const addDanhGia = (danhGia) =>
     axios.post(`${REST_API_BASE_URL}/add`, danhGia);
 
 export const getProductDanhGiaById = (giayId) =>
-    axios.get(`${REST_API_BASE_URL}/${giayId}`)
+    axios.get(`${REST_API_BASE_URL}/san-pham/${giayId}`)

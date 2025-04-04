@@ -16,6 +16,7 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
   const [selectedProduct, setSelectedProduct] = useState(null);
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState('');
+  const [reviewedProductIds, setReviewedProductIds] = useState([]);
   useEffect(() => {
     if (selectedOrder) {
       setUpdatedOrder(selectedOrder);
@@ -73,6 +74,7 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
         ngayNhanXet : currentDate
       });
       message.success("Đánh giá đã được gửi thành công");
+      setReviewedProductIds(prev => [...prev, selectedProduct.id]);
       setIsReviewModalVisible(false);
       setRating(0);
       setReviewText('');
@@ -219,7 +221,9 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
                       {(product.soLuong * product.giaBan)?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}
                     </td>
                     <td>
-                      <Button type="primary" onClick={() => handleOpenReviewModal(product)}>Đánh giá</Button>
+                      {!reviewedProductIds.includes(product.id) && (
+                        <Button type="primary" onClick={() => handleOpenReviewModal(product)}>Đánh giá</Button>
+                      )}
                     </td>
                   </tr>
                 ))}

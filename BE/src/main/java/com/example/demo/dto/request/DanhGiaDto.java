@@ -18,6 +18,7 @@ public class DanhGiaDto {
     private UUID id;
     private UUID hoaDonChiTietId;
     private UUID userId;
+    private String userFullName;
     private Integer saoDanhGia;
     private String nhanXet;
     private Date ngayNhanXet;
