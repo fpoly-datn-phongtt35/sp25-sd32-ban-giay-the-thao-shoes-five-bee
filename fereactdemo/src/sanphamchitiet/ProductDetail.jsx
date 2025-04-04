@@ -7,8 +7,10 @@ import {
 } from "../service/GiayChiTietService";
 import { getGiayDetail } from "../service/GiayService";
 import "./sanphamchitiet.css";
-import { addToCart } from "../service/GioHangChiTietService";
-import { Button, message } from "antd";
+import { addToCart, getByKhachHangId } from "../service/GioHangChiTietService";
+import { Avatar, Button, Divider, message, Rate } from "antd";
+import { getProductDanhGiaById } from "../service/DanhGiaService";
+import { UserOutlined } from "@ant-design/icons";
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -24,12 +26,77 @@ const ProductDetail = () => {
   const [anhCHiTiet, setanhCHiTiet] = useState([]);
   const [soLuongChitiet, setSoLuongChiTiet] = useState([]);
   const [totalQuantity, setTotalQuantity] = useState(0); // Thêm dòng này để khai báo totalQuantity
-
+  
+  // State cho phần đánh giá - chỉ hiển thị
+  const [danhGiaList, setDanhGiaList] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
   console.log("anh chi tiet", anhCHiTiet);
 
   useEffect(() => {
     fetchProductDetail();
+    fetchProductReviews();
   }, [id]);
+
+  useEffect(() => {
+    const fetchReviewsWithUserInfo = async () => {
+      try {
+        const response = await getProductDanhGiaById(id);
+        console.log("📌 Kết quả API đánh giá:", response.data);
+    
+        if (Array.isArray(response.data)) {
+          // Lấy thông tin người dùng cho mỗi đánh giá
+          const reviewsWithUserInfo = await Promise.all(
+            response.data.map(async (review) => {
+              try {
+                const userResponse = await getByKhachHangId(review.userId);
+                return {
+                  ...review,
+                  userInfo: userResponse.data
+                };
+              } catch (error) {
+                console.error("❌ Lỗi khi lấy thông tin người dùng:", error);
+                return review;
+              }
+            })
+          );
+          
+          setDanhGiaList(reviewsWithUserInfo);
+          setTotalReviews(reviewsWithUserInfo.length);
+    
+          if (reviewsWithUserInfo.length > 0) {
+            const totalRating = reviewsWithUserInfo.reduce((sum, item) => sum + item.saoDanhGia, 0);
+            setAverageRating((totalRating / reviewsWithUserInfo.length).toFixed(1));
+          }
+        }
+      } catch (error) {
+        console.error("❌ Lỗi khi lấy đánh giá:", error);
+      }
+    };
+  
+    fetchReviewsWithUserInfo();
+  }, [id]);
+
+   // Lấy danh sách đánh giá
+   const fetchProductReviews = async () => {
+    try {
+      console.log("🔍 Gọi API đánh giá với ID Giày:", id); 
+      const response = await getProductDanhGiaById(id);
+      console.log("📌 Kết quả API đánh giá:", response.data);
+  
+      if (Array.isArray(response.data)) {
+        setDanhGiaList(response.data);
+        setTotalReviews(response.data.length);
+  
+        if (response.data.length > 0) {
+          const totalRating = response.data.reduce((sum, item) => sum + item.saoDanhGia, 0);
+          setAverageRating((totalRating / response.data.length).toFixed(1));
+        }
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi lấy đánh giá:", error);
+    }
+  };
 
   const fetchProductDetail = async () => {
     try {
@@ -155,6 +222,11 @@ const ProductDetail = () => {
     } catch (error) {
       message.error("Có lỗi xảy ra khi thêm vào giỏ hàng!");
     }
+  };
+  // Format date từ chuỗi ISO
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
   };
 
   if (loading) return <p>Đang tải dữ liệu...</p>; // Hiển thị khi đang tải
@@ -284,6 +356,49 @@ const ProductDetail = () => {
             🔄 ĐỔI HÀNG TRONG VÒNG <strong>33 NGÀY</strong>
           </p>
         </div>
+      </div>
+       {/* Phần đánh giá sản phẩm - chỉ hiển thị */}
+       <div className="product-reviews">
+        <Divider orientation="left">
+          <h2>Đánh giá từ khách hàng</h2>
+        </Divider>
+        
+        {/* Tổng quan đánh giá */}
+        <div className="review-summary">
+          <div className="rating-overview">
+            <div className="rating-score">
+              <div className="average-rating">{averageRating}</div>
+              <Rate disabled value={parseFloat(averageRating)} allowHalf />
+              <div className="total-reviews">{totalReviews} đánh giá</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Danh sách đánh giá */}
+        <div className="review-list">
+      {danhGiaList.length > 0 ? (
+      danhGiaList.map((review, index) => (
+      <div key={review.id || index} className="review-item">
+        <div className="review-header">
+          <Avatar icon={<UserOutlined />} />
+          <div className="reviewer-info">
+          <div className="reviewer-name">{review.userFullName || "Khách hàng"}</div>            
+  <div className="review-date">{formatDate(review.ngayNhanXet)}</div>
+          </div>
+        </div>
+        <div className="review-rating">
+          <Rate disabled value={review.saoDanhGia} />
+        </div>
+        <div className="review-content">{review.nhanXet}</div>
+        <Divider />
+      </div>
+    ))
+    ) : (
+    <div className="no-reviews">
+      <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+    </div>
+    )}
+  </div>
       </div>
     </div>
   );

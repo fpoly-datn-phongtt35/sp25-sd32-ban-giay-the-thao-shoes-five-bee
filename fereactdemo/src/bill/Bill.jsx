@@ -152,46 +152,48 @@ export const Bill = () => {
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!khachHangId) {
-      console.error('Khach hang ID is not available');
+      console.error('Khách hàng ID is not available');
       return;
     }
+  
     try {
-      console.log({ 
-        ...order, 
-        khachHangId,
-        idGiamGia: order.idGiamGia || null,
-        idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet") 
-      })
-      if (selectedOption === "option2"){
-      const response = await paymentOnline({ 
-        ...order, 
-        khachHangId,
-        idGiamGia: order.idGiamGia || null,
-        idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet") 
-      });
-    }else if(selectedOption === "option1"){
-      const response = await paymentOnline({
+      const idsGioHangChiTiet = localStorage.getItem("idGioHangChiTiet");
+      const idsArray = idsGioHangChiTiet.split(',').map(id => id.trim());
+  
+      const orderData = {
         ...order,
         khachHangId,
         idGiamGia: order.idGiamGia || null,
-        idsGioHangChiTiet: localStorage.getItem("idGioHangChiTiet")
-      });
-      const { idHoaDon, tongTien } = response.data;
-      console.log("ID Hóa đơn:", idHoaDon, "Tổng tiền:", tongTien);
-      try {
-        const vnpayResponse = await createVNPayPayment(tongTien,idHoaDon);
-        if (vnpayResponse.data) {
-          window.location.href = vnpayResponse.data;
-          console.log("URL thanh toán VNPay:", vnpayResponse.data);
+        idsGioHangChiTiet: idsArray // Sử dụng mảng UUID
+      };
+  
+      console.log({ ...orderData });
+  
+      if (selectedOption === "option2") {
+        // Xử lý thanh toán trực tuyến
+        const response = await paymentOnline(orderData);
+      } else if (selectedOption === "option1") {
+        // Xử lý thanh toán VNPay
+        const response = await paymentOnline(orderData);
+        const { idHoaDon, tongTien } = response.data;
+        console.log("ID Hóa đơn:", idHoaDon, "Tổng tiền:", tongTien);
+        
+        try {
+          const vnpayResponse = await createVNPayPayment(tongTien, idHoaDon);
+          if (vnpayResponse.data) {
+            window.location.href = vnpayResponse.data;
+            console.log("URL thanh toán VNPay:", vnpayResponse.data);
+          }
+        } catch (error) {
+          console.error("Lỗi khi tạo URL thanh toán VNPay:", error);
+          message.error("Không thể tạo liên kết thanh toán VNPay!");
         }
-      } catch (error) {
-        console.error("Lỗi khi tạo URL thanh toán VNPay:", error);
-        message.error("Không thể tạo liên kết thanh toán VNPay!");
       }
-    }
+  
       navigate('/orderStatusPage');
     } catch (error) {
       console.error("Lỗi khi tạo đơn hàng", error);
+      message.error("Đã có lỗi xảy ra khi tạo đơn hàng.");
     }
   };
 

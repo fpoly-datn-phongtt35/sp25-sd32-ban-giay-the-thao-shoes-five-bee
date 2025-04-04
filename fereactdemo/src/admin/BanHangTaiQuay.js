@@ -51,13 +51,13 @@ const BanHangTaiQuay = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [khachHangTimThay, setKhachHangTimThay] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
-  const [customerMoney, setCustomerMoney] = useState("");
   const [giay, setGiay] = useState([]);
   const [sdtNguoiNhan, setSdtNguoiNhan] = useState("");
   const [hoaDonChiTiet, setHoaDonChiTiet] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalHoaDon, setTotalHoaDon] = useState(0);
+  const [customerMoney, setCustomerMoney] = useState(totalHoaDon);
   const [maGiamGiaList, setMaGiamGiaList] = useState([]); // Thêm state này
   const [selectedMaGiamGia, setSelectedMaGiamGia] = useState(null); // State cho mã giảm giá được chọn
   const [giaTriGiam, setGiaTriGiam] = useState(0); // Giá trị giảm
@@ -90,7 +90,7 @@ const BanHangTaiQuay = () => {
   const [diaChi, setDiaChi] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isGiaoHang, setIsGiaoHang] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const { Option } = Select;
   const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
@@ -111,6 +111,14 @@ const BanHangTaiQuay = () => {
     fetchHoaDonCho();
     getAllMaGiamGiaData();
   }, []);
+
+  useEffect(() => {
+    setSelectedPaymentMethod(0);
+  }, []);
+
+  useEffect(() => {
+    setCustomerMoney(totalHoaDon);
+  }, [totalHoaDon]);
   const getAllGiay = async () => {
     try {
       const result = await getAllGiayChiTiet();
@@ -522,22 +530,22 @@ const BanHangTaiQuay = () => {
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => {
-            const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
-            const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
+          const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
+          const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
 
-            return {
-              ID: item.id,
-              TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-              SOLUONG: item.soLuong,
-              GIABAN: item.giayChiTietEntity?.giaBan || 0,
-              ANH_GIAY:
-                item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
-                  ?.tenUrl || "https://via.placeholder.com/150",
-              KICH_CO: kichCo, // Lưu vào biến kích cỡ
-              MAU_SAC: mauSac, // Lưu vào biến màu sắc
-              TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
-            };
-          })
+          return {
+            ID: item.id,
+            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+            SOLUONG: item.soLuong,
+            GIABAN: item.giayChiTietEntity?.giaBan || 0,
+            ANH_GIAY:
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+                ?.tenUrl || "https://via.placeholder.com/150",
+            KICH_CO: kichCo, // Lưu vào biến kích cỡ
+            MAU_SAC: mauSac, // Lưu vào biến màu sắc
+            TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+          };
+        })
         : [];
 
       console.log("dsadasqewrq", formattedData);
@@ -644,20 +652,20 @@ const BanHangTaiQuay = () => {
       const result = await getHoaDon();
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            key: item.id,
-            order_id: item.id,
-            user: item.khachHang ? item.khachHang.hoTen : null,
-            user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
-            order_on: item.ngayTao
-              ? moment(item.ngayTao).format("DD/MM/YYYY")
-              : "N/A",
-            status: mapTrangThai(item.trangThai),
-            trangThai: item.trangThai,
-            tongTien: item.tongTien,
-            hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
-            hinhThucThanhToan:
-              item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
-          }))
+          key: item.id,
+          order_id: item.id,
+          user: item.khachHang ? item.khachHang.hoTen : null,
+          user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
+          order_on: item.ngayTao
+            ? moment(item.ngayTao).format("DD/MM/YYYY")
+            : "N/A",
+          status: mapTrangThai(item.trangThai),
+          trangThai: item.trangThai,
+          tongTien: item.tongTien,
+          hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
+          hinhThucThanhToan:
+            item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+        }))
         : [];
       setData(formattedData);
     } catch (error) {
@@ -711,8 +719,8 @@ const BanHangTaiQuay = () => {
       sdtNguoiNhan: selectedKhachHang
         ? soDienThoai
         : sdtNguoiNhan?.trim() !== ""
-        ? sdtNguoiNhan
-        : null,
+          ? sdtNguoiNhan
+          : null,
       tongTien: totalHoaDon,
       diaChi: isGiaoHang ? diaChi : null,
       idGiamGia: selectedMaGiamGia || null,
@@ -789,7 +797,7 @@ const BanHangTaiQuay = () => {
     setTenMaGiamGia(""); // Reset discount code name
     setLoaiGiamGia("VNĐ"); // Reset discount type
     setIsGiaoHang(false); // Reset delivery option
-    setSelectedPaymentMethod(null); // Reset payment method
+    // setSelectedPaymentMethod(null); // Reset payment method
   };
   const addChuongTrinhGiamGiaHoaDonChiTiet = async (
     hoaDonId,
@@ -1056,13 +1064,11 @@ const BanHangTaiQuay = () => {
                 {pages.map((page) => (
                   <div key={page.id} className="page_button_container">
                     <button
-                      className={`page_button ${
-                        selectedPage === page.id ? "selected" : ""
-                      } ${
-                        invoiceProductCounts[page.hoaDonId] > 0
+                      className={`page_button ${selectedPage === page.id ? "selected" : ""
+                        } ${invoiceProductCounts[page.hoaDonId] > 0
                           ? "has-products"
                           : "empty-invoice"
-                      }`}
+                        }`}
                       onClick={() => handleSelectPage(page.id, page.hoaDonId)}
                     >
                       HD {page.id}
@@ -1112,8 +1118,8 @@ const BanHangTaiQuay = () => {
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
             {selectedHoaDonId &&
-            selectedProducts[selectedHoaDonId] &&
-            selectedProducts[selectedHoaDonId].length > 0 ? (
+              selectedProducts[selectedHoaDonId] &&
+              selectedProducts[selectedHoaDonId].length > 0 ? (
               selectedProducts[selectedHoaDonId].map((product) => (
                 <div key={product.ID} className="selected_product">
                   {product.ANH_GIAY && (
@@ -1276,9 +1282,9 @@ const BanHangTaiQuay = () => {
                   style={{
                     backgroundColor:
                       Array.isArray(selectedProducts[selectedPage]) &&
-                      selectedProducts[selectedPage].some(
-                        (product) => product.ID === item.ID
-                      )
+                        selectedProducts[selectedPage].some(
+                          (product) => product.ID === item.ID
+                        )
                         ? "#e0f7fa"
                         : "transparent",
                     opacity: item.SOLUONG === 0 ? 0.5 : 1,
@@ -1420,7 +1426,7 @@ const BanHangTaiQuay = () => {
             <label htmlFor="customerMoney">Tiền khách đưa:</label>
             <Input
               id="customerMoney"
-              value={customerMoney}
+              value={formatCurrency(customerMoney)}
               onChange={handleInputChange}
               placeholder="Nhập số tiền khách đưa"
             />
