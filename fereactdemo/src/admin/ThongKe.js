@@ -265,8 +265,8 @@ const Statistics = () => {
                     </td>
                     <td>{item.giayEntity.ten}</td>
                     <td>{item.mauSacEntity.ten}</td>
-                    <td>{item.giayEntity.thuongHieu.ten}</td>
-                    <td>{item.giayEntity.danhMuc.ten}</td>
+                    <td>{item.giayEntity.thuongHieu?.ten || "Không có"}</td>
+                    <td>{item.giayEntity.danhMuc?.ten || "Không có"}</td>
                     <td>{item.kichCoEntity.ten}</td>
                     <td>{item.giaBan.toLocaleString("vi-VN")} VND</td>
                     <td>{item.soLuongTon}</td>
