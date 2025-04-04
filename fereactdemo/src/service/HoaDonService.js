@@ -13,6 +13,9 @@ export const getHoaDonByKhachHangId1 = (userId) =>
 export const getHoaDonById1 = (hoaDonId) =>
   axios.get(`${REST_API_BASE_URL}/${hoaDonId}`);
 
+export const topSelling = () =>
+  axios.get(`http://localhost:5000/hoa-don-chi-tiet/top-selling`);
+
 export const updateOrderAddress = async (hoaDonId, diaChiId) => {
   try {
     const response = await axios.put(`${REST_API_BASE_URLSS}/${hoaDonId}/update-address`, null, {

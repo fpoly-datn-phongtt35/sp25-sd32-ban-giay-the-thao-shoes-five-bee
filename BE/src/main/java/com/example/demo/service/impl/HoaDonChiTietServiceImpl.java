@@ -1,5 +1,6 @@
 package com.example.demo.service.impl;
 
+import com.example.demo.dto.request.BestSellingProductDTO;
 import com.example.demo.dto.request.UpdateAddressBillRequest;
 import com.example.demo.dto.request.UpdateQuantityRequest;
 import com.example.demo.entity.DiaChiEntity;
@@ -17,6 +18,7 @@ import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.stereotype.Service;
 
 import java.io.ByteArrayOutputStream;
@@ -24,6 +26,7 @@ import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @Service
 @AllArgsConstructor
@@ -37,10 +40,11 @@ public class HoaDonChiTietServiceImpl implements HoaDonChiTietService {
     private GiamGiaHoaDonChiTietRepository giamGiaHoaDonChiTietRepository;
     @Autowired
     private DiaChiRepository diaChiRepository;
+
     @Override
     public HoaDonEntity updateAddress(UUID idHoaDon, UpdateAddressBillRequest updateAddressBillRequest) {
         HoaDonEntity hoaDonEntity = hoaDonRepository.findById(idHoaDon)
-                .orElseThrow(()-> new RuntimeException("hóa đơn không tồn tại"));
+                .orElseThrow(() -> new RuntimeException("hóa đơn không tồn tại"));
         hoaDonEntity.setDiaChi(updateAddressBillRequest.getDiaChi());
         hoaDonEntity.setXa(updateAddressBillRequest.getXa());
         hoaDonEntity.setHuyen(updateAddressBillRequest.getHuyen());
@@ -50,7 +54,7 @@ public class HoaDonChiTietServiceImpl implements HoaDonChiTietService {
 
     @Override
     public HoaDonChiTietEntity updateQuantity(UUID id, UUID idGiayChiTiet, UpdateQuantityRequest updateQuantityRequest) {
-        HoaDonChiTietEntity item = hoaDonChiTietRepository.findByHoaDonEntityIdAndGiayChiTietEntityId(id,idGiayChiTiet)
+        HoaDonChiTietEntity item = hoaDonChiTietRepository.findByHoaDonEntityIdAndGiayChiTietEntityId(id, idGiayChiTiet)
                 .orElseThrow(() -> new RuntimeException("sản phẩm không tồn tại trong đơn hàng"));
 
         item.setSoLuong(updateQuantityRequest.getSoLuong());
@@ -73,7 +77,7 @@ public class HoaDonChiTietServiceImpl implements HoaDonChiTietService {
     @Override
     public byte[] printHoaDonChiTiet(UUID id) {
         Optional<HoaDonEntity> hoaDonEntity = hoaDonRepository.findById(id);
-        if(hoaDonEntity.isPresent()){
+        if (hoaDonEntity.isPresent()) {
             HoaDonEntity hoaDonEntity1 = hoaDonEntity.get();
             List<HoaDonChiTietEntity> hoaDonChiTietEntities = hoaDonChiTietRepository.findAllByHoaDonEntity_Id(id);
             Optional<GiamGiaHoaDonChiTietEntity> optionalDiscount = giamGiaHoaDonChiTietRepository.findById(id);
@@ -155,4 +159,13 @@ public class HoaDonChiTietServiceImpl implements HoaDonChiTietService {
         System.out.println("Cập nhật địa chỉ thành công cho hóa đơn: " + hoaDonId);
         return true;
     }
+
+    @Override
+    public List<BestSellingProductDTO> findTopSellingProductsWithVariants() {
+        // Tạo PageRequest để lấy 5 sản phẩm bán chạy nhất
+        PageRequest pageRequest = PageRequest.of(0, 5);  // Lấy 5 sản phẩm từ trang đầu tiên
+        return hoaDonChiTietRepository.findTopSellingProductsWithVariants(pageRequest);
+    }
+
+
 }

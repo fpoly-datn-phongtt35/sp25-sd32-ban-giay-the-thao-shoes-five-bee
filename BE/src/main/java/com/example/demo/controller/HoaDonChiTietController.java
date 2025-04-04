@@ -1,5 +1,6 @@
 package com.example.demo.controller;
 
+import com.example.demo.dto.request.BestSellingProductDTO;
 import com.example.demo.dto.request.UpdateAddressBillRequest;
 import com.example.demo.dto.request.UpdateQuantityRequest;
 import com.example.demo.entity.HoaDonChiTietEntity;
@@ -68,5 +69,9 @@ public class HoaDonChiTietController {
         }else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+    }
+    @GetMapping("/top-selling")
+    public List<BestSellingProductDTO> getTop5BestSellingProducts() {
+        return hoaDonChiTietService.findTopSellingProductsWithVariants();
     }
 }

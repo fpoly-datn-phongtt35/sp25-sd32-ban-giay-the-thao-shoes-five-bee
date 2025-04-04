@@ -22,7 +22,10 @@ import {
 } from "../service/PhieuGiamGiaService";
 import { getGiay, getGiayDetail } from "../service/GiayService";
 import { FilterOutlined } from "@ant-design/icons";
-import { getAllGiayChiTiet, getGiayChitietDetail1 } from "../service/GiayChiTietService";
+import {
+  getAllGiayChiTiet,
+  getGiayChitietDetail1,
+} from "../service/GiayChiTietService";
 const DotGiamGia = () => {
   const [ma, setMa] = useState("");
   const [ten, setTen] = useState("");
@@ -39,8 +42,20 @@ const DotGiamGia = () => {
   const { RangePicker } = DatePicker;
   const [giay, setGiay] = useState([]);
   const [giayChiTiet, setGiayChiTiet] = useState([]);
+  const [giayChiTietAll, setGiayChiTietAll] = useState([]);
+  const [filteredByColor, setFilteredByColor] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState([]);
   const [selectedRowKey, setSelectedRowKey] = useState(null);
+  const [searchTerm, setSearchTerm] = useState("");
+  const [selectedSize, setSelectedSize] = useState(""); // Lọc kích cỡ
+  const [selectedColor, setSelectedColor] = useState("");
+  const [selectedBrand, setSelectedBrand] = useState("");
+  const [selectedSl, setSelectedSL] = useState(""); // Lưu thương hiệu đã chọn
+  // Lưu thương hiệu đã chọn
+  const [stockMin, setStockMin] = useState();
+  const [stockMax, setStockMax] = useState();
+
+  const [filteredByBrand, setFilteredByBrand] = useState([]);
   const [filters, setFilters] = useState({
     ten: "",
     phanTramGiam: "",
@@ -49,8 +64,8 @@ const DotGiamGia = () => {
     trangThai: "all",
   });
   const handleRowClick = (record) => {
-    setSelectedRowKey(record.id);  // Cập nhật ID dòng được chọn
-    fetchSanPhamChiTiet(record);    // Gọi hàm để lấy chi tiết sản phẩm
+    setSelectedRowKey(record.id); // Cập nhật ID dòng được chọn
+    fetchSanPhamChiTiet(record); // Gọi hàm để lấy chi tiết sản phẩm
   };
   const handleChange = (key, value) => {
     setFilters((prev) => ({ ...prev, [key]: value }));
@@ -104,7 +119,6 @@ const DotGiamGia = () => {
   const getAllGiay = async () => {
     try {
       const result = await getGiay();
-      console.log("Dữ liệu giày:", result);
 
       if (!result || !result.data) {
         console.error("Error: result.data is undefined or null");
@@ -138,16 +152,59 @@ const DotGiamGia = () => {
         // Nếu muốn lấy toàn bộ ảnh: item.anhGiayEntities ? item.anhGiayEntities.map(img => img.tenUrl) : [],
         KICH_CO: item.kichCo ? item.kichCo.ten : null,
       }));
-    
+
       setGiay(dataGiay);
+    } catch (error) {
+      console.error("Error fetching data:", error);
+    }
+  };
+  const getGiayChiTietAll = async () => {
+    try {
+      const result = await getAllGiayChiTiet();
+
+      if (!result || !result.data) {
+        console.error("Error: result.data is undefined or null");
+        return;
+      }
+
+      if (!Array.isArray(result.data)) {
+        console.error("Error: result.data is not an array", result.data);
+        return;
+      }
+
+      const dataGiayChitiet = result.data.map((item) => ({
+        ID: item.id,
+        MA: item.maVach, // Mã vạch của sản phẩm
+        TEN: item.giayEntity?.ten || null,
+        MOTA: item.giayEntity?.moTa || null,
+        GIABAN: item.giayEntity?.giaBan || null,
+        SOLUONGTON: item.soLuongTon || 0,
+        TRANG_THAI: item.trangThai || 0,
+
+        // Lấy thông tin từ giayEntity
+        THUONG_HIEU: item.giayEntity?.thuongHieu?.ten || null,
+        DANH_MUC: item.giayEntity?.danhMuc?.ten || null,
+        CHAT_LIEU: item.giayEntity?.chatLieu?.ten || null,
+        DE_GIAY: item.giayEntity?.deGiay?.ten || null,
+        XUAT_XU: item.giayEntity?.xuatXu?.ten || null,
+        KIEU_DANG: item.giayEntity?.kieuDang?.ten || null,
+
+        // Màu sắc & kích cỡ lấy từ entity của chính sản phẩm
+        MAU_SAC: item.mauSacEntity?.ten || null,
+        KICH_CO: item.kichCoEntity?.ten || null,
+        ANH_GIAY:
+          item.danhSachAnh && item.danhSachAnh.length > 0
+            ? item.danhSachAnh[0].tenUrl
+            : null,
+      }));
+
+      setGiayChiTietAll(dataGiayChitiet);
     } catch (error) {
       console.error("Error fetching data:", error);
     }
   };
   const fetchSanPhamChiTiet = async (data) => {
     try {
-
-
       // Hỗ trợ cả số và UUID (chuỗi)
       const id = typeof data === "object" ? data.ID || data.id : data;
 
@@ -156,10 +213,9 @@ const DotGiamGia = () => {
         return [];
       }
 
- 
-
       // Gọi API với ID hợp lệ
       const response = await getGiayChitietDetail1(id);
+      console.log(response);
 
       if (!Array.isArray(response.data)) {
         console.error("Dữ liệu trả về không phải mảng!", response.data);
@@ -171,12 +227,16 @@ const DotGiamGia = () => {
         ten: item.giayEntity?.ten || "N/A",
         anh: item.danhSachAnh.length > 0 ? item.danhSachAnh[0] : null,
         giaBan: item.giaBan || 0,
+        thuongHieu: item.giayEntity?.thuongHieu?.ten || null,
         mauSac: item.mauSacEntity?.ten || "Không có",
         kichCo: item.kichCoEntity?.ten || "Không có",
         soLuongTon: item.soLuongTon || 0,
+        anh:
+          item.danhSachAnh && item.danhSachAnh.length > 0
+            ? item.danhSachAnh[0].tenUrl
+            : null,
       }));
-
- 
+      console.log(danhSachChiTiet);
 
       // Cập nhật state
       setGiayChiTiet(danhSachChiTiet);
@@ -189,8 +249,8 @@ const DotGiamGia = () => {
   useEffect(() => {
     loadDotGiamGia();
     getAllGiay();
+    getGiayChiTietAll();
   }, []);
-
 
   const handleAddSubmit = async () => {
     // if (!ma || !ten || !dieuKien) {
@@ -210,10 +270,10 @@ const DotGiamGia = () => {
       ngayKetThuc: ngayKetThuc,
       phanTramGiam: parseFloat(phanTramGiam),
       trangThai: newTrangThai,
-      idGiayChiTiet: selectedProducts.map(product => product.id),
+      idGiayChiTiet: selectedProducts.map((product) => product.id),
     };
     console.log("Đợt giảm giá mới:", newDotGiamGia);
-    
+
     try {
       await taoGiamGia(newDotGiamGia);
       message.success("Thêm thành công!");
@@ -223,7 +283,7 @@ const DotGiamGia = () => {
       setPhamTramGiam("");
       setNgayBatDau("");
       setNgayKetThuc("");
-      setSelectedProducts(null)
+      setSelectedProducts(null);
     } catch (error) {
       message.error("Lỗi khi thêm!");
       console.error("Lỗi khi thêm:", error);
@@ -320,7 +380,7 @@ const DotGiamGia = () => {
         }
       },
     },
-    
+
     {
       title: "Thao tác",
       key: "action",
@@ -362,9 +422,139 @@ const DotGiamGia = () => {
 
   const handleAddModalCancel = () => {
 
+    setStockMin("");
+    setStockMax("");
     setIsAddModalVisible(false);
   };
+  const danhSachKichCo = [
+    ...new Set(giayChiTietAll.map((item) => item.KICH_CO)),
+  ];
+  const danhSachMauSac = [
+    ...new Set(giayChiTietAll.map((item) => item.MAU_SAC)),
+  ];
+  const danhSachThuongHieu = [
+    ...new Set(giayChiTietAll.map((item) => item.THUONG_HIEU)), // Lấy các thương hiệu không trùng lặp
+  ];
+  const soLuongTon = [
+    ...new Set(giayChiTietAll.map((item) => item.SOLUONGTON)), // Lấy các thương hiệu không trùng lặp
+  ];
 
+  // const filteredGiay = giay.filter((item) => {
+  //   const searchStr = searchTerm.toLowerCase();
+  //   const matchSearch = ["TEN", "GIABAN", "SOLUONG", "KICH_CO", "MAU_SAC"].some(
+  //     (key) =>
+  //       item[key]
+  //         ? item[key].toString().toLowerCase().includes(searchStr)
+  //         : false
+  //   );
+
+  //   const matchSize = selectedSize ? item.KICH_CO === selectedSize : true;
+  //   const matchColor = selectedColor ? item.MAU_SAC === selectedColor : true;
+
+  //   return matchSearch && matchSize && matchColor;
+  // });
+  const handleStockRangeFilter = () => {
+    const filtered = giayChiTietAll.filter(
+      (item) => item.SOLUONGTON >= stockMin && item.SOLUONGTON <= stockMax
+    );
+
+    const giayChiTiet = filtered.map((item) => ({
+      ID: item.ID,
+      ten: item.TEN,
+      mauSac: item.MAU_SAC,
+      kichCo: item.KICH_CO,
+      thuongHieu: item.THUONG_HIEU,
+      soLuongTon: item.SOLUONGTON,
+      giaBan: item.GIABAN,
+      anh: item.ANH_GIAY,
+    }));
+
+    console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
+
+    setGiayChiTiet(giayChiTiet);
+    setFilteredByBrand(filtered);
+  };
+
+  const handleBrandChange = (e) => {
+    const brand = e.target.value; // Lấy thương hiệu đã chọn
+    setSelectedBrand(brand); // Lưu thương hiệu đã chọn vào state
+
+    // Lọc giày theo thương hiệu đã chọn
+    const filtered = giayChiTietAll.filter(
+      (item) => (brand ? item.THUONG_HIEU === brand : true) // Nếu có thương hiệu chọn, lọc theo thương hiệu, nếu không thì hiển thị tất cả
+    );
+
+    // Sau khi lọc, bạn có thể lấy các thông tin chi tiết từ giày lọc được
+    const giayChiTiet = filtered.map((item) => ({
+      ID: item.ID,
+      ten: item.TEN,
+      mauSac: item.MAU_SAC,
+      kichCo: item.KICH_CO,
+      thuongHieu: item.THUONG_HIEU,
+      soLuongTon: item.SOLUONGTON,
+      giaBan: item.GIABAN,
+      anh: item.ANH_GIAY,
+      // Thêm các trường thông tin khác nếu cần
+    }));
+
+    console.log("Giày theo thương hiệu lọc được: ", giayChiTiet);
+
+    // Lưu vào state để hiển thị
+    setGiayChiTiet(giayChiTiet); // Cập nhật giày chi tiết đã lọc vào state
+    setFilteredByBrand(filtered); // Lưu vào state các giày lọc theo thương hiệu
+  };
+  const handleColorChange = (e) => {
+    const color = e.target.value; // Lấy màu sắc đã chọn
+    setSelectedColor(color); // Lưu màu sắc đã chọn vào state
+
+    // Lọc giày theo màu sắc đã chọn
+    const filtered = giayChiTietAll.filter(
+      (item) => (color ? item.MAU_SAC === color : true) // Nếu có màu sắc chọn, lọc theo màu sắc, nếu không thì hiển thị tất cả
+    );
+
+    console.log(filtered);
+
+    const giayChiTiet = filtered.map((item) => ({
+      ID: item.ID,
+      ten: item.TEN,
+      mauSac: item.MAU_SAC,
+      kichCo: item.KICH_CO,
+      THUONG_HIEU: item.THUONG_HIEU,
+      soLuongTon: item.SOLUONGTON,
+      giaBan: item.GIABAN,
+      anh: item.ANH_GIAY,
+
+      // Thêm các trường thông tin khác nếu cần
+    }));
+
+    console.log("Giày theo màu sắc lọc được: ", giayChiTiet);
+
+    // Lưu vào state để hiển thị
+    setGiayChiTiet(giayChiTiet); // Cập nhật giày chi tiết đã lọc vào state
+    setFilteredByColor(filtered);
+  };
+  useEffect(() => {
+    // Lọc giày theo khoảng số lượng tồn
+    const filtered = giayChiTietAll.filter(
+      (item) => item.SOLUONGTON >= stockMin && item.SOLUONGTON <= stockMax
+    );
+
+    const giayChiTiet = filtered.map((item) => ({
+      ID: item.ID,
+      ten: item.TEN,
+      mauSac: item.MAU_SAC,
+      kichCo: item.KICH_CO,
+      thuongHieu: item.THUONG_HIEU,
+      soLuongTon: item.SOLUONGTON,
+      giaBan: item.GIABAN,
+      anh: item.ANH_GIAY,
+    }));
+
+    console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
+
+    setGiayChiTiet(giayChiTiet);
+    setFilteredByBrand(filtered);
+  }, [stockMin, stockMax, giayChiTietAll]); // Lọc lại khi stockMin, stockMax thay đổi
 
   return (
     <div className="dot-giam-gia">
@@ -455,7 +645,6 @@ const DotGiamGia = () => {
         className="custom-modal"
         visible={isAddModalVisible}
         onOk={handleAddSubmit}
-    
         onCancel={handleAddModalCancel}
         footer={null}
         width={1000}
@@ -572,9 +761,94 @@ const DotGiamGia = () => {
               />
             </div>
 
-
             <div className="tableDanhsachchitiet">
               <h3>Danh sách sản phẩm chi tiết</h3>
+              <div style={{ display: "flex" }}>
+                {/* Ô tìm kiếm */}
+                {/* <div
+                  style={{
+                    top: 0,
+                    background: "white",
+                    zIndex: 1000,
+                    padding: "10px",
+                  }}
+                >
+                  <input
+                    type="text"
+                    placeholder="Tìm kiếm..."
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    style={{
+                      padding: "8px",
+                      width: "100%",
+                      borderRadius: "15px",
+                      border: "1px solid #ccc",
+                    }}
+                  />
+                </div> */}
+
+                {/* Bộ lọc thương hiệu*/}
+                <select
+                  value={selectedBrand}
+                  onChange={handleBrandChange}
+                  style={{
+                    margin: "10px",
+                    padding: "5px",
+                    borderRadius: "15px",
+                  }}
+                >
+                  <option value="">Tất cả thương hiệu</option>
+                  {danhSachThuongHieu.map((brand) => (
+                    <option key={brand} value={brand}>
+                      {brand}
+                    </option>
+                  ))}
+                </select>
+
+                {/* Bộ lọc màu sắc */}
+                <select
+                  value={selectedColor}
+                  onChange={handleColorChange}
+                  style={{
+                    margin: "10px",
+                    padding: "5px",
+                    borderRadius: "15px",
+                  }}
+                >
+                  <option value="">Tất cả màu sắc</option>
+                  {danhSachMauSac.map((color) => (
+                    <option key={color} value={color}>
+                      {color}
+                    </option>
+                  ))}
+                </select>
+                {/* Bộ lọc số lượng */}
+                <div style={{ display: "flex", alignItems: "center" }}>
+                  <label>Từ:</label>
+                  <input
+                    type="number"
+                    style={{
+                      margin: "10px",
+                      padding: "5px",
+                      borderRadius: "15px",
+                    }}
+                    value={stockMin}
+                    onChange={(e) => setStockMin(Number(e.target.value))}
+                  />
+                  <label>Đến:</label>
+                  <input
+                    type="number"
+                    value={stockMax}
+                    style={{
+                      margin: "10px",
+                      padding: "5px",
+                      borderRadius: "15px",
+                    }}
+                    onChange={(e) => setStockMax(Number(e.target.value))}
+                  />
+                </div>
+              </div>
+
               <Table
                 rowSelection={{
                   type: "checkbox",
@@ -612,18 +886,23 @@ const DotGiamGia = () => {
                   },
                   { title: "Tên", dataIndex: "ten", width: 150 },
                   {
+                    title: "Giá bán",
+                    dataIndex: "giaBan",
+                    width: 120,
+                    render: (gia) => gia?.toLocaleString() + " VNĐ",
+                  },
+                  {
+                    title: "Thương Hiệu",
+                    dataIndex: "thuongHieu",
+                    width: 120,
+                  },
+                  {
                     title: "Số lượng tồn",
                     dataIndex: "soLuongTon",
                     width: 120,
                   },
                   { title: "Màu sắc", dataIndex: "mauSac", width: 120 },
                   { title: "Kích cỡ", dataIndex: "kichCo", width: 100 },
-                  {
-                    title: "Giá bán",
-                    dataIndex: "giaBan",
-                    width: 120,
-                    render: (gia) => gia.toLocaleString() + " VNĐ",
-                  },
                 ]}
                 dataSource={giayChiTiet}
                 rowKey="id"
