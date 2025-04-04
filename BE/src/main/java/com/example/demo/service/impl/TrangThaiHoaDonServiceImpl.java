@@ -3,17 +3,16 @@ package com.example.demo.service.impl;
 import com.example.demo.dto.request.HoaDonDto;
 import com.example.demo.dto.request.UserDto;
 import com.example.demo.entity.*;
-import com.example.demo.repository.GiayChiTietRepository;
-import com.example.demo.repository.GiayRepository;
-import com.example.demo.repository.GioHangChiTietRepository;
-import com.example.demo.repository.HoaDonRepository;
+import com.example.demo.repository.*;
 import com.example.demo.service.LichSuHoaDonService;
+import com.example.demo.service.SendMailService;
 import com.example.demo.service.TrangThaiHoaDonService;
 import com.itextpdf.kernel.pdf.PdfDocument;
 import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import java.io.ByteArrayOutputStream;
+import java.util.Collections;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -34,6 +33,10 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     @Autowired
     private GiayRepository giayRepository;
     @Autowired private LichSuHoaDonService lichSuHoaDonService;
+    @Autowired
+    private UserRepository userRepository;
+    @Autowired
+    private SendMailService sendMailService;
 
     @Override
     public HoaDonEntity xacNhanHoaDon(UUID id) {
@@ -77,6 +80,8 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
             case 6:
                 hoaDon.setTrangThai(2); // Đã giao hàng → Hoàn thành
                 lichSuHoaDonService.createLichSuHoaDon(id, 2,6);
+                // gửi email đánh giá khi đơn hàng hoàn thành
+                sendDanhGiaEmail(hoaDon.getUserEntity().getId(),hoaDon.getId());
                 break;
             default:
                 throw new RuntimeException("Trạng thái hiện tại không thể xác nhận tiếp.");
@@ -130,6 +135,32 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     @Override
     public List<HoaDonDto> getAllHoaDon() {
         List<HoaDonEntity> hoaDons = hoaDonRepository.findAll();
+        // sắp xếp hóa đơn đã
+        Collections.sort(hoaDons,(hd1,hd2) ->{
+            boolean hd1IsOnlineWaiting = hd1.getHinhThucThanhToan() == 2 && hd1.getTrangThai() == 0;
+            boolean hd2IsOnlineWaiting = hd2.getHinhThucThanhToan() == 2 && hd2.getTrangThai() == 0;
+
+            // nếu hd1 là online và chờ xác nhận và hd2 không phải
+            if (hd1IsOnlineWaiting && !hd2IsOnlineWaiting){
+                return -1;
+            }
+
+            // nếu hd2 la online và chờ xác nhận , hd1 khong phải
+            if (hd2IsOnlineWaiting && !hd1IsOnlineWaiting){
+                return 1;
+            }
+            // nếu hai hóa đơn cùng là hoặc đều không là online + chờ xác nhận, kiểm tra đã thanh toán
+            if (hd1.getNgayThanhToan() != null && hd2.getNgayThanhToan() == null) {
+                return -1; // hd1 lên trước
+            }
+
+            if (hd2.getNgayThanhToan() != null && hd1.getNgayThanhToan() == null) {
+                return 1; // hd2 lên trước
+            }
+
+            // nếu cả hai cùng trạng thái thanh toán, sắp xếp theo ngày tạo mới nhất
+            return hd2.getNgayTao().compareTo(hd1.getNgayTao());
+        });
         return hoaDons.stream().map(hd -> {
             UserDto userDto = null;
             if (hd.getUserEntity() != null) {
@@ -211,6 +242,20 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
             return hoaDon1.toByteArray();
         }
         return null;
+    }
+
+    public void sendDanhGiaEmail (UUID userId,UUID hoaDonId){
+        UserEntity userEntity = userRepository.findById(userId)
+                .orElseThrow(() -> new RuntimeException("không tìm thấy user"));
+        String email  = userEntity.getEmail();
+        String subject = "Mời bạn đánh giá đơn hàng #" + hoaDonId;
+        String body = "Chào " + userEntity.getHoTen() + ",\n\n"
+                + "Cảm ơn bạn đã mua hàng! Đơn hàng của bạn đã hoàn thành. "
+                + "Vui lòng để lại đánh giá về sản phẩm tại đường dẫn sau:\n"
+                + "http://your-frontend.com/danh-gia/" + hoaDonId + "\n\n"
+                + "Trân trọng,\nĐội ngũ hỗ trợ khách hàng.";
+
+        sendMailService.sendMail(email, subject, body);
     }
 
     @Override

@@ -51,13 +51,13 @@ const BanHangTaiQuay = () => {
   const [isTyping, setIsTyping] = useState(false);
   const [khachHangTimThay, setKhachHangTimThay] = useState(false);
   const [selectedOption, setSelectedOption] = useState(null);
-  const [customerMoney, setCustomerMoney] = useState("");
   const [giay, setGiay] = useState([]);
   const [sdtNguoiNhan, setSdtNguoiNhan] = useState("");
   const [hoaDonChiTiet, setHoaDonChiTiet] = useState([]);
   const [selectedProducts, setSelectedProducts] = useState({});
   const [totalAmount, setTotalAmount] = useState(0);
   const [totalHoaDon, setTotalHoaDon] = useState(0);
+  const [customerMoney, setCustomerMoney] = useState(totalHoaDon);
   const [maGiamGiaList, setMaGiamGiaList] = useState([]); // Thêm state này
   const [selectedMaGiamGia, setSelectedMaGiamGia] = useState(null); // State cho mã giảm giá được chọn
   const [giaTriGiam, setGiaTriGiam] = useState(0); // Giá trị giảm
@@ -90,13 +90,14 @@ const BanHangTaiQuay = () => {
   const [diaChi, setDiaChi] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isGiaoHang, setIsGiaoHang] = useState(false);
-  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(null);
+  const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(0);
   const [searchTerm, setSearchTerm] = useState("");
   const { Option } = Select;
   const [selectedHoaDonId, setSelectedHoaDonId] = useState(null);
   const [initialTotalHoaDon, setInitialTotalHoaDon] = useState(totalHoaDon);
   const [hoaDonCho, setHoaDonCho] = useState([]);
   const [scanResult, setScanResult] = useState("");
+  const [fakeSoLuong, setFakeSoLuong] = useState({});
   const [availablePageNumbers, setAvailablePageNumbers] = useState([
     1, 2, 3, 4, 5,
   ]);
@@ -107,6 +108,17 @@ const BanHangTaiQuay = () => {
     fetchHoaDonCho();
     getAllMaGiamGiaData();
   }, []);
+
+  useEffect(() => {
+    setSelectedPaymentMethod(0);
+  }, []);
+
+  useEffect(() => {
+    setCustomerMoney(totalHoaDon);
+  }, [totalHoaDon]);
+
+
+
   const getAllGiay = async () => {
     try {
       const result = await getAllGiayChiTiet();
@@ -787,7 +799,7 @@ const BanHangTaiQuay = () => {
     setTenMaGiamGia(""); // Reset discount code name
     setLoaiGiamGia("VNĐ"); // Reset discount type
     setIsGiaoHang(false); // Reset delivery option
-    setSelectedPaymentMethod(null); // Reset payment method
+    // setSelectedPaymentMethod(null); // Reset payment method
   };
   const addChuongTrinhGiamGiaHoaDonChiTiet = async (
     hoaDonId,
@@ -848,12 +860,12 @@ const BanHangTaiQuay = () => {
       message.error("Vui lòng nhập đầy đủ thông tin khách hàng!");
       return;
     }
-    
+
     const newData = {
       hoTen,
       sdtNguoiNhan,
     };
-  
+
     try {
       await addKhachHang(newData);  // Chỉ gửi tên và số điện thoại
       message.success("Thêm khách hàng thành công!");
@@ -863,7 +875,7 @@ const BanHangTaiQuay = () => {
       message.error("Lỗi khi thêm khách hàng");
     }
   };
-  
+
 
   const handleAddPage = async () => {
     if (pages.length >= 5) {
@@ -1345,7 +1357,7 @@ const BanHangTaiQuay = () => {
             <label htmlFor="customerMoney">Tiền khách đưa:</label>
             <Input
               id="customerMoney"
-              value={customerMoney}
+              value={formatCurrency(customerMoney)}
               onChange={handleInputChange}
               placeholder="Nhập số tiền khách đưa"
             />

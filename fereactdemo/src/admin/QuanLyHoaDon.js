@@ -694,7 +694,7 @@ const QuanLyHoaDon = () => {
           <Button
             type="primary"
             icon={<HistoryOutlined />}
-            onClick={() => fetchLichSuHoaDonById(record.order_id)} // Gọi hàm với hoaDonId
+            onClick={() => fetchLichSuHoaDonById(record.order_id)}
           >
 
           </Button>

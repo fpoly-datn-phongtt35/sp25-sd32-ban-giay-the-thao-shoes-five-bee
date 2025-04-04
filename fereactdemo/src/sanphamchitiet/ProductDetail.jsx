@@ -8,7 +8,12 @@ import {
 import { getGiayDetail } from "../service/GiayService";
 import "./sanphamchitiet.css";
 import { addToCart } from "../service/GioHangChiTietService";
-import { Button, message } from "antd";
+import { Button, message, Rate, Avatar, Divider } from "antd";
+import { UserOutlined } from "@ant-design/icons";
+import axios from "axios";
+import { getProductDanhGiaById } from "../service/DanhGiaService";
+
+
 const ProductDetail = () => {
   const { id } = useParams();
   const [product, setProduct] = useState(null);
@@ -18,18 +23,25 @@ const ProductDetail = () => {
   const [selectedColor, setSelectedColor] = useState(null);
   const [quantity, setQuantity] = useState(1);
   const [bienTheList, setBienTheList] = useState([]);
-  const [currentPrice, setCurrentPrice] = useState(productGiay?.giaBan || 0);
+  const [currentPrice, setCurrentPrice] = useState(0);
+  
+  // State cho phần đánh giá - chỉ hiển thị
+  const [danhGiaList, setDanhGiaList] = useState([]);
+  const [averageRating, setAverageRating] = useState(0);
+  const [totalReviews, setTotalReviews] = useState(0);
 
   useEffect(() => {
     fetchProductDetail();
+    fetchProductReviews();
   }, [id]);
 
+  // Lấy chi tiết sản phẩm
   const fetchProductDetail = async () => {
     try {
       console.log(`🔍 Đang lấy dữ liệu sản phẩm với ID: ${id}`);
       const giayDto = { id };
       const giayResponse = await getGiayDetail(giayDto);
-      const giayChiTietResponse = await getGiayChitietDetail1(id); // Lấy danh sách chi tiết giày
+      const giayChiTietResponse = await getGiayChitietDetail1(id);
 
       console.log("Kết quả từ getGiayDetail:", giayResponse.data);
       console.log("Kết quả từ getAllGiayChiTiet:", giayChiTietResponse.data);
@@ -38,40 +50,60 @@ const ProductDetail = () => {
         Array.isArray(giayChiTietResponse.data) &&
         giayChiTietResponse.data.length > 0
       ) {
-        // Trích xuất màu sắc, kích cỡ và thông tin liên quan
         const bienTheSanPham = giayChiTietResponse.data.map((item) => ({
-          idMauSac: item.mauSacEntity?.id, // ID màu sắc
-          tenMauSac: item.mauSacEntity?.ten, // Tên màu sắc
-          idGiayChiTiet: item.id, // ID giày chi tiết
-          giaBan: item.giaBan, // Giá bán
-          idKichCo: item.kichCoEntity?.id, // ID kích cỡ
-          tenKichCo: item.kichCoEntity?.ten, // Tên kích cỡ
+          idMauSac: item.mauSacEntity?.id,
+          tenMauSac: item.mauSacEntity?.ten,
+          idGiayChiTiet: item.id,
+          giaBan: item.giaBan,
+          idKichCo: item.kichCoEntity?.id,
+          tenKichCo: item.kichCoEntity?.ten,
         }));
 
         console.log("Danh sách biến thể sản phẩm:", bienTheSanPham);
-        setBienTheList(bienTheSanPham); // Cập nhật state
+        setBienTheList(bienTheSanPham);
       } else {
-        setBienTheList([]); // Nếu không có dữ liệu, gán mảng rỗng
+        setBienTheList([]);
       }
 
       setProductGiay(giayResponse.data);
       setProduct(giayChiTietResponse.data);
+      setCurrentPrice(giayResponse.data?.giaBan || 0);
     } catch (error) {
       console.error("Lỗi khi lấy chi tiết sản phẩm:", error);
     } finally {
       setLoading(false);
     }
   };
+
+  // Lấy danh sách đánh giá
+  const fetchProductReviews = async () => {
+    try {
+      console.log("🔍 Gọi API đánh giá với ID Giày:", id); 
+      const response = await getProductDanhGiaById(id);
+      console.log("📌 Kết quả API đánh giá:", response.data);
+  
+      if (Array.isArray(response.data)) {
+        setDanhGiaList(response.data);
+        setTotalReviews(response.data.length);
+  
+        if (response.data.length > 0) {
+          const totalRating = response.data.reduce((sum, item) => sum + item.saoDanhGia, 0);
+          setAverageRating((totalRating / response.data.length).toFixed(1));
+        }
+      }
+    } catch (error) {
+      console.error("❌ Lỗi khi lấy đánh giá:", error);
+    }
+  };
+
   const handleColorSelect = (color) => {
     setSelectedColor(color);
-
-    // Tìm biến thể đầu tiên có màu sắc được chọn
     const selectedVariant = bienTheList.find(
       (item) => item.tenMauSac === color
     );
 
     if (selectedVariant) {
-      setCurrentPrice(selectedVariant.giaBan); // Cập nhật giá
+      setCurrentPrice(selectedVariant.giaBan);
     }
   };
 
@@ -100,7 +132,13 @@ const ProductDetail = () => {
     }
   };
 
-  if (loading) return <p>Đang tải dữ liệu...</p>; // Hiển thị khi đang tải
+  // Format date từ chuỗi ISO
+  const formatDate = (dateString) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('vi-VN');
+  };
+
+  if (loading) return <p>Đang tải dữ liệu...</p>;
 
   return (
     <div className="product-detail">
@@ -151,7 +189,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Màu sắc */}
           <div>
             <strong>Màu sắc:</strong>
             <div className="color-options">
@@ -171,7 +208,6 @@ const ProductDetail = () => {
             </div>
           </div>
 
-          {/* Số lượng */}
           <div className="quantity">
             <strong>Số lượng:</strong>
             <Button onClick={() => setQuantity(Math.max(1, quantity - 1))}>
@@ -181,7 +217,6 @@ const ProductDetail = () => {
             <Button onClick={() => setQuantity(quantity + 1)}>+</Button>
           </div>
 
-          {/* Nút Mua ngay */}
           <div className="buy-button" onClick={handleAddToCart} style={{borderRadius: "15px"}}> 
             MUA NGAY VỚI GIÁ {""}
             {selectedColor
@@ -191,7 +226,6 @@ const ProductDetail = () => {
           </div>
         </div>
 
-        {/* Chính sách */}
         <div className="policy">
           <p>
             ✅ KIỂM TRA HÀNG VÀ THANH TOÁN KHI <strong>NHẬN HÀNG</strong>
@@ -206,6 +240,50 @@ const ProductDetail = () => {
             🔄 ĐỔI HÀNG TRONG VÒNG <strong>33 NGÀY</strong>
           </p>
         </div>
+      </div>
+
+      {/* Phần đánh giá sản phẩm - chỉ hiển thị */}
+      <div className="product-reviews">
+        <Divider orientation="left">
+          <h2>Đánh giá từ khách hàng</h2>
+        </Divider>
+        
+        {/* Tổng quan đánh giá */}
+        <div className="review-summary">
+          <div className="rating-overview">
+            <div className="rating-score">
+              <div className="average-rating">{averageRating}</div>
+              <Rate disabled value={parseFloat(averageRating)} allowHalf />
+              <div className="total-reviews">{totalReviews} đánh giá</div>
+            </div>
+          </div>
+        </div>
+
+        {/* Danh sách đánh giá */}
+        <div className="review-list">
+      {danhGiaList.length > 0 ? (
+      danhGiaList.map((review, index) => (
+      <div key={review.id || index} className="review-item">
+        <div className="review-header">
+          <Avatar icon={<UserOutlined />} />
+          <div className="reviewer-info">
+            <div className="reviewer-name">{review.userEntity?.hoTen || "Khách hàng"}</div>
+            <div className="review-date">{formatDate(review.ngayNhanXet)}</div>
+          </div>
+        </div>
+        <div className="review-rating">
+          <Rate disabled value={review.saoDanhGia} />
+        </div>
+        <div className="review-content">{review.nhanXet}</div>
+        <Divider />
+      </div>
+    ))
+    ) : (
+    <div className="no-reviews">
+      <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+    </div>
+    )}
+  </div>
       </div>
     </div>
   );

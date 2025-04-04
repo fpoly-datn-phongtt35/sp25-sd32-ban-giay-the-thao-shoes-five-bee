@@ -1,9 +1,10 @@
-import { Button, message, Modal, Select } from 'antd'; 
+import { Button, Input, message, Modal, Rate, Select } from 'antd'; 
 import './OrderDetailPopup.css';
 import { useEffect, useState } from 'react';
 import { fetchCustomerId } from '../service/LoginService';
 import { getDiaChiByKhachHangId } from '../service/DiaChiService';
 import { updateOrderAddress } from '../service/HoaDonService';
+import { addDanhGia } from '../service/DanhGiaService';
 
 const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePrint }) => {
   const [khachHangId, setKhachHangId] = useState(null);
@@ -11,7 +12,10 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
   const [addresses, setAddresses] = useState([]);
   const [selectedAddressId, setSelectedAddressId] = useState(null); 
   const [updatedOrder, setUpdatedOrder] = useState(selectedOrder);
-
+  const [isReviewModalVisible, setIsReviewModalVisible] = useState(false);
+  const [selectedProduct, setSelectedProduct] = useState(null);
+  const [rating, setRating] = useState(0);
+  const [reviewText, setReviewText] = useState('');
   useEffect(() => {
     if (selectedOrder) {
       setUpdatedOrder(selectedOrder);
@@ -43,6 +47,41 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
       message.error("Lỗi khi lấy danh sách địa chỉ");
     }
   };
+
+  const handleOpenReviewModal = (product) => {
+    setSelectedProduct(product);
+    setIsReviewModalVisible(true);
+  };
+
+  const handleSubmitReview = async () => {
+    if (!selectedProduct || rating === 0 || !reviewText.trim()) {
+      message.warning("Vui lòng nhập đầy đủ thông tin đánh giá");
+      return;
+    }
+    
+    console.log("Selected product:", selectedProduct);
+    console.log("Product ID:", selectedProduct?.id);
+
+    // lấy ngày hiện tại
+    const currentDate = new Date().toISOString().split('T')[0]; 
+    try {
+      await addDanhGia({
+        hoaDonChiTietId: selectedProduct.id,
+        userId : khachHangId,
+        saoDanhGia: rating,
+        nhanXet: reviewText,
+        ngayNhanXet : currentDate
+      });
+      message.success("Đánh giá đã được gửi thành công");
+      setIsReviewModalVisible(false);
+      setRating(0);
+      setReviewText('');
+    } catch (error) {
+      console.error("Lỗi khi thêm đánh giá:", error);
+      message.error("Lỗi khi gửi đánh giá");
+    }
+  };
+
 
   const handleEditAddress = async () => {
     await fetchAddresses();
@@ -158,6 +197,7 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
                   <th>Giá bán</th>
                   <th>Số lượng</th>
                   <th>Tổng tiền</th>
+                  <th>Đánh giá</th>
                 </tr>
               </thead>
               <tbody>
@@ -178,6 +218,9 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
                     <td>
                       {(product.soLuong * product.giaBan)?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}
                     </td>
+                    <td>
+                      <Button type="primary" onClick={() => handleOpenReviewModal(product)}>Đánh giá</Button>
+                    </td>
                   </tr>
                 ))}
               </tbody>
@@ -193,6 +236,15 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
                 </tr>
               </tfoot>
             </table>
+          {/* Modal đánh giá */}
+          <Modal title="Thêm đánh giá" visible={isReviewModalVisible} onOk={handleSubmitReview} onCancel={() => setIsReviewModalVisible(false)}>
+            <div>
+              <Rate onChange={setRating} value={rating} />
+              <br/>
+              <br/>
+              <Input.TextArea rows={4} value={reviewText} onChange={(e) => setReviewText(e.target.value)} placeholder="Nhập đánh giá của bạn" />
+            </div>
+          </Modal>
           </div>
         </div>
       </div>
