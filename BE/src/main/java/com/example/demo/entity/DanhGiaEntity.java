@@ -1,5 +1,7 @@
 package com.example.demo.entity;
 
+import com.fasterxml.jackson.annotation.JsonBackReference;
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import lombok.AllArgsConstructor;
 import lombok.Data;
@@ -27,10 +29,12 @@ public class DanhGiaEntity {
     private Date ngayNhanXet;
 
     @ManyToOne
+    @JsonBackReference
     @JoinColumn(name = "HOA_DON_CHI_TIET_ID",referencedColumnName = "ID")
     private HoaDonChiTietEntity hoaDonChiTietEntity;
 
     @ManyToOne
+    @JsonIgnore
     @JoinColumn(name =  "USER_ID",referencedColumnName = "ID")
     private UserEntity userEntity;
 }

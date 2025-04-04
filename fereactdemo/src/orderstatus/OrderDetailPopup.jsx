@@ -199,7 +199,9 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
                   <th>Giá bán</th>
                   <th>Số lượng</th>
                   <th>Tổng tiền</th>
-                  <th>Đánh giá</th>
+                  {selectedOrder?.trangThai === 2 && (
+                    <th>Đánh giá</th>
+                  )}
                 </tr>
               </thead>
               <tbody>
@@ -221,7 +223,7 @@ const OrderDetailPopup = ({ selectedOrder, isPopupVisible, togglePopup, handlePr
                       {(product.soLuong * product.giaBan)?.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' }) || 'N/A'}
                     </td>
                     <td>
-                      {!reviewedProductIds.includes(product.id) && (
+                      {selectedOrder?.trangThai === 2 && !reviewedProductIds.includes(product.id) && (
                         <Button type="primary" onClick={() => handleOpenReviewModal(product)}>Đánh giá</Button>
                       )}
                     </td>
