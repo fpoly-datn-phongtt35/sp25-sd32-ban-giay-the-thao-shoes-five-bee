@@ -46,7 +46,7 @@ public class SubscriptionServiceImpl implements SubscriptionService {
         subscriptionEntityList.stream().map(s -> s.getUserEntity()).collect(Collectors.toList());
 
     for (UserEntity userEntity : userEntities) {
-      String subject = "Sản phẩm bạn quan tâm: " + giayChiTiet.getGiayEntity().getTen() + "trên website giày thể thao FiveBe";
+      String subject = "Sản phẩm bạn quan tâm: " + giayChiTiet.getGiayEntity().getTen() + " trên website giày thể thao FiveBe";
       String body =
           "Chào "
               + userEntity.getHoTen()

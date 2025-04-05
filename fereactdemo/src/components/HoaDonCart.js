@@ -1,6 +1,6 @@
 import React, { useEffect, useState } from "react";
 import "./HoaDonCart.css";
-import { getGioHangChiTietCheckOut } from "../service/GioHangChiTietService"
+import { getGioHangChiTietCheckOut } from "../service/GioHangChiTietService";
 import useCart from "./Cart";
 import { useLocation } from "react-router-dom";
 const Cart = ({ customerId, onSetTongTienHang }) => {
@@ -20,20 +20,20 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
         setCart(data);
         var arr = [];
         for (var i = 0; i < data.length; i++) {
-          arr.push(data[i].id)
+          arr.push(data[i].id);
         }
-        localStorage.setItem("idGioHangChiTiet",arr);
+        localStorage.setItem("idGioHangChiTiet", arr);
       }
     };
     fetchProducts();
   }, [selectedProducts]);
 
   useEffect(() => {
-    onSetTongTienHang(totalAmount)
+    onSetTongTienHang(totalAmount);
   }, [cartt]);
 
   const totalAmount = cartt.reduce(
-    (total, product) => total + (product.giaBan || 0) * (product.soLuong || 1),
+    (total, product) => total + (product.donGiaKhiGiam ?? product.giaBan ?? 0) * (product.soLuong || 1),
     0
   );
   if (products.length === 0) return <p>Không có sản phẩm nào để thanh toán!</p>;
@@ -53,16 +53,29 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
           <div className="prouduct_cart" key={index}>
             <div className="prouduct_cart_name">
               <img
-                src={product.anhGiayUrl || '/placeholder.jpg'}
-                alt={product.tenGiay || 'Hình ảnh sản phẩm'}
+                src={product.anhGiayUrl || "/placeholder.jpg"}
+                alt={product.tenGiay || "Hình ảnh sản phẩm"}
               />
-              <div style={{ display: 'flex', justifyContent: 'center',alignItems: 'center' }}>
-                <p>{product.tenGiay || 'Sản phẩm không xác định'}</p>
+              <div
+                style={{
+                  display: "flex",
+                  justifyContent: "center",
+                  alignItems: "center",
+                }}
+              >
+                <p>{product.tenGiay || "Sản phẩm không xác định"}</p>
               </div>
             </div>
 
             <div className="prouduct_cart_price">
-              <p>{(product.giaBan || 0).toLocaleString()}đ</p>
+              <p>
+                {(
+                  product.donGiaKhiGiam ??
+                  product.giaBan ??
+                  0
+                ).toLocaleString()}
+                đ
+              </p>
             </div>
             <div className="prouduct_cart_count">
               <div className="prouduct_cart_count_count">
@@ -72,7 +85,7 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
             <div className="prouduct_cart_discount">
               <p>
                 {(
-                  (product.giaBan || 0) * (product.soLuong || 1)
+                  (product.donGiaKhiGiam ?? product.giaBan ?? 0) * (product.soLuong || 1)
                 ).toLocaleString()}
                 đ
               </p>
@@ -84,7 +97,6 @@ const Cart = ({ customerId, onSetTongTienHang }) => {
             <div className="total_value_total">
               Tổng số tiền : <p>{totalAmount.toLocaleString()}đ </p>
             </div>
-
           </div>
         </div>
       </div>
