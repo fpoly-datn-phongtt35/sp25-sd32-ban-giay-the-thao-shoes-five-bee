@@ -9,4 +9,5 @@ public interface DanhGiaService {
     void creteDanhGia(DanhGiaDto danhGiaDto);
     List<DanhGiaDto> getDanhGiaByHoaDonChiTiet(UUID hoaDonChiTietId);
     List<DanhGiaDto> getDanhGiaByProduct(UUID productId);
+    List<DanhGiaDto> getDanhGiaByUserAndHoaDonChiTiet(UUID userId, UUID hoaDonChiTietId);
 }

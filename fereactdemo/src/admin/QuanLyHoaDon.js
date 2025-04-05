@@ -14,12 +14,9 @@ import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from 
 import Highlighter from "react-highlight-words";
 import "./quanlyhoadon.css";
 import {
-  deleteHoaDon,
   detailHoaDon,
   getHoaDon,
   getHoaDonById1,
-  printfHoaDon,
-  updateHoaDon,
   xacNhanHoaDon,
 
 } from "../service/HoaDonService";
@@ -30,11 +27,7 @@ import {
 } from "../service/LichSuHoaDonService";
 import moment from "moment";
 import {
-  deleteHoaDonChiTiet,
-  getHoaDonChiTiet1,
-  getHoaDonChiTiet,
   printfHoaDonChiTiet,
-  updateHoaDonChiTiet,
 } from "../service/HoaDonChiTietService";
 const QuanLyHoaDon = () => {
   const [searchText, setSearchText] = useState("");
@@ -50,8 +43,6 @@ const QuanLyHoaDon = () => {
   const [statusFilter, setStatusFilter] = useState(null);
   const [dateFilter, setDateFilter] = useState(null);
   const [isViewOnly, setIsViewOnly] = useState(false);
-  const [selectedOrderId, setSelectedOrderId] = useState(null);
-  const [selectedOrder, setSelectedOrder] = useState();
   const [isPopupVisible, setIsPopupVisible] = useState(false);
   const [phoneFilter, setPhoneFilter] = useState("");
   const [isHistoryPopupVisible, setIsHistoryPopupVisible] = useState(false);
@@ -79,6 +70,9 @@ const QuanLyHoaDon = () => {
         return "Đã hủy";
     }
   };
+
+
+
   useEffect(() => {
     fetchHoaDon();
   }, [statusFilter, dateFilter]);
@@ -339,6 +333,8 @@ const QuanLyHoaDon = () => {
       ),
   });
 
+
+
   const handleEdit = async (record) => {
     try {
       console.log("📌 Record nhận được trong handleEdit:", record);
@@ -483,101 +479,7 @@ const QuanLyHoaDon = () => {
     }
   };
 
-  const handleDelete = () => {
-    Modal.confirm({
-      title:
-        "Bạn có chắc chắn muốn xóa các hóa đơn chi tiết và hóa đơn chính liên quan không?",
-      okText: "Có",
-      cancelText: "Không",
-      onOk: async () => {
-        try {
-          const allDetails = await getHoaDonChiTiet1();
-          const detailsToDelete = allDetails.data.filter((detail) =>
-            selectedRowKeys.includes(detail.hoaDon.id)
-          );
-
-          for (const detail of detailsToDelete) {
-            await deleteHoaDonChiTiet(detail.id);
-          }
-
-          for (const key of selectedRowKeys) {
-            await deleteHoaDon(key);
-          }
-
-          await fetchHoaDon();
-          setSelectedRowKeys([]);
-          setSelectAll(false);
-          message.success("Xóa thành công!");
-        } catch (error) {
-          console.error(
-            "Lỗi khi xóa hóa đơn chi tiết và hóa đơn chính:",
-            error
-          );
-          message.error(
-            "Có lỗi xảy ra khi xóa hóa đơn chi tiết và hóa đơn chính!"
-          );
-        }
-      },
-    });
-  };
-
-  const handleDeleteSingle = async (record) => {
-    try {
-      Modal.confirm({
-        title:
-          "Bạn có chắc chắn muốn xóa hóa đơn này và các hóa đơn chi tiết liên quan không?",
-        okText: "Có",
-        cancelText: "Không",
-        onOk: async () => {
-          try {
-            const detailResponse = await getHoaDonChiTiet1();
-            const details = detailResponse.data.filter(
-              (item) => item.hoaDon.id === record.order_id
-            );
-
-            for (const detail of details) {
-              await deleteHoaDonChiTiet(detail.id);
-            }
-
-            await deleteHoaDon(record.order_id);
-
-            await fetchHoaDon();
-            setSelectedRowKeys((prevKeys) =>
-              prevKeys.filter((key) => key !== record.order_id)
-            );
-            message.success("Xóa thành công");
-          } catch (error) {
-            console.error("Lỗi khi xóa hóa đơn và hóa đơn chi tiết:", error);
-            message.error("Có lỗi xảy ra khi xóa hóa đơn và hóa đơn chi tiết!");
-          }
-        },
-      });
-    } catch (error) {
-      console.error("Lỗi khi xóa hóa đơn:", error);
-      message.error("Có lỗi xảy ra khi xóa hóa đơn!");
-    }
-  };
-  const handleSelectAll = (e) => {
-    const checked = e.target.checked;
-    setSelectedRowKeys(checked ? data.map((item) => item.key) : []);
-    setSelectAll(checked);
-  };
-
   const columns = [
-    // {
-    //   title: "Xem chi tiết hóa đơn",
-    //   dataIndex: "order_id",
-    //   key: "order_id",
-    //   width: 120,
-    //   ...getColumnSearchProps("order_id"),
-    //   ellipsis: true,
-    //   render: (text, record) => (
-    //     <a href="#" onClick={() => handleOrderClick(record.order_id)}>
-    //       {record.order_id.slice(0, 12)}... {/* Chỉ hiển thị 8 ký tự đầu */}
-    //     </a>
-    //   ),
-    // },
-
     {
       title: "Tên khách hàng",
       dataIndex: "user",
@@ -593,25 +495,6 @@ const QuanLyHoaDon = () => {
       width: 120,
       ...getColumnSearchProps("user_phone"),
     },
-    // {
-    //     title: "Products",
-    //     key: "products",
-    //     render: (text, record) => {
-    //         return (
-    //             <div>
-    //                 {record.products.map((product, index) => (
-    //                     <div key={index}>
-    //                         <p><strong>Tên sản phẩm:</strong> {product.tenGiay || "N/A"}</p>
-    //                         <p><strong>Màu sắc:</strong> {product.mauSac || "N/A"}</p>
-    //                         <p><strong>Kích cỡ:</strong> {product.kichCo || "N/A"}</p>
-    //                         <p><strong>Số lượng:</strong> {product.soLuong || 0}</p>
-    //                     </div>
-    //                 ))}
-    //                 <p><strong>Tổng Tiền: {record.tongTien.toLocaleString('vi-VN', { style: 'currency', currency: 'VND' })}</strong></p>
-    //             </div>
-    //         );
-    //     },
-    // },
     {
       title: "Ngày đặt",
       dataIndex: "order_on",
@@ -700,21 +583,10 @@ const QuanLyHoaDon = () => {
           </Button>
         </>
 
-        // {/* <Button type="danger" size="small" onClick={() => handleDeleteSingle(record)}>
-        //               Xóa
-        //           </Button> */}
-
       ),
     },
   ];
 
-  const handleRowSelect = (key) => {
-    const newSelectedRowKeys = selectedRowKeys.includes(key)
-      ? selectedRowKeys.filter((item) => item !== key)
-      : [...selectedRowKeys, key];
-    setSelectedRowKeys(newSelectedRowKeys);
-    setSelectAll(newSelectedRowKeys.length === data.length);
-  };
   const handlePrint = async () => {
     try {
       for (const id of selectedRowKeys) {
@@ -748,7 +620,6 @@ const QuanLyHoaDon = () => {
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
   };
-  const handlePhoneSearch = (value) => { };
 
   // Hàm hỗ trợ để hiển thị phương thức thanh toán
   const getPaymentMethodText = (method) => {

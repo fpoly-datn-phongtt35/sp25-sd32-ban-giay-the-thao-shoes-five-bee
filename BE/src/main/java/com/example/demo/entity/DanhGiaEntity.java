@@ -23,7 +23,7 @@ public class DanhGiaEntity {
     private UUID id;
     @Column(name = "SAO_DANH_GIA")
     private Integer saoDanhGia;
-    @Column(name = "NHAN_XET")
+    @Column(name = "NHAN_XET",columnDefinition = "NVARCHAR(255)")
     private String nhanXet;
     @Column(name = "NGAY_NHAN_XET")
     private Date ngayNhanXet;

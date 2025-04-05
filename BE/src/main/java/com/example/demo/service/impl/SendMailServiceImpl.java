@@ -26,6 +26,7 @@ public class SendMailServiceImpl implements SendMailService {
             mimeMessageHelper.setTo(to);
             mimeMessageHelper.setSubject(subject);
             mimeMessageHelper.setText(body,true);
+            mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
             javaMailSender.send(mimeMessage);
         }catch (MessagingException e){
             throw new RuntimeException("gui email that bai :" + e.getMessage());

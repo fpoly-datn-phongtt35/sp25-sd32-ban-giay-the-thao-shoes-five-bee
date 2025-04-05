@@ -23,6 +23,15 @@ public class DanhGiaController {
         return ResponseEntity.ok(Map.of("message","Đánh giá thành công"));
     }
 
+    @GetMapping
+    public ResponseEntity<List<DanhGiaDto>> getDanhGiaByUserAndHoaDonChiTiet(
+            @RequestParam UUID userId,
+            @RequestParam UUID hoaDonChiTietId
+    ){
+        List<DanhGiaDto> danhGiaDtos = danhGiaService.getDanhGiaByUserAndHoaDonChiTiet(userId,hoaDonChiTietId);
+        return ResponseEntity.ok(danhGiaDtos);
+    }
+
     @GetMapping("/{hoaDonChiTietId}")
     public ResponseEntity<List<DanhGiaDto>> getDanhGia(@PathVariable UUID hoaDonChiTietId){
         return ResponseEntity.ok(danhGiaService.getDanhGiaByHoaDonChiTiet(hoaDonChiTietId));
