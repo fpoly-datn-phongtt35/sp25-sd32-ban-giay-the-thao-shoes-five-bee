@@ -26,12 +26,11 @@ const ProductDetail = () => {
   const [anhCHiTiet, setanhCHiTiet] = useState([]);
   const [soLuongChitiet, setSoLuongChiTiet] = useState([]);
   const [totalQuantity, setTotalQuantity] = useState(0); // Thêm dòng này để khai báo totalQuantity
-  
+
   // State cho phần đánh giá - chỉ hiển thị
   const [danhGiaList, setDanhGiaList] = useState([]);
   const [averageRating, setAverageRating] = useState(0);
   const [totalReviews, setTotalReviews] = useState(0);
-  console.log("anh chi tiet", anhCHiTiet);
 
   useEffect(() => {
     fetchProductDetail();
@@ -43,7 +42,7 @@ const ProductDetail = () => {
       try {
         const response = await getProductDanhGiaById(id);
         console.log("📌 Kết quả API đánh giá:", response.data);
-    
+
         if (Array.isArray(response.data)) {
           // Lấy thông tin người dùng cho mỗi đánh giá
           const reviewsWithUserInfo = await Promise.all(
@@ -52,7 +51,7 @@ const ProductDetail = () => {
                 const userResponse = await getByKhachHangId(review.userId);
                 return {
                   ...review,
-                  userInfo: userResponse.data
+                  userInfo: userResponse.data,
                 };
               } catch (error) {
                 console.error("❌ Lỗi khi lấy thông tin người dùng:", error);
@@ -60,36 +59,42 @@ const ProductDetail = () => {
               }
             })
           );
-          
+
           setDanhGiaList(reviewsWithUserInfo);
           setTotalReviews(reviewsWithUserInfo.length);
-    
+
           if (reviewsWithUserInfo.length > 0) {
-            const totalRating = reviewsWithUserInfo.reduce((sum, item) => sum + item.saoDanhGia, 0);
-            setAverageRating((totalRating / reviewsWithUserInfo.length).toFixed(1));
+            const totalRating = reviewsWithUserInfo.reduce(
+              (sum, item) => sum + item.saoDanhGia,
+              0
+            );
+            setAverageRating(
+              (totalRating / reviewsWithUserInfo.length).toFixed(1)
+            );
           }
         }
       } catch (error) {
         console.error("❌ Lỗi khi lấy đánh giá:", error);
       }
     };
-  
+
     fetchReviewsWithUserInfo();
   }, [id]);
 
-   // Lấy danh sách đánh giá
-   const fetchProductReviews = async () => {
+  // Lấy danh sách đánh giá
+  const fetchProductReviews = async () => {
     try {
-      console.log("🔍 Gọi API đánh giá với ID Giày:", id); 
       const response = await getProductDanhGiaById(id);
-      console.log("📌 Kết quả API đánh giá:", response.data);
-  
+
       if (Array.isArray(response.data)) {
         setDanhGiaList(response.data);
         setTotalReviews(response.data.length);
-  
+
         if (response.data.length > 0) {
-          const totalRating = response.data.reduce((sum, item) => sum + item.saoDanhGia, 0);
+          const totalRating = response.data.reduce(
+            (sum, item) => sum + item.saoDanhGia,
+            0
+          );
           setAverageRating((totalRating / response.data.length).toFixed(1));
         }
       }
@@ -106,7 +111,6 @@ const ProductDetail = () => {
       const giayChiTietResponse = await getGiayChitietDetail1(id); // Lấy danh sách chi tiết giày
 
       // console.log("Kết quả từ getGiayDetail:", giayResponse.data);
-      console.log("Kết quả từ getAllGiayChiTiet:", giayChiTietResponse.data);
 
       if (
         Array.isArray(giayChiTietResponse.data) &&
@@ -117,17 +121,18 @@ const ProductDetail = () => {
           tenMauSac: item.mauSacEntity?.ten, // Tên màu sắc
           idGiayChiTiet: item.id,
           giaBan: item.giaBan,
+          giaKhiGiam: item.giaKhiGiam,
           idKichCo: item.kichCoEntity?.id,
           tenKichCo: item.kichCoEntity?.ten,
           soLuong: item.soLuongTon,
           anh: item.danhSachAnh,
         }));
 
-        console.log("Danh sách biến thể sản phẩm:", bienTheSanPham);
         setBienTheList(bienTheSanPham);
       } else {
         setBienTheList([]);
       }
+      console.log(giayChiTietResponse.data);
 
       setProductGiay(giayResponse.data);
       setProduct(giayChiTietResponse.data);
@@ -143,43 +148,44 @@ const ProductDetail = () => {
     const variantsWithSameColor = bienTheList.filter(
       (item) => item.tenMauSac === color
     );
-    console.log("aaa", variantsWithSameColor);
 
     if (variantsWithSameColor.length > 0) {
       const sizeList = variantsWithSameColor.map(
         (variant) => variant.tenKichCo
       );
       setSizeList(sizeList);
-      setCurrentPrice(variantsWithSameColor[0].giaBan);
 
-      // Lấy danh sách URL ảnh từ tất cả biến thể có cùng màu
+      const giaKhiGiam = variantsWithSameColor[0]?.giaKhiGiam;
+      const giaBan = variantsWithSameColor[0]?.giaBan;
+      const finalPrice = giaKhiGiam ?? giaBan ?? 0;
+      setCurrentPrice(finalPrice);
+
       const imageList = variantsWithSameColor.flatMap((variant) =>
         variant.anh ? variant.anh.map((img) => img.tenUrl) : []
       );
       setanhCHiTiet(imageList);
 
-      // Lấy danh sách số lượng từ các biến thể có cùng màu và kích cỡ
       const quantityList = variantsWithSameColor.map(
         (variant) => variant.soLuong
       );
-      setSoLuongChiTiet(quantityList); // Lưu danh sách số lượng vào state
+      setSoLuongChiTiet(quantityList);
 
-      // Tính tổng số lượng khi chưa chọn kích cỡ
       const totalQuantity = quantityList.reduce((acc, qty) => acc + qty, 0);
-      setTotalQuantity(totalQuantity); // Cập nhật tổng số lượng vào state
+      setTotalQuantity(totalQuantity);
 
-      // Lưu danh sách kích cỡ, ảnh và số lượng
-      setSelectedVariantDetails({
+      const selectedDetails = {
         tenMauSac: color,
         sizes: sizeList,
-        images: imageList, // Thêm danh sách ảnh
-        quantities: quantityList, // Thêm danh sách số lượng
-      });
+        images: imageList,
+        quantities: quantityList,
+        giaBan,
+        giaKhiGiam,
+        tongSoLuong: totalQuantity,
+      };
 
-      console.log("Danh sách kích cỡ:", sizeList);
-      console.log("Danh sách ảnh:", imageList);
-      console.log("Danh sách số lượng:", quantityList); // Kiểm tra số lượng
-      console.log("Tổng số lượng:", totalQuantity); // Kiểm tra tổng số lượng
+      setSelectedVariantDetails(selectedDetails);
+
+      console.log("Thông tin giày đã chọn:", selectedDetails);
     } else {
       console.log("Không tìm thấy biến thể nào có màu sắc được chọn");
     }
@@ -204,14 +210,27 @@ const ProductDetail = () => {
       message.warning("Vui lòng chọn kích thước và màu sắc!");
       return;
     }
+  
     const selectedVariant = bienTheList.find(
       (item) =>
         item.tenMauSac === selectedColor && item.tenKichCo === selectedSize
     );
+  
     if (!selectedVariant) {
       message.error("Không tìm thấy sản phẩm với lựa chọn này!");
       return;
     }
+  
+    // ✅ Log thông tin biến thể được thêm vào giỏ hàng
+    console.log("Thông tin giày gửi lên giỏ hàng:", {
+      idGiayChiTiet: selectedVariant.idGiayChiTiet,
+      tenMauSac: selectedVariant.tenMauSac,
+      tenKichCo: selectedVariant.tenKichCo,
+      soLuong: quantity,
+      giaBan: selectedVariant.giaBan,
+      giaKhiGiam: selectedVariant.giaKhiGiam ?? null,
+    });
+  
     try {
       const response = await addToCart(selectedVariant.idGiayChiTiet, quantity);
       if (response.status === 200) {
@@ -223,10 +242,11 @@ const ProductDetail = () => {
       message.error("Có lỗi xảy ra khi thêm vào giỏ hàng!");
     }
   };
+  
   // Format date từ chuỗi ISO
   const formatDate = (dateString) => {
     const date = new Date(dateString);
-    return date.toLocaleDateString('vi-VN');
+    return date.toLocaleDateString("vi-VN");
   };
 
   if (loading) return <p>Đang tải dữ liệu...</p>; // Hiển thị khi đang tải
@@ -262,10 +282,7 @@ const ProductDetail = () => {
         <div className="product-info">
           <p className="product-title">{productGiay?.ten}</p>
           <p className="product-price">
-            {selectedColor
-              ? Number(currentPrice).toLocaleString()
-              : Number(productGiay?.giaBan ?? 0).toLocaleString()}
-            ₫
+            {Number(currentPrice ?? 0).toLocaleString()}₫
           </p>
         </div>
 
@@ -357,12 +374,12 @@ const ProductDetail = () => {
           </p>
         </div>
       </div>
-       {/* Phần đánh giá sản phẩm - chỉ hiển thị */}
-       <div className="product-reviews">
+      {/* Phần đánh giá sản phẩm - chỉ hiển thị */}
+      <div className="product-reviews">
         <Divider orientation="left">
           <h2>Đánh giá từ khách hàng</h2>
         </Divider>
-        
+
         {/* Tổng quan đánh giá */}
         <div className="review-summary">
           <div className="rating-overview">
@@ -376,29 +393,33 @@ const ProductDetail = () => {
 
         {/* Danh sách đánh giá */}
         <div className="review-list">
-      {danhGiaList.length > 0 ? (
-      danhGiaList.map((review, index) => (
-      <div key={review.id || index} className="review-item">
-        <div className="review-header">
-          <Avatar icon={<UserOutlined />} />
-          <div className="reviewer-info">
-          <div className="reviewer-name">{review.userFullName || "Khách hàng"}</div>            
-  <div className="review-date">{formatDate(review.ngayNhanXet)}</div>
-          </div>
+          {danhGiaList.length > 0 ? (
+            danhGiaList.map((review, index) => (
+              <div key={review.id || index} className="review-item">
+                <div className="review-header">
+                  <Avatar icon={<UserOutlined />} />
+                  <div className="reviewer-info">
+                    <div className="reviewer-name">
+                      {review.userFullName || "Khách hàng"}
+                    </div>
+                    <div className="review-date">
+                      {formatDate(review.ngayNhanXet)}
+                    </div>
+                  </div>
+                </div>
+                <div className="review-rating">
+                  <Rate disabled value={review.saoDanhGia} />
+                </div>
+                <div className="review-content">{review.nhanXet}</div>
+                <Divider />
+              </div>
+            ))
+          ) : (
+            <div className="no-reviews">
+              <p>Chưa có đánh giá nào cho sản phẩm này.</p>
+            </div>
+          )}
         </div>
-        <div className="review-rating">
-          <Rate disabled value={review.saoDanhGia} />
-        </div>
-        <div className="review-content">{review.nhanXet}</div>
-        <Divider />
-      </div>
-    ))
-    ) : (
-    <div className="no-reviews">
-      <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-    </div>
-    )}
-  </div>
       </div>
     </div>
   );
