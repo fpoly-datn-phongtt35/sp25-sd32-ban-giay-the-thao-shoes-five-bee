@@ -7,13 +7,15 @@ import { message, Select } from "antd";
 import { getGiamGiaHoaDon } from "../service/GiamGiaHoaDonService";
 
 export const Cart = () => {
-  const { cart,loading, error,  increment, decrement, removeProduct } = useCart();
+  const { cart, loading, error, increment, decrement, removeProduct } =
+    useCart();
   const [selectedProducts, setSelectedProducts] = useState([]);
-  const [idGiamGiaHoaDon, setIdGiamGiaHoaDon] = useState(null); 
+  const [idGiamGiaHoaDon, setIdGiamGiaHoaDon] = useState(null);
   const [discounts, setDiscounts] = useState([]);
   const [phanTramGiam, setPhanTramGiam] = useState(0);
 
-  
+  console.log( "cart", cart);
+ ;
   useEffect(() => {
     const fetchDiscountData = async () => {
       const discountData = await getGiamGiaHoaDon();
@@ -32,8 +34,10 @@ export const Cart = () => {
 
   const handleDiscountChange = (value) => {
     setIdGiamGiaHoaDon(value);
-    const selectedDiscount = discounts.find((discount) => discount.id === value);
-    setPhanTramGiam(selectedDiscount?.phanTramGiam || 0); 
+    const selectedDiscount = discounts.find(
+      (discount) => discount.id === value
+    );
+    setPhanTramGiam(selectedDiscount?.phanTramGiam || 0);
   };
 
   if (loading) return <p>Đang tải giỏ hàng...</p>;
@@ -51,16 +55,28 @@ export const Cart = () => {
 
   const totalAmount = cart.reduce((sum, item) => {
     if (selectedProducts.includes(item.id)) {
-      const giaBan = item?.giaBan || 0;
+      const giaBan = item?.donGiaKhiGiam ?? item?.giaBan ?? 0;
       const soLuong = item?.soLuong || 0;
+  
+      // Log thông tin giày (từng item trong cart)
+      console.log("Thông tin giày đang tính:", {
+        id: item.id,
+        tenMauSac: item.tenMauSac,
+        tenKichCo: item.tenKichCo,
+        giaBan,
+        soLuong,
+        tongTien: giaBan * soLuong,
+      });
+  
       return sum + giaBan * soLuong;
     }
     return sum;
   }, 0);
+  
 
   // kiem tra phải chọn 1 sản phẩm để vào /check-out
   const handleCheckoutClick = (e) => {
-    console.log(selectedProducts)
+    console.log(selectedProducts);
     if (selectedProducts.length === 0) {
       e.preventDefault();
       message.warning("Vui lòng chọn ít nhất một sản phẩm để thanh toán");
@@ -100,7 +116,9 @@ export const Cart = () => {
                   />
                   <div style={{ marginTop: "20px" }}>
                     <p>{product.tenGiay || "Sản phẩm không xác định"}</p>
-                    <button onClick={() => removeProduct(product.id)}>Xóa</button>
+                    <button onClick={() => removeProduct(product.id)}>
+                      Xóa
+                    </button>
                   </div>
                 </div>
                 <div className="prouduct_cart_classify">
@@ -110,17 +128,27 @@ export const Cart = () => {
                   <p>{product.kichCo || "N/A"}</p>
                 </div>
                 <div className="prouduct_cart_price">
-                  <p>{(product.giaBan || 0).toLocaleString()}đ</p>
+                <p>{Number(product.donGiaKhiGiam ?? product.giaBan ?? 0).toLocaleString()}đ</p>
+
                 </div>
                 <div className="prouduct_cart_count">
                   <div className="prouduct_cart_count_count">
-                    <button onClick={() => decrement(product.id, product.soLuong)}>-</button>
+                    <button
+                      onClick={() => decrement(product.id, product.soLuong)}
+                    >
+                      -
+                    </button>
                     <p>{product.soLuong || 1}</p>
-                    <button onClick={() => increment(product.id, product.soLuong)}>+</button>
+                    <button
+                      onClick={() => increment(product.id, product.soLuong)}
+                    >
+                      +
+                    </button>
                   </div>
                 </div>
                 <div className="prouduct_cart_discount">
-                  <p>{(product.giaBan * product.soLuong).toLocaleString()}đ</p>
+                <p>{Number((product.donGiaKhiGiam ?? product.giaBan ?? 0) * product.soLuong).toLocaleString()}đ</p>
+
                 </div>
               </div>
             );
@@ -131,15 +159,15 @@ export const Cart = () => {
                 Tổng tiền : <p>{totalAmount.toLocaleString()}đ </p>
               </div>
               {selectedProducts.length > 0 ? (
-          <Link 
-          to={"/check-out"}
-          state={{ selectedProducts, idGiamGiaHoaDon,phanTramGiam  }}
-          >
-          <button>Thanh toán</button>
-          </Link>
-          ) : (
-          <button onClick={handleCheckoutClick}>Thanh toán</button>
-          )}
+                <Link
+                  to={"/check-out"}
+                  state={{ selectedProducts, idGiamGiaHoaDon, phanTramGiam }}
+                >
+                  <button>Thanh toán</button>
+                </Link>
+              ) : (
+                <button onClick={handleCheckoutClick}>Thanh toán</button>
+              )}
             </div>
           </div>
         </div>
