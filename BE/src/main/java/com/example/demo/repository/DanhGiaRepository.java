@@ -19,4 +19,7 @@ public interface DanhGiaRepository extends JpaRepository<DanhGiaEntity, UUID> {
             "JOIN gct.giayEntity g " +
             "WHERE g.id = :giayId")
     List<DanhGiaEntity> findByGiayId(@Param("giayId") UUID giayId);
+
+    List<DanhGiaEntity> findByUserEntityIdAndHoaDonChiTietEntityId(UUID khachHangId, UUID hoaDonChiTietId);
+
 }

@@ -79,6 +79,21 @@ public class DanhGiaServiceImpl implements DanhGiaService {
                 .collect(Collectors.toList());
     }
 
+    @Override
+    public List<DanhGiaDto> getDanhGiaByUserAndHoaDonChiTiet(UUID userId, UUID hoaDonChiTietId) {
+        List<DanhGiaEntity> danhGiaEntities = danhGiaRepository.findByUserEntityIdAndHoaDonChiTietEntityId(userId, hoaDonChiTietId);
+        return danhGiaEntities.stream()
+                .map(danhGia -> DanhGiaDto.builder()
+                        .id(danhGia.getId())
+                        .nhanXet(danhGia.getNhanXet())
+                        .saoDanhGia(danhGia.getSaoDanhGia())
+                        .ngayNhanXet(danhGia.getNgayNhanXet())
+                        .hoaDonChiTietId(danhGia.getHoaDonChiTietEntity().getId())
+                        .userId(danhGia.getUserEntity().getId())
+                        .build())
+                .collect(Collectors.toList());
+    }
+
     private DanhGiaDto convertToDto(DanhGiaEntity danhGia) {
         return new DanhGiaDto(
                 danhGia.getId(),
