@@ -189,35 +189,28 @@ const BanHangTaiQuay = () => {
 
     const idHoaDon = selectedPageData.hoaDonId;
     const idSanPham = product.ID;
-
-    if (!idHoaDon || !idSanPham) {
-      message.error("ID hóa đơn hoặc ID sản phẩm không hợp lệ!");
-      return;
-    }
-
-    // Kiểm tra nếu có GIA_KHI_GIAM thì dùng GIA_KHI_GIAM, nếu không thì dùng GIABAN
-    const giaSanPham = product.GIA_KHI_GIAM
-      ? product.GIA_KHI_GIAM
-      : product.GIABAN;
+    const giaSanPham = product.GIA_KHI_GIAM ?? product.GIABAN;
 
     try {
-      await themSanPhamVaoHoaDon(idHoaDon, idSanPham, giaSanPham); // Truyền giá vào hàm themSanPhamVaoHoaDon
-      fetchSanPhamTrongHoaDon(idHoaDon);
-      getAllGiay();
-      message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
+      await themSanPhamVaoHoaDon(idHoaDon, idSanPham, giaSanPham);
 
-      // Log thông tin sản phẩm vừa được thêm vào hóa đơn
-      console.log("Sản phẩm vừa được thêm vào hóa đơn:", {
-        idHoaDon,
-        idSanPham,
-        tenSanPham: product.TEN,
-        giaSanPham,
-      });
+      // ✅ Trừ tồn kho fake
+      const updatedGiay = giay.map((item) =>
+        item.ID === idSanPham && item.SOLUONG > 0
+          ? { ...item, SOLUONG: item.SOLUONG - 1 }
+          : item
+      );
+      setGiay(updatedGiay);
+      localStorage.setItem("fakeTonKho", JSON.stringify(updatedGiay)); // ✅ Lưu vào localStorage
+
+      await fetchSanPhamTrongHoaDon(idHoaDon);
+      message.success(`Thêm sản phẩm "${product.TEN}" vào hóa đơn thành công!`);
     } catch (error) {
-      console.error("❌ Lỗi khi thêm sản phẩm vào hóa đơn:", error);
+      console.error("❌ Lỗi khi thêm sản phẩm:", error);
       message.error("Không thể thêm sản phẩm vào hóa đơn.");
     }
   };
+
 
   const handleRemoveProduct = async (productId) => {
     try {
@@ -262,13 +255,31 @@ const BanHangTaiQuay = () => {
         throw new Error("Không nhận được phản hồi từ API");
       }
 
+      console.log("✅ Response từ updateSoLuongGiay:", response);
+
+      const giayChiTietId = response?.giayChiTietEntity?.id;
+      console.log("🔍 ID giày chi tiết từ response:", giayChiTietId);
+
+      if (!giayChiTietId) {
+        console.warn("⚠ Không tìm thấy ID giày chi tiết từ response!");
+      }
+
+      // ✅ Trừ tồn kho fake
+      setGiay((prevGiay) => {
+        console.log("📦 Danh sách giày trước khi cập nhật:", prevGiay);
+        return prevGiay.map((item) => {
+          const match = item.ID === giayChiTietId;
+          if (match && item.SOLUONG > 0) {
+            console.log(`🔻 Trừ 1 tồn kho của giày "${item.TEN}"`);
+            return { ...item, SOLUONG: item.SOLUONG - 1 };
+          }
+          return item;
+        });
+      });
+
+      // ✅ Cập nhật lại sản phẩm trong hóa đơn
       await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
         console.log("📡 Danh sách sản phẩm sau cập nhật:", updatedProducts);
-
-        if (!updatedProducts) {
-          console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
-          return;
-        }
 
         setSelectedProducts((prev) => ({
           ...prev,
@@ -285,13 +296,15 @@ const BanHangTaiQuay = () => {
         setTotalAmount(newTotalAmount);
         handleInputChange();
       });
-
-      getAllGiay();
     } catch (error) {
       console.error("❌ Lỗi khi tăng số lượng:", error);
       message.error("Không thể tăng số lượng!");
     }
   };
+
+
+
+
 
   const decreaseQuantity = async (productId, hoaDonId) => {
     try {
@@ -300,13 +313,31 @@ const BanHangTaiQuay = () => {
         throw new Error("Không nhận được phản hồi từ API");
       }
 
+      console.log("✅ Response từ updateSoLuongGiay:", response);
+
+      const giayChiTietId = response?.giayChiTietEntity?.id;
+      console.log("🔍 ID giày chi tiết từ response:", giayChiTietId);
+
+      if (!giayChiTietId) {
+        console.warn("⚠ Không tìm thấy ID giày chi tiết từ response!");
+      }
+
+      // ✅ Khôi phục lại 1 tồn kho fake
+      setGiay((prevGiay) => {
+        console.log("📦 Danh sách giày trước khi phục hồi:", prevGiay);
+        return prevGiay.map((item) => {
+          const match = item.ID === giayChiTietId;
+          if (match) {
+            console.log(`🔁 Cộng lại 1 tồn kho cho giày "${item.TEN}"`);
+            return { ...item, SOLUONG: item.SOLUONG + 1 };
+          }
+          return item;
+        });
+      });
+
+      // ✅ Cập nhật lại sản phẩm trong hóa đơn
       await fetchSanPhamTrongHoaDon(hoaDonId, (updatedProducts) => {
         console.log("📡 Danh sách sản phẩm sau cập nhật:", updatedProducts);
-
-        if (!updatedProducts) {
-          console.error("⚠ Không thể lấy danh sách sản phẩm sau khi cập nhật!");
-          return;
-        }
 
         setSelectedProducts((prev) => ({
           ...prev,
@@ -323,21 +354,21 @@ const BanHangTaiQuay = () => {
         setTotalAmount(newTotalAmount);
         handleInputChange();
       });
-
-      getAllGiay();
     } catch (error) {
-      console.error("❌ Lỗi khi tăng số lượng:", error);
-      message.error("Không thể tăng số lượng!");
+      console.error("❌ Lỗi khi giảm số lượng:", error);
+      message.error("Không thể giảm số lượng!");
     }
   };
 
+
+
   const calculateTotal = (product) => {
-    
-    
+
+
     const price = product.GIA_KHI_GIAM && product.GIA_KHI_GIAM !== 0 ? product.GIA_KHI_GIAM : product.GIABAN;
     return price * product.SOLUONG;
   };
-  
+
   const getAllMaGiamGiaData = async () => {
     try {
       const result = await getGiamGia(); // Thay đổi từ getGiamGiaHoaDon sang getGiamGia
@@ -549,22 +580,22 @@ const BanHangTaiQuay = () => {
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => {
-            const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
-            const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
-            return {
-              ID: item.id,
-              TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-              SOLUONG: item.soLuong,
-              GIA_KHI_GIAM:item.donGia,
-              GIABAN: item.giayChiTietEntity?.giaBan || 0,
-              ANH_GIAY:
-                item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
-                  ?.tenUrl || "https://via.placeholder.com/150",
-              KICH_CO: kichCo, // Lưu vào biến kích cỡ
-              MAU_SAC: mauSac, // Lưu vào biến màu sắc
-              TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
-            };
-          })
+          const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
+          const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
+          return {
+            ID: item.id,
+            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+            SOLUONG: item.soLuong,
+            GIA_KHI_GIAM: item.donGia,
+            GIABAN: item.giayChiTietEntity?.giaBan || 0,
+            ANH_GIAY:
+              item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
+                ?.tenUrl || "https://via.placeholder.com/150",
+            KICH_CO: kichCo, // Lưu vào biến kích cỡ
+            MAU_SAC: mauSac, // Lưu vào biến màu sắc
+            TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+          };
+        })
         : [];
 
       console.log("dsadasqewrq", formattedData);
@@ -1137,10 +1168,10 @@ const BanHangTaiQuay = () => {
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
             {selectedHoaDonId &&
-            selectedProducts[selectedHoaDonId] &&
-            selectedProducts[selectedHoaDonId].length > 0 ? (
+              selectedProducts[selectedHoaDonId] &&
+              selectedProducts[selectedHoaDonId].length > 0 ? (
               selectedProducts[selectedHoaDonId].map((product) => {
-                console.log("aaaaaa",product);  // Log dữ liệu của từng sản phẩm
+                console.log("aaaaaa", product);  // Log dữ liệu của từng sản phẩm
                 return (
                   <div key={product.ID} className="selected_product">
                     {product.ANH_GIAY && (
@@ -1155,13 +1186,13 @@ const BanHangTaiQuay = () => {
                         <span style={{ fontWeight: "bold" }}>Màu sắc:</span> ({product.MAU_SAC})
                       </div>
                     </div>
-              
+
                     <div>
                       {product.GIA_KHI_GIAM && product.GIA_KHI_GIAM !== 0
                         ? product.GIA_KHI_GIAM
                         : product.GIABAN}
                     </div>
-              
+
                     <div className="quantity_controls">
                       <Button
                         onClick={() =>
@@ -1191,7 +1222,7 @@ const BanHangTaiQuay = () => {
                   </div>
                 );
               })
-              
+
             ) : (
               <div className="empty-invoice-message">
                 <div className="empty-icon">
