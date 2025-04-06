@@ -14,6 +14,8 @@ public interface GiayChiTietService {
 
   List<GiayChiTietEntity> getAll();
 
+  List<GiayChiTietEntity> goiYSanPhamTuongTuTheoGiayId(UUID giayId);
+
   GiayChiTietEntity add(GiayChiTietDto giayChiTietDto);
 
   GiayChiTietEntity update(GiayChiTietDto giayChiTietDto);

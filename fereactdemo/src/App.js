@@ -45,6 +45,7 @@ import ThongKeSanPham from "./admin/ThongKeSanPham";
 import GiamGiaHoaDon from "./admin/GiamGiaHoaDon";
 import { Header } from "./header/Header";
 import { Footer } from "./footer/Footer";
+import DanhGiaComponent from "./components/DanhGiaComponent";
 const Layout = () => {
   return (
     <div className="app_container">
@@ -75,6 +76,7 @@ function App() {
               <Route path="/addresslist" element={<AddressList />} />
               <Route path="/productAll" element={<ProductAll />} />
               <Route path="/product-detail/:id" element={<ProductDetail />} />
+              <Route path="/danh-gia" element={<DanhGiaComponent />} />
             </Route>
 
             {/* Các route không có Layout */}

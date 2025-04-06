@@ -6,6 +6,8 @@ import com.example.demo.service.GiayChiTietService;
 import java.math.BigDecimal;
 import java.util.List;
 import java.util.UUID;
+
+import com.example.demo.service.GiayService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
@@ -17,6 +19,12 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 public class GiayChiTietController {
   private final GiayChiTietService giayChiTietService;
+
+  @GetMapping("/goi-y/{giayId}")
+  public ResponseEntity<?> getSanPhamTuongTu(@PathVariable UUID giayId) {
+    List<GiayChiTietEntity> goiYList = giayChiTietService.goiYSanPhamTuongTuTheoGiayId(giayId);
+    return ResponseEntity.ok(goiYList);
+  }
 
   @PutMapping("/update-bien-the/{id}")
   public ResponseEntity<?> updateBienThe(

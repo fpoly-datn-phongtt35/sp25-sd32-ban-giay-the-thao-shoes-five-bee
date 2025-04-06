@@ -23,10 +23,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -84,7 +81,37 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
     return giayChiTietRepository.findAll();
   }
 
-  @Override
+    @Override
+    public List<GiayChiTietEntity> goiYSanPhamTuongTuTheoGiayId(UUID giayId) {
+        GiayEntity giayEntity = giayRepository.findById(giayId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giày"));
+
+        UUID danhMucId = giayEntity.getDanhMuc() != null ? giayEntity.getDanhMuc().getId() : null;
+        UUID thuongHieuId = giayEntity.getThuongHieu() != null ? giayEntity.getThuongHieu().getId() : null;
+        UUID kieuDangId = giayEntity.getKieuDang() != null ? giayEntity.getKieuDang().getId() : null;
+
+        // Lấy danh sách tất cả ID của biến thể thuộc giày này
+        List<UUID> excludedIds = giayEntity.getGiayChiTietEntities()
+                .stream()
+                .map(GiayChiTietEntity::getId)
+                .collect(Collectors.toList());
+
+        if (danhMucId != null && thuongHieuId != null && kieuDangId != null) {
+            return giayChiTietRepository.findSimilarProductsByGiay(danhMucId, thuongHieuId, kieuDangId, excludedIds);
+        }
+
+        if (thuongHieuId != null && kieuDangId != null) {
+            return giayChiTietRepository.findByThuongHieuAndKieuDang(thuongHieuId, kieuDangId, excludedIds);
+        }
+
+        if (thuongHieuId != null) {
+            return giayChiTietRepository.findByThuongHieuAndNotCurrent(thuongHieuId, excludedIds);
+        }
+
+        return Collections.emptyList();
+    }
+
+    @Override
   public GiayChiTietEntity add(GiayChiTietDto giayChiTietDto) {
     GiayChiTietEntity giayChiTiet =
         GiayChiTietEntity.builder()
