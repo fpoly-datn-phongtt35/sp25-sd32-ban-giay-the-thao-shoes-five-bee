@@ -391,45 +391,55 @@ const QuanLyHoaDon = () => {
     }
   };
   const handleSave = () => {
-    form.validateFields().then(async (values) => {
-      console.log("Values to Update:", values);
+    form.validateFields().then((values) => {
+      Modal.confirm({
+        title: "Xác nhận cập nhật hóa đơn",
+        content: "Bạn có chắc chắn muốn cập nhật trạng thái hóa đơn này không?",
+        okText: "Cập nhật",
+        okType: "primary",
+        cancelText: "Hủy",
+        onOk: async () => {
+          const trangThaiMoi = chuyenDoiTrangThai(values.status);
+          const totalAmount = editingRecord?.tongTien;
 
-      const trangThaiMoi = chuyenDoiTrangThai(values.status);
-      const totalAmount = editingRecord?.tongTien; // Đảm bảo editingRecord tồn tại
-      console.log("editingRecord", editingRecord);
+          console.log("Values to Update:", values);
+          console.log("editingRecord", editingRecord);
 
-      if (!editingRecord?.id) {
-        console.error("Lỗi: Không tìm thấy ID hóa đơn!");
-        message.error("Không tìm thấy ID hóa đơn!");
-        return;
-      }
+          if (!editingRecord?.id) {
+            console.error("Lỗi: Không tìm thấy ID hóa đơn!");
+            message.error("Không tìm thấy ID hóa đơn!");
+            return;
+          }
 
-      if (trangThaiMoi === undefined) {
-        console.error("Lỗi: Trạng thái không hợp lệ!", values.status);
-        message.error("Trạng thái không hợp lệ!");
-        return;
-      }
+          if (trangThaiMoi === undefined) {
+            console.error("Lỗi: Trạng thái không hợp lệ!", values.status);
+            message.error("Trạng thái không hợp lệ!");
+            return;
+          }
 
-      try {
-        console.log("Data sent to updateHoaDon:", {
-          trangThai: trangThaiMoi,
-          // tongTien: totalAmount,
-        });
+          try {
+            console.log("Data sent to updateHoaDon:", {
+              trangThai: trangThaiMoi,
+              // tongTien: totalAmount,
+            });
 
-        await xacNhanHoaDon(editingRecord.id || editingRecord.order_id, {
-          trangThai: trangThaiMoi,
-        });
+            await xacNhanHoaDon(editingRecord.id || editingRecord.order_id, {
+              trangThai: trangThaiMoi,
+            });
 
-        await fetchHoaDon();
+            await fetchHoaDon();
 
-        setIsModalVisible(false);
-        message.success("Cập nhật thành công!");
-      } catch (error) {
-        console.error("Lỗi khi cập nhật hóa đơn chi tiết:", error);
-        message.error("Có lỗi xảy ra khi cập nhật hóa đơn chi tiết!");
-      }
+            setIsModalVisible(false);
+            message.success("Cập nhật thành công!");
+          } catch (error) {
+            console.error("Lỗi khi cập nhật hóa đơn chi tiết:", error);
+            message.error("Có lỗi xảy ra khi cập nhật hóa đơn chi tiết!");
+          }
+        },
+      });
     });
   };
+
   const getTrangThaiText = (statusCode) => {
     switch (statusCode) {
       case 0:
