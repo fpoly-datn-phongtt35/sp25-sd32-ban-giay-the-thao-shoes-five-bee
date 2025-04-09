@@ -18,6 +18,35 @@ import org.springframework.stereotype.Repository;
 public interface GiayChiTietRepository
     extends JpaRepository<GiayChiTietEntity, UUID>, JpaSpecificationExecutor<GiayChiTietEntity> {
 
+  @Query("SELECT g FROM GiayChiTietEntity g " +
+          "WHERE g.id NOT IN :excludeIds " +
+          "AND g.giayEntity.danhMuc.id = :danhMucId " +
+          "AND g.giayEntity.thuongHieu.id = :thuongHieuId " +
+          "AND g.giayEntity.kieuDang.id = :kieuDangId " +
+          "AND g.trangThai = 1 " +
+          "ORDER BY g.giaBan ASC")
+  List<GiayChiTietEntity> findSimilarProductsByGiay(
+          @Param("danhMucId") UUID danhMucId,
+          @Param("thuongHieuId") UUID thuongHieuId,
+          @Param("kieuDangId") UUID kieuDangId,
+          @Param("excludeIds") List<UUID> excludeIds);
+
+  @Query("SELECT g FROM GiayChiTietEntity g " +
+          "WHERE g.giayEntity.thuongHieu.id = :thuongHieuId " +
+          "AND g.giayEntity.kieuDang.id = :kieuDangId " +
+          "AND g.id NOT IN :excludeIds")
+  List<GiayChiTietEntity> findByThuongHieuAndKieuDang(
+          @Param("thuongHieuId") UUID thuongHieuId,
+          @Param("kieuDangId") UUID kieuDangId,
+          @Param("excludeIds") List<UUID> excludeIds);
+
+  @Query("SELECT g FROM GiayChiTietEntity g " +
+          "WHERE g.giayEntity.thuongHieu.id = :thuongHieuId " +
+          "AND g.id NOT IN :excludeIds")
+  List<GiayChiTietEntity> findByThuongHieuAndNotCurrent(
+          @Param("thuongHieuId") UUID thuongHieuId,
+          @Param("excludeIds") List<UUID> excludeIds);
+
   @Query("SELECT COALESCE(SUM(g.soLuongTon), 0) FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId")
   int sumSoLuongTonByGiay(@Param("giayId") UUID giayId);
 

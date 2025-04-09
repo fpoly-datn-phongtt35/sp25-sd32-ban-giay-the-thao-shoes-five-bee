@@ -8,6 +8,7 @@ import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.*;
 import com.example.demo.service.AnhGiayService;
 import com.example.demo.service.GiayChiTietService;
+import com.example.demo.service.SubscriptionService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
 import com.google.zxing.WriterException;
@@ -22,10 +23,7 @@ import java.io.IOException;
 import java.math.BigDecimal;
 import java.nio.file.FileSystems;
 import java.nio.file.Path;
-import java.util.ArrayList;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.NonNull;
 import lombok.RequiredArgsConstructor;
@@ -43,154 +41,193 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final MauSacRepository mauSacRepository;
   private final KichCoRepository kichCoRepository;
   private final AnhGiayRepository anhGiayRepository;
-    private final AnhGiayService anhGiayService;
-    private final GiayServiceImpl giayServiceImpl;
+  private final AnhGiayService anhGiayService;
+  private final GiayServiceImpl giayServiceImpl;
+  private final SubscriptionService subscriptionService;
 
-    @Override
-    public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
-        GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(id).orElse(null);
+  @Override
+  public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
+    GiayChiTietEntity giayChiTiet = giayChiTietRepository.findById(id).orElse(null);
 
-        if (giayChiTiet == null) {
-            throw new RuntimeException("Không tìm thấy giày chi tiết");
-        }
-
-        // Lấy sản phẩm gốc
-        GiayEntity giay = giayChiTiet.getGiayEntity();
-
-        if (giay == null) {
-            throw new RuntimeException("Không tìm thấy sản phẩm");
-        }
-
-        // Cập nhật số lượng và giá bán của biến thể
-        giayChiTiet.setSoLuongTon(soLuong);
-        giayChiTiet.setGiaBan(giaBan);
-
-        // Tính tổng số lượng của tất cả các biến thể
-        List<GiayChiTietEntity> listBienThe = giayChiTietRepository.findByGiayEntityId(giay.getId());
-        int tongSoLuongBienThe = listBienThe.stream()
-                .mapToInt(GiayChiTietEntity::getSoLuongTon)
-                .sum();
-
-        // Cập nhật tổng số lượng cho sản phẩm
-        giay.setSoLuongTon(tongSoLuongBienThe);
-
-        // Lưu lại sản phẩm và biến thể
-        giayRepository.save(giay);
-        return giayChiTietRepository.save(giayChiTiet);
+    if (giayChiTiet == null) {
+      throw new RuntimeException("Không tìm thấy giày chi tiết");
     }
+
+    // Lấy sản phẩm gốc
+    GiayEntity giay = giayChiTiet.getGiayEntity();
+
+    if (giay == null) {
+      throw new RuntimeException("Không tìm thấy sản phẩm");
+    }
+
+    // Cập nhật số lượng và giá bán của biến thể
+    giayChiTiet.setSoLuongTon(soLuong);
+    giayChiTiet.setGiaBan(giaBan);
+
+    // Tính tổng số lượng của tất cả các biến thể
+    List<GiayChiTietEntity> listBienThe = giayChiTietRepository.findByGiayEntityId(giay.getId());
+    int tongSoLuongBienThe = listBienThe.stream().mapToInt(GiayChiTietEntity::getSoLuongTon).sum();
+
+    // Cập nhật tổng số lượng cho sản phẩm
+    giay.setSoLuongTon(tongSoLuongBienThe);
+
+    // Lưu lại sản phẩm và biến thể
+    giayRepository.save(giay);
+    return giayChiTietRepository.save(giayChiTiet);
+  }
 
   @Override
   public List<GiayChiTietEntity> getAll() {
     return giayChiTietRepository.findAll();
   }
 
-  @Override
-  public GiayChiTietEntity add(GiayChiTietDto giayChiTietDto) {
-      GiayChiTietEntity giayChiTiet = GiayChiTietEntity.builder()
-              .giaBan(giayChiTietDto.getGiaBan())
-              .soLuongTon(giayChiTietDto.getSoLuongTon())
-              .mauSacEntity(
-                      giayChiTietDto.getMauSacDto() != null ?
-                              mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null) :
-                              null
-              )
-              .kichCoEntity(
-                      giayChiTietDto.getKichCoDto() != null ?
-                              kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null) :
-                              null
-              )
-              .trangThai(giayChiTietDto.getTrangThai())
-              .giayEntity(
-                      giayChiTietDto.getGiayDto() != null ?
-                              giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null) :
-                              null
-              )
-              .build();
+    @Override
+    public List<GiayChiTietEntity> goiYSanPhamTuongTuTheoGiayId(UUID giayId) {
+        GiayEntity giayEntity = giayRepository.findById(giayId)
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy giày"));
 
-      // Lưu vào database để lấy ID
-      giayChiTiet = giayChiTietRepository.save(giayChiTiet);
+        UUID danhMucId = giayEntity.getDanhMuc() != null ? giayEntity.getDanhMuc().getId() : null;
+        UUID thuongHieuId = giayEntity.getThuongHieu() != null ? giayEntity.getThuongHieu().getId() : null;
+        UUID kieuDangId = giayEntity.getKieuDang() != null ? giayEntity.getKieuDang().getId() : null;
 
+        // Lấy danh sách tất cả ID của biến thể thuộc giày này
+        List<UUID> excludedIds = giayEntity.getGiayChiTietEntities()
+                .stream()
+                .map(GiayChiTietEntity::getId)
+                .collect(Collectors.toList());
 
-      String maVach = giayChiTiet.getGiayEntity().getTen();
-      giayChiTiet.setMaVach(maVach);
-
-      // Lưu lại với maVach
-      giayChiTiet = giayChiTietRepository.save(giayChiTiet);
-
-      // Tạo ảnh QR
-      try {
-          generateQRCode(maVach);
-      } catch (WriterException | IOException e) {
-          throw new RuntimeException("Lỗi khi tạo mã QR: " + e.getMessage());
-      }
-
-      return giayChiTiet;
-  }
-
-    public void generateQRCode(String maVach) throws WriterException, IOException {
-        int width = 300;
-        int height = 300;
-        String fileType = "png";
-        String folderPath = "C:/QR/"; // Thư mục lưu QR Code
-        String filePath = folderPath + maVach + ".png"; // Đường dẫn file QR
-
-        // Tạo thư mục nếu chưa tồn tại
-        File folder = new File(folderPath);
-        if (!folder.exists()) {
-            boolean isCreated = folder.mkdirs();
-            if (!isCreated) {
-                throw new IOException("Không thể tạo thư mục: " + folderPath);
-            }
+        if (danhMucId != null && thuongHieuId != null && kieuDangId != null) {
+            return giayChiTietRepository.findSimilarProductsByGiay(danhMucId, thuongHieuId, kieuDangId, excludedIds);
         }
 
-        // Tạo mã QR
-        BitMatrix bitMatrix = new MultiFormatWriter().encode(maVach, BarcodeFormat.QR_CODE, width, height);
-        Path path = FileSystems.getDefault().getPath(filePath);
-        MatrixToImageWriter.writeToPath(bitMatrix, fileType, path);
+        if (thuongHieuId != null && kieuDangId != null) {
+            return giayChiTietRepository.findByThuongHieuAndKieuDang(thuongHieuId, kieuDangId, excludedIds);
+        }
 
-        System.out.println("QR Code đã được lưu tại: " + filePath);
-    }// tao QR o o D
+        if (thuongHieuId != null) {
+            return giayChiTietRepository.findByThuongHieuAndNotCurrent(thuongHieuId, excludedIds);
+        }
+
+        return Collections.emptyList();
+    }
 
     @Override
-    public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {
-        Optional<GiayChiTietEntity> optional = giayChiTietRepository.findById(giayChiTietDto.getId());
+  public GiayChiTietEntity add(GiayChiTietDto giayChiTietDto) {
+    GiayChiTietEntity giayChiTiet =
+        GiayChiTietEntity.builder()
+            .giaBan(giayChiTietDto.getGiaBan())
+            .soLuongTon(giayChiTietDto.getSoLuongTon())
+            .mauSacEntity(
+                giayChiTietDto.getMauSacDto() != null
+                    ? mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null)
+                    : null)
+            .kichCoEntity(
+                giayChiTietDto.getKichCoDto() != null
+                    ? kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null)
+                    : null)
+            .trangThai(giayChiTietDto.getTrangThai())
+            .giayEntity(
+                giayChiTietDto.getGiayDto() != null
+                    ? giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null)
+                    : null)
+            .build();
 
-        return optional.map(o -> {
-            o.setGiaBan(giayChiTietDto.getGiaBan());
-            o.setSoLuongTon(giayChiTietDto.getSoLuongTon());
+    // Lưu vào database để lấy ID
+    giayChiTiet = giayChiTietRepository.save(giayChiTiet);
 
-            // Cập nhật các thuộc tính liên quan nếu không null
-            if (giayChiTietDto.getMauSacDto() != null) {
-                o.setMauSacEntity(mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null));
-            }
+    String maVach = giayChiTiet.getGiayEntity().getTen();
+    giayChiTiet.setMaVach(maVach);
 
-            if (giayChiTietDto.getKichCoDto() != null) {
-                o.setKichCoEntity(kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null));
-            }
+    // Lưu lại với maVach
+    giayChiTiet = giayChiTietRepository.save(giayChiTiet);
 
-            if (giayChiTietDto.getGiayDto() != null) {
-                o.setGiayEntity(giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null));
-            }
+    // Tạo ảnh QR
+    try {
+      generateQRCode(maVach);
+    } catch (WriterException | IOException e) {
+      throw new RuntimeException("Lỗi khi tạo mã QR: " + e.getMessage());
+    }
 
-            o.setTrangThai(giayChiTietDto.getTrangThai());
+    return giayChiTiet;
+  }
 
-            GiayEntity giay = o.getGiayEntity();
-            if (giay != null) {
-                List<GiayChiTietEntity> listBienThe = giayChiTietRepository.findByGiayEntityId(giay.getId());
+  public void generateQRCode(String maVach) throws WriterException, IOException {
+    int width = 300;
+    int height = 300;
+    String fileType = "png";
+    String folderPath = "C:/QR/"; // Thư mục lưu QR Code
+    String filePath = folderPath + maVach + ".png"; // Đường dẫn file QR
 
-                int tongSoLuongBienThe = listBienThe.stream()
-                        .mapToInt(GiayChiTietEntity::getSoLuongTon)
-                        .sum();
+    // Tạo thư mục nếu chưa tồn tại
+    File folder = new File(folderPath);
+    if (!folder.exists()) {
+      boolean isCreated = folder.mkdirs();
+      if (!isCreated) {
+        throw new IOException("Không thể tạo thư mục: " + folderPath);
+      }
+    }
+
+    // Tạo mã QR
+    BitMatrix bitMatrix =
+        new MultiFormatWriter().encode(maVach, BarcodeFormat.QR_CODE, width, height);
+    Path path = FileSystems.getDefault().getPath(filePath);
+    MatrixToImageWriter.writeToPath(bitMatrix, fileType, path);
+
+    System.out.println("QR Code đã được lưu tại: " + filePath);
+  } // tao QR o o D
+
+  @Override
+  public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {
+    Optional<GiayChiTietEntity> optional = giayChiTietRepository.findById(giayChiTietDto.getId());
+
+    if (optional.get().getSoLuongTon() == 0) {
+      subscriptionService.notifyAllCustomersAboutProduct(giayChiTietDto.getId());
+    }
+    return optional
+        .map(
+            o -> {
+              o.setGiaBan(giayChiTietDto.getGiaBan());
+              o.setSoLuongTon(giayChiTietDto.getSoLuongTon());
+
+              // Cập nhật các thuộc tính liên quan nếu không null
+              if (giayChiTietDto.getMauSacDto() != null) {
+                o.setMauSacEntity(
+                    mauSacRepository.findById(giayChiTietDto.getMauSacDto().getId()).orElse(null));
+              }
+
+              if (giayChiTietDto.getKichCoDto() != null) {
+                o.setKichCoEntity(
+                    kichCoRepository.findById(giayChiTietDto.getKichCoDto().getId()).orElse(null));
+              }
+
+              if (giayChiTietDto.getGiayDto() != null) {
+                o.setGiayEntity(
+                    giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null));
+              }
+
+              o.setTrangThai(giayChiTietDto.getTrangThai());
+
+              GiayEntity giay = o.getGiayEntity();
+              if (giay != null) {
+                List<GiayChiTietEntity> listBienThe =
+                    giayChiTietRepository.findByGiayEntityId(giay.getId());
+
+                int tongSoLuongBienThe =
+                    listBienThe.stream().mapToInt(GiayChiTietEntity::getSoLuongTon).sum();
 
                 giay.setSoLuongTon(tongSoLuongBienThe);
                 giayRepository.save(giay);
-            }
-            UUID idGiay = giayChiTietDto.getId();
-            List<UUID> ids = giayChiTietDto.getAnhGiayDtos().stream().map(AnhGiayDto::getId).collect(Collectors.toList());
-            this.assignAnhGiay(idGiay,ids);
-            return giayChiTietRepository.save(o);
-        }).orElse(null);
-    }
+              }
+              UUID idGiay = giayChiTietDto.getId();
+              List<UUID> ids =
+                  giayChiTietDto.getAnhGiayDtos().stream()
+                      .map(AnhGiayDto::getId)
+                      .collect(Collectors.toList());
+              this.assignAnhGiay(idGiay, ids);
+              return giayChiTietRepository.save(o);
+            })
+        .orElse(null);
+  }
 
   @Override
   public GiayChiTietEntity detail(GiayChiTietDto giayChiTietDto) {
@@ -257,37 +294,38 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
     return pageResponse;
   }
 
-    @Override
-    public GiayChiTietEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds) {
+  @Override
+  public GiayChiTietEntity assignAnhGiay(@NonNull UUID id, @NonNull List<UUID> anhGiayIds) {
 
-        anhGiayService.assignToGiayChiTietByAnhGiayIdAndIds(id, anhGiayIds);
+    anhGiayService.assignToGiayChiTietByAnhGiayIdAndIds(id, anhGiayIds);
 
-        return giayChiTietRepository.findById(id).orElse(null);
+    return giayChiTietRepository.findById(id).orElse(null);
+  }
+
+  @Override
+  public List<GiayChiTietEntity> getAllGiayChiTietByGiayId(UUID giayId) {
+    System.out.println("Fetching giay_chi_tiet with id_giay = " + giayId);
+    List<GiayChiTietEntity> list = giayChiTietRepository.findByGiayEntityId(giayId);
+    System.out.println("Result: " + list.size() + " items found.");
+    return list;
+  }
+
+  @Override
+  public List<GiayChiTietEntity> filterGiayChiTiet(
+      UUID mauSacId, UUID kichCoId, UUID thuongHieuId) {
+    if (mauSacId != null && kichCoId != null && thuongHieuId != null) {
+      return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityIdAndGiayEntity_ThuongHieu_Id(
+          mauSacId, kichCoId, thuongHieuId);
+    } else if (mauSacId != null && kichCoId != null) {
+      return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityId(mauSacId, kichCoId);
+    } else if (mauSacId != null) {
+      return giayChiTietRepository.findByMauSacEntityId(mauSacId);
+    } else if (kichCoId != null) {
+      return giayChiTietRepository.findByKichCoEntityId(kichCoId);
+    } else if (thuongHieuId != null) {
+      return giayChiTietRepository.findByGiayEntity_ThuongHieu_Id(thuongHieuId);
+    } else {
+      return giayChiTietRepository.findAll();
     }
-
-    @Override
-    public List<GiayChiTietEntity> getAllGiayChiTietByGiayId(UUID giayId) {
-        System.out.println("Fetching giay_chi_tiet with id_giay = " + giayId);
-        List<GiayChiTietEntity> list = giayChiTietRepository.findByGiayEntityId(giayId);
-        System.out.println("Result: " + list.size() + " items found.");
-        return list;
-    }
-    @Override
-    public List<GiayChiTietEntity> filterGiayChiTiet(UUID mauSacId, UUID kichCoId, UUID thuongHieuId) {
-        if (mauSacId != null && kichCoId != null && thuongHieuId != null) {
-            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityIdAndGiayEntity_ThuongHieu_Id(mauSacId, kichCoId, thuongHieuId);
-        } else if (mauSacId != null && kichCoId != null) {
-            return giayChiTietRepository.findByMauSacEntityIdAndKichCoEntityId(mauSacId, kichCoId);
-        } else if (mauSacId != null) {
-            return giayChiTietRepository.findByMauSacEntityId(mauSacId);
-        } else if (kichCoId != null) {
-            return giayChiTietRepository.findByKichCoEntityId(kichCoId);
-        } else if (thuongHieuId != null) {
-            return giayChiTietRepository.findByGiayEntity_ThuongHieu_Id(thuongHieuId);
-        } else {
-            return giayChiTietRepository.findAll();
-        }
-    }
-
-
+  }
 }

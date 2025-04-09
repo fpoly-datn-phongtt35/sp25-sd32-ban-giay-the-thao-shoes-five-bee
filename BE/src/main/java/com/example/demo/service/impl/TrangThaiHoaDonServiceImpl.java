@@ -135,20 +135,21 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     @Override
     public List<HoaDonDto> getAllHoaDon() {
         List<HoaDonEntity> hoaDons = hoaDonRepository.findAll();
-        // sắp xếp hóa đơn đã
-        Collections.sort(hoaDons,(hd1,hd2) ->{
-            boolean hd1IsOnlineWaiting = hd1.getHinhThucThanhToan() == 2 && hd1.getTrangThai() == 0;
-            boolean hd2IsOnlineWaiting = hd2.getHinhThucThanhToan() == 2 && hd2.getTrangThai() == 0;
+        // sắp xếp hóa đơn
+        Collections.sort(hoaDons, (hd1, hd2) -> {
+            boolean hd1IsOnlineWaiting = (hd1.getHinhThucThanhToan() != null && hd1.getHinhThucThanhToan() == 2) && hd1.getTrangThai() == 0;
+            boolean hd2IsOnlineWaiting = (hd2.getHinhThucThanhToan() != null && hd2.getHinhThucThanhToan() == 2) && hd2.getTrangThai() == 0;
 
             // nếu hd1 là online và chờ xác nhận và hd2 không phải
-            if (hd1IsOnlineWaiting && !hd2IsOnlineWaiting){
+            if (hd1IsOnlineWaiting && !hd2IsOnlineWaiting) {
                 return -1;
             }
 
-            // nếu hd2 la online và chờ xác nhận , hd1 khong phải
-            if (hd2IsOnlineWaiting && !hd1IsOnlineWaiting){
+            // nếu hd2 là online và chờ xác nhận , hd1 không phải
+            if (hd2IsOnlineWaiting && !hd1IsOnlineWaiting) {
                 return 1;
             }
+
             // nếu hai hóa đơn cùng là hoặc đều không là online + chờ xác nhận, kiểm tra đã thanh toán
             if (hd1.getNgayThanhToan() != null && hd2.getNgayThanhToan() == null) {
                 return -1; // hd1 lên trước
@@ -161,62 +162,64 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
             // nếu cả hai cùng trạng thái thanh toán, sắp xếp theo ngày tạo mới nhất
             return hd2.getNgayTao().compareTo(hd1.getNgayTao());
         });
+
         return hoaDons.stream().map(hd -> {
             UserDto userDto = null;
             if (hd.getUserEntity() != null) {
                 try {
                     userDto = new UserDto(
-                        hd.getUserEntity().getId(),
-                        null, // Không cần ảnh
-                        hd.getUserEntity().getHoTen(),
-                        null, // Không cần ngày sinh
-                        hd.getUserEntity().getSoDienThoai(),
-                        hd.getUserEntity().getEmail(),
-                        null, // Không cần mật khẩu
-                        null, // Không cần isEnabled
-                        null, // Không cần roleNames
-                        null  // Không cần địa chỉ
+                            hd.getUserEntity().getId(),
+                            null, // Không cần ảnh
+                            hd.getUserEntity().getHoTen(),
+                            null, // Không cần ngày sinh
+                            hd.getUserEntity().getSoDienThoai(),
+                            hd.getUserEntity().getEmail(),
+                            null, // Không cần mật khẩu
+                            null, // Không cần isEnabled
+                            null, // Không cần roleNames
+                            null  // Không cần địa chỉ
                     );
                 } catch (Exception e) {
                     // Xử lý trường hợp không thể truy cập thông tin người dùng
                     userDto = new UserDto(
-                        UUID.fromString("00000000-0000-0000-0000-000000000000"),
-                        null,
-                        "Người dùng không tồn tại",
-                        null,
-                        "N/A",
-                        "N/A",
-                        null,
-                        null,
-                        null,
-                        null
+                            UUID.fromString("00000000-0000-0000-0000-000000000000"),
+                            null,
+                            "Người dùng không tồn tại",
+                            null,
+                            "N/A",
+                            "N/A",
+                            null,
+                            null,
+                            null,
+                            null
                     );
                 }
             }
-            
+
             return new HoaDonDto(
-                hd.getId(),
-                hd.getMa(),
-                hd.getNgayTao(),
-                hd.getNgayThanhToan(),
-                hd.getMoTa(),
-                hd.getTenNguoiNhan(),
-                hd.getSdtNguoiNhan(),
-                hd.getXa(),
-                hd.getHuyen(),
-                hd.getTinh(),
-                hd.getDiaChi(),
-                hd.getTongTien(),
-                hd.getHinhThucMua(),
-                hd.getHinhThucThanhToan(),
-                hd.getHinhThucNhanHang(),
-                hd.getSoTienGiam(),
-                hd.getPhiShip(),
-                hd.getTrangThai(),
-                userDto
+                    hd.getId(),
+                    hd.getMa(),
+                    hd.getNgayTao(),
+                    hd.getNgayThanhToan(),
+                    hd.getMoTa(),
+                    hd.getTenNguoiNhan(),
+                    hd.getSdtNguoiNhan(),
+                    hd.getXa(),
+                    hd.getHuyen(),
+                    hd.getTinh(),
+                    hd.getDiaChi(),
+                    hd.getTongTien(),
+                    hd.getHinhThucMua(),
+                    hd.getHinhThucThanhToan(),
+                    hd.getHinhThucNhanHang(),
+                    hd.getSoTienGiam(),
+                    hd.getPhiShip(),
+                    hd.getTrangThai(),
+                    userDto
             );
         }).collect(Collectors.toList());
     }
+
 
     @Override
     public Optional<HoaDonEntity> findById(UUID id) {

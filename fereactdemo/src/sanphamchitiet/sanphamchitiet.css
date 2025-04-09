@@ -255,6 +255,145 @@
     margin-bottom: 20px;
   }
 }
+
+/* Kiểu dáng cho carousel ảnh sản phẩm */
+.image-carousel {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.prev-btn, .next-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(255, 255, 255, 0.7);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.prev-btn {
+  left: 10px;
+}
+
+.next-btn {
+  right: 10px;
+}
+
+.image-thumbnails {
+  display: flex;
+  justify-content: center;
+  margin-top: 10px;
+  flex-wrap: wrap;
+}
+
+.image-thumbnails img {
+  margin: 5px;
+  border: 2px solid transparent;
+  transition: all 0.3s;
+}
+
+.image-thumbnails img.active-thumbnail {
+  border-color: #1890ff;
+}
+
+/* Kiểu dáng cho carousel sản phẩm tương tự */
+.similar-products-carousel-container {
+  position: relative;
+  width: 100%;
+  margin: 30px 0;
+}
+
+.similar-products-carousel {
+  display: flex;
+  overflow-x: auto;
+  scroll-behavior: smooth;
+  -ms-overflow-style: none;  /* IE and Edge */
+  scrollbar-width: none;  /* Firefox */
+  padding: 10px 0;
+}
+
+.similar-products-carousel::-webkit-scrollbar {
+  display: none; /* Chrome, Safari, Opera */
+}
+
+.similar-product-card {
+  flex: 0 0 auto;
+  width: 250px;
+  margin-right: 20px;
+  border-radius: 8px;
+  overflow: hidden;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  transition: transform 0.3s;
+  cursor: pointer;
+}
+
+.similar-product-card:hover {
+  transform: translateY(-5px);
+}
+
+.similar-product-image {
+  width: 100%;
+  height: 200px;
+  overflow: hidden;
+}
+
+.similar-product-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.similar-product-info {
+  padding: 15px;
+}
+
+.similar-product-name {
+  font-size: 16px;
+  margin: 0 0 10px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.similar-product-price {
+  color: #f5222d;
+  font-weight: bold;
+  margin: 0;
+}
+
+.carousel-control {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  background-color: rgba(0, 0, 0, 0.6);
+  color: white;
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  z-index: 2;
+}
+
+.carousel-control.prev {
+  left: -20px;
+}
+
+.carousel-control.next {
+  right: -20px;
+}
 .product-price {
   display: flex;
   gap: 10px;

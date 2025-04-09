@@ -9,5 +9,6 @@ import java.util.UUID;
 
 @Repository
 public interface DanhMucRepository extends JpaRepository<DanhMucEntity, UUID>, JpaSpecificationExecutor<DanhMucEntity> {
+
 }
 //danhmuc
