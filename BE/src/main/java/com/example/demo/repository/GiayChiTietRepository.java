@@ -23,7 +23,7 @@ public interface GiayChiTietRepository
           "AND g.giayEntity.danhMuc.id = :danhMucId " +
           "AND g.giayEntity.thuongHieu.id = :thuongHieuId " +
           "AND g.giayEntity.kieuDang.id = :kieuDangId " +
-          "AND g.trangThai = 1 " +
+          "AND g.trangThai = 0 " +
           "ORDER BY g.giaBan ASC")
   List<GiayChiTietEntity> findSimilarProductsByGiay(
           @Param("danhMucId") UUID danhMucId,
@@ -34,6 +34,7 @@ public interface GiayChiTietRepository
   @Query("SELECT g FROM GiayChiTietEntity g " +
           "WHERE g.giayEntity.thuongHieu.id = :thuongHieuId " +
           "AND g.giayEntity.kieuDang.id = :kieuDangId " +
+          "AND g.trangThai = 0 "+
           "AND g.id NOT IN :excludeIds")
   List<GiayChiTietEntity> findByThuongHieuAndKieuDang(
           @Param("thuongHieuId") UUID thuongHieuId,
@@ -42,9 +43,47 @@ public interface GiayChiTietRepository
 
   @Query("SELECT g FROM GiayChiTietEntity g " +
           "WHERE g.giayEntity.thuongHieu.id = :thuongHieuId " +
+          "AND g.giayEntity.danhMuc.id = :danhMucId " +
+          "AND g.trangThai = 0 "+
+          "AND g.id NOT IN :excludeIds")
+  List<GiayChiTietEntity> findByThuongHieuAndDanhMuc(
+          @Param("thuongHieuId") UUID thuongHieuId,
+          @Param("danhMucId") UUID danhMucId,
+          @Param("excludeIds") List<UUID> excludeIds);
+
+  @Query("SELECT g FROM GiayChiTietEntity g " +
+          "WHERE g.giayEntity.kieuDang.id = :kieuDangId " +
+          "AND g.giayEntity.danhMuc.id = :danhMucId " +
+          "AND g.trangThai = 0 "+
+          "AND g.id NOT IN :excludeIds")
+  List<GiayChiTietEntity> findByKieuDangAndDanhMuc(
+          @Param("kieuDangId") UUID kieuDangId,
+          @Param("danhMucId") UUID danhMucId,
+          @Param("excludeIds") List<UUID> excludeIds);
+
+
+  @Query("SELECT g FROM GiayChiTietEntity g " +
+          "WHERE g.giayEntity.thuongHieu.id = :thuongHieuId " +
+          "AND g.trangThai = 0 "+
           "AND g.id NOT IN :excludeIds")
   List<GiayChiTietEntity> findByThuongHieuAndNotCurrent(
           @Param("thuongHieuId") UUID thuongHieuId,
+          @Param("excludeIds") List<UUID> excludeIds);
+
+  @Query("SELECT g FROM GiayChiTietEntity g " +
+          "WHERE g.giayEntity.kieuDang.id = :kieuDangId " +
+          "AND g.trangThai = 0 "+
+          "AND g.id NOT IN :excludeIds")
+  List<GiayChiTietEntity> findByKieuDangAndNotCurrent(
+          @Param("thuongHieuId") UUID kieuDangId,
+          @Param("excludeIds") List<UUID> excludeIds);
+
+  @Query("SELECT g FROM GiayChiTietEntity g " +
+          "WHERE g.giayEntity.danhMuc.id = :danhMucId " +
+          "AND g.trangThai = 0 "+
+          "AND g.id NOT IN :excludeIds")
+  List<GiayChiTietEntity> findByDanhMucAndNotCurrent(
+          @Param("thuongHieuId") UUID danhMucId,
           @Param("excludeIds") List<UUID> excludeIds);
 
   @Query("SELECT COALESCE(SUM(g.soLuongTon), 0) FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId")
