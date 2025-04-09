@@ -4,10 +4,11 @@ import com.example.demo.dto.request.BestSellingProductDTO;
 import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonEntity;
+
+import java.math.BigDecimal;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
-
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.JpaSpecificationExecutor;
@@ -52,6 +53,55 @@ public interface HoaDonChiTietRepository
           "ORDER BY SUM(hde.soLuong) DESC")  // Sắp xếp theo tổng số lượng bán
   List<BestSellingProductDTO> findTopSellingProductsWithVariants(PageRequest pageRequest);
 
+
+  @Query("SELECT SUM(hdct.soLuong) " +
+          "FROM HoaDonChiTietEntity hdct " +
+          "WHERE hdct.hoaDonEntity.userEntity.id = :userId AND hdct.trangThai = 2")
+  Integer getTongSoLuong(@Param("userId") UUID userId);
+
+  @Query("SELECT SUM(hdct.soLuong * hdct.donGia) " +
+          "FROM HoaDonChiTietEntity hdct " +
+          "WHERE hdct.hoaDonEntity.userEntity.id = :userId AND hdct.trangThai = 2")
+  BigDecimal getTongTien(@Param("userId") UUID userId);
+
+  @Query("SELECT g.thuongHieu.ten, COUNT(hdct.id) AS sl " +
+          "FROM HoaDonChiTietEntity hdct " +
+          "JOIN hdct.giayChiTietEntity gct " +
+          "JOIN gct.giayEntity g " +
+          "WHERE hdct.hoaDonEntity.userEntity.id = :userId AND hdct.trangThai = 2 " +
+          "GROUP BY g.thuongHieu.ten " +
+          "ORDER BY sl DESC")
+  List<Object[]> getTopThuongHieu(@Param("userId") UUID userId);
+
+  @Query("SELECT gct.mauSacEntity.ten, COUNT(hdct.id) AS sl " +
+          "FROM HoaDonChiTietEntity hdct " +
+          "JOIN hdct.giayChiTietEntity gct " +
+          "WHERE hdct.hoaDonEntity.userEntity.id = :userId AND hdct.trangThai = 2 " +
+          "GROUP BY gct.mauSacEntity.ten " +
+          "ORDER BY sl DESC")
+  List<Object[]> getTopMauSac(@Param("userId") UUID userId);
+
+//  @Query("SELECT " +
+//          "SUM(hdct.soLuong) AS tongSoLuong, " +
+//          "SUM(hdct.soLuong * hdct.donGia) AS tongTien, " +
+//          "(SELECT g.thuongHieu.ten " +
+//          " FROM HoaDonChiTietEntity hdct2 " +
+//          " JOIN hdct2.giayChiTietEntity gct2 " +
+//          " JOIN gct2.giayEntity g " +
+//          " WHERE hdct2.hoaDonEntity.userEntity.id = :userId AND hdct2.trangThai = 2 " +
+//          " GROUP BY g.thuongHieu.ten " +
+//          " ORDER BY COUNT(hdct2.id) DESC " +
+//          " LIMIT 1), " +
+//          "(SELECT gct3.mauSacEntity.ten " +
+//          " FROM HoaDonChiTietEntity hdct3 " +
+//          " JOIN hdct3.giayChiTietEntity gct3 " +
+//          " WHERE hdct3.hoaDonEntity.userEntity.id = :userId AND hdct3.trangThai = 2 " +
+//          " GROUP BY gct3.mauSacEntity.ten " +
+//          " ORDER BY COUNT(hdct3.id) DESC " +
+//          " LIMIT 1) " +
+//          "FROM HoaDonChiTietEntity hdct " +
+//          "WHERE hdct.hoaDonEntity.userEntity.id = :userId AND hdct.trangThai = 2")
+//  Object[] thongKeMuaHangByUserId(@Param("userId") UUID userId);
 
 
 }
