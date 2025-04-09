@@ -4,6 +4,7 @@ import {
   getGiayChitietDetail,
   getAllGiayChiTiet,
   getGiayChitietDetail1,
+  getListGoiYSanPham,
 } from "../service/GiayChiTietService";
 import { getGiayDetail } from "../service/GiayService";
 import "./sanphamchitiet.css";
@@ -35,6 +36,7 @@ const ProductDetail = () => {
   useEffect(() => {
     fetchProductDetail();
     fetchProductReviews();
+    fetchGoiY();
   }, [id]);
 
   useEffect(() => {
@@ -81,6 +83,16 @@ const ProductDetail = () => {
     fetchReviewsWithUserInfo();
   }, [id]);
 
+  // Lấy danh sách gợi ý sản phẩm
+  const fetchGoiY = async () => {
+    try { 
+      const response = await getListGoiYSanPham(id);
+      console.log("Gợi ý sản phẩm:", response.data);
+      
+    }catch (error) {
+      console.error("❌ Lỗi khi lấy gợi ý sản phẩm:", error);
+    }
+  }
   // Lấy danh sách đánh giá
   const fetchProductReviews = async () => {
     try {

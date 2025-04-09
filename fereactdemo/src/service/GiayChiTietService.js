@@ -2,8 +2,8 @@ import axios from "../axiosConfig";
 
 const REST_API_BASE_URL = "/giay-chi-tiet";
 
-export const getListGoiYSanPham = (giayChiTietId) =>
-  axios.get(`${REST_API_BASE_URL}/goi-y/${giayChiTietId}`)
+export const getListGoiYSanPham = (giayId) =>
+  axios.get(`${REST_API_BASE_URL}/goi-y/san-pham/${giayId}`)
 
 export const getAllGiayChiTiet = () =>
   axios.post(`${REST_API_BASE_URL}/getAll`);
