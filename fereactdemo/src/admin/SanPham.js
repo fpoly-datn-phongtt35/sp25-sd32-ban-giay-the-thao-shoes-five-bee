@@ -162,8 +162,8 @@ const SanPham = () => {
     console.log("Danh sách ID giày đã chọn:", selectedGiayIds);
 
     // Tiến hành các thao tác khác nếu cần
-    setIsThemNhanhAnh(false); 
-  // Reset danh sách ID giày đã chọn
+    setIsThemNhanhAnh(false);
+    // Reset danh sách ID giày đã chọn
   };
 
   const getMauSacList = async () => {
@@ -323,7 +323,7 @@ const SanPham = () => {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error(
         "Lỗi khi thực hiện thao tác: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -338,9 +338,9 @@ const SanPham = () => {
 
     const anhGiayDtos = Array.isArray(selectedGiayIds)
       ? selectedGiayIds.map((item) => ({
-          id: item.id,
-          tenUrl: item.tenUrl,
-        }))
+        id: item.id,
+        tenUrl: item.tenUrl,
+      }))
       : [];
     console.log("anhGiayDtos", anhGiayDtos);
 
@@ -448,7 +448,7 @@ const SanPham = () => {
         );
       },
     },
-    
+
     {
       title: "Thao tác",
       key: "action",
@@ -723,9 +723,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-            id: ag.id,
-            tenUrl: ag.tenUrl,
-          }))
+          id: ag.id,
+          tenUrl: ag.tenUrl,
+        }))
         : [],
     };
 
@@ -820,7 +820,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -1193,9 +1193,8 @@ const SanPham = () => {
                     {kichCoList.map((kc) => (
                       <button
                         key={kc.id}
-                        className={`option-btn ${
-                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectKichCo(kc.id)}
                       >
                         {kc.ten}
@@ -1224,9 +1223,8 @@ const SanPham = () => {
                     {mauSacList.map((ms) => (
                       <button
                         key={ms.id}
-                        className={`option-btn ${
-                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
-                        }`}
+                        className={`option-btn ${tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                          }`}
                         onClick={() => handleSelectMauSac(ms.id)}
                       >
                         {ms.ten}
@@ -1545,27 +1543,38 @@ const SanPham = () => {
             dataIndex: "THUONG_HIEU",
             width: 150,
           },
-          {
-            title: "Giá bán",
-            dataIndex: "GIABAN",
-            width: 150,
-            render: (text) => {
-              return text.toLocaleString("vi-VN"); // Định dạng giá trị theo kiểu Việt Nam
-            },
-          },
+          // {
+          //   title: "Giá bán",
+          //   dataIndex: "GIABAN",
+          //   width: 150,
+          //   render: (text) => {
+          //     return text.toLocaleString("vi-VN"); // Định dạng giá trị theo kiểu Việt Nam
+          //   },
+          // },
           {
             title: "Trạng thái",
             dataIndex: "trang_thai",
             width: 150,
-            render: (text, record) => (
-              <Switch
-                checked={record.TRANG_THAI === 0}
-                disabled
-                checkedChildren="Hoạt động"
-                unCheckedChildren="Không hoạt động"
-              />
-            ),
+            render: (text, record) => {
+              // Kiểm tra số lượng tồn
+              const statusText =
+                record.SOLUONGTON < 30 ? "Sắp hết hàng" : (record.TRANG_THAI === 0 ? "Hoạt động" : "Không hoạt động");
+
+              // Điều kiện thay đổi màu sắc của Switch khi sản phẩm gần hết hàng
+              const switchStyle = record.SOLUONGTON < 30 ? { backgroundColor: 'red', borderColor: 'red' } : {};
+
+              return (
+                <Switch
+                  checked={record.TRANG_THAI === 0}
+                  disabled
+                  checkedChildren={statusText}
+                  unCheckedChildren="Không hoạt động"
+                  style={switchStyle}  // Áp dụng màu đỏ khi số lượng tồn dưới 30
+                />
+              );
+            },
           },
+
           {
             title: "Thao tác",
             key: "action",
