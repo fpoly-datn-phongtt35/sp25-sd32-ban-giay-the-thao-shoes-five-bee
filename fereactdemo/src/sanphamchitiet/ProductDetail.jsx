@@ -49,6 +49,7 @@ const ProductDetail = () => {
   useEffect(() => {
     fetchProductDetail();
     fetchProductReviews();
+
   }, [id]);
 
   useEffect(() => {

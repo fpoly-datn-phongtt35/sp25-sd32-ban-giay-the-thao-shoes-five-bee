@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.request.UserDto;
 import com.example.demo.dto.request.UserDtoSearch;
+import com.example.demo.dto.response.LichSuMuaHangResponse;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.UserEntity;
 import org.springframework.data.domain.Pageable;
@@ -36,4 +37,6 @@ public interface UsersService {
   List<UserDto> importExcelCheckDuplicate(MultipartFile file) throws IOException;
 
   UserEntity details(UUID id);
+
+  LichSuMuaHangResponse lichSuMuaHang(UUID id);
 }

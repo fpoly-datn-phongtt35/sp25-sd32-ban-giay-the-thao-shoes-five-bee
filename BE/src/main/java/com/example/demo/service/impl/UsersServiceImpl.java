@@ -5,6 +5,7 @@ import com.cloudinary.utils.ObjectUtils;
 import com.example.demo.dto.request.DiaChiDto;
 import com.example.demo.dto.request.UserDto;
 import com.example.demo.dto.request.UserDtoSearch;
+import com.example.demo.dto.response.LichSuMuaHangResponse;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.*;
 import com.example.demo.repository.*;
@@ -16,6 +17,7 @@ import jakarta.persistence.criteria.Root;
 import java.io.File;
 import java.io.IOException;
 import java.io.InputStream;
+import java.math.BigDecimal;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.text.ParseException;
@@ -49,6 +51,7 @@ public class UsersServiceImpl implements UsersService {
   @Autowired private DiaChiRepository diaChiRepository;
   @Autowired private Cloudinary cloudinary;
   @Autowired private GioHangRepository gioHangRepository;
+  @Autowired private HoaDonChiTietRepository hoaDonChiTietRepository;
 
   @Override
   public String getAuthenticatedUserEmail() throws UsernameNotFoundException {
@@ -67,7 +70,7 @@ public class UsersServiceImpl implements UsersService {
   }
 
   @Override
-  public UserEntity getBySdt(String sdt){
+  public UserEntity getBySdt(String sdt) {
     return userRepository.findBySoDienThoai(sdt);
   }
 
@@ -145,7 +148,7 @@ public class UsersServiceImpl implements UsersService {
 
     userEntity.setGioHangEntity(gioHangEntity);
     userRepository.save(userEntity);
-//    UserEntity savedUser = userRepository.save(userEntity);
+    //    UserEntity savedUser = userRepository.save(userEntity);
     // them role vao user
     if (userDto.getRoleNames() != null && !userDto.getRoleNames().isEmpty()) {
       List<UserRoleEntity> userRoles =
@@ -174,8 +177,9 @@ public class UsersServiceImpl implements UsersService {
 
     return userEntity;
   }
+
   private String generateUniqueCode() {
-    return "GH" + UUID.randomUUID().toString().substring(0,6).toUpperCase();
+    return "GH" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();
   }
 
   @Override
@@ -605,5 +609,22 @@ public class UsersServiceImpl implements UsersService {
   public UserEntity details(UUID id) {
     Optional<UserEntity> userEntityOptional = userRepository.findById(id);
     return userEntityOptional.orElse(null);
+  }
+
+  @Override
+  public LichSuMuaHangResponse lichSuMuaHang(UUID id) {
+    List<Object[]> topThuongHieuList = hoaDonChiTietRepository.getTopThuongHieu(id);
+    List<Object[]> topMauSacList = hoaDonChiTietRepository.getTopMauSac(id);
+
+
+
+    String thuongHieu = topThuongHieuList.isEmpty() ? "Không có" : (String) topThuongHieuList.get(0)[0];
+    String mauSac = topMauSacList.isEmpty() ? "Không có" : (String) topMauSacList.get(0)[0];
+    return LichSuMuaHangResponse.builder()
+        .thuongHieu(thuongHieu)
+        .mauSac(mauSac)
+        .soLuong(hoaDonChiTietRepository.getTongSoLuong(id))
+        .tongTien(hoaDonChiTietRepository.getTongTien(id))
+        .build();
   }
 }

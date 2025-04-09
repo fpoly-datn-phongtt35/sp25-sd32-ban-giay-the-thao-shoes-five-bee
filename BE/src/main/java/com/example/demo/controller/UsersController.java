@@ -1,12 +1,15 @@
 package com.example.demo.controller;
 
-import com.example.demo.dto.request.ChatLieuDto;
-import com.example.demo.dto.request.RoleDto;
 import com.example.demo.dto.request.UserDto;
 import com.example.demo.dto.request.UserDtoSearch;
 import com.example.demo.entity.UserEntity;
 import com.example.demo.service.UsersService;
 import jakarta.servlet.http.HttpServletResponse;
+import java.io.IOException;
+import java.io.OutputStream;
+import java.util.Collections;
+import java.util.List;
+import java.util.UUID;
 import org.apache.poi.ss.usermodel.*;
 import org.apache.poi.xssf.usermodel.XSSFWorkbook;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -16,12 +19,6 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
-
-import java.io.IOException;
-import java.io.OutputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.UUID;
 
 @RestController
 @RequestMapping("/user")
@@ -155,5 +152,10 @@ public class UsersController {
     UserDto userDto = new UserDto();
     userDto.setId(id);
     return ResponseEntity.ok(usersService.detail(userDto));
+  }
+
+  @GetMapping("/lich-su-mua-hang/{id}")
+  public ResponseEntity<?> lichSuMuaHang(@PathVariable("id") UUID id) {
+    return ResponseEntity.ok(usersService.lichSuMuaHang(id));
   }
 }
