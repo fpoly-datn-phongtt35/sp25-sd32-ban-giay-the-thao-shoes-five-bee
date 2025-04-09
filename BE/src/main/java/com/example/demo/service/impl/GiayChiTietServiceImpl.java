@@ -99,31 +99,31 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
         Set<GiayChiTietEntity> result = new LinkedHashSet<>();
 
         if (danhMucId != null && thuongHieuId != null && kieuDangId != null) {
-            return giayChiTietRepository.findSimilarProductsByGiay(danhMucId, thuongHieuId, kieuDangId, excludedIds);
+            result.addAll(giayChiTietRepository.findSimilarProductsByGiay(danhMucId, thuongHieuId, kieuDangId, excludedIds));
         }
 
         if (thuongHieuId != null && danhMucId != null){
-            return giayChiTietRepository.findByThuongHieuAndDanhMuc(thuongHieuId,danhMucId , excludedIds);
+            result.addAll( giayChiTietRepository.findByThuongHieuAndDanhMuc(thuongHieuId,danhMucId , excludedIds));
         }
 
         if (danhMucId != null && kieuDangId != null){
-            return giayChiTietRepository.findByKieuDangAndDanhMuc(kieuDangId,danhMucId,excludedIds);
+            result.addAll( giayChiTietRepository.findByKieuDangAndDanhMuc(kieuDangId,danhMucId,excludedIds));
         }
 
         if (thuongHieuId != null && kieuDangId != null) {
-            return giayChiTietRepository.findByThuongHieuAndKieuDang(thuongHieuId, kieuDangId, excludedIds);
+            result.addAll( giayChiTietRepository.findByThuongHieuAndKieuDang(thuongHieuId, kieuDangId, excludedIds));
         }
 
         if (thuongHieuId != null) {
-            return giayChiTietRepository.findByThuongHieuAndNotCurrent(thuongHieuId, excludedIds);
+            result.addAll( giayChiTietRepository.findByThuongHieuAndNotCurrent(thuongHieuId, excludedIds));
         }
 
         if (kieuDangId != null) {
-            return giayChiTietRepository.findByKieuDangAndNotCurrent(kieuDangId, excludedIds);
+            result.addAll( giayChiTietRepository.findByKieuDangAndNotCurrent(kieuDangId, excludedIds));
         }
 
         if (danhMucId != null) {
-            return giayChiTietRepository.findByDanhMucAndNotCurrent(danhMucId, excludedIds);
+            result.addAll( giayChiTietRepository.findByDanhMucAndNotCurrent(danhMucId, excludedIds));
         }
 
         return new ArrayList<>(result);

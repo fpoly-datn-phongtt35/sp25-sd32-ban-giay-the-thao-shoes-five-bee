@@ -75,7 +75,7 @@ public interface GiayChiTietRepository
           "AND g.trangThai = 0 "+
           "AND g.id NOT IN :excludeIds")
   List<GiayChiTietEntity> findByKieuDangAndNotCurrent(
-          @Param("thuongHieuId") UUID kieuDangId,
+          @Param("kieuDangId") UUID kieuDangId,
           @Param("excludeIds") List<UUID> excludeIds);
 
   @Query("SELECT g FROM GiayChiTietEntity g " +
@@ -83,7 +83,7 @@ public interface GiayChiTietRepository
           "AND g.trangThai = 0 "+
           "AND g.id NOT IN :excludeIds")
   List<GiayChiTietEntity> findByDanhMucAndNotCurrent(
-          @Param("thuongHieuId") UUID danhMucId,
+          @Param("danhMucId") UUID danhMucId,
           @Param("excludeIds") List<UUID> excludeIds);
 
   @Query("SELECT COALESCE(SUM(g.soLuongTon), 0) FROM GiayChiTietEntity g WHERE g.giayEntity.id = :giayId")
