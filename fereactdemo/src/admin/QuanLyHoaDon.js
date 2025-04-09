@@ -9,6 +9,8 @@ import {
   Modal,
   Form,
   message,
+  Empty,
+  Spin,
 } from "antd";
 import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
@@ -29,6 +31,7 @@ import moment from "moment";
 import {
   printfHoaDonChiTiet,
 } from "../service/HoaDonChiTietService";
+import { getDanhGiaByUserAndHoaDonChiTiet } from "../service/DanhGiaService";
 const QuanLyHoaDon = () => {
   const [searchText, setSearchText] = useState("");
   const [searchedColumn, setSearchedColumn] = useState("");
@@ -47,6 +50,8 @@ const QuanLyHoaDon = () => {
   const [phoneFilter, setPhoneFilter] = useState("");
   const [isHistoryPopupVisible, setIsHistoryPopupVisible] = useState(false);
   const [lichSuHoaDon, setLichSuHoaDon] = useState([]);
+  const [danhGia, setDanhGia] = useState([]);
+  const [loadingDanhGia, setLoadingDanhGia] = useState(false);
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -123,6 +128,43 @@ const QuanLyHoaDon = () => {
   const handleHistoryClick = () => {
     fetchLichSuHoaDon(); // Gọi API để fetch dữ liệu lịch sử hóa đơn
     setIsHistoryPopupVisible(true); // Mở popup sau khi dữ liệu được fetch
+  };
+
+  useEffect(() => {
+    if (dataHoaDonChiTiet?.user_email) {
+      console.log("Có thông tin user, userId:", dataHoaDonChiTiet.userId);
+      console.log("Gọi API lấy đánh giá...");
+      fetchDanhGia(dataHoaDonChiTiet.userId, dataHoaDonChiTiet.id);
+    } else {
+      console.log("Không có thông tin user_email");
+    }
+  }, [dataHoaDonChiTiet]);
+
+  const fetchDanhGia = async (userId, hoaDonId) => {
+    if (!userId || !hoaDonId) {
+      console.log("Missing userId or hoaDonId:", { userId, hoaDonId });
+      return;
+    }
+
+    setLoadingDanhGia(true);
+    try {
+      console.log("Fetching đánh giá with params:", { userId, hoaDonId });
+      const response = await getDanhGiaByUserAndHoaDonChiTiet(userId, hoaDonId);
+      console.log("Đánh giá API response:", response.data);
+
+      if (response.data && Array.isArray(response.data)) {
+        setDanhGia(response.data);
+      } else {
+        console.log("No đánh giá data found or invalid format");
+        setDanhGia([]);
+      }
+    } catch (error) {
+      console.error("Lỗi khi lấy đánh giá:", error);
+      message.error("Không thể lấy thông tin đánh giá!");
+      setDanhGia([]);
+    } finally {
+      setLoadingDanhGia(false);
+    }
   };
 
 
@@ -209,6 +251,8 @@ const QuanLyHoaDon = () => {
         ma: response.data.ma,
         order_on: response.data.ngayTao,
         user: response.data.tenNguoiNhan,
+        user_email: response.data.userDto?.email,// Thêm email
+        userId: response.data.userDto?.id, // Thêm userId
         user_phone: response.data.sdtNguoiNhan,
         diaChi: response.data.diaChi || "Tại Quầy",
         tongTienGoc: tongTienSanPham, // Tổng tiền sản phẩm
@@ -228,7 +272,10 @@ const QuanLyHoaDon = () => {
         // Thêm thông tin giảm giá
         chuongTrinhGiamGiaChiTietHoaDons: response.data.chuongTrinhGiamGiaChiTietHoaDons || []
       };
-
+      setDataHoaDonChiTiet(hoaDonData);
+      if (hoaDonData.userId && hoaDonData.id) {
+        fetchDanhGia(hoaDonData.userId, hoaDonData.id);
+      }
       setDataHoaDonChiTiet(hoaDonData);
       setIsPopupVisible(true);
     } catch (error) {
@@ -236,6 +283,8 @@ const QuanLyHoaDon = () => {
       message.error("Không thể lấy thông tin chi tiết hóa đơn!");
     }
   };
+
+
   const handleOrderClick = async (orderId) => {
     if (!orderId) {
       console.error("Order ID không hợp lệ");
@@ -983,6 +1032,41 @@ const QuanLyHoaDon = () => {
                 </tfoot>
               </table>
             </div>
+            {/* Thêm phần hiển thị đánh giá */}
+            {dataHoaDonChiTiet && (
+              <div className="danh-gia-container">
+                <h3>Đánh giá sản phẩm</h3>
+
+                {loadingDanhGia ? (
+                  <div className="loading-spinner">
+                    <Spin tip="Đang tải đánh giá..." />
+                  </div>
+                ) : danhGia.length > 0 ? (
+                  <div className="danh-gia-content">
+                    <div className="star-rating">
+                      {[...Array(5)].map((_, index) => (
+                        <span
+                          key={index}
+                          className={`star ${index < danhGia[0].saoDanhGia ? 'active' : ''}`}
+                        >
+                          ★
+                        </span>
+                      ))}
+                    </div>
+                    <div className="danh-gia-info">
+                      <p className="danh-gia-text">{danhGia[0].nhanXet}</p>
+                      <p className="danh-gia-date">
+                        Ngày đánh giá: {danhGia[0].ngayNhanXet ? moment(danhGia[0].ngayNhanXet).format("DD/MM/YYYY") : "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                ) : (
+                  <div className="no-danh-gia">
+                    <Empty description="Khách hàng chưa đánh giá đơn hàng này" />
+                  </div>
+                )}
+              </div>
+            )}
           </div>
         </div>
       )}
