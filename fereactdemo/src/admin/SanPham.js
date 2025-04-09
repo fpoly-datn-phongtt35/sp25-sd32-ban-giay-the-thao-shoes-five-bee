@@ -1548,7 +1548,8 @@ const SanPham = () => {
             dataIndex: "GIABAN",
             width: 150,
             render: (text) => {
-              return text.toLocaleString("vi-VN"); // Định dạng giá trị theo kiểu Việt Nam
+              const giaBan = Number(text) || 0;
+              return giaBan.toLocaleString("vi-VN");
             },
           },
           {

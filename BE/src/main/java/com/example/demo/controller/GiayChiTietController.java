@@ -60,7 +60,7 @@ public class GiayChiTietController {
     return ResponseEntity.ok(giayChiTietService.detail(giayChiTietDto));
   }
 
-  @PostMapping("/delete")
+  @PostMapping("/delete") 
   public ResponseEntity<?> delete(@RequestBody GiayChiTietDto giayChiTietDto) {
     return ResponseEntity.ok(giayChiTietService.delete(giayChiTietDto));
   }

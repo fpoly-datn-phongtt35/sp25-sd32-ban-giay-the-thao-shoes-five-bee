@@ -9,3 +9,11 @@ export const addDanhGia = (danhGia) =>
 
 export const getProductDanhGiaById = (giayId) =>
     axios.get(`${REST_API_BASE_URL}/san-pham/${giayId}`)
+
+export const getDanhGiaByUserAndHoaDonChiTiet = (userId, hoaDonChiTietId) =>
+    axios.get(`${REST_API_BASE_URL}`, {
+        params: {
+            userId: userId,
+            hoaDonChiTietId: hoaDonChiTietId,
+        },
+    });

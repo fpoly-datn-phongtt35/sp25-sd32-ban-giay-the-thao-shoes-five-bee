@@ -394,3 +394,20 @@
 .carousel-control.next {
   right: -20px;
 }
+.product-price {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.original-price {
+  text-decoration: line-through;
+  color: #ff4d4f; /* đỏ nhẹ */
+  font-size: 16px;
+}
+
+.discounted-price {
+  color: #1a7f37; /* xanh lá đậm */
+  font-weight: bold;
+  font-size: 18px;
+}
