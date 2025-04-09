@@ -96,8 +96,18 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
                 .map(GiayChiTietEntity::getId)
                 .collect(Collectors.toList());
 
+        Set<GiayChiTietEntity> result = new LinkedHashSet<>();
+
         if (danhMucId != null && thuongHieuId != null && kieuDangId != null) {
             return giayChiTietRepository.findSimilarProductsByGiay(danhMucId, thuongHieuId, kieuDangId, excludedIds);
+        }
+
+        if (thuongHieuId != null && danhMucId != null){
+            return giayChiTietRepository.findByThuongHieuAndDanhMuc(thuongHieuId,danhMucId , excludedIds);
+        }
+
+        if (danhMucId != null && kieuDangId != null){
+            return giayChiTietRepository.findByKieuDangAndDanhMuc(kieuDangId,danhMucId,excludedIds);
         }
 
         if (thuongHieuId != null && kieuDangId != null) {
@@ -108,7 +118,15 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
             return giayChiTietRepository.findByThuongHieuAndNotCurrent(thuongHieuId, excludedIds);
         }
 
-        return Collections.emptyList();
+        if (kieuDangId != null) {
+            return giayChiTietRepository.findByKieuDangAndNotCurrent(kieuDangId, excludedIds);
+        }
+
+        if (danhMucId != null) {
+            return giayChiTietRepository.findByDanhMucAndNotCurrent(danhMucId, excludedIds);
+        }
+
+        return new ArrayList<>(result);
     }
 
     @Override
