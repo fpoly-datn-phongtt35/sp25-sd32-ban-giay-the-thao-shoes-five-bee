@@ -210,17 +210,17 @@ const ProductDetail = () => {
       message.warning("Vui lòng chọn kích thước và màu sắc!");
       return;
     }
-  
+
     const selectedVariant = bienTheList.find(
       (item) =>
         item.tenMauSac === selectedColor && item.tenKichCo === selectedSize
     );
-  
+
     if (!selectedVariant) {
       message.error("Không tìm thấy sản phẩm với lựa chọn này!");
       return;
     }
-  
+
     // ✅ Log thông tin biến thể được thêm vào giỏ hàng
     console.log("Thông tin giày gửi lên giỏ hàng:", {
       idGiayChiTiet: selectedVariant.idGiayChiTiet,
@@ -230,7 +230,7 @@ const ProductDetail = () => {
       giaBan: selectedVariant.giaBan,
       giaKhiGiam: selectedVariant.giaKhiGiam ?? null,
     });
-  
+
     try {
       const response = await addToCart(selectedVariant.idGiayChiTiet, quantity);
       if (response.status === 200) {
@@ -242,7 +242,7 @@ const ProductDetail = () => {
       message.error("Có lỗi xảy ra khi thêm vào giỏ hàng!");
     }
   };
-  
+
   // Format date từ chuỗi ISO
   const formatDate = (dateString) => {
     const date = new Date(dateString);
@@ -281,9 +281,25 @@ const ProductDetail = () => {
       <div className="right">
         <div className="product-info">
           <p className="product-title">{productGiay?.ten}</p>
-          <p className="product-price">
-            {Number(currentPrice ?? 0).toLocaleString()}₫
-          </p>
+          <div className="product-price">
+            {selectedVariantDetails?.giaKhiGiam ? (
+              <>
+                <span className="original-price">
+                  {Number(selectedVariantDetails.giaBan ?? 0).toLocaleString()}₫
+                </span>
+                <span className="discounted-price">
+                  {Number(
+                    selectedVariantDetails.giaKhiGiam ?? 0
+                  ).toLocaleString()}
+                  ₫
+                </span>
+              </>
+            ) : (
+              <span className="discounted-price">
+                {Number(currentPrice ?? 0).toLocaleString()}₫
+              </span>
+            )}
+          </div>
         </div>
 
         <div className="product-options">
