@@ -5,6 +5,7 @@ import {
   getAllGiayChiTiet,
   getGiayChitietDetail1,
   getListGoiYSanPham,
+  detailGiayChiTiet2,
 } from "../service/GiayChiTietService";
 import { getGiayDetail } from "../service/GiayService";
 import "./sanphamchitiet.css";
@@ -24,9 +25,11 @@ const ProductDetail = () => {
   const [currentPrice, setCurrentPrice] = useState(productGiay?.giaBan || 0);
   const [selectedVariantDetails, setSelectedVariantDetails] = useState(null);
   const [sizeList, setSizeList] = useState([]);
+
   const [anhCHiTiet, setanhCHiTiet] = useState([]);
   const [soLuongChitiet, setSoLuongChiTiet] = useState([]);
-  const [totalQuantity, setTotalQuantity] = useState(0); // Thêm dòng này để khai báo totalQuantity
+  const [totalQuantity, setTotalQuantity] = useState(0); 
+  const [selectedSimilarProduct, setSelectedSimilarProduct] = useState(null);
 
   // State cho phần đánh giá - chỉ hiển thị
   const [danhGiaList, setDanhGiaList] = useState([]);
@@ -35,7 +38,7 @@ const ProductDetail = () => {
 
   const [similarProducts, setSimilarProducts] = useState([]);
   const [currentImageIndex, setCurrentImageIndex] = useState(0);
-  
+
   // Ref cho carousel sản phẩm tương tự
   const carouselRef = useRef(null);
   // State cho phần đánh giá - chỉ hiển thị
@@ -49,7 +52,6 @@ const ProductDetail = () => {
   useEffect(() => {
     fetchProductDetail();
     fetchProductReviews();
-
   }, [id]);
 
   useEffect(() => {
@@ -102,7 +104,7 @@ const ProductDetail = () => {
 
   const fetchSimilarProducts = async () => {
     if (!id) return;
-    
+   
     try {
       // Kiểm tra xem sản phẩm chính có tồn tại không trước khi gọi API sản phẩm tương tự
       if (productGiay && productGiay.id) {
@@ -115,19 +117,30 @@ const ProductDetail = () => {
       setSimilarProducts([]);
     }
   };
+  const handleSelectSimilarProduct = async (id) => {
+    try {
+      const response = await detailGiayChiTiet2(id);
+      console.log("Chi tiết sản phẩm tương tự:", response.data);
+      
+      setProductGiay(response.data); // Cập nhật lại sản phẩm chính
+    } catch (error) {
+      console.error("Lỗi khi lấy chi tiết sản phẩm tương tự:", error);
+    }
+  };
+  
 
   const scrollCarouselLeft = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: -300, behavior: 'smooth' });
+      carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
     }
   };
 
   const scrollCarouselRight = () => {
     if (carouselRef.current) {
-      carouselRef.current.scrollBy({ left: 300, behavior: 'smooth' });
+      carouselRef.current.scrollBy({ left: 300, behavior: "smooth" });
     }
   };
-  
+
   // Gọi API sản phẩm tương tự sau khi đã có dữ liệu sản phẩm chính
   useEffect(() => {
     if (productGiay && !loading) {
@@ -462,93 +475,112 @@ const ProductDetail = () => {
         </div>
 
         {/* Danh sách đánh giá */}
-    <div className="review-list">
-    {danhGiaList.length > 0 ? (
-    <>
-      {/* Hiển thị danh sách đánh giá đã phân trang */}
-      {danhGiaList
-        .slice((currentPage - 1) * pageSize, currentPage * pageSize)
-        .map((review, index) => (
-          <div key={review.id || index} className="review-item">
-            <div className="review-header">
-              <Avatar icon={<UserOutlined />} />
-              <div className="reviewer-info">
-                <div className="reviewer-name">{review.userFullName || "Khách hàng"}</div>
-                <div className="review-date">{formatDate(review.ngayNhanXet)}</div>
+        <div className="review-list">
+          {danhGiaList.length > 0 ? (
+            <>
+              {/* Hiển thị danh sách đánh giá đã phân trang */}
+              {danhGiaList
+                .slice((currentPage - 1) * pageSize, currentPage * pageSize)
+                .map((review, index) => (
+                  <div key={review.id || index} className="review-item">
+                    <div className="review-header">
+                      <Avatar icon={<UserOutlined />} />
+                      <div className="reviewer-info">
+                        <div className="reviewer-name">
+                          {review.userFullName || "Khách hàng"}
+                        </div>
+                        <div className="review-date">
+                          {formatDate(review.ngayNhanXet)}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="review-rating">
+                      <Rate disabled value={review.saoDanhGia} />
+                    </div>
+                    <div className="review-content">{review.nhanXet}</div>
+                    <Divider />
+                  </div>
+                ))}
+
+              {/* Thêm phân trang */}
+              <div
+                className="pagination-container"
+                style={{ textAlign: "center", margin: "20px 0" }}
+              >
+                <Pagination
+                  current={currentPage}
+                  total={danhGiaList.length}
+                  pageSize={pageSize}
+                  onChange={handlePageChange}
+                  showSizeChanger={false}
+                />
               </div>
+            </>
+          ) : (
+            <div className="no-reviews">
+              <p>Chưa có đánh giá nào cho sản phẩm này.</p>
             </div>
-            <div className="review-rating">
-              <Rate disabled value={review.saoDanhGia} />
+          )}
+        </div>
+
+        {/* Phần sản phẩm tương tự */}
+        <div className="similar-products-section">
+          <Divider orientation="left">
+            <h2>Sản phẩm tương tự</h2>
+          </Divider>
+
+          {similarProducts.length > 0 ? (
+            <div className="similar-products-carousel-container">
+              <button
+                className="carousel-control prev"
+                onClick={scrollCarouselLeft}
+              >
+                <LeftOutlined />
+              </button>
+
+              <div className="similar-products-carousel" ref={carouselRef}>
+                {similarProducts.map((product) => (
+                  <div
+                    key={product.id}
+                    className="similar-product-card"
+                    onClick={() => window.location.href = `/product-detailSPTT/${product.id}`}
+
+                  >
+                    <div className="similar-product-image">
+                      <img
+                        src={
+                          product.anhUrl ||
+                          (product.giayEntity?.anhGiayEntities &&
+                          product.giayEntity.anhGiayEntities.length > 0
+                            ? product.giayEntity.anhGiayEntities[0].tenUrl
+                            : "/default-product.jpg")
+                        }
+                        alt={product.giayEntity?.ten || "Giày sản phẩm"}
+                      />
+                    </div>
+                    <div className="similar-product-info">
+                      <h3 className="similar-product-name">
+                        {product.giayEntity?.ten || "Tên sản phẩm"}
+                      </h3>
+                      <p className="similar-product-price">
+                        {Number(product.giaBan).toLocaleString()}₫
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              </div>
+
+              <button
+                className="carousel-control next"
+                onClick={scrollCarouselRight}
+              >
+                <RightOutlined />
+              </button>
             </div>
-            <div className="review-content">{review.nhanXet}</div>
-            <Divider />
-          </div>
-        ))}
-
-      {/* Thêm phân trang */}
-      <div className="pagination-container" style={{ textAlign: 'center', margin: '20px 0' }}>
-        <Pagination
-          current={currentPage}
-          total={danhGiaList.length}
-          pageSize={pageSize}
-          onChange={handlePageChange}
-          showSizeChanger={false}
-        />
-      </div>
-    </>
-  ) : (
-    <div className="no-reviews">
-      <p>Chưa có đánh giá nào cho sản phẩm này.</p>
-    </div>
-  )}
-</div>
-
-{/* Phần sản phẩm tương tự */}
-<div className="similar-products-section">
-  <Divider orientation="left">
-    <h2>Sản phẩm tương tự</h2>
-  </Divider>
-
-  {similarProducts.length > 0 ? (
-    <div className="similar-products-carousel-container">
-      <button className="carousel-control prev" onClick={scrollCarouselLeft}>
-        <LeftOutlined />
-      </button>
-
-      <div className="similar-products-carousel" ref={carouselRef}>
-        {similarProducts.map((product) => (
-          <div
-            key={product.id}
-            className="similar-product-card"
-            onClick={() => window.location.href = `/product-detail/${product.id}`}
-          >
-            <div className="similar-product-image">
-              <img
-                src={
-                  product.anhUrl ||
-                  (product.giayEntity?.anhGiayEntities && product.giayEntity.anhGiayEntities.length > 0
-                    ? product.giayEntity.anhGiayEntities[0].tenUrl
-                    : "/default-product.jpg")
-                }
-                alt={product.giayEntity?.ten || "Giày sản phẩm"}
-              />
-            </div>
-            <div className="similar-product-info">
-              <h3 className="similar-product-name">{product.giayEntity?.ten || "Tên sản phẩm"}</h3>
-              <p className="similar-product-price">{Number(product.giaBan).toLocaleString()}₫</p>
-            </div>
-          </div>
-        ))}
-      </div>
-
-      <button className="carousel-control next" onClick={scrollCarouselRight}>
-        <RightOutlined />
-      </button>
-    </div>
-  ) : (
-    <p>Không có sản phẩm tương tự.</p>
-  )}
-</div>
+          ) : (
+            <p>Không có sản phẩm tương tự.</p>
+          )}
+        </div>
       </div>
     </div>
   );

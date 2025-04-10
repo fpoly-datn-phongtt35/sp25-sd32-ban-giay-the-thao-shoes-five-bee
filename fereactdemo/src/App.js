@@ -36,6 +36,8 @@ import { ReturnOrderStatusPage } from "./returnoders/ReturnOrderStatusPage";
 import { AddressList } from "./address/AddressList";
 import { ProductAll } from "./productAll/ProductAll";
 import ProductDetail from "./sanphamchitiet/ProductDetail";
+import ProductDetailSPTT from "./sanphamchitiet/ProductDetailSPTT";
+
 import Statistics from "./admin/ThongKe";
 import { ProfileUser } from "./profile/ProfileUser";
 import ProtectedRoute from "./components/ProtectedRoute";
@@ -76,6 +78,7 @@ function App() {
               <Route path="/addresslist" element={<AddressList />} />
               <Route path="/productAll" element={<ProductAll />} />
               <Route path="/product-detail/:id" element={<ProductDetail />} />
+              <Route path="/product-detailSPTT/:id" element={<ProductDetailSPTT />} />
               <Route path="/danh-gia" element={<DanhGiaComponent />} />
             </Route>
 
