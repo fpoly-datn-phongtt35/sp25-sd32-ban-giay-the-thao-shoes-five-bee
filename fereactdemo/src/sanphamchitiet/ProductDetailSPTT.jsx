@@ -63,6 +63,7 @@ const ProductDetailSPTT = () => {
       console.log("✅ Thông tin giày chi tiết:", item);
 
       const giayChitiet = {
+        id: item.id,
         tenGiay: item.giayEntity?.ten,
         tenMauSac: item.mauSacEntity?.ten,
         giaBan: item.giaBan,
@@ -72,7 +73,8 @@ const ProductDetailSPTT = () => {
         anh: item.danhSachAnh?.[0]?.tenUrl,
       };
       console.log("✅ Thông tin giày chi tiếtaaa:", giayChitiet);
-
+      setSelectedSize(item.kichCoEntity?.ten);
+      setSelectedColor(item.mauSacEntity?.ten);
       setProductGiay(giayChitiet);
     } catch (error) {
       console.error("❌ Lỗi khi lấy chi tiết sản phẩm:", error);
@@ -80,33 +82,20 @@ const ProductDetailSPTT = () => {
   };
 
   const handleAddToCart = async () => {
-    if (!selectedSize || !selectedColor) {
-      message.warning("Vui lòng chọn kích thước và màu sắc!");
-      return;
-    }
-
-    const selectedVariant = bienTheList.find(
-      (item) =>
-        item.tenMauSac === selectedColor && item.tenKichCo === selectedSize
-    );
-
-    if (!selectedVariant) {
-      message.error("Không tìm thấy sản phẩm với lựa chọn này!");
-      return;
-    }
+    
 
     // ✅ Log thông tin biến thể được thêm vào giỏ hàng
     console.log("Thông tin giày gửi lên giỏ hàng:", {
-      idGiayChiTiet: selectedVariant.idGiayChiTiet,
-      tenMauSac: selectedVariant.tenMauSac,
-      tenKichCo: selectedVariant.tenKichCo,
+      idGiayChiTiet: productGiay.id,
+      tenMauSac: selectedSize,
+      tenKichCo: selectedSize,
       soLuong: quantity,
-      giaBan: selectedVariant.giaBan,
-      giaKhiGiam: selectedVariant.giaKhiGiam ?? null,
+      giaBan: productGiay.giaBan,
+      giaKhiGiam: productGiay.giaKhiGiam ?? null,
     });
 
     try {
-      const response = await addToCart(selectedVariant.idGiayChiTiet, quantity);
+      const response = await addToCart(productGiay.id, quantity);
       if (response.status === 200) {
         message.success("Đã thêm vào giỏ hàng thành công!");
       } else {
