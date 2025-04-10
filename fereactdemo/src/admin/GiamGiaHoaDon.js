@@ -91,10 +91,37 @@ const GiamGiaHoaDon = () => {
     setIsAddModalVisible(false);
   };
   const handleAddSubmit = async () => {
-    // if (!ma || !ten || !dieuKien) {
-    //   message.error("Mã, Tên và Điều kiện phiếu giảm giá không được bỏ trống!");
-    //   return;
-    // }
+    // Kiểm tra từng trường riêng biệt để báo lỗi cụ thể
+    const parsedPhanTramGiam = parseFloat(phanTramGiam);
+
+    if (isNaN(parsedPhanTramGiam)) {
+      message.error("Phần trăm giảm phải là một số!");
+      return;
+    }
+    if (parsedPhanTramGiam <= 0) {
+      message.error("Phần trăm giảm phải lớn hơn 0!");
+      return;
+    }
+    if (parsedPhanTramGiam > 100) {
+      message.error("Phần trăm giảm không được vượt quá 100%!");
+      return;
+    }
+    if (isNaN(parseFloat(dieuKien)) || parseFloat(dieuKien) <= 0) {
+      message.error("Điều kiện phải là một số dương hợp lệ!");
+      return;
+    }
+
+    if (isNaN(parseFloat(soTienGiamMax)) || parseFloat(soTienGiamMax) <= 0) {
+      message.error("Số tiền giảm tối đa phải là một số dương hợp lệ!");
+      return;
+    }
+
+    if (isNaN(parseInt(soLuong)) || parseInt(soLuong) <= 0) {
+      message.error("Số lượng phải là một số nguyên dương hợp lệ!");
+      return;
+    }
+
+
 
     const newTrangThai = getTrangThaiFromDates(
       new Date(ngayBatDau),
@@ -102,16 +129,17 @@ const GiamGiaHoaDon = () => {
     );
 
     const newGiamGiaHoaDon = {
-      ma: ma,
-      ten: ten,
+      ma,
+      ten,
       dieuKien: parseFloat(dieuKien),
       soTienGiamMax: parseFloat(soTienGiamMax),
-      ngayBatDau: ngayBatDau,
-      ngayKetThuc: ngayKetThuc,
+      ngayBatDau,
+      ngayKetThuc,
       phanTramGiam: parseFloat(phanTramGiam),
       soLuong: parseInt(soLuong),
       trangThai: newTrangThai,
     };
+
     try {
       await addGiamGiaHoaDon(newGiamGiaHoaDon);
       message.success("Thêm thành công!");
@@ -125,9 +153,10 @@ const GiamGiaHoaDon = () => {
       setNgayBatDau("");
       setNgayKetThuc("");
     } catch (error) {
-      message.error("Lỗi khi thêm!");
+      message.error("Lỗi khi thêm!" + (error.response?.data?.message || error.message));
       console.error("Lỗi khi thêm:", error);
     }
+
     setIsAddModalVisible(false);
   };
 
@@ -168,7 +197,8 @@ const GiamGiaHoaDon = () => {
       setValue(null);
     } catch (error) {
       console.error("Lỗi khi cập nhật mã giảm giá:", error);
-      message.error("Lỗi khi cập nhật mã giảm giá!");
+      message.error("Lỗi khi cập nhật mã giảm giá!" +
+        (error.response?.data?.message || error.message));
     }
   };
 

@@ -82,10 +82,14 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   @Override
   public GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
       GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
+    
 
-    if (giamGiaChiTietSanPhamRequest.getIdGiayChiTiet() == null
-        && giamGiaChiTietSanPhamRequest.getIdGiayChiTiet().isEmpty()) {
-      throw new IllegalArgumentException("Vui lòng truyền vào điều kiện để tạo giảm giá.");
+    if (giamGiaChiTietSanPhamRequest.getPhanTramGiam() > 100) {
+      throw new IllegalArgumentException("Phần trăm giảm không được vượt quá 100%.");
+    }
+
+    if (giamGiaChiTietSanPhamRequest.getNgayBatDau().after(giamGiaChiTietSanPhamRequest.getNgayKetThuc())) {
+      throw new IllegalArgumentException("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
     }
 
     Integer trangThai;

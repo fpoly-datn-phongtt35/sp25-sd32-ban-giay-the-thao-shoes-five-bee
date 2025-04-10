@@ -56,21 +56,30 @@ public class GiamGiaHoaDonServiceImpl implements GiamGiaHoaDonService {
     return giamGiaHoaDonRepository.findAll();
   }
 
-  @Override
-  public GiamGiaHoaDonEntity add(GiamGiaHoaDonDto giamGiaHoaDonDto) {
-    return giamGiaHoaDonRepository.save(
-        GiamGiaHoaDonEntity.builder()
-            .ma(giamGiaHoaDonDto.getMa())
-            .ten(giamGiaHoaDonDto.getTen())
-            .dieuKien(giamGiaHoaDonDto.getDieuKien())
-            .soTienGiamMax(giamGiaHoaDonDto.getSoTienGiamMax())
-            .ngayBatDau(giamGiaHoaDonDto.getNgayBatDau())
-            .ngayKetThuc(giamGiaHoaDonDto.getNgayKetThuc())
-            .phanTramGiam(giamGiaHoaDonDto.getPhanTramGiam())
-            .soLuong(giamGiaHoaDonDto.getSoLuong())
-            .trangThai(giamGiaHoaDonDto.getTrangThai())
-            .build());
-  }
+    @Override
+    public GiamGiaHoaDonEntity add(GiamGiaHoaDonDto giamGiaHoaDonDto) {
+
+        if (giamGiaHoaDonDto.getPhanTramGiam() > 100) {
+            throw new IllegalArgumentException("Phần trăm giảm không được vượt quá 100%.");
+        }
+
+        if (giamGiaHoaDonDto.getNgayBatDau().after(giamGiaHoaDonDto.getNgayKetThuc())) {
+            throw new IllegalArgumentException("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
+        }
+
+        return giamGiaHoaDonRepository.save(
+                GiamGiaHoaDonEntity.builder()
+                        .ma(giamGiaHoaDonDto.getMa())
+                        .ten(giamGiaHoaDonDto.getTen())
+                        .dieuKien(giamGiaHoaDonDto.getDieuKien())
+                        .soTienGiamMax(giamGiaHoaDonDto.getSoTienGiamMax())
+                        .ngayBatDau(giamGiaHoaDonDto.getNgayBatDau())
+                        .ngayKetThuc(giamGiaHoaDonDto.getNgayKetThuc())
+                        .phanTramGiam(giamGiaHoaDonDto.getPhanTramGiam())
+                        .soLuong(giamGiaHoaDonDto.getSoLuong())
+                        .trangThai(giamGiaHoaDonDto.getTrangThai())
+                        .build());
+    }
 
   @Override
   public GiamGiaHoaDonEntity update(GiamGiaHoaDonDto giamGiaHoaDonDto) {
