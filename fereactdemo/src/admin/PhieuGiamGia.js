@@ -253,10 +253,20 @@ const DotGiamGia = () => {
   }, []);
 
   const handleAddSubmit = async () => {
-    // if (!ma || !ten || !dieuKien) {
-    //   message.error("Mã, Tên và Điều kiện phiếu giảm giá không được bỏ trống!");
-    //   return;
-    // }
+    const parsedPhanTramGiam = parseFloat(phanTramGiam);
+
+    if (isNaN(parsedPhanTramGiam)) {
+      message.error("Phần trăm giảm phải là một số!");
+      return;
+    }
+    if (parsedPhanTramGiam <= 0) {
+      message.error("Phần trăm giảm phải lớn hơn 0!");
+      return;
+    }
+    if (parsedPhanTramGiam > 100) {
+      message.error("Phần trăm giảm không được vượt quá 100%!");
+      return;
+    }
 
     const newTrangThai = getTrangThaiFromDates(
       new Date(ngayBatDau),
@@ -268,10 +278,11 @@ const DotGiamGia = () => {
       ten: ten,
       ngayBatDau: ngayBatDau,
       ngayKetThuc: ngayKetThuc,
-      phanTramGiam: parseFloat(phanTramGiam),
+      phanTramGiam: parsedPhanTramGiam,
       trangThai: newTrangThai,
       idGiayChiTiet: selectedProducts.map((product) => product.id),
     };
+
     console.log("Đợt giảm giá mới:", newDotGiamGia);
 
     try {
@@ -285,9 +296,10 @@ const DotGiamGia = () => {
       setNgayKetThuc("");
       setSelectedProducts(null);
     } catch (error) {
-      message.error("Lỗi khi thêm!");
+      message.error("Lỗi khi thêm!" + (error.response?.data?.message || error.message));
       console.error("Lỗi khi thêm:", error);
     }
+
     setIsAddModalVisible(false);
   };
 
@@ -676,7 +688,7 @@ const DotGiamGia = () => {
               <Form.Item label="Tên khuyến mại">
                 <Input value={ten} onChange={(e) => setTen(e.target.value)} />
               </Form.Item>
-              <Form.Item label="Giá trị giảm">
+              <Form.Item label="Phần trăm giảm">
                 <Input
                   value={phanTramGiam}
                   onChange={(e) => setPhamTramGiam(e.target.value)}
