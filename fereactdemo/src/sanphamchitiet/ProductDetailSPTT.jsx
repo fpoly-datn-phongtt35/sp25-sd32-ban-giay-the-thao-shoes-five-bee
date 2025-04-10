@@ -51,10 +51,7 @@ const ProductDetailSPTT = () => {
 
   useEffect(() => {
     fetchProductDetail();
-
   }, [id]);
-
-
 
   const fetchProductDetail = async () => {
     try {
@@ -81,8 +78,6 @@ const ProductDetailSPTT = () => {
       console.error("❌ Lỗi khi lấy chi tiết sản phẩm:", error);
     }
   };
-
-
 
   const handleAddToCart = async () => {
     if (!selectedSize || !selectedColor) {
@@ -127,7 +122,6 @@ const ProductDetailSPTT = () => {
     const date = new Date(dateString);
     return date.toLocaleDateString("vi-VN");
   };
-
 
   return (
     <div className="product-detail">
@@ -181,7 +175,7 @@ const ProductDetailSPTT = () => {
           </div>
           <div>
             <p>
-              <strong>Số lượng:</strong> {productGiay?.soLuong }
+              <strong>Số lượng:</strong> {productGiay?.soLuong}
             </p>
           </div>
 
@@ -208,9 +202,9 @@ const ProductDetailSPTT = () => {
             onClick={handleAddToCart}
             style={{ borderRadius: "15px" }}
           >
-            MUA NGAY VỚI GIÁ {""}
-            {selectedColor
-              ? currentPrice.toLocaleString()
+            MUA NGAY VỚI GIÁ{" "}
+            {productGiay?.giaKhiGiam
+              ? productGiay.giaKhiGiam.toLocaleString()
               : productGiay?.giaBan?.toLocaleString() || "0"}
             ₫
           </div>
