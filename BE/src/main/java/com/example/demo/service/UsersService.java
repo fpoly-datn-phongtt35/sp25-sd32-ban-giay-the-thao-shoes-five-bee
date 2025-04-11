@@ -15,7 +15,7 @@ import java.util.UUID;
 public interface UsersService {
   String getAuthenticatedUserEmail();
 
-  UserEntity getBySdt(String sdt);
+  List<UserEntity> getBySdt(String sdt);
 
   List<UserEntity> getAll();
 

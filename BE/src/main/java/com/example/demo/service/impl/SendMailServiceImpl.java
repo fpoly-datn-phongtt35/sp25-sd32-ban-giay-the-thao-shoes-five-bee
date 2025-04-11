@@ -8,6 +8,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.mail.javamail.JavaMailSender;
 import org.springframework.mail.javamail.MimeMessageHelper;
+import org.springframework.scheduling.annotation.Async;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -17,6 +18,8 @@ public class SendMailServiceImpl implements SendMailService {
     private JavaMailSender javaMailSender;
     @Value("${spring.mail.username}")
     private String fromEmailId;
+
+    @Async
     @Override
     public void sendMail(String to, String body, String subject) {
         MimeMessage mimeMessage = javaMailSender.createMimeMessage();

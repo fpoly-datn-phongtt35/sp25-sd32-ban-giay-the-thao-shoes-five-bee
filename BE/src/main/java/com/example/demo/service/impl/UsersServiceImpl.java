@@ -70,7 +70,7 @@ public class UsersServiceImpl implements UsersService {
   }
 
   @Override
-  public UserEntity getBySdt(String sdt) {
+  public List<UserEntity> getBySdt(String sdt) {
     return userRepository.findBySoDienThoai(sdt);
   }
 
