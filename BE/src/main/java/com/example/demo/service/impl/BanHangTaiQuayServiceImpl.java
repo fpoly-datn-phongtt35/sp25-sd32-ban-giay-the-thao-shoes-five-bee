@@ -45,8 +45,8 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
                     .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
 
     // Kiểm tra người dùng đã mua hàng chưa
-    UserEntity user = userRepository.findBySoDienThoai(hoaDonRequest.getSdtNguoiNhan());
-
+    List<UserEntity> users = userRepository.findBySoDienThoai(hoaDonRequest.getSdtNguoiNhan());
+    UserEntity user = users.isEmpty() ? null : users.get(0);
     // Kiểm tra trạng thái hóa đơn
     if (hoaDon.getTrangThai() != 1) {
       throw new IllegalArgumentException("Hóa đơn đã được thanh toán hoặc không hợp lệ");
