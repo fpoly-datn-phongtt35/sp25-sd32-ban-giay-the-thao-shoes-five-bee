@@ -252,7 +252,7 @@ public class AuthServiceImpl implements AuthService {
 
         sendMailWithHtml(toEmail, "OTP mới của bạn", emailBody);
     }
-    
+
     private void sendMailWithHtml(String to, String subject, String htmlContent) {
         // Phương thức này phải đảm bảo email được gửi với content-type là text/html
         // Ví dụ sử dụng JavaMailSender:
