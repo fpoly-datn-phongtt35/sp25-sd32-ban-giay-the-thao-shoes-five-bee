@@ -132,7 +132,16 @@ const OrderItem = ({ order, onChangeData }) => {
                 ? "Tiền mặt"
                 : "Chuyển khoản" || 'N/A'}
           </p>
-          <p className="product-category">Địa chỉ nhận hàng: {order.diaChi || 'Tại quầy'}</p>
+          <p className="product-category">
+            Địa chỉ nhận hàng: {[
+              order.diaChi,
+              order.xa,
+              order.huyen,
+              order.tinh,
+            ].filter(item => item && item !== "null" && item !== "undefined").join(', ') || 'Tại quầy'}
+          </p>
+
+
           <p className="return-policy">{returnPolicy}</p>
         </div>
         {/* <div className="product-price">

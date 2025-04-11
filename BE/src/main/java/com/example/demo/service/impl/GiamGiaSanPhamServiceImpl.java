@@ -82,7 +82,7 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   @Override
   public GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
       GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
-    
+
 
     if (giamGiaChiTietSanPhamRequest.getPhanTramGiam() > 100) {
       throw new IllegalArgumentException("Phần trăm giảm không được vượt quá 100%.");

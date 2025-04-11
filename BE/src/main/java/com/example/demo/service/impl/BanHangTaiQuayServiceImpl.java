@@ -39,10 +39,9 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
           Integer hinhThucThanhToan,
           Boolean isGiaoHang,
           HoaDonRequest hoaDonRequest) {
-    HoaDonEntity hoaDon =
-            hoaDonRepository
-                    .findById(idHoaDon)
-                    .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
+
+    HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon)
+            .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
 
     // Kiểm tra người dùng đã mua hàng chưa
     List<UserEntity> users = userRepository.findBySoDienThoai(hoaDonRequest.getSdtNguoiNhan());
@@ -59,43 +58,33 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     }
 
     // Tổng tiền sản phẩm gốc
-    BigDecimal tongTienSanPhamGoc =
-            danhSachSanPham.stream()
-                    .map(
-                            hoaDonChiTiet ->
-                                    hoaDonChiTiet
-                                            .getGiaBan()
-                                            .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+    BigDecimal tongTienSanPhamGoc = danhSachSanPham.stream()
+            .map(hdct -> hdct.getGiaBan().multiply(BigDecimal.valueOf(hdct.getSoLuong())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
-    // Tổng tiền saản phẩm có khuyến mãi sản phẩm
-    BigDecimal tongTienSanPhamKhiGiam =
-            danhSachSanPham.stream()
-                    .map(
-                            hoaDonChiTiet ->
-                                    hoaDonChiTiet
-                                            .getDonGia()
-                                            .multiply(BigDecimal.valueOf(hoaDonChiTiet.getSoLuong())))
-                    .reduce(BigDecimal.ZERO, BigDecimal::add);
+    // Tổng tiền sản phẩm khi có giảm giá sản phẩm
+    BigDecimal tongTienSanPhamKhiGiam = danhSachSanPham.stream()
+            .map(hdct -> hdct.getDonGia().multiply(BigDecimal.valueOf(hdct.getSoLuong())))
+            .reduce(BigDecimal.ZERO, BigDecimal::add);
 
+    // Tính tiền giảm nếu có mã giảm giá
     BigDecimal soTienGiamKhiApMa = BigDecimal.ZERO;
     if (idGiamGia != null) {
       GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findById(idGiamGia).orElse(null);
+      if (giamGia != null &&
+              giamGia.getSoLuong() > 0 &&
+              tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0 &&
+              giamGia.getTrangThai() == 0) {
 
-      // Nếu mã giảm giá tồn tại, kiểm tra điều kiện áp dụng
-      if (giamGia != null
-              && giamGia.getSoLuong() > 0
-              && tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0
-              && giamGia.getTrangThai() == 0) {
-        soTienGiamKhiApMa =
-                giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
-                        idHoaDon, giamGia, tongTienSanPhamKhiGiam);
+        soTienGiamKhiApMa = giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
+                idHoaDon, giamGia, tongTienSanPhamKhiGiam);
       }
     }
 
     BigDecimal soTienGiam = tongTienSanPhamGoc.subtract(tongTienSanPhamKhiGiam);
     BigDecimal phiShip = isGiaoHang ? BigDecimal.valueOf(0) : BigDecimal.ZERO;
 
+    // Cập nhật thông tin hóa đơn
     hoaDon.setMa(hoaDonRequest.getMa());
     hoaDon.setNgayThanhToan(new Date());
     hoaDon.setMoTa(hoaDonRequest.getMoTa());
@@ -116,50 +105,55 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
     // Cập nhật trạng thái hóa đơn
     if (hinhThucThanhToan == 2) {
-      hoaDon.setTrangThai(0);  // Hóa đơn chờ thanh toán khi giao hàng
+      hoaDon.setTrangThai(0);  // Chờ thanh toán khi giao hàng
     } else {
       hoaDon.setTrangThai(
               isGiaoHang
-                      ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2)  // Trạng thái là 3 nếu là Tiền mặt hoặc Chuyển khoản, 2 nếu là thanh toán khi giao hàng
-                      : 2  // Nếu không giao hàng, trạng thái là 2
+                      ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2)
+                      : 2
       );
     }
 
-    // Kiểm tra và trừ số lượng tồn kho, chỉ khi không phải thanh toán khi giao hàng (hình thức thanh toán khác 2)
+    // ✅ Cập nhật trạng thái hóa đơn chi tiết → 2 nếu là thanh toán tại quầy (0, 1) và không giao hàng
+    if (!isGiaoHang && (hinhThucThanhToan == 0 || hinhThucThanhToan == 1)) {
+      danhSachSanPham.forEach(hdct -> {
+        hdct.setTrangThai(2); // 2 = Hoàn thành
+        hoaDonChiTietRepository.save(hdct);
+      });
+    }
+
+    // Trừ tồn kho nếu không phải "thanh toán khi giao hàng"
     if (hinhThucThanhToan != 2) {
-      for (HoaDonChiTietEntity hoaDonChiTiet : danhSachSanPham) {
-        GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
-        int soLuongMua = hoaDonChiTiet.getSoLuong();
+      for (HoaDonChiTietEntity hdct : danhSachSanPham) {
+        GiayChiTietEntity giayChiTiet = hdct.getGiayChiTietEntity();
+        int soLuongMua = hdct.getSoLuong();
 
         if (giayChiTiet.getSoLuongTon() < soLuongMua) {
-          throw new IllegalArgumentException("Số lượng sản phẩm " + giayChiTiet.getId() + " không đủ để thanh toán");
+          throw new IllegalArgumentException("Sản phẩm " + giayChiTiet.getId() + " không đủ tồn kho");
         }
 
         giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - soLuongMua);
         giayChiTietRepository.save(giayChiTiet);
 
-
         GiayEntity giayEntity = giayChiTiet.getGiayEntity();
         if (giayEntity != null) {
-            int tongSoLuongMoi = giayEntity.getSoLuongTon() - soLuongMua;
-            if (tongSoLuongMoi < 0 ){
-                tongSoLuongMoi = 0;
-            }
-            giayEntity.setSoLuongTon(tongSoLuongMoi);
-            giayRepository.save(giayEntity);
+          int tongMoi = giayEntity.getSoLuongTon() - soLuongMua;
+          if (tongMoi < 0) tongMoi = 0;
+          giayEntity.setSoLuongTon(tongMoi);
+          giayRepository.save(giayEntity);
         }
-
       }
     }
 
     hoaDon.setUserEntity(user);
     hoaDonRepository.save(hoaDon);
 
-    // gửi email đánh giá cho user nếu có thông tin user
-    if (user != null && user.getEmail() != null){
-      sendFormDanhGia(user,danhSachSanPham);
+    // Gửi mail đánh giá nếu có user
+    if (user != null && user.getEmail() != null) {
+      sendFormDanhGia(user, danhSachSanPham);
     }
   }
+
 
   public void sendFormDanhGia(UserEntity user, List<HoaDonChiTietEntity> danhSachSanPham) {
     // Tạo nội dung sản phẩm như đã làm trước đây

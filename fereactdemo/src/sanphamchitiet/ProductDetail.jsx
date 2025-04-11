@@ -10,6 +10,7 @@ import {
 import { getGiayDetail } from "../service/GiayService";
 import "./sanphamchitiet.css";
 import { addToCart, getByKhachHangId } from "../service/GioHangChiTietService";
+import { subscribeToProduct } from "../service/QuanTamService";
 import { Avatar, Button, Divider, message, Pagination, Rate } from "antd";
 import { getProductDanhGiaById } from "../service/DanhGiaService";
 import { LeftOutlined, RightOutlined, UserOutlined } from "@ant-design/icons";
@@ -28,7 +29,7 @@ const ProductDetail = () => {
 
   const [anhCHiTiet, setanhCHiTiet] = useState([]);
   const [soLuongChitiet, setSoLuongChiTiet] = useState([]);
-  const [totalQuantity, setTotalQuantity] = useState(0); 
+  const [totalQuantity, setTotalQuantity] = useState(0);
   const [selectedSimilarProduct, setSelectedSimilarProduct] = useState(null);
 
   // State cho phần đánh giá - chỉ hiển thị
@@ -104,7 +105,7 @@ const ProductDetail = () => {
 
   const fetchSimilarProducts = async () => {
     if (!id) return;
-   
+
     try {
       // Kiểm tra xem sản phẩm chính có tồn tại không trước khi gọi API sản phẩm tương tự
       if (productGiay && productGiay.id) {
@@ -121,13 +122,13 @@ const ProductDetail = () => {
     try {
       const response = await detailGiayChiTiet2(id);
       console.log("Chi tiết sản phẩm tương tự:", response.data);
-      
+
       setProductGiay(response.data); // Cập nhật lại sản phẩm chính
     } catch (error) {
       console.error("Lỗi khi lấy chi tiết sản phẩm tương tự:", error);
     }
   };
-  
+
 
   const scrollCarouselLeft = () => {
     if (carouselRef.current) {
@@ -169,6 +170,22 @@ const ProductDetail = () => {
       console.error("❌ Lỗi khi lấy đánh giá:", error);
     }
   };
+  const handleSubscribe = async (giayChiTietId) => {
+    try {
+      const res = await subscribeToProduct(giayChiTietId);
+      message.success("Bạn đã đăng ký theo dõi sản phẩm này thành công!");
+    } catch (err) {
+      console.error("❌ Lỗi đăng ký theo dõi:", err);
+      message.error("Đăng ký theo dõi thất bại. Vui lòng thử lại.");
+    }
+  };
+
+  const selectedVariant = bienTheList.find(
+    (item) =>
+      item.tenMauSac === selectedColor &&
+      item.tenKichCo === selectedSize
+  );
+
 
   const fetchProductDetail = async () => {
     try {
@@ -376,9 +393,8 @@ const ProductDetail = () => {
               {sizeList.map((size) => (
                 <div
                   key={size}
-                  className={`size-box ${
-                    selectedSize === size ? "active" : ""
-                  }`}
+                  className={`size-box ${selectedSize === size ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedSize(size); // Cập nhật kích cỡ đã chọn
                     handleSizeSelect(size); // Gọi hàm xử lý khi chọn kích cỡ
@@ -398,9 +414,8 @@ const ProductDetail = () => {
                 (color) => (
                   <div
                     key={color}
-                    className={`color-box ${
-                      selectedColor === color ? "active" : ""
-                    }`}
+                    className={`color-box ${selectedColor === color ? "active" : ""
+                      }`}
                     onClick={() => handleColorSelect(color)}
                   >
                     {color}
@@ -439,6 +454,16 @@ const ProductDetail = () => {
               : productGiay?.giaBan?.toLocaleString() || "0"}
             ₫
           </div>
+          {selectedColor && selectedSize && selectedVariant?.soLuong === 0 && (
+            <Button
+              type="primary"
+              onClick={() => handleSubscribe(selectedVariant.idGiayChiTiet)}
+              style={{ marginTop: '10px', backgroundColor: '#1890ff', color: 'white' }}
+            >
+              Theo dõi khi có hàng
+            </Button>
+          )}
+
         </div>
 
         {/* Chính sách */}
@@ -551,7 +576,7 @@ const ProductDetail = () => {
                         src={
                           product.anhUrl ||
                           (product.giayEntity?.anhGiayEntities &&
-                          product.giayEntity.anhGiayEntities.length > 0
+                            product.giayEntity.anhGiayEntities.length > 0
                             ? product.giayEntity.anhGiayEntities[0].tenUrl
                             : "/default-product.jpg")
                         }

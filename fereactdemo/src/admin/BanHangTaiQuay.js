@@ -212,41 +212,56 @@ const BanHangTaiQuay = () => {
   };
 
 
-  const handleRemoveProduct = async (productId) => {
+  const handleRemoveProduct = async (productId, giayChiTietId) => {
     try {
       if (!selectedHoaDonId) {
         message.error("Không tìm thấy ID hóa đơn!");
         return;
       }
 
-      const hoaDonId = selectedHoaDonId; // Lấy ID hóa đơn hiện tại
-      console.log("ID hóa đơn:", hoaDonId);
+      const hoaDonId = selectedHoaDonId;
 
-      // Xóa sản phẩm khỏi state ngay lập tức
-      setSelectedProducts((prevSelectedProducts) => {
-        const updatedProducts = { ...prevSelectedProducts };
+      const productToRemove = selectedProducts[hoaDonId]?.find(
+        (product) => product.ID === productId
+      );
 
-        if (Array.isArray(updatedProducts[hoaDonId])) {
-          updatedProducts[hoaDonId] = updatedProducts[hoaDonId].filter(
-            (product) => product.ID !== productId
-          );
-        }
+      console.log("productToRemove:", productToRemove);
+      console.log("giayChiTietId cần hoàn lại:", giayChiTietId);
 
-        return updatedProducts;
+      setSelectedProducts((prev) => ({
+        ...prev,
+        [hoaDonId]: prev[hoaDonId].filter((product) => product.ID !== productId),
+      }));
+
+      const quantityToReturn = productToRemove?.SOLUONG || 1;
+      console.log("Số lượng hoàn trả:", quantityToReturn);
+
+      setGiay((prevGiay) => {
+        const updatedGiay = prevGiay.map((item) => {
+          if (item.ID === giayChiTietId) {
+            console.log("Tìm thấy giày cần hoàn:", item);
+            return { ...item, SOLUONG: item.SOLUONG + quantityToReturn };
+          }
+          return item;
+        });
+
+        console.log("Updated tồn kho fake:", updatedGiay);
+        localStorage.setItem("fakeTonKho", JSON.stringify(updatedGiay));
+        return updatedGiay;
       });
 
-      // Gọi API xóa sản phẩm
       await deleteSanPhamHoaDonChiTiet(productId);
       message.success("Xóa sản phẩm thành công!");
-      getAllGiay();
 
-      // Cập nhật lại số lượng sản phẩm trong hóa đơn
       fetchSanPhamTrongHoaDon(hoaDonId);
     } catch (error) {
       console.error("Lỗi khi xóa sản phẩm:", error);
       message.error("Không thể xóa sản phẩm!");
     }
   };
+
+
+
 
   const increaseQuantity = async (productId, hoaDonId) => {
     try {
@@ -584,6 +599,7 @@ const BanHangTaiQuay = () => {
           const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
           return {
             ID: item.id,
+            ID_GIAY_CHI_TIET: item.giayChiTietEntity?.id, // ✅ thêm dòng này
             TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
             SOLUONG: item.soLuong,
             GIA_KHI_GIAM: item.donGia,
@@ -591,15 +607,15 @@ const BanHangTaiQuay = () => {
             ANH_GIAY:
               item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]
                 ?.tenUrl || "https://via.placeholder.com/150",
-            KICH_CO: kichCo, // Lưu vào biến kích cỡ
-            MAU_SAC: mauSac, // Lưu vào biến màu sắc
-            TRANG_THAI: "Đang bán", // Không cần kiểm tra lại vì đã lọc trước đó
+            KICH_CO: kichCo,
+            MAU_SAC: mauSac,
+            TRANG_THAI: "Đang bán",
           };
         })
         : [];
 
-      console.log("dsadasqewrq", formattedData);
-      // Cập nhật số lượng sản phẩm trong hóa đơn
+      console.log("formattedData (đã có ID_GIAY_CHI_TIET)", formattedData);
+
       setInvoiceProductCounts((prev) => ({
         ...prev,
         [idHoaDon]: formattedData.length,
@@ -611,7 +627,6 @@ const BanHangTaiQuay = () => {
           [idHoaDon]: formattedData,
         };
 
-        // Tính tổng tiền ngay sau khi cập nhật sản phẩm
         const newTotalAmount = formattedData.reduce((total, product) => {
           const giaBan = product.GIA_KHI_GIAM ?? product.GIABAN ?? 0;
           const soLuong = product.SOLUONG ?? 0;
@@ -628,6 +643,7 @@ const BanHangTaiQuay = () => {
       message.error("Lỗi khi tải danh sách sản phẩm!");
     }
   };
+
 
   useEffect(() => {
     if (selectedHoaDonId) {
@@ -1215,7 +1231,8 @@ const BanHangTaiQuay = () => {
                     </div>
                     <Button
                       className="remove_button"
-                      onClick={() => handleRemoveProduct(product.ID)}
+                      onClick={() => handleRemoveProduct(product.ID, product.ID_GIAY_CHI_TIET)}
+
                     >
                       Xóa
                     </Button>

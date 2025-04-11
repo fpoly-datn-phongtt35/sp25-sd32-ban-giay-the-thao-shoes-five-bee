@@ -37,6 +37,9 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     private UserRepository userRepository;
     @Autowired
     private SendMailService sendMailService;
+    @Autowired
+    private HoaDonChiTietRepository hoaDonChiTietRepository;
+
 
     @Override
     public HoaDonEntity xacNhanHoaDon(UUID id) {
@@ -80,8 +83,18 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
             case 6:
                 hoaDon.setTrangThai(2); // Đã giao hàng → Hoàn thành
                 lichSuHoaDonService.createLichSuHoaDon(id, 2,6);
-                // gửi email đánh giá khi đơn hàng hoàn thành
-                sendDanhGiaEmail(hoaDon.getUserEntity().getId(),hoaDon.getId());
+
+                // Tìm tất cả hoá đơn chi tiết theo hóa đơn hiện tại
+                List<HoaDonChiTietEntity> hoaDonChiTietList = hoaDonChiTietRepository.findAllByHoaDonEntity_Id(id);
+
+                // Cập nhật trạng thái của tất cả hóa đơn chi tiết về hoàn thành
+                hoaDonChiTietList.forEach(hdct -> hdct.setTrangThai(2));
+
+                // Lưu lại trạng thái đã cập nhật
+                hoaDonChiTietRepository.saveAll(hoaDonChiTietList);
+
+                // Gửi email đánh giá khi đơn hàng hoàn thành
+                sendDanhGiaEmail(hoaDon.getUserEntity().getId(), hoaDon.getId());
                 break;
             default:
                 throw new RuntimeException("Trạng thái hiện tại không thể xác nhận tiếp.");

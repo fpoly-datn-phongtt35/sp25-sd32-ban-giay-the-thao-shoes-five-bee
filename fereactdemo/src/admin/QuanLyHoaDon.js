@@ -817,7 +817,7 @@ const QuanLyHoaDon = () => {
                     <th>Trạng thái cũ</th>
                     <th>Trạng thái mới</th>
                     <th>Người cập nhật</th>
-                    <th>Mã Hóa Đơn</th>
+
                   </tr>
                 </thead>
                 <tbody>
@@ -827,7 +827,7 @@ const QuanLyHoaDon = () => {
                       <td>{mapTrangThai(historyItem.trangThaiCu)}</td>
                       <td>{mapTrangThai(historyItem.trangThaiMoi)}</td>
                       <td>{historyItem.nguoiCapNhat}</td>
-                      <td>{historyItem.maHoaDon}</td> {/* Hiển thị mã hóa đơn */}
+
                     </tr>
                   ))}
                 </tbody>

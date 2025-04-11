@@ -9,19 +9,22 @@ export const addKhachHang = (khachHangData, file) => {
   formData.append('userDto', new Blob([JSON.stringify(khachHangData)], {
     type: 'application/json'
   }));
-  
+
   if (file) {
     formData.append('file', file);
   }
-  
+
   return axios.post(`${REST_API_BASE_URL}/add`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'
     }
   });
 };
+export const getLichSuMuaHang = (userId) =>
+  axios.get(`/user/lich-su-mua-hang/${userId}`);
 
-export const deleteKhachHang = ( khachHang) =>
+
+export const deleteKhachHang = (khachHang) =>
   axios.post(`${REST_API_BASE_URL}/delete`, khachHang);
 
 export const updateKhachHang = (khachHang, file) => {
@@ -29,7 +32,7 @@ export const updateKhachHang = (khachHang, file) => {
   formData.append('userDto', new Blob([JSON.stringify(khachHang)], {
     type: 'application/json'
   }));
-  
+
   if (file) {
     formData.append('file', file);
   }
@@ -46,7 +49,7 @@ export const detailKhachHang = (id) =>
 export const importExcel = (file) => {
   const formData = new FormData();
   formData.append('file', file);
-  
+
   return axios.post(`${REST_API_BASE_URL}/import-excel`, formData, {
     headers: {
       'Content-Type': 'multipart/form-data'

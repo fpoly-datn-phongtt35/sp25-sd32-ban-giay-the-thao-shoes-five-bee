@@ -1,5 +1,8 @@
 import React, { useEffect, useState } from 'react'
-import { addKhachHang, deleteKhachHang, detailKhachHang, getAllKhachHang, updateKhachHang, importExcel } from '../service/KhachHangService';
+import {
+    addKhachHang, deleteKhachHang, detailKhachHang, getAllKhachHang, updateKhachHang, importExcel,
+    getLichSuMuaHang,
+} from '../service/KhachHangService';
 import { Button, Form, Input, message, Modal, Radio, Select, Space, Table, DatePicker, Drawer } from 'antd';
 import bcrypt from 'bcryptjs';
 import moment from 'moment';
@@ -22,6 +25,12 @@ const KhachHang = () => {
     const [soDienThoai, setSoDienThoai] = useState("");
     const [importFile, setImportFile] = useState(null);
     const [isDrawerVisible, setIsDrawerVisible] = useState(false);
+    const [selectedKhachHang, setSelectedKhachHang] = useState(null);
+    const [isLichSuModalVisible, setIsLichSuModalVisible] = useState(false);
+    const [isLichSuVisible, setIsLichSuVisible] = useState(false);
+    const [lichSuMuaHang, setLichSuMuaHang] = useState(null);
+
+
 
     const getActiveChatLieu = () => {
         return khachHang.filter(item => item.TRANG_THAI === 0);
@@ -71,6 +80,19 @@ const KhachHang = () => {
             message.error("Lỗi khi tải dữ liệu khách hàng");
         }
     };
+
+    const lichSuMuaHangDetail = async (record) => {
+        try {
+            const response = await getLichSuMuaHang(record.ID);
+            const lichSu = response.data;
+            setLichSuMuaHang({ ...lichSu, hoTen: record.HOTEN }); // gộp thêm tên khách
+            setIsLichSuVisible(true);
+        } catch (error) {
+            message.error("Lỗi khi lấy lịch sử mua hàng");
+        }
+    };
+
+
 
 
     const createKhachHang = async () => {
@@ -350,6 +372,7 @@ const KhachHang = () => {
                                 <Space size="middle">
                                     <Button onClick={() => detail(record)}>Chi tiết</Button>
                                     <Button onClick={() => removeKhachHang(record)}>Xóa</Button>
+                                    <Button onClick={() => lichSuMuaHangDetail(record)}>Lịch sử</Button>
                                 </Space>
                             ),
                         },
@@ -475,6 +498,66 @@ const KhachHang = () => {
                     </Form.Item>
                 </Form>
             </Modal>
+            <Modal
+                title={`Lịch sử mua hàng - ${selectedKhachHang?.HOTEN}`}
+                visible={isLichSuModalVisible}
+                onCancel={() => setIsLichSuModalVisible(false)}
+                footer={null}
+            >
+                <Table
+                    dataSource={lichSuMuaHang}
+                    rowKey={(record, index) => index}
+                    pagination={{ pageSize: 5 }}
+                    columns={[
+                        {
+                            title: "Màu Sắc",
+                            dataIndex: "mauSac",
+                            key: "mauSac",
+                        },
+                        {
+                            title: "Thương Hiệu",
+                            dataIndex: "thuongHieu",
+                            key: "thuongHieu",
+                        },
+                        {
+                            title: "Số Lượng",
+                            dataIndex: "soLuong",
+                            key: "soLuong",
+                        },
+                        {
+                            title: "Tổng Tiền",
+                            dataIndex: "tongTien",
+                            key: "tongTien",
+                            render: (value) => `${value.toLocaleString()} đ`,
+                        },
+                    ]}
+                />
+            </Modal>
+            <Modal
+                title="Lịch sử mua hàng"
+                open={isLichSuVisible}
+                onCancel={() => setIsLichSuVisible(false)}
+                footer={null}
+            >
+                {lichSuMuaHang ? (
+                    <div>
+                        <p><strong>Khách hàng:</strong> {lichSuMuaHang.hoTen || 'Chưa có'}</p>
+                        <p><strong>Màu sắc hay mua:</strong> {lichSuMuaHang.mauSac || 'Chưa có'}</p>
+                        <p><strong>Thương hiệu hay mua:</strong> {lichSuMuaHang.thuongHieu || 'Chưa có'}</p>
+                        <p><strong>Số lượng đã mua:</strong> {lichSuMuaHang.soLuong ?? 'Chưa có'}</p>
+                        <p>
+                            <strong>Tổng tiền đã tiêu:</strong>{' '}
+                            {lichSuMuaHang.tongTien != null
+                                ? `${lichSuMuaHang.tongTien.toLocaleString()} đ`
+                                : 'Chưa có'}
+                        </p>
+                    </div>
+                ) : (
+                    <p>Chưa có dữ liệu...</p>
+                )}
+            </Modal>
+
+
         </div>
     )
 }
