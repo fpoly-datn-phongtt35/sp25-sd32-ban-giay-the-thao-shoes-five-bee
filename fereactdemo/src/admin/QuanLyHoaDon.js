@@ -287,6 +287,8 @@ const QuanLyHoaDon = () => {
         chuongTrinhGiamGiaChiTietHoaDons:
           response.data.chuongTrinhGiamGiaChiTietHoaDons || [],
       };
+      console.log("Chi tiết hóa đơn:", hoaDonData);
+
       setDataHoaDonChiTiet(hoaDonData);
       if (hoaDonData.userId && hoaDonData.id) {
         fetchDanhGia(hoaDonData.userId, hoaDonData.id);
@@ -928,8 +930,15 @@ const QuanLyHoaDon = () => {
                 <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
                 <h6>
                   Địa Chỉ:{" "}
-                  {dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.xa || dataHoaDonChiTiet?.huyen || dataHoaDonChiTiet?.tinh
-                    ? `${dataHoaDonChiTiet?.diaChi || ""}, ${dataHoaDonChiTiet?.xa || ""}, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""}`
+                  {dataHoaDonChiTiet?.diaChi ||
+                  dataHoaDonChiTiet?.xa ||
+                  dataHoaDonChiTiet?.huyen ||
+                  dataHoaDonChiTiet?.tinh
+                    ? `${dataHoaDonChiTiet?.diaChi || ""}, ${
+                        dataHoaDonChiTiet?.xa || ""
+                      }, ${dataHoaDonChiTiet?.huyen || ""}, ${
+                        dataHoaDonChiTiet?.tinh || ""
+                      }`
                     : "Tại Quầy"}
                 </h6>
               </div>
@@ -977,82 +986,63 @@ const QuanLyHoaDon = () => {
                   </div>
                 )}
             </div>
-            <div className="phai">
-              <h4>Thông tin người nhận</h4>
+            {dataHoaDonChiTiet.trangThai === 0 && (
+              <div className="phai">
+                <h4>Thông tin người nhận</h4>
 
-              {dataHoaDonChiTiet?.trangThai === 0 ? (
-                <>
-                  <div className="info-row">
-                    <h6 className="info-label">Tên khách hàng:</h6>
-                    <Input
-                      placeholder="Tên người nhận"
-                      value={formData.tenNguoiNhan}
-                      onChange={(e) =>
-                        handleChange("tenNguoiNhan", e.target.value)
-                      }
-                    />
-                  </div>
+                <div className="info-row">
+                  <h6 className="info-label">Tên khách hàng:</h6>
+                  <Input
+                    placeholder="Tên người nhận"
+                    value={formData.tenNguoiNhan}
+                    onChange={(e) =>
+                      handleChange("tenNguoiNhan", e.target.value)
+                    }
+                  />
+                </div>
 
-                  <div className="info-row">
-                    <h6 className="info-label">Số điện thoại:</h6>
-                    <Input
-                      placeholder="Số điện thoại"
-                      value={formData.sdtNguoiNhan}
-                      onChange={(e) =>
-                        handleChange("sdtNguoiNhan", e.target.value)
-                      }
-                    />
-                  </div>
+                <div className="info-row">
+                  <h6 className="info-label">Số điện thoại:</h6>
+                  <Input
+                    placeholder="Số điện thoại"
+                    value={formData.sdtNguoiNhan}
+                    onChange={(e) =>
+                      handleChange("sdtNguoiNhan", e.target.value)
+                    }
+                  />
+                </div>
 
-                  <div className="info-row">
-                    <h6 className="info-label">Địa chỉ:</h6>
-                    <Input
-                      placeholder="Địa chỉ"
-                      value={formData.diaChi}
-                      onChange={(e) => handleChange("diaChi", e.target.value)}
-                    />
-                  </div>
-                </>
-              ) : (
-                <>
-                  <div className="info-row">
-                    <h6 className="info-label">Tên người nhận:</h6>
-                    <span>{dataHoaDonChiTiet?.user || "N/A"}</span>
-                  </div>
-                  <div className="info-row">
-                    <h6 className="info-label">Số điện thoại:</h6>
-                    <span>{dataHoaDonChiTiet?.user_phone || "N/A"}</span>
-                  </div>
-                  <div className="info-row">
-                    <h6 className="info-label">Địa chỉ:</h6>
-                    <span>{dataHoaDonChiTiet?.diaChi || "Tại quầy"}</span>
-                  </div>
-                </>
-              )}
+                <div className="info-row">
+                  <h6 className="info-label">Địa chỉ:</h6>
+                  <Input
+                    placeholder="Địa chỉ"
+                    value={formData.diaChi}
+                    onChange={(e) => handleChange("diaChi", e.target.value)}
+                  />
+                </div>
 
-              {dataHoaDonChiTiet?.trangThai === 0 && (
                 <Button type="primary">Cập nhật thông tin người nhận</Button>
-              )}
 
-              <Modal
-                title="Chọn địa chỉ mới"
-                visible={isModalVisible}
-                onCancel={() => setIsModalVisible(false)}
-              >
-                <Select
-                  style={{ width: "100%" }}
-                  onChange={setSelectedAddressId}
-                  value={selectedAddressId}
-                  placeholder="Chọn địa chỉ mới"
+                <Modal
+                  title="Chọn địa chỉ mới"
+                  visible={isModalVisible}
+                  onCancel={() => setIsModalVisible(false)}
                 >
-                  {addresses.map((addr) => (
-                    <Select.Option key={addr.id} value={addr.id}>
-                      {`${addr.tenDiaChi}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
-                    </Select.Option>
-                  ))}
-                </Select>
-              </Modal>
-            </div>
+                  <Select
+                    style={{ width: "100%" }}
+                    onChange={setSelectedAddressId}
+                    value={selectedAddressId}
+                    placeholder="Chọn địa chỉ mới"
+                  >
+                    {addresses.map((addr) => (
+                      <Select.Option key={addr.id} value={addr.id}>
+                        {`${addr.tenDiaChi}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
+                      </Select.Option>
+                    ))}
+                  </Select>
+                </Modal>
+              </div>
+            )}
 
             {/* Thông tin các sản phẩm trong đơn hàng */}
             <div>
