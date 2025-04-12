@@ -221,6 +221,7 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
                   hd.getMoTa(),
                   hd.getTenNguoiNhan(),
                   hd.getSdtNguoiNhan(),
+                  hd.getEmail(),
                   hd.getXa(),
                   hd.getHuyen(),
                   hd.getTinh(),
@@ -238,40 +239,8 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
   }
 
   @Override
-  public HoaDonDto findById(UUID id) {
-    HoaDonEntity hoaDonEntity = hoaDonRepository.findById(id).orElse(null);
-
-    UserDto userDto =
-        UserDto.builder()
-            .id(hoaDonEntity.getUserEntity().getId())
-            .anh(hoaDonEntity.getUserEntity().getAnh())
-            .hoTen(hoaDonEntity.getUserEntity().getHoTen())
-            .ngaySinh(hoaDonEntity.getUserEntity().getNgaySinh())
-            .soDienThoai(hoaDonEntity.getUserEntity().getSoDienThoai())
-            .email(hoaDonEntity.getUserEntity().getEmail())
-            .matKhau(hoaDonEntity.getUserEntity().getMatKhau())
-            .build();
-    return HoaDonDto.builder()
-        .id(hoaDonEntity.getId())
-        .ma(hoaDonEntity.getMa())
-        .ngayTao(hoaDonEntity.getNgayTao())
-        .ngayThanhToan(hoaDonEntity.getNgayThanhToan())
-        .moTa(hoaDonEntity.getMoTa())
-        .tenNguoiNhan(hoaDonEntity.getTenNguoiNhan())
-        .sdtNguoiNhan(hoaDonEntity.getSdtNguoiNhan())
-        .diaChi(hoaDonEntity.getDiaChi())
-        .Xa(hoaDonEntity.getXa())
-        .Huyen(hoaDonEntity.getHuyen())
-        .Tinh(hoaDonEntity.getTinh())
-        .tongTien(hoaDonEntity.getTongTien())
-        .hinhThucMua(hoaDonEntity.getHinhThucMua())
-        .hinhThucThanhToan(hoaDonEntity.getHinhThucThanhToan())
-        .hinhThucNhanHang(hoaDonEntity.getHinhThucNhanHang())
-        .soTienGiam(hoaDonEntity.getSoTienGiam())
-        .phiShip(hoaDonEntity.getPhiShip())
-        .trangThai(hoaDonEntity.getTrangThai())
-        .userDto(userDto)
-        .build();
+  public HoaDonEntity findById(UUID id) {
+    return hoaDonRepository.findById(id).orElse(null);
   }
 
   @Override

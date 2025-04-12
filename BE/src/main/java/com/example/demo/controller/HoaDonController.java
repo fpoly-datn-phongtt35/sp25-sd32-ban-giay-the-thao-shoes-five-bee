@@ -43,8 +43,8 @@ public class HoaDonController {
   }
 
   @GetMapping("/{id}")
-  public ResponseEntity<HoaDonDto> getHoaDonChiTiet(@PathVariable UUID id) {
-    HoaDonDto hoaDon = trangThaiHoaDonService.findById(id);
+  public ResponseEntity<HoaDonEntity> getHoaDonChiTiet(@PathVariable UUID id) {
+    HoaDonEntity hoaDon = trangThaiHoaDonService.findById(id);
     return ResponseEntity.ok(hoaDon);
   }
 
