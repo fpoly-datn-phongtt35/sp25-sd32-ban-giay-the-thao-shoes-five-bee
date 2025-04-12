@@ -262,6 +262,9 @@ const QuanLyHoaDon = () => {
         userId: response.data.userDto?.id, // Thêm userId
         user_phone: response.data.sdtNguoiNhan,
         diaChi: response.data.diaChi || "Tại Quầy",
+        xa: response.data.xa,
+        huyen: response.data.huyen,
+        tinh: response.data.tinh,
         tongTienGoc: tongTienSanPham, // Tổng tiền sản phẩm
         soTienGiam: response.data.soTienGiam || 0, // Số tiền giảm giá
         tongTien: response.data.tongTien, // Tổng tiền thanh toán từ API
@@ -923,7 +926,12 @@ const QuanLyHoaDon = () => {
                 <h4>Thông tin khách hàng</h4>
                 <h6>Khách Hàng: {dataHoaDonChiTiet?.user || "N/A"}</h6>
                 <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
-                <h6>Địa Chỉ: {dataHoaDonChiTiet?.diaChi || "Tại Quầy"}</h6>
+                <h6>
+                  Địa Chỉ:{" "}
+                  {dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.xa || dataHoaDonChiTiet?.huyen || dataHoaDonChiTiet?.tinh
+                    ? `${dataHoaDonChiTiet?.diaChi || ""}, ${dataHoaDonChiTiet?.xa || ""}, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""}`
+                    : "Tại Quầy"}
+                </h6>
               </div>
 
               {/* Thêm phần hiển thị thông tin giảm giá */}
