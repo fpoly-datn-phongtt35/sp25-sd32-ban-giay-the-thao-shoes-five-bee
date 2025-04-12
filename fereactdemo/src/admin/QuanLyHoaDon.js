@@ -12,7 +12,12 @@ import {
   Empty,
   Spin,
 } from "antd";
-import { EditOutlined, FileTextOutlined, HistoryOutlined, SearchOutlined } from "@ant-design/icons";
+import {
+  EditOutlined,
+  FileTextOutlined,
+  HistoryOutlined,
+  SearchOutlined,
+} from "@ant-design/icons";
 import Highlighter from "react-highlight-words";
 import "./quanlyhoadon.css";
 import {
@@ -20,17 +25,13 @@ import {
   getHoaDon,
   getHoaDonById1,
   xacNhanHoaDon,
-
 } from "../service/HoaDonService";
 import {
   getLichSuHoaDon,
   getLichSuHoaDonById,
-
 } from "../service/LichSuHoaDonService";
 import moment from "moment";
-import {
-  printfHoaDonChiTiet,
-} from "../service/HoaDonChiTietService";
+import { printfHoaDonChiTiet } from "../service/HoaDonChiTietService";
 import { getDanhGiaByUserAndHoaDonChiTiet } from "../service/DanhGiaService";
 const QuanLyHoaDon = () => {
   const [searchText, setSearchText] = useState("");
@@ -52,6 +53,17 @@ const QuanLyHoaDon = () => {
   const [lichSuHoaDon, setLichSuHoaDon] = useState([]);
   const [danhGia, setDanhGia] = useState([]);
   const [loadingDanhGia, setLoadingDanhGia] = useState(false);
+  const [selectedAddressId, setSelectedAddressId] = useState(null);
+  const [addresses, setAddresses] = useState([]);
+  const [formData, setFormData] = useState({
+    tenNguoiNhan: dataHoaDonChiTiet?.tenNguoiNhan || "",
+    sdtNguoiNhan: dataHoaDonChiTiet?.sdtNguoiNhan || "",
+    diaChi: dataHoaDonChiTiet?.diaChi || "",
+  });
+
+  const handleChange = (field, value) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
+  };
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
       case 0:
@@ -75,8 +87,6 @@ const QuanLyHoaDon = () => {
         return "Đã hủy";
     }
   };
-
-
 
   useEffect(() => {
     fetchHoaDon();
@@ -103,16 +113,15 @@ const QuanLyHoaDon = () => {
     }
   };
 
-
   const fetchLichSuHoaDonById = async (hoaDonId) => {
     try {
       const response = await getLichSuHoaDonById(hoaDonId); // Gọi API với hoaDonId
       console.log("Lịch sử hóa đơn theo ID:", response.data); // Kiểm tra dữ liệu trả về
 
       // Map qua dữ liệu và lấy mã hóa đơn (maHoaDon)
-      const lichSuData = response.data.map(item => ({
+      const lichSuData = response.data.map((item) => ({
         ...item,
-        maHoaDon: item.maHoaDon  // Mã hóa đơn
+        maHoaDon: item.maHoaDon, // Mã hóa đơn
       }));
 
       setLichSuHoaDon(lichSuData); // Cập nhật dữ liệu vào state
@@ -122,8 +131,6 @@ const QuanLyHoaDon = () => {
       message.error("Không thể lấy lịch sử hóa đơn theo ID!");
     }
   };
-
-
 
   const handleHistoryClick = () => {
     fetchLichSuHoaDon(); // Gọi API để fetch dữ liệu lịch sử hóa đơn
@@ -167,7 +174,6 @@ const QuanLyHoaDon = () => {
     }
   };
 
-
   const fetchHoaDon = async () => {
     try {
       const result = await getHoaDon();
@@ -196,13 +202,14 @@ const QuanLyHoaDon = () => {
           trangThai: item.trangThai,
           diaChi: item.diaChi || "Không có địa chỉ", // Địa chỉ đơn hàng
           hinhThucMua: item.hinhThucMua === 1 ? "Tại Quầy" : "Online",
-          hinhThucThanhToan: item.hinhThucThanhToan === 0
-            ? "Tiền mặt"
-            : item.hinhThucThanhToan === 1
+          hinhThucThanhToan:
+            item.hinhThucThanhToan === 0
+              ? "Tiền mặt"
+              : item.hinhThucThanhToan === 1
               ? "Chuyển khoản"
               : item.hinhThucThanhToan === 2
-                ? "Thanh toán khi nhận hàng"
-                : "VNPay",
+              ? "Thanh toán khi nhận hàng"
+              : "VNPay",
 
           phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
           soTienGiam: item.soTienGiam ?? 0, // Số tiền giảm giá
@@ -219,7 +226,8 @@ const QuanLyHoaDon = () => {
                 product.giayChiTietEntity.giayEntity.anhGiayEntities?.[0]
                   ?.tenUrl ?? "", // Lấy ảnh đầu tiên nếu có
             })) ?? [],
-          chuongTrinhGiamGiaChiTietHoaDons: item.chuongTrinhGiamGiaChiTietHoaDons || [],
+          chuongTrinhGiamGiaChiTietHoaDons:
+            item.chuongTrinhGiamGiaChiTietHoaDons || [],
         };
       });
 
@@ -237,11 +245,10 @@ const QuanLyHoaDon = () => {
   const fetchHoaDonChiTiet = async (id) => {
     try {
       const response = await getHoaDonById1(id);
-      console.log("Chi tiết hóa đơn:", response.data);
 
       // Tính tổng tiền sản phẩm từ items
       const tongTienSanPham = response.data.items.reduce(
-        (total, item) => total + (item.giaBan * item.soLuong),
+        (total, item) => total + item.giaBan * item.soLuong,
         0
       );
 
@@ -251,7 +258,7 @@ const QuanLyHoaDon = () => {
         ma: response.data.ma,
         order_on: response.data.ngayTao,
         user: response.data.tenNguoiNhan,
-        user_email: response.data.userDto?.email,// Thêm email
+        user_email: response.data.userDto?.email, // Thêm email
         userId: response.data.userDto?.id, // Thêm userId
         user_phone: response.data.sdtNguoiNhan,
         diaChi: response.data.diaChi || "Tại Quầy",
@@ -259,31 +266,36 @@ const QuanLyHoaDon = () => {
         soTienGiam: response.data.soTienGiam || 0, // Số tiền giảm giá
         tongTien: response.data.tongTien, // Tổng tiền thanh toán từ API
         hinhThucMua: response.data.hinhThucMua === 1 ? "Tại quầy" : "Online",
-        hinhThucThanhToan: getPaymentMethodText(response.data.hinhThucThanhToan),
-        products: response.data.items.map(item => ({
+        trangThai: response.data.trangThai,
+        hinhThucThanhToan: getPaymentMethodText(
+          response.data.hinhThucThanhToan
+        ),
+        products: response.data.items.map((item) => ({
           id: item.id,
           tenGiay: item.giayChiTietEntity?.giayEntity?.ten,
           mauSac: item.giayChiTietEntity?.mauSacEntity?.ten,
           kichCo: item.giayChiTietEntity?.kichCoEntity?.ten,
           giaBan: item.giaBan,
           soLuong: item.soLuong,
-          hinhAnh: item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl
+          hinhAnh:
+            item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl,
         })),
         // Thêm thông tin giảm giá
-        chuongTrinhGiamGiaChiTietHoaDons: response.data.chuongTrinhGiamGiaChiTietHoaDons || []
+        chuongTrinhGiamGiaChiTietHoaDons:
+          response.data.chuongTrinhGiamGiaChiTietHoaDons || [],
       };
       setDataHoaDonChiTiet(hoaDonData);
       if (hoaDonData.userId && hoaDonData.id) {
         fetchDanhGia(hoaDonData.userId, hoaDonData.id);
       }
       setDataHoaDonChiTiet(hoaDonData);
+
       setIsPopupVisible(true);
     } catch (error) {
       console.error("Lỗi khi lấy chi tiết hóa đơn:", error);
       message.error("Không thể lấy thông tin chi tiết hóa đơn!");
     }
   };
-
 
   const handleOrderClick = async (orderId) => {
     if (!orderId) {
@@ -381,8 +393,6 @@ const QuanLyHoaDon = () => {
         text
       ),
   });
-
-
 
   const handleEdit = async (record) => {
     try {
@@ -582,12 +592,13 @@ const QuanLyHoaDon = () => {
       width: 100,
       render: (text, record) => {
         // Tính tổng tiền gốc từ danh sách sản phẩm
-        const tongTienGoc = record.products && record.products.length > 0
-          ? record.products.reduce(
-            (total, product) => total + product.soLuong * product.giaBan,
-            0
-          )
-          : record.tongTien + (record.soTienGiam || 0); // Nếu không có products, tính ngược từ tổng tiền và số tiền giảm
+        const tongTienGoc =
+          record.products && record.products.length > 0
+            ? record.products.reduce(
+                (total, product) => total + product.soLuong * product.giaBan,
+                0
+              )
+            : record.tongTien + (record.soTienGiam || 0); // Nếu không có products, tính ngược từ tổng tiền và số tiền giảm
 
         // Nếu có giảm giá, hiển thị cả giá gốc và giá sau giảm
         if (record.soTienGiam > 0) {
@@ -617,31 +628,26 @@ const QuanLyHoaDon = () => {
       width: 120,
 
       render: (_, record) => (
-
-        <><Button
-          type="primary"
-          icon={<EditOutlined />}
-          onClick={() => handleEdit(record)}
-          style={{ marginRight: "8px" }}
-        >
-        </Button><Button
-          type="primary"
-          icon={<FileTextOutlined />}
-          onClick={() => handleOrderClick(record.order_id)}
-          style={{ marginRight: "8px" }}
-        >
-
-          </Button>
+        <>
+          <Button
+            type="primary"
+            icon={<EditOutlined />}
+            onClick={() => handleEdit(record)}
+            style={{ marginRight: "8px" }}
+          ></Button>
+          <Button
+            type="primary"
+            icon={<FileTextOutlined />}
+            onClick={() => handleOrderClick(record.order_id)}
+            style={{ marginRight: "8px" }}
+          ></Button>
 
           <Button
             type="primary"
             icon={<HistoryOutlined />}
             onClick={() => fetchLichSuHoaDonById(record.order_id)}
-          >
-
-          </Button>
+          ></Button>
         </>
-
       ),
     },
   ];
@@ -710,7 +716,10 @@ const QuanLyHoaDon = () => {
               onChange={handleStatusChange}
               options={[
                 { value: "Chờ xác nhận", label: "Chờ xác nhận" },
-                { value: "Hóa đơn chờ thanh toán", label: "Hóa đơn chờ thanh toán" },
+                {
+                  value: "Hóa đơn chờ thanh toán",
+                  label: "Hóa đơn chờ thanh toán",
+                },
                 { value: "Đã xác nhận", label: "Đã xác nhận" },
                 { value: "Chờ vận chuyển", label: "Chờ vận chuyển" },
                 { value: "Đang vận chuyển", label: "Đang vận chuyển" },
@@ -740,8 +749,7 @@ const QuanLyHoaDon = () => {
             type="primary"
             icon={<HistoryOutlined />}
             onClick={handleHistoryClick}
-          >
-          </Button>
+          ></Button>
           <Button
             type="primary"
             onClick={handlePrint}
@@ -798,36 +806,44 @@ const QuanLyHoaDon = () => {
             />
           </Form.Item>
         </Form>
-
-
-
       </Modal>
       {isHistoryPopupVisible && (
-        <div className="popup-overlay" onClick={() => setIsHistoryPopupVisible(false)}>
+        <div
+          className="popup-overlay"
+          onClick={() => setIsHistoryPopupVisible(false)}
+        >
           <div className="popup-content" onClick={(e) => e.stopPropagation()}>
             <div className="history-popup">
               <h1>Lịch sử hóa đơn</h1>
-              <Button style={{ float: "right" }} onClick={() => setIsHistoryPopupVisible(false)}>
+              <Button
+                style={{ float: "right" }}
+                onClick={() => setIsHistoryPopupVisible(false)}
+              >
                 Đóng
               </Button>
-              <table border="1" style={{ width: "100%", borderCollapse: "collapse" }}>
+              <table
+                border="1"
+                style={{ width: "100%", borderCollapse: "collapse" }}
+              >
                 <thead>
                   <tr>
                     <th>Ngày cập nhật</th>
                     <th>Trạng thái cũ</th>
                     <th>Trạng thái mới</th>
                     <th>Người cập nhật</th>
-
                   </tr>
                 </thead>
                 <tbody>
                   {lichSuHoaDon.map((historyItem, index) => (
                     <tr key={index}>
-                      <td>{moment(historyItem.thoiGianCapNhat).format("DD/MM/YYYY")}</td>
+                      <td>
+                        {moment(historyItem.thoiGianCapNhat).format(
+                          "DD/MM/YYYY"
+                        )}
+                      </td>
                       <td>{mapTrangThai(historyItem.trangThaiCu)}</td>
                       <td>{mapTrangThai(historyItem.trangThaiMoi)}</td>
                       <td>{historyItem.nguoiCapNhat}</td>
-
                     </tr>
                   ))}
                 </tbody>
@@ -912,25 +928,122 @@ const QuanLyHoaDon = () => {
 
               {/* Thêm phần hiển thị thông tin giảm giá */}
               {dataHoaDonChiTiet?.chuongTrinhGiamGiaChiTietHoaDons &&
-                dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.length > 0 && (
+                dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.length >
+                  0 && (
                   <div className="giamgia">
                     <h4>Thông tin giảm giá</h4>
-                    {dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.map((giamGia, index) => (
-                      <div key={index}>
-                        <h6>Mã giảm giá: {giamGia.chuongTrinhGiamGiaHoaDonEntity?.ten || "N/A"}</h6>
-                        <h6>Phần trăm giảm: {giamGia.chuongTrinhGiamGiaHoaDonEntity?.phanTramGiam || 0}%</h6>
-                        <h6>Số tiền đã giảm: {giamGia.soTienDaGiam?.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }) || "N/A"}</h6>
-                        <h6>Điều kiện áp dụng: {giamGia.chuongTrinhGiamGiaHoaDonEntity?.dieuKien?.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        }) || "N/A"}</h6>
-                      </div>
-                    ))}
+                    {dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.map(
+                      (giamGia, index) => (
+                        <div key={index}>
+                          <h6>
+                            Mã giảm giá:{" "}
+                            {giamGia.chuongTrinhGiamGiaHoaDonEntity?.ten ||
+                              "N/A"}
+                          </h6>
+                          <h6>
+                            Phần trăm giảm:{" "}
+                            {giamGia.chuongTrinhGiamGiaHoaDonEntity
+                              ?.phanTramGiam || 0}
+                            %
+                          </h6>
+                          <h6>
+                            Số tiền đã giảm:{" "}
+                            {giamGia.soTienDaGiam?.toLocaleString("vi-VN", {
+                              style: "currency",
+                              currency: "VND",
+                            }) || "N/A"}
+                          </h6>
+                          <h6>
+                            Điều kiện áp dụng:{" "}
+                            {giamGia.chuongTrinhGiamGiaHoaDonEntity?.dieuKien?.toLocaleString(
+                              "vi-VN",
+                              {
+                                style: "currency",
+                                currency: "VND",
+                              }
+                            ) || "N/A"}
+                          </h6>
+                        </div>
+                      )
+                    )}
                   </div>
                 )}
+            </div>
+            <div className="phai">
+              <h4>Thông tin người nhận</h4>
+
+              {dataHoaDonChiTiet?.trangThai === 0 ? (
+                <>
+                  <div className="info-row">
+                    <h6 className="info-label">Tên khách hàng:</h6>
+                    <Input
+                      placeholder="Tên người nhận"
+                      value={formData.tenNguoiNhan}
+                      onChange={(e) =>
+                        handleChange("tenNguoiNhan", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="info-row">
+                    <h6 className="info-label">Số điện thoại:</h6>
+                    <Input
+                      placeholder="Số điện thoại"
+                      value={formData.sdtNguoiNhan}
+                      onChange={(e) =>
+                        handleChange("sdtNguoiNhan", e.target.value)
+                      }
+                    />
+                  </div>
+
+                  <div className="info-row">
+                    <h6 className="info-label">Địa chỉ:</h6>
+                    <Input
+                      placeholder="Địa chỉ"
+                      value={formData.diaChi}
+                      onChange={(e) => handleChange("diaChi", e.target.value)}
+                    />
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className="info-row">
+                    <h6 className="info-label">Tên người nhận:</h6>
+                    <span>{dataHoaDonChiTiet?.user || "N/A"}</span>
+                  </div>
+                  <div className="info-row">
+                    <h6 className="info-label">Số điện thoại:</h6>
+                    <span>{dataHoaDonChiTiet?.user_phone || "N/A"}</span>
+                  </div>
+                  <div className="info-row">
+                    <h6 className="info-label">Địa chỉ:</h6>
+                    <span>{dataHoaDonChiTiet?.diaChi || "Tại quầy"}</span>
+                  </div>
+                </>
+              )}
+
+              {dataHoaDonChiTiet?.trangThai === 0 && (
+                <Button type="primary">Cập nhật thông tin người nhận</Button>
+              )}
+
+              <Modal
+                title="Chọn địa chỉ mới"
+                visible={isModalVisible}
+                onCancel={() => setIsModalVisible(false)}
+              >
+                <Select
+                  style={{ width: "100%" }}
+                  onChange={setSelectedAddressId}
+                  value={selectedAddressId}
+                  placeholder="Chọn địa chỉ mới"
+                >
+                  {addresses.map((addr) => (
+                    <Select.Option key={addr.id} value={addr.id}>
+                      {`${addr.tenDiaChi}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
+                    </Select.Option>
+                  ))}
+                </Select>
+              </Modal>
             </div>
 
             {/* Thông tin các sản phẩm trong đơn hàng */}
@@ -992,10 +1105,13 @@ const QuanLyHoaDon = () => {
                     </td>
                     <td>
                       <strong>
-                        {dataHoaDonChiTiet?.tongTienGoc?.toLocaleString("vi-VN", {
-                          style: "currency",
-                          currency: "VND",
-                        })}
+                        {dataHoaDonChiTiet?.tongTienGoc?.toLocaleString(
+                          "vi-VN",
+                          {
+                            style: "currency",
+                            currency: "VND",
+                          }
+                        )}
                       </strong>
                     </td>
                   </tr>
@@ -1007,10 +1123,14 @@ const QuanLyHoaDon = () => {
                         </td>
                         <td>
                           <span className="discount-amount-table">
-                            -{dataHoaDonChiTiet.soTienGiam.toLocaleString("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            })}
+                            -
+                            {dataHoaDonChiTiet.soTienGiam.toLocaleString(
+                              "vi-VN",
+                              {
+                                style: "currency",
+                                currency: "VND",
+                              }
+                            )}
                           </span>
                         </td>
                       </tr>
@@ -1020,10 +1140,13 @@ const QuanLyHoaDon = () => {
                         </td>
                         <td>
                           <strong className="final-total">
-                            {dataHoaDonChiTiet.tongTien.toLocaleString("vi-VN", {
-                              style: "currency",
-                              currency: "VND",
-                            })}
+                            {dataHoaDonChiTiet.tongTien.toLocaleString(
+                              "vi-VN",
+                              {
+                                style: "currency",
+                                currency: "VND",
+                              }
+                            )}
                           </strong>
                         </td>
                       </tr>
@@ -1047,7 +1170,9 @@ const QuanLyHoaDon = () => {
                       {[...Array(5)].map((_, index) => (
                         <span
                           key={index}
-                          className={`star ${index < danhGia[0].saoDanhGia ? 'active' : ''}`}
+                          className={`star ${
+                            index < danhGia[0].saoDanhGia ? "active" : ""
+                          }`}
                         >
                           ★
                         </span>
@@ -1056,7 +1181,10 @@ const QuanLyHoaDon = () => {
                     <div className="danh-gia-info">
                       <p className="danh-gia-text">{danhGia[0].nhanXet}</p>
                       <p className="danh-gia-date">
-                        Ngày đánh giá: {danhGia[0].ngayNhanXet ? moment(danhGia[0].ngayNhanXet).format("DD/MM/YYYY") : "N/A"}
+                        Ngày đánh giá:{" "}
+                        {danhGia[0].ngayNhanXet
+                          ? moment(danhGia[0].ngayNhanXet).format("DD/MM/YYYY")
+                          : "N/A"}
                       </p>
                     </div>
                   </div>

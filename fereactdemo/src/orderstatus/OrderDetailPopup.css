@@ -61,3 +61,14 @@ th {
 tr:nth-child(even) {
     background-color: #f9f9f9;
 }
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.info-label {
+  width: 200px;
+  font-weight: 500;
+  margin-right: 12px;
+}

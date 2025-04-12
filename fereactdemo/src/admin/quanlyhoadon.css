@@ -508,3 +508,14 @@ table tfoot td {
   padding: 20px;
   text-align: center;
 }
+.info-row {
+  display: flex;
+  align-items: center;
+  margin-bottom: 12px;
+}
+
+.info-label {
+  width: 130px;
+  font-weight: 500;
+  margin-right: 12px;
+}

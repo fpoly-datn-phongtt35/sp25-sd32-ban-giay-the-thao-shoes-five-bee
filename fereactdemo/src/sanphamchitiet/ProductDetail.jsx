@@ -129,7 +129,6 @@ const ProductDetail = () => {
     }
   };
 
-
   const scrollCarouselLeft = () => {
     if (carouselRef.current) {
       carouselRef.current.scrollBy({ left: -300, behavior: "smooth" });
@@ -182,10 +181,8 @@ const ProductDetail = () => {
 
   const selectedVariant = bienTheList.find(
     (item) =>
-      item.tenMauSac === selectedColor &&
-      item.tenKichCo === selectedSize
+      item.tenMauSac === selectedColor && item.tenKichCo === selectedSize
   );
-
 
   const fetchProductDetail = async () => {
     try {
@@ -234,29 +231,39 @@ const ProductDetail = () => {
     );
 
     if (variantsWithSameColor.length > 0) {
+      // Lấy danh sách size
       const sizeList = variantsWithSameColor.map(
         (variant) => variant.tenKichCo
       );
       setSizeList(sizeList);
 
-      const giaKhiGiam = variantsWithSameColor[0]?.giaKhiGiam;
-      const giaBan = variantsWithSameColor[0]?.giaBan;
+      // Ưu tiên tìm biến thể có giá khi giảm
+      const variantWithDiscount =
+        variantsWithSameColor.find((variant) => variant.giaKhiGiam != null) ??
+        variantsWithSameColor[0]; // Nếu không có thì lấy phần tử đầu tiên
+
+      const giaKhiGiam = variantWithDiscount?.giaKhiGiam;
+      const giaBan = variantWithDiscount?.giaBan;
       const finalPrice = giaKhiGiam ?? giaBan ?? 0;
       setCurrentPrice(finalPrice);
 
+      // Lấy danh sách ảnh
       const imageList = variantsWithSameColor.flatMap((variant) =>
         variant.anh ? variant.anh.map((img) => img.tenUrl) : []
       );
       setanhCHiTiet(imageList);
 
+      // Lấy số lượng
       const quantityList = variantsWithSameColor.map(
         (variant) => variant.soLuong
       );
       setSoLuongChiTiet(quantityList);
 
+      // Tính tổng số lượng
       const totalQuantity = quantityList.reduce((acc, qty) => acc + qty, 0);
       setTotalQuantity(totalQuantity);
 
+      // Lưu thông tin biến thể đã chọn
       const selectedDetails = {
         tenMauSac: color,
         sizes: sizeList,
@@ -393,8 +400,9 @@ const ProductDetail = () => {
               {sizeList.map((size) => (
                 <div
                   key={size}
-                  className={`size-box ${selectedSize === size ? "active" : ""
-                    }`}
+                  className={`size-box ${
+                    selectedSize === size ? "active" : ""
+                  }`}
                   onClick={() => {
                     setSelectedSize(size); // Cập nhật kích cỡ đã chọn
                     handleSizeSelect(size); // Gọi hàm xử lý khi chọn kích cỡ
@@ -414,8 +422,9 @@ const ProductDetail = () => {
                 (color) => (
                   <div
                     key={color}
-                    className={`color-box ${selectedColor === color ? "active" : ""
-                      }`}
+                    className={`color-box ${
+                      selectedColor === color ? "active" : ""
+                    }`}
                     onClick={() => handleColorSelect(color)}
                   >
                     {color}
@@ -458,12 +467,15 @@ const ProductDetail = () => {
             <Button
               type="primary"
               onClick={() => handleSubscribe(selectedVariant.idGiayChiTiet)}
-              style={{ marginTop: '10px', backgroundColor: '#1890ff', color: 'white' }}
+              style={{
+                marginTop: "10px",
+                backgroundColor: "#1890ff",
+                color: "white",
+              }}
             >
               Theo dõi khi có hàng
             </Button>
           )}
-
         </div>
 
         {/* Chính sách */}
@@ -568,15 +580,16 @@ const ProductDetail = () => {
                   <div
                     key={product.id}
                     className="similar-product-card"
-                    onClick={() => window.location.href = `/product-detailSPTT/${product.id}`}
-
+                    onClick={() =>
+                      (window.location.href = `/product-detailSPTT/${product.id}`)
+                    }
                   >
                     <div className="similar-product-image">
                       <img
                         src={
                           product.anhUrl ||
                           (product.giayEntity?.anhGiayEntities &&
-                            product.giayEntity.anhGiayEntities.length > 0
+                          product.giayEntity.anhGiayEntities.length > 0
                             ? product.giayEntity.anhGiayEntities[0].tenUrl
                             : "/default-product.jpg")
                         }
