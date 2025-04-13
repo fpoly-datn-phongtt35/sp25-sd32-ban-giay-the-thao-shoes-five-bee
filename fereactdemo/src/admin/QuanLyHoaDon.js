@@ -194,7 +194,8 @@ const QuanLyHoaDon = () => {
           order_id: item.id,
           ma: item.ma, // Mã hóa đơn
           user: item.tenNguoiNhan || (item.userDto?.hoTen ?? "Khách lẻ"), // Tên người nhận hoặc user
-          user_phone: item.sdtNguoiNhan || (item.userDto?.soDienThoai ?? "N/A"), // Số điện thoại
+          user_phone: item.sdtNguoiNhan || (item.userDto?.soDienThoai ?? "N/A"),
+          user_email:item.userDto?.email, // Số điện thoại
           order_on: item.ngayTao
             ? moment(item.ngayTao).format("DD/MM/YYYY")
             : "N/A", // Ngày tạo đơn
@@ -247,10 +248,12 @@ const QuanLyHoaDon = () => {
       const response = await getHoaDonById1(id);
 
       // Tính tổng tiền sản phẩm từ items
-      const tongTienSanPham = response.data.items.reduce(
+      const tongTienSanPham = (response.data.items || []).reduce(
         (total, item) => total + item.giaBan * item.soLuong,
         0
       );
+
+      console.log("Chi tiết hóa đơn từ API:", response.data);
 
       // Xử lý dữ liệu hóa đơn
       const hoaDonData = {
@@ -258,7 +261,7 @@ const QuanLyHoaDon = () => {
         ma: response.data.ma,
         order_on: response.data.ngayTao,
         user: response.data.tenNguoiNhan,
-        user_email: response.data.userDto?.email, // Thêm email
+        user_email: response.data.email, // Thêm email
         userId: response.data.userDto?.id, // Thêm userId
         user_phone: response.data.sdtNguoiNhan,
         diaChi: response.data.diaChi || "Tại Quầy",

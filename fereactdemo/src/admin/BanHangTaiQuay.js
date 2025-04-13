@@ -88,6 +88,7 @@ const BanHangTaiQuay = () => {
   const [hoTen, setHoTen] = useState("");
   const [soDienThoai, setSoDienThoai] = useState("");
   const [diaChi, setDiaChi] = useState("");
+  const [email, setemail] = useState("");
   const [showModal, setShowModal] = useState(false);
   const [isGiaoHang, setIsGiaoHang] = useState(false);
   const [selectedPaymentMethod, setSelectedPaymentMethod] = useState(0);
@@ -122,13 +123,12 @@ const BanHangTaiQuay = () => {
   const getAllGiay = async () => {
     try {
       const result = await getAllGiayChiTiet();
-      console.log("Dữ liệu giày:", result.data);
+    
 
       if (!result || !Array.isArray(result.data)) {
         throw new Error("Dữ liệu trả về không hợp lệ");
       }
-      console.log(result.data);
-
+    
       // Lọc giày có trạng thái Đang bán
       const dataGiay = result.data
         .filter((item) => item.trangThai === 0) // Chỉ lấy giày có trạng thái Đang bán
@@ -502,20 +502,20 @@ const BanHangTaiQuay = () => {
       message.error("Không thể lấy danh sách chương trình giảm giá");
     }
   };
-  const handleKhachHangChange = async (value) => {
-    setIsKhachLe(false);
-    setSelectedKhachHang(value);
-    try {
-      const response = await detailKhachHang(value);
-      console.log("khachhang", response.data);
-      const khachHang = response.data;
-      setHoTen(khachHang.hoTen);
-      setSoDienThoai(khachHang.soDienThoai);
-      setDiaChi(khachHang.diaChi);
-    } catch (error) {
-      message.error("Lỗi khi lấy chi tiết khách hàng");
-    }
-  };
+  // const handleKhachHangChange = async (value) => {
+  //   setIsKhachLe(false);
+  //   setSelectedKhachHang(value);
+  //   try {
+  //     const response = await detailKhachHang(value);
+  //     console.log("khachhang", response.data);
+  //     const khachHang = response.data;
+  //     setHoTen(khachHang.hoTen);
+  //     setSoDienThoai(khachHang.soDienThoai);
+  //     setDiaChi(khachHang.diaChi);
+  //   } catch (error) {
+  //     message.error("Lỗi khi lấy chi tiết khách hàng");
+  //   }
+  // };
   const getAllKhachHangData = async () => {
     try {
       const result = await getAllKhachHang();
@@ -537,13 +537,12 @@ const BanHangTaiQuay = () => {
           id: user.id,
           hoTen: user.hoTen ?? "Không có tên",
           soDienThoai: user.soDienThoai ?? "Không có SĐT",
+          email: user.email ?? "Không có email",
           diaChi:
             Array.isArray(user.diaChiEntities) && user.diaChiEntities.length > 0
               ? user.diaChiEntities.map((diaChi) => diaChi.diaChi).join(", ")
               : "Không có địa chỉ",
         }));
-
-      console.log("Danh sách khách hàng sau khi lọc:", filteredUsers);
 
       setKhachHangList(filteredUsers);
     } catch (error) {
@@ -766,7 +765,8 @@ const BanHangTaiQuay = () => {
       throw error;
     }
   };
-
+  
+  
   const handlePayment = async () => {
     if (selectedPaymentMethod === null) {
       message.error("Vui lòng chọn hình thức thanh toán!");
@@ -777,7 +777,7 @@ const BanHangTaiQuay = () => {
       message.error("Số tiền khách đưa không đủ!");
       return;
     }
-
+    
     const hoaDonRequest = {
       ma: `HD${moment().format("YYYYMMDDHHmmss")}`,
       moTa: isGiaoHang ? "Giao hàng" : "Thanh toán tại quầy",
@@ -788,6 +788,7 @@ const BanHangTaiQuay = () => {
           ? sdtNguoiNhan
           : null,
       tongTien: totalHoaDon,
+      email:email,
       diaChi: isGiaoHang ? diaChi : null,
       idGiamGia: selectedMaGiamGia || null,
       hinhThucThanhToan: selectedPaymentMethod,
@@ -798,7 +799,7 @@ const BanHangTaiQuay = () => {
           : 0
         : 2,
     };
-
+    console.log(hoaDonRequest);
     try {
       if (selectedPaymentMethod === 0 || selectedPaymentMethod === 2) {
         // ✅ Tiền mặt hoặc Thanh toán khi giao hàng
@@ -1069,14 +1070,14 @@ const BanHangTaiQuay = () => {
   }, [soDienThoai, khachHangList]);
 
   // Khi chọn khách hàng từ danh sách gợi ý
-  const handleSelectKhachHang = (value) => {
-    const foundKhachHang = khachHangList.find((kh) => kh.id === value);
-    if (foundKhachHang) {
-      setSoDienThoai(foundKhachHang.soDienThoai);
-      setHoTen(foundKhachHang.hoTen);
-      setSelectedKhachHang(foundKhachHang.id);
-    }
-  };
+  // const handleSelectKhachHang = (value) => {
+  //   const foundKhachHang = khachHangList.find((kh) => kh.id === value);
+  //   if (foundKhachHang) {
+  //     setSoDienThoai(foundKhachHang.soDienThoai);
+  //     setHoTen(foundKhachHang.hoTen);
+  //     setSelectedKhachHang(foundKhachHang.id);
+  //   }
+  // };
 
   // Thêm hàm xử lý xóa hóa đơn
   const handleDeletePage = async (hoaDonId) => {
@@ -1437,6 +1438,7 @@ const BanHangTaiQuay = () => {
                 setHoTen(selected.hoTen);
                 setSelectedKhachHang(selected.id);
                 setDiaChi(selected.diaChi || "");
+                setemail(selected.email || "");
               }
             }}
             style={{ width: "100%", marginBottom: "10px" }}
