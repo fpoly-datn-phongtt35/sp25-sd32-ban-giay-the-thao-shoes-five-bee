@@ -32,6 +32,8 @@ public class HoaDonDto {
 
     private String sdtNguoiNhan;
 
+    private String email;
+
     private String diaChi;
 
     private String Xa;

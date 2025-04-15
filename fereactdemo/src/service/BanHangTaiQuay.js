@@ -1,6 +1,6 @@
 import axios from "../axiosConfig";
 
-const REST_API_BASE_URL = "http://localhost:5000/api/ban-hang-tai-quay";
+const REST_API_BASE_URL = "/api/ban-hang-tai-quay";
 
 export const thanhToanTaiQuay = (idHoaDon, hoaDonRequest) => {
   // Chỉ thêm idGiamGia vào params nếu nó tồn tại

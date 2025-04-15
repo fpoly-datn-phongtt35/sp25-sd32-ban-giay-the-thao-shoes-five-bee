@@ -93,6 +93,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
                     ? hoaDonRequest.getTenNguoiNhan()
                     : "Khách lẻ");
     hoaDon.setSdtNguoiNhan(hoaDonRequest.getSdtNguoiNhan());
+    hoaDon.setEmail(hoaDonRequest.getEmail());
     hoaDon.setXa(hoaDonRequest.getXa());
     hoaDon.setHuyen(hoaDonRequest.getHuyen());
     hoaDon.setTinh(hoaDonRequest.getTinh());
