@@ -156,87 +156,72 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
 
   public void sendFormDanhGia(UserEntity user, List<HoaDonChiTietEntity> danhSachSanPham) {
-    // Tạo nội dung sản phẩm như đã làm trước đây
     StringBuilder productItems = new StringBuilder();
 
     for (HoaDonChiTietEntity hdct : danhSachSanPham) {
       UUID hoaDonChiTietId = hdct.getId();
       UUID userId = user.getId();
 
-      productItems.append(String.format("""
-      <tr>
-        <td style="padding:15px;border-bottom:1px solid #dddddd;">
-          <p style="margin:0;font-size:16px;"><strong>%s</strong></p>
-        </td>
-        <td style="padding:15px;border-bottom:1px solid #dddddd;text-align:center;">
-          <a href="http://localhost:3000/danh-gia?userId=%s&hoaDonChiTietId=%s" 
-             style="display:inline-block;padding:10px 20px;background-color:#1D70B8;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;">
-             Đánh giá ngay
-          </a>
-        </td>
-      </tr>
-    """, hdct.getGiayChiTietEntity().getGiayEntity().getTen(), userId, hoaDonChiTietId));
+      productItems.append("<tr>");
+      productItems.append("<td style=\"padding:15px;border-bottom:1px solid #dddddd;\">");
+      productItems.append("<p style=\"margin:0;font-size:16px;\"><strong>")
+              .append(hdct.getGiayChiTietEntity().getGiayEntity().getTen())
+              .append("</strong></p>");
+      productItems.append("</td>");
+      productItems.append("<td style=\"padding:15px;border-bottom:1px solid #dddddd;text-align:center;\">");
+      productItems.append("<a href=\"http://localhost:3000/danh-gia?userId=")
+              .append(userId).append("&hoaDonChiTietId=").append(hoaDonChiTietId)
+              .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#1D70B8;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;\">")
+              .append("Đánh giá ngay</a>");
+      productItems.append("</td>");
+      productItems.append("</tr>");
     }
 
-    // Tạo email hoàn chỉnh
-    String emailContent = String.format("""
-    <div style="font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c">
-      <table role="presentation" width="100%%" style="border-collapse:collapse;min-width:100%%;width:100%%!important" cellpadding="0" cellspacing="0" border="0">
-        <tr>
-          <td bgcolor="#0b0c0c" style="padding:20px;text-align:center;">
-            <span style="font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;">Đánh giá sản phẩm</span>
-          </td>
-        </tr>
-      </table>
-      <table align="center" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;width:100%%;margin:20px auto;">
-        <tr>
-          <td style="font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;">
-            <p>Chào <strong>%s</strong>,</p>
-            <p>Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi. Vui lòng đánh giá sản phẩm bạn đã mua:</p>
-          </td>
-        </tr>
-      </table>
-      <table align="center" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;width:100%%;margin:0 auto 20px;border-collapse:collapse;">
-        <tr>
-          <th style="text-align:left;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;">Sản phẩm</th>
-          <th style="text-align:center;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;">Hành động</th>
-        </tr>
-        %s
-      </table>
-      <table align="center" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;width:100%%;margin:20px auto;">
-        <tr>
-          <td style="font-size:16px;line-height:1.6;color:#0b0c0c;padding:10px 20px;text-align:center;">
-            <p>Cảm ơn đánh giá của bạn!</p>
-            <p>Trân trọng,<br>Đội ngũ cửa hàng</p>
-          </td>
-        </tr>
-      </table>
-    </div>
-  """, user.getHoTen(), productItems.toString());
+    StringBuilder emailContent = new StringBuilder();
+    emailContent.append("<!DOCTYPE html>");
+    emailContent.append("<html lang=\"vi\">");
+    emailContent.append("<head>");
+    emailContent.append("<meta charset=\"UTF-8\">");
+    emailContent.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
+    emailContent.append("</head>");
+    emailContent.append("<body>");
+    emailContent.append("<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">");
+    emailContent.append("<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">");
+    emailContent.append("<tr>");
+    emailContent.append("<td bgcolor=\"#0b0c0c\" style=\"padding:20px;text-align:center;\">");
+    emailContent.append("<span style=\"font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;\">Đánh giá sản phẩm</span>");
+    emailContent.append("</td>");
+    emailContent.append("</tr>");
+    emailContent.append("</table>");
+    emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+    emailContent.append("<tr>");
+    emailContent.append("<td style=\"font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;\">");
+    emailContent.append("<p>Chào <strong>").append(user.getHoTen()).append("</strong>,</p>");
+    emailContent.append("<p>Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi. Vui lòng đánh giá sản phẩm bạn đã mua:</p>");
+    emailContent.append("</td>");
+    emailContent.append("</tr>");
+    emailContent.append("</table>");
+    emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:0 auto 20px;border-collapse:collapse;\">");
+    emailContent.append("<tr>");
+    emailContent.append("<th style=\"text-align:left;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Sản phẩm</th>");
+    emailContent.append("<th style=\"text-align:center;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Hành động</th>");
+    emailContent.append("</tr>");
+    emailContent.append(productItems.toString());
+    emailContent.append("</table>");
+    emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+    emailContent.append("<tr>");
+    emailContent.append("<td style=\"font-size:16px;line-height:1.6;color:#0b0c0c;padding:10px 20px;text-align:center;\">");
+    emailContent.append("<p>Cảm ơn đánh giá của bạn!</p>");
+    emailContent.append("<p>Trân trọng,<br>Đội ngũ cửa hàng</p>");
+    emailContent.append("</td>");
+    emailContent.append("</tr>");
+    emailContent.append("</table>");
+    emailContent.append("</div>");
+    emailContent.append("</body>");
+    emailContent.append("</html>");
 
-    // KHI GỬI EMAIL, ĐẢM BẢO CONTENT-TYPE LÀ TEXT/HTML
-    sendMailWithHtml(user.getEmail(), "Đánh giá sản phẩm bạn đã mua", emailContent);
+    sendMailService.sendMail(user.getEmail(), "Đánh giá sản phẩm bạn đã mua", emailContent.toString());
   }
-
-  // Bạn có thể cần tạo hoặc sửa phương thức sendMailWithHtml
-  private void sendMailWithHtml(String to, String subject, String htmlContent) {
-    // Phương thức này phải đảm bảo email được gửi với content-type là text/html
-    // Ví dụ sử dụng JavaMailSender:
-    try {
-      MimeMessage message = javaMailSender.createMimeMessage();
-      MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-      helper.setTo(to);
-      helper.setSubject(subject);
-      helper.setText(htmlContent, true); // Tham số thứ hai (true) chỉ định nội dung là HTML
-
-      javaMailSender.send(message);
-    } catch (Exception e) {
-      e.printStackTrace();
-    }
-  }
-
-
   @Override
   public HoaDonEntity createHoaDonBanHangTaiQuay() {
 
@@ -411,39 +396,4 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
     hoaDonChiTietRepository.delete(hoaDonChiTiet);
   }
-
-  //  public HoaDonChiTietEntity themSanPhamVaoHoaHoaBangMaVach(UUID idHoaDon, String maVach) {
-  //    HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon).orElse(null);
-  //    GiayChiTietEntity giayChiTiet = giayChiTietRepository.findByMaVach(maVach);
-  //
-  //    HoaDonChiTietEntity hoaDonChiTiet =
-  //        HoaDonChiTietEntity.builder()
-  //            .soLuong(1)
-  //            .giaBan(giayChiTiet.getGiaBan())
-  //            .trangThai(1)
-  //            .hoaDonEntity(hoaDon)
-  //            .giayChiTietEntity(giayChiTiet)
-  //            .build();
-  //
-  //    return hoaDonChiTietRepository.save(hoaDonChiTiet);
-  //  }
-  //
-  //  private String scanBarcode(InputStream imageStream) {
-  //    try {
-  //      BufferedImage image = ImageIO.read(imageStream);
-  //      if (image == null) {
-  //        throw new IllegalStateException("Ảnh không hợp lệ");
-  //      }
-  //
-  //      LuminanceSource source = new BufferedImageLuminanceSource(image);
-  //      BinaryBitmap bitmap = new BinaryBitmap(new HybridBinarizer(source));
-  //
-  //      Result result = new MultiFormatReader().decode(bitmap);
-  //      return result.getText(); // Trả về mã vạch đọc được
-  //    } catch (NotFoundException e) {
-  //      return "Không tìm thấy mã vạch";
-  //    } catch (IOException e) {
-  //      return "Lỗi đọc ảnh";
-  //    }
-  //  }
 }

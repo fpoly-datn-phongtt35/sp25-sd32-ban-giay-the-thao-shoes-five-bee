@@ -19,20 +19,20 @@ public class SendMailServiceImpl implements SendMailService {
     @Value("${spring.mail.username}")
     private String fromEmailId;
 
-    @Async
     @Override
+    @Async
     public void sendMail(String to, String body, String subject) {
-        MimeMessage mimeMessage = javaMailSender.createMimeMessage();
         try {
-            MimeMessageHelper mimeMessageHelper = new MimeMessageHelper(mimeMessage,true,"UTF-8");
-            mimeMessageHelper.setFrom(fromEmailId);
-            mimeMessageHelper.setTo(to);
-            mimeMessageHelper.setSubject(subject);
-            mimeMessageHelper.setText(body,true);
-            mimeMessage.setHeader("Content-Type", "text/html; charset=UTF-8");
-            javaMailSender.send(mimeMessage);
-        }catch (MessagingException e){
-            throw new RuntimeException("gui email that bai :" + e.getMessage());
+            MimeMessage message = javaMailSender.createMimeMessage();
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(body, true); // true để gửi HTML
+            helper.setFrom(fromEmailId);
+
+            javaMailSender.send(message);
+        } catch (MessagingException e) {
+            throw new RuntimeException("Gửi mail thất bại", e);
         }
     }
 }

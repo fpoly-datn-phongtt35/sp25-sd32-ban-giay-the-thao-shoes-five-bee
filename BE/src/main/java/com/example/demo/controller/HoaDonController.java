@@ -69,7 +69,7 @@ public class HoaDonController {
         HoaDonEntity hoaDon = hoaDonRepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
 
-        if (hoaDon.getTrangThai() != 1) {
+        if (hoaDon.getTrangThai() != 0) {
             return ResponseEntity.badRequest().body("Chỉ được cập nhật khi hóa đơn ở trạng thái chờ xác nhận.");
         }
 

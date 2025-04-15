@@ -250,23 +250,6 @@ public class AuthServiceImpl implements AuthService {
             </div>
             """, name, otpCode);
 
-        sendMailWithHtml(toEmail, "OTP mới của bạn", emailBody);
-    }
-
-    private void sendMailWithHtml(String to, String subject, String htmlContent) {
-        // Phương thức này phải đảm bảo email được gửi với content-type là text/html
-        // Ví dụ sử dụng JavaMailSender:
-        try {
-            MimeMessage message = javaMailSender.createMimeMessage();
-            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
-
-            helper.setTo(to);
-            helper.setSubject(subject);
-            helper.setText(htmlContent, true); // Tham số thứ hai (true) chỉ định nội dung là HTML
-
-            javaMailSender.send(message);
-        } catch (Exception e) {
-            e.printStackTrace();
-        }
+        sendMailService.sendMail(toEmail, emailBody, "OTP mới của bạn");
     }
 }

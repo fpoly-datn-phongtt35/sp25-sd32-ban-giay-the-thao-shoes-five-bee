@@ -13,6 +13,10 @@ export const getHoaDonByKhachHangId1 = (userId) =>
 export const getHoaDonById1 = (hoaDonId) =>
   axios.get(`${REST_API_BASE_URL}/${hoaDonId}`);
 
+export const tachNguoiNhanMoiInHoaDon = (hoaDonId, thongTin) => {
+  axios.put(`${REST_API_BASE_URL}/hoa-don/${hoaDonId}/cap-nhat-thong-tin-nguoi-nhan`, thongTin);
+}
+
 export const topSelling = () =>
   axios.get(`http://localhost:5000/hoa-don-chi-tiet/top-selling`);
 

@@ -3,7 +3,7 @@ import "./OrderDetailPopup.css";
 import { useEffect, useState } from "react";
 import { fetchCustomerId } from "../service/LoginService";
 import { getDiaChiByKhachHangId } from "../service/DiaChiService";
-import { updateOrderAddress } from "../service/HoaDonService";
+import { tachNguoiNhanMoiInHoaDon, updateOrderAddress } from "../service/HoaDonService";
 import { addDanhGia } from "../service/DanhGiaService";
 
 const OrderDetailPopup = ({
@@ -22,14 +22,25 @@ const OrderDetailPopup = ({
   const [rating, setRating] = useState(0);
   const [reviewText, setReviewText] = useState("");
   const [reviewedProductIds, setReviewedProductIds] = useState([]);
+  const [tenNguoiNhanMoi, setTenNguoiNhanMoi] = useState('');
+  const [sdtNguoiNhanMoi, setSdtNguoiNhanMoi] = useState('');
+  const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({
-    tenNguoiNhan: selectedOrder?.tenNguoiNhan || "",
-    sdtNguoiNhan: selectedOrder?.sdtNguoiNhan || "",
-    diaChi: selectedOrder?.diaChi || "",
+    tenNguoiNhanMoi: selectedOrder?.tenNguoiNhanMoi || "",
+    sdtNguoiNhanMoi: selectedOrder?.sdtNguoiNhanMoi || "",
   });
   useEffect(() => {
     if (selectedOrder) {
       setUpdatedOrder(selectedOrder);
+    }
+  }, [selectedOrder]);
+
+  useEffect(() => {
+    if (selectedOrder) {
+      setFormData({
+        tenNguoiNhanMoi: selectedOrder?.tenNguoiNhanMoi || "",
+        sdtNguoiNhanMoi: selectedOrder?.sdtNguoiNhanMoi || "",
+      });
     }
   }, [selectedOrder]);
 
@@ -146,6 +157,35 @@ const OrderDetailPopup = ({
     setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
+  const handleSubmit = async () => {
+    try {
+      const response = await tachNguoiNhanMoiInHoaDon(selectedOrder.id, {
+        tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
+        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
+      });
+      
+      // // Cập nhật lại selectedOrder
+      // selectedOrder.tenNguoiNhan = formData.tenNguoiNhanMoi;
+      // selectedOrder.sdtNguoiNhan = formData.sdtNguoiNhanMoi;
+      
+      setFormData({
+        tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
+        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
+      });
+      
+      message.success("Thêm thông tin người nhận thành công");
+
+      console.log(response);
+      setUpdatedOrder((prev) => ({
+        ...prev,
+        tenNguoiNhan: formData.tenNguoiNhanMoi,
+        sdtNguoiNhan: formData.sdtNguoiNhanMoi
+      }));
+    } catch (error) {
+      setMessage(error.response?.data || 'Có lỗi xảy ra.');
+    }
+  };
+
   return (
     isPopupVisible && (
       <div className="popup-overlay" onClick={togglePopup}>
@@ -240,12 +280,12 @@ const OrderDetailPopup = ({
             {selectedOrder?.trangThai === 0 ? (
               <>
                 <div className="info-row">
-                  <h6 className="info-label">Tên khách hàng:</h6>
+                  <h6 className="info-label">Tên người nhận:</h6>
                   <Input
                     placeholder="Tên người nhận"
-                    value={formData.tenNguoiNhan}
+                    value={formData.tenNguoiNhanMoi}
                     onChange={(e) =>
-                      handleChange("tenNguoiNhan", e.target.value)
+                      handleChange("tenNguoiNhanMoi", e.target.value)
                     }
                   />
                 </div>
@@ -254,19 +294,10 @@ const OrderDetailPopup = ({
                   <h6 className="info-label">Số điện thoại:</h6>
                   <Input
                     placeholder="Số điện thoại"
-                    value={formData.sdtNguoiNhan}
+                    value={formData.sdtNguoiNhanMoi}
                     onChange={(e) =>
-                      handleChange("sdtNguoiNhan", e.target.value)
+                      handleChange("sdtNguoiNhanMoi", e.target.value)
                     }
-                  />
-                </div>
-
-                <div className="info-row">
-                  <h6 className="info-label">Địa chỉ:</h6>
-                  <Input
-                    placeholder="Địa chỉ"
-                    value={formData.diaChi}
-                    onChange={(e) => handleChange("diaChi", e.target.value)}
                   />
                 </div>
               </>
@@ -280,15 +311,11 @@ const OrderDetailPopup = ({
                   <h6 className="info-label">Số điện thoại:</h6>
                   <span>{selectedOrder?.sdtNguoiNhan || "N/A"}</span>
                 </div>
-                <div className="info-row">
-                  <h6 className="info-label">Địa chỉ:</h6>
-                  <span>{selectedOrder?.diaChi || "Tại quầy"}</span>
-                </div>
               </>
             )}
 
             {selectedOrder?.trangThai === 0 && (
-              <Button type="primary" onClick={handleEditAddress}>
+              <Button type="primary" onClick={handleSubmit}>
                 Cập nhật thông tin người nhận
               </Button>
             )}
