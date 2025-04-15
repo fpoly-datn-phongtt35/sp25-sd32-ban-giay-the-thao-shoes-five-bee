@@ -39,6 +39,12 @@ public class HoaDonEntity {
     @Column(name = "MO_TA",columnDefinition = "NVARCHAR(255)")
     private String moTa;
 
+    @Column(name = "TEN_NGUOI_NHAN_MOI",columnDefinition =  "NVARCHAR(255)")
+    private String tenNguoiNhanMoi;
+
+    @Column(name = "SO_DIEN_THOAI_NGUOI_NHAN_MOI",columnDefinition =  "NVARCHAR(255)")
+    private String sdtNguoiNhanMoi;
+
     @Column(name = "TEN_NGUOI_NHAN",columnDefinition = "NVARCHAR(255)")
     private String tenNguoiNhan;
 

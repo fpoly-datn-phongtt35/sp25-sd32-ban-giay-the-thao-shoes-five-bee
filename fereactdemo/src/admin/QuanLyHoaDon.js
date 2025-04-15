@@ -24,6 +24,7 @@ import {
   detailHoaDon,
   getHoaDon,
   getHoaDonById1,
+  tachNguoiNhanMoiInHoaDon,
   xacNhanHoaDon,
 } from "../service/HoaDonService";
 import {
@@ -56,13 +57,45 @@ const QuanLyHoaDon = () => {
   const [selectedAddressId, setSelectedAddressId] = useState(null);
   const [addresses, setAddresses] = useState([]);
   const [formData, setFormData] = useState({
-    tenNguoiNhan: dataHoaDonChiTiet?.tenNguoiNhan || "",
-    sdtNguoiNhan: dataHoaDonChiTiet?.sdtNguoiNhan || "",
-    diaChi: dataHoaDonChiTiet?.diaChi || "",
+    tenNguoiNhanMoi: "",
+    sdtNguoiNhanMoi: "",
   });
 
   const handleChange = (field, value) => {
-    setFormData((prev) => ({ ...prev, [field]: value }));
+    setFormData(prev => ({ ...prev, [field]: value }));
+  };
+
+  useEffect(() => {
+    if (dataHoaDonChiTiet) {
+      setFormData({
+        tenNguoiNhanMoi: dataHoaDonChiTiet.tenNguoiNhanMoi || "",
+        sdtNguoiNhanMoi: dataHoaDonChiTiet.sdtNguoiNhanMoi || "",
+      });
+    }
+  }, [dataHoaDonChiTiet]);
+
+  const handleSubmitRecipient = async () => {
+    try {
+      // Make sure you're using the correct ID
+      const hoaDonId = dataHoaDonChiTiet.id;
+
+      // Call the API to update the new recipient information
+      const response = await tachNguoiNhanMoiInHoaDon(hoaDonId, {
+        tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
+        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
+      });
+
+      // Update the local state with the new values
+      setDataHoaDonChiTiet(prev => ({
+        ...prev,
+        tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
+        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
+      }));
+
+      message.success("Thông tin người nhận mới đã được cập nhật thành công");
+    } catch (error) {
+      message.error(error.response?.data || "Có lỗi xảy ra khi cập nhật thông tin người nhận mới");
+    }
   };
   const mapTrangThai = (trangThai) => {
     switch (trangThai) {
@@ -91,6 +124,17 @@ const QuanLyHoaDon = () => {
   useEffect(() => {
     fetchHoaDon();
   }, [statusFilter, dateFilter]);
+
+  useEffect(() => {
+    if (dataHoaDonChiTiet) {
+      setFormData({
+        tenNguoiNhanMoi: dataHoaDonChiTiet?.tenNguoiNhanMoi || "",
+        sdtNguoiNhanMoi: dataHoaDonChiTiet?.sdtNguoiNhanMoi || "",
+      });
+    }
+  }, [dataHoaDonChiTiet]);
+
+
 
   const fetchLichSuHoaDon = async () => {
     try {
@@ -195,7 +239,7 @@ const QuanLyHoaDon = () => {
           ma: item.ma, // Mã hóa đơn
           user: item.tenNguoiNhan || (item.userDto?.hoTen ?? "Khách lẻ"), // Tên người nhận hoặc user
           user_phone: item.sdtNguoiNhan || (item.userDto?.soDienThoai ?? "N/A"),
-          user_email:item.userDto?.email, // Số điện thoại
+          user_email: item.userDto?.email, // Số điện thoại
           order_on: item.ngayTao
             ? moment(item.ngayTao).format("DD/MM/YYYY")
             : "N/A", // Ngày tạo đơn
@@ -207,10 +251,10 @@ const QuanLyHoaDon = () => {
             item.hinhThucThanhToan === 0
               ? "Tiền mặt"
               : item.hinhThucThanhToan === 1
-              ? "Chuyển khoản"
-              : item.hinhThucThanhToan === 2
-              ? "Thanh toán khi nhận hàng"
-              : "VNPay",
+                ? "Chuyển khoản"
+                : item.hinhThucThanhToan === 2
+                  ? "Thanh toán khi nhận hàng"
+                  : "VNPay",
 
           phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
           soTienGiam: item.soTienGiam ?? 0, // Số tiền giảm giá
@@ -247,6 +291,7 @@ const QuanLyHoaDon = () => {
     try {
       const response = await getHoaDonById1(id);
 
+
       // Tính tổng tiền sản phẩm từ items
       const tongTienSanPham = (response.data.items || []).reduce(
         (total, item) => total + item.giaBan * item.soLuong,
@@ -265,6 +310,8 @@ const QuanLyHoaDon = () => {
         userId: response.data.userDto?.id, // Thêm userId
         user_phone: response.data.sdtNguoiNhan,
         diaChi: response.data.diaChi || "Tại Quầy",
+        tenNguoiNhanMoi: response.data.tenNguoiNhanMoi,
+        sdtNguoiNhanMoi: response.data.sdtNguoiNhanMoi,
         xa: response.data.xa,
         huyen: response.data.huyen,
         tinh: response.data.tinh,
@@ -603,9 +650,9 @@ const QuanLyHoaDon = () => {
         const tongTienGoc =
           record.products && record.products.length > 0
             ? record.products.reduce(
-                (total, product) => total + product.soLuong * product.giaBan,
-                0
-              )
+              (total, product) => total + product.soLuong * product.giaBan,
+              0
+            )
             : record.tongTien + (record.soTienGiam || 0); // Nếu không có products, tính ngược từ tổng tiền và số tiền giảm
 
         // Nếu có giảm giá, hiển thị cả giá gốc và giá sau giảm
@@ -934,14 +981,12 @@ const QuanLyHoaDon = () => {
                 <h6>
                   Địa Chỉ:{" "}
                   {dataHoaDonChiTiet?.diaChi ||
-                  dataHoaDonChiTiet?.xa ||
-                  dataHoaDonChiTiet?.huyen ||
-                  dataHoaDonChiTiet?.tinh
-                    ? `${dataHoaDonChiTiet?.diaChi || ""}, ${
-                        dataHoaDonChiTiet?.xa || ""
-                      }, ${dataHoaDonChiTiet?.huyen || ""}, ${
-                        dataHoaDonChiTiet?.tinh || ""
-                      }`
+                    dataHoaDonChiTiet?.xa ||
+                    dataHoaDonChiTiet?.huyen ||
+                    dataHoaDonChiTiet?.tinh
+                    ? `${dataHoaDonChiTiet?.diaChi || ""}, ${dataHoaDonChiTiet?.xa || ""
+                    }, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""
+                    }`
                     : "Tại Quầy"}
                 </h6>
               </div>
@@ -949,7 +994,7 @@ const QuanLyHoaDon = () => {
               {/* Thêm phần hiển thị thông tin giảm giá */}
               {dataHoaDonChiTiet?.chuongTrinhGiamGiaChiTietHoaDons &&
                 dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.length >
-                  0 && (
+                0 && (
                   <div className="giamgia">
                     <h4>Thông tin giảm giá</h4>
                     {dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.map(
@@ -993,38 +1038,57 @@ const QuanLyHoaDon = () => {
               <div className="phai">
                 <h4>Thông tin người nhận</h4>
 
-                <div className="info-row">
-                  <h6 className="info-label">Tên khách hàng:</h6>
-                  <Input
-                    placeholder="Tên người nhận"
-                    value={formData.tenNguoiNhan}
-                    onChange={(e) =>
-                      handleChange("tenNguoiNhan", e.target.value)
-                    }
-                  />
-                </div>
+                {dataHoaDonChiTiet?.trangThai === 0 ? (
+                  <>
+                    <div className="info-row">
+                      <h6 className="info-label">Tên người nhận:</h6>
+                      <Input
+                        placeholder="Tên người nhận mới"
+                        value={formData.tenNguoiNhanMoi}
+                        onChange={(e) => handleChange("tenNguoiNhanMoi", e.target.value)}
+                      />
+                    </div>
 
-                <div className="info-row">
-                  <h6 className="info-label">Số điện thoại:</h6>
-                  <Input
-                    placeholder="Số điện thoại"
-                    value={formData.sdtNguoiNhan}
-                    onChange={(e) =>
-                      handleChange("sdtNguoiNhan", e.target.value)
-                    }
-                  />
-                </div>
+                    <div className="info-row">
+                      <h6 className="info-label">Số điện thoại:</h6>
+                      <Input
+                        placeholder="Số điện thoại người nhận mới"
+                        value={formData.sdtNguoiNhanMoi}
+                        onChange={(e) => handleChange("sdtNguoiNhanMoi", e.target.value)}
+                      />
+                    </div>
 
-                <div className="info-row">
-                  <h6 className="info-label">Địa chỉ:</h6>
-                  <Input
-                    placeholder="Địa chỉ"
-                    value={formData.diaChi}
-                    onChange={(e) => handleChange("diaChi", e.target.value)}
-                  />
-                </div>
+                    {/* <div className="info-row">
+                    <h6 className="info-label">Địa chỉ:</h6>
+                    <Input
+                      placeholder="Địa chỉ"
+                      value={formData.diaChi}
+                      onChange={(e) => handleChange("diaChi", e.target.value)}
+                    />
+                  </div> */}
+                  </>
+                ) : (
+                  <>
+                    <div className="info-row">
+                      <h6 className="info-label">Tên người nhận:</h6>
+                      <span>{dataHoaDonChiTiet?.user || "N/A"}</span>
+                    </div>
+                    <div className="info-row">
+                      <h6 className="info-label">Số điện thoại:</h6>
+                      <span>{dataHoaDonChiTiet?.user_phone || "N/A"}</span>
+                    </div>
+                    <div className="info-row">
+                      <h6 className="info-label">Địa chỉ:</h6>
+                      <span>{dataHoaDonChiTiet?.diaChi || "Tại quầy"}</span>
+                    </div>
+                  </>
+                )}
 
-                <Button type="primary">Cập nhật thông tin người nhận</Button>
+                {dataHoaDonChiTiet?.trangThai === 0 && (
+                  <Button type="primary" onClick={handleSubmitRecipient}>
+                    Cập nhật thông tin người nhận
+                  </Button>
+                )}
 
                 <Modal
                   title="Chọn địa chỉ mới"
@@ -1171,9 +1235,8 @@ const QuanLyHoaDon = () => {
                       {[...Array(5)].map((_, index) => (
                         <span
                           key={index}
-                          className={`star ${
-                            index < danhGia[0].saoDanhGia ? "active" : ""
-                          }`}
+                          className={`star ${index < danhGia[0].saoDanhGia ? "active" : ""
+                            }`}
                         >
                           ★
                         </span>

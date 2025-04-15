@@ -1,7 +1,9 @@
 package com.example.demo.controller;
 
 import com.example.demo.dto.request.HoaDonDto;
+import com.example.demo.dto.request.ThongTinNguoiNhanDto;
 import com.example.demo.entity.HoaDonEntity;
+import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.TrangThaiHoaDonService;
 import java.util.List;
 import java.util.UUID;
@@ -15,7 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/trang-thai-hoa-don")
 public class HoaDonController {
   @Autowired private TrangThaiHoaDonService trangThaiHoaDonService;
-
+  @Autowired private HoaDonRepository hoaDonRepository;
   @PutMapping("/xac-nhan/{id}")
   public HoaDonEntity xacNhanHoaDon(@PathVariable UUID id) {
     return trangThaiHoaDonService.xacNhanHoaDon(id);
@@ -59,4 +61,19 @@ public class HoaDonController {
       return new ResponseEntity<>(HttpStatus.NOT_FOUND);
     }
   }
+    @PutMapping("/hoa-don/{id}/cap-nhat-thong-tin-nguoi-nhan")
+    public ResponseEntity<?> capNhatNguoiNhan(@PathVariable UUID id, @RequestBody ThongTinNguoiNhanDto dto){
+            HoaDonEntity hoaDon = hoaDonRepository.findById(id)
+                    .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+            if (hoaDon.getTrangThai() != 0) {
+                return ResponseEntity.badRequest().body("Chỉ được cập nhật khi hóa đơn ở trạng thái chờ xác nhận.");
+            }
+
+            hoaDon.setTenNguoiNhanMoi(dto.getTenNguoiNhanMoi());
+            hoaDon.setSdtNguoiNhanMoi(dto.getSdtNguoiNhanMoi());
+
+            hoaDonRepository.save(hoaDon);
+            return ResponseEntity.ok("Cập nhật thông tin người nhận thành công.");
+        }
 }
