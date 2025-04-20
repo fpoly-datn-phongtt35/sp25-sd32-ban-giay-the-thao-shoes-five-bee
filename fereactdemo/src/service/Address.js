@@ -44,7 +44,7 @@ export const getWardsByDistrictId = async (districtId) => {
   try {
     const response = await axios.post(
       API_URL_WARD,
-      { district_id : parseInt(districtId, 10) }, // Dữ liệu body
+      { district_id: parseInt(districtId, 10) }, // Dữ liệu body
       {
         headers: {
           Token: TOKEN,  // Thêm token vào header

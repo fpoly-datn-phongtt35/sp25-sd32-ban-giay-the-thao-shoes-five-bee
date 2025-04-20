@@ -10,6 +10,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -22,16 +23,19 @@ import java.util.UUID;
 public class GiamGiaSanPhamController {
   private final GiamGiaSanPhamService giamGiaSanPhamService;
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/tao-giam-gia")
   public ResponseEntity<?> taoChuongTrinhGiamGia(@RequestBody GiamGiaChiTietSanPhamRequest request) {
     return ResponseEntity.ok(giamGiaSanPhamService.taoChuongTrinhGiamGia(request));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
   @PostMapping("/getAll")
   public ResponseEntity<?> getAll() {
     return ResponseEntity.ok(giamGiaSanPhamService.getAll());
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/search")
   public ResponseEntity<?> findAndPageChatLieu(@RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
     Pageable pageable = PageRequest.of(giamGiaSanPhamDto.getPage(), giamGiaSanPhamDto.getSize());
@@ -39,11 +43,13 @@ public class GiamGiaSanPhamController {
         giamGiaSanPhamService.findByPagingCriteria(giamGiaSanPhamDto, pageable));
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/add")
   public ResponseEntity<?> add(@RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
     return ResponseEntity.ok(giamGiaSanPhamService.add(giamGiaSanPhamDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/update/{id}")
   public ResponseEntity<?> update(@PathVariable("id") UUID id, @RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
     // Bạn có thể sử dụng id để xác định đợt giảm giá cần cập nhật
@@ -51,15 +57,19 @@ public class GiamGiaSanPhamController {
     return ResponseEntity.ok(giamGiaSanPhamService.update(giamGiaSanPhamDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/detail")
   public ResponseEntity<?> detail(@RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
     return ResponseEntity.ok(giamGiaSanPhamService.detail(giamGiaSanPhamDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
   @PostMapping("/delete")
   public ResponseEntity<?> delete(@RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
     return ResponseEntity.ok(giamGiaSanPhamService.delete(giamGiaSanPhamDto));
   }
+
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/export-excel")
   public ResponseEntity<byte[]> exportExcel() throws IOException {
     byte[] excelFile = giamGiaSanPhamService.exportExcel().toByteArray();
@@ -67,6 +77,8 @@ public class GiamGiaSanPhamController {
     headers.add("Content-Disposition", "attachment; filename=chuongtrinhgiamgia.xlsx");
     return ResponseEntity.ok().headers(headers).body(excelFile);
   }
+
+  @PreAuthorize("hasRole('ADMIN')")
   @GetMapping("/search-ten")
   public ResponseEntity<List<GiamGiaSanPhamEntity>> searchGiamGiaByName(@RequestParam String ten) {
     List<GiamGiaSanPhamEntity> result = giamGiaSanPhamService.findByTen(ten);

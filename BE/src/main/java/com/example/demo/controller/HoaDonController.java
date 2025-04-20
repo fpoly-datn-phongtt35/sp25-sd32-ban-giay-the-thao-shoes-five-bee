@@ -11,6 +11,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +19,8 @@ import org.springframework.web.bind.annotation.*;
 public class HoaDonController {
   @Autowired private TrangThaiHoaDonService trangThaiHoaDonService;
   @Autowired private HoaDonRepository hoaDonRepository;
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PutMapping("/xac-nhan/{id}")
   public HoaDonEntity xacNhanHoaDon(@PathVariable UUID id) {
     return trangThaiHoaDonService.xacNhanHoaDon(id);
@@ -32,24 +35,29 @@ public class HoaDonController {
   // 6 da giao hang
   // 7 tra hang
   // 8 da huy
+  // 9 cho nhap hang
 
   /** API hủy hóa đơn */
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @PutMapping("/{id}/huy")
   public HoaDonEntity huyHoaDon(@PathVariable UUID id) {
     return trangThaiHoaDonService.huyHoaDon(id);
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/getAll")
   public List<HoaDonDto> getAllHoaDon() {
     return trangThaiHoaDonService.getAllHoaDon();
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/{id}")
   public ResponseEntity<HoaDonEntity> getHoaDonChiTiet(@PathVariable UUID id) {
     HoaDonEntity hoaDon = trangThaiHoaDonService.findById(id);
     return ResponseEntity.ok(hoaDon);
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/download-pdf/{id}")
   public ResponseEntity<byte[]> downloadInvoicePdf(@PathVariable UUID id) {
     byte[] pdfData = trangThaiHoaDonService.printHoaDon(id);

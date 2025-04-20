@@ -5,6 +5,13 @@ const REST_API_BASE_URL = "http://localhost:5000/gio-hang-chi-tiet";
 const REST_API_BASE_URLS = "http://localhost:5000/gio-hang";
 
 
+// Lấy token từ localStorage hoặc sessionStorage
+const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+const config = {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+};
 export const getByKhachHangId = () => {
   const token = localStorage.getItem("token");
   return axios.get(`${REST_API_BASE_URLS}/getAll`, {
@@ -16,7 +23,7 @@ export const getByKhachHangId = () => {
 
 export const getGioHangChiTietCheckOut = async (ids) => {
   try {
-    const response = await axios.post(`${REST_API_BASE_URL}/check-out`, ids, {
+    const response = await axios.post(`${REST_API_BASE_URL}/check-out`, ids, config, {
       headers: {
         'Content-Type': 'application/json',
       },
@@ -30,7 +37,7 @@ export const getGioHangChiTietCheckOut = async (ids) => {
 
 export const countProductsInCart = async (idGioHang) => {
   try {
-    const response = await axios.get(`${REST_API_BASE_URLS}/tong-so-luong/${idGioHang}`);
+    const response = await axios.get(`${REST_API_BASE_URLS}/tong-so-luong/${idGioHang}`, config);
     return response.data;
   } catch (error) {
     console.error('Lỗi khi lấy tổng số lượng sản phẩm trong giỏ:', error);

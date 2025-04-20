@@ -8,6 +8,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -19,6 +20,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GiamGiaHoaDonChiTietController {
   private final GiamGiaHoaDonChiTietService giamGiaHoaDonChiTietService;
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/getAll")
   public ResponseEntity<?> getAll() {
     return ResponseEntity.ok(giamGiaHoaDonChiTietService.getAll());
@@ -33,21 +35,25 @@ public class GiamGiaHoaDonChiTietController {
         giamGiaHoaDonChiTietService.findByPagingCriteria(giamGiaHoaDonChiTietDto, pageable));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/add")
   public ResponseEntity<?> add(@RequestBody GiamGiaHoaDonChiTietDto giamGiaHoaDonChiTietDto) {
     return ResponseEntity.ok(giamGiaHoaDonChiTietService.add(giamGiaHoaDonChiTietDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/update")
   public ResponseEntity<?> update(@RequestBody GiamGiaHoaDonChiTietDto giamGiaHoaDonChiTietDto) {
     return ResponseEntity.ok(giamGiaHoaDonChiTietService.update(giamGiaHoaDonChiTietDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/detail")
   public ResponseEntity<?> detail(@RequestBody GiamGiaHoaDonChiTietDto giamGiaHoaDonChiTietDto) {
     return ResponseEntity.ok(giamGiaHoaDonChiTietService.detail(giamGiaHoaDonChiTietDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/delete")
   public ResponseEntity<?> delete(@RequestBody GiamGiaHoaDonChiTietDto giamGiaHoaDonChiTietDto) {
     return ResponseEntity.ok(giamGiaHoaDonChiTietService.delete(giamGiaHoaDonChiTietDto));

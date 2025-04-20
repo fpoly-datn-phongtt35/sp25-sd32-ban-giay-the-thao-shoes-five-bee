@@ -8,6 +8,7 @@ import {
 } from "../service/GiayChiTietService";
 
 import { topSelling } from "../service/HoaDonService";
+import { getDoanhThuNamHienTai, getDoanhThuNgayHienTai, getDoanhThuThangHienTai, getDoanhThuTheoKhoangNgay, getDoanhThuTheoNgayCuThe } from "../service/DoanhThu";
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 const Statistics = () => {
@@ -78,24 +79,20 @@ const Statistics = () => {
     try {
       const today = formatDate(new Date());
 
-      const endpoints = [
-        `http://localhost:5000/doanh-thu/nam-hien-tai`,
-        `http://localhost:5000/doanh-thu/thang-hien-tai`,
-        `http://localhost:5000/doanh-thu/ngay-hien-tai`,
-        `http://localhost:5000/doanh-thu/ngay-cu-the?ngay=${today}`,
-      ];
+      const [nam, thang, ngay, ngayCuThe] = await Promise.all([
+        getDoanhThuNamHienTai(),
+        getDoanhThuThangHienTai(),
+        getDoanhThuNgayHienTai(),
+        getDoanhThuTheoNgayCuThe(today),
+      ]);
 
-      const responses = await Promise.all(
-        endpoints.map((url) => fetch(url).then((res) => res.json()))
-      );
+      setDoanhThuNam(createChartData("Doanh Thu Năm", nam.data, "#FF6384"));
+      setDoanhThuThang(createChartData("Doanh Thu Tháng", thang.data, "#36A2EB"));
+      setDoanhThuNgay(createChartData("Doanh Thu Ngày", ngay.data, "#FFCE56"));
 
-      setDoanhThuNam(createChartData("Doanh Thu Năm", responses[0], "#FF6384"));
-      setDoanhThuThang(createChartData("Doanh Thu Tháng", responses[1], "#36A2EB"));
-      setDoanhThuNgay(createChartData("Doanh Thu Ngày", responses[2], "#FFCE56"));
-
-      setLoading(false);
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu:", error);
+    } finally {
       setLoading(false);
     }
   };
@@ -103,11 +100,8 @@ const Statistics = () => {
   // Lọc theo năm
   const fetchByYear = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/doanh-thu/nam-cu-the?year=${selectedYear}`
-      );
-      const data = await response.json();
-      setDoanhThuNam(createChartData("Doanh Thu Năm", data, "#FF6384"));
+      const res = await getDoanhThuNamHienTai(selectedYear);
+      setDoanhThuNam(createChartData("Doanh Thu Năm", res.data, "#FF6384"));
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu năm:", error);
     }
@@ -116,11 +110,8 @@ const Statistics = () => {
   // Lọc theo tháng
   const fetchByMonth = async () => {
     try {
-      const response = await fetch(
-        `http://localhost:5000/doanh-thu/thang-cu-the?year=${selectedYear}&month=${selectedMonth}`
-      );
-      const data = await response.json();
-      setDoanhThuThang(createChartData("Doanh Thu Tháng", data, "#36A2EB"));
+      const res = await getDoanhThuThangHienTai(selectedYear, selectedMonth);
+      setDoanhThuThang(createChartData("Doanh Thu Tháng", res.data, "#36A2EB"));
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu tháng:", error);
     }
@@ -130,11 +121,8 @@ const Statistics = () => {
   const fetchByDate = async () => {
     if (!selectedDate) return;
     try {
-      const response = await fetch(
-        `http://localhost:5000/doanh-thu/ngay-cu-the?ngay=${formatDate(selectedDate)}`
-      );
-      const data = await response.json();
-      setDoanhThuNgay(createChartData("Doanh Thu Ngày", data, "#FFCE56"));
+      const res = await getDoanhThuTheoNgayCuThe(formatDate(selectedDate));
+      setDoanhThuNgay(createChartData("Doanh Thu Ngày", res.data, "#FFCE56"));
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu ngày:", error);
     }
@@ -144,11 +132,8 @@ const Statistics = () => {
   const fetchByRange = async () => {
     if (!startDate || !endDate) return;
     try {
-      const response = await fetch(
-        `http://localhost:5000/doanh-thu/khoang-ngay?start=${formatDate(startDate)}&end=${formatDate(endDate)}`
-      );
-      const data = await response.json();
-      setDoanhThuNgay(createChartData("Doanh Thu Khoảng Ngày", data, "#FFA500")); // Cam
+      const res = await getDoanhThuTheoKhoangNgay(formatDate(startDate), formatDate(endDate));
+      setDoanhThuNgay(createChartData("Doanh Thu Khoảng Ngày", res.data, "#FFA500"));
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu khoảng ngày:", error);
     }

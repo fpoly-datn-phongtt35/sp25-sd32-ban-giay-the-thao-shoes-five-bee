@@ -18,6 +18,7 @@ function AddressModal({ onAddAddress }) {
     xa: "",
     huyen: "",
     thanhPho: "",
+    diaChiCuThe: "",
     trangThai: 1,
   });
 
@@ -180,8 +181,8 @@ function AddressModal({ onAddAddress }) {
               <Form.Control
                 type="text"
                 placeholder="Nhập địa chỉ cụ thể"
-                name="tenDiaChi"
-                value={diaChi.tenDiaChi}
+                name="diaChiCuThe"
+                value={diaChi.diaChiCuThe}
                 onChange={handleInputChange}
               />
             </Form.Group>

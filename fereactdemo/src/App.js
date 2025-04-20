@@ -43,11 +43,11 @@ import { ProfileUser } from "./profile/ProfileUser";
 import ProtectedRoute from "./components/ProtectedRoute";
 import { CartProvider } from "./cart/CartContext";
 import ThongKe from "./admin/ThongKe";
-import ThongKeSanPham from "./admin/ThongKeSanPham";
 import GiamGiaHoaDon from "./admin/GiamGiaHoaDon";
 import { Header } from "./header/Header";
 import { Footer } from "./footer/Footer";
 import DanhGiaComponent from "./components/DanhGiaComponent";
+import Unauthorized from "./signln/Unauthorized";
 const Layout = () => {
   return (
     <div className="app_container">
@@ -67,19 +67,21 @@ function App() {
     <CartProvider>
       <Router>
         <div className="app_container">
-          <Routes>
+          <Routes >
             {/* Group các route cần Layout */}
-            <Route element={<Layout />}>
-              <Route path="/home" element={<Home />} />
-              <Route path="/cart" element={<Cart />} />
-              <Route path="/check-out" element={<Bill />} />
-              <Route path="/orderStatusPage" element={<OrderStatusPage />} />
-              <Route path="/profile" element={<ProfileUser />} />
-              <Route path="/addresslist" element={<AddressList />} />
-              <Route path="/productAll" element={<ProductAll />} />
-              <Route path="/product-detail/:id" element={<ProductDetail />} />
-              <Route path="/product-detailSPTT/:id" element={<ProductDetailSPTT />} />
-              <Route path="/danh-gia" element={<DanhGiaComponent />} />
+            <Route element={<Layout />} >
+              <Route element={<ProtectedRoute allowedRoles={['ROLE_USER']} />}>
+                <Route path="/home" element={<Home />} />
+                <Route path="/cart" element={<Cart />} />
+                <Route path="/check-out" element={<Bill />} />
+                <Route path="/orderStatusPage" element={<OrderStatusPage />} />
+                <Route path="/profile" element={<ProfileUser />} />
+                <Route path="/addresslist" element={<AddressList />} />
+                <Route path="/productAll" element={<ProductAll />} />
+                <Route path="/product-detail/:id" element={<ProductDetail />} />
+                <Route path="/product-detailSPTT/:id" element={<ProductDetailSPTT />} />
+                <Route path="/danh-gia" element={<DanhGiaComponent />} />
+              </Route>
             </Route>
 
             {/* Các route không có Layout */}
@@ -88,32 +90,57 @@ function App() {
             <Route path="/" element={<Login />} />
 
             {/* Routes dành cho Admin */}
-            <Route path="/admin" element={<AdminLayout />}>
-              <Route path="statistics" element={<Statistics />} />
-              <Route index element={<Dashbord />} />
-              <Route path="ban-hang-tai-quay" element={<BanHangTaiQuay />} />
-              <Route path="Thong-Ke" element={<ThongKe />} />
-              <Route path="Thong-Ke-San-Pham" element={<ThongKeSanPham />} />
-              <Route path="quan-ly-hoa-don" element={<QuanLyHoaDon />} />
-              <Route path="tra-hang" element={<ReturnOrderStatusPage />} />
-              <Route path="san-pham" element={<SanPham />} />
-              <Route path="thuong-hieu" element={<ThuongHieu />} />
-              <Route path="danh-muc" element={<DanhMuc />} />
-              <Route path="san-pham-chi-tiet" element={<SanPhamChiTiet />} />
-              <Route path="mau-sac" element={<MauSac />} />
-              <Route path="xuat-xu" element={<XuatXu />} />
-              <Route path="upload-file" element={<AnhSanPham />} />
-              <Route path="kieu-dang" element={<KieuDang />} />
-              <Route path="de-giay" element={<DeGiay />} />
-              <Route path="chat-lieu" element={<ChatLieu />} />
-              <Route path="nhan-vien" element={<NhanVien />} />
-              <Route path="khach-hang" element={<KhachHang />} />
-              <Route path="chuc-vu" element={<ChucVu />} />
-              <Route path="hang-khachHang" element={<HangKhachHang />} />
-              <Route path="phieu-giam-gia" element={<PhieuGiamGia />} />
-              <Route path="giam-gia-hoa-don" element={<GiamGiaHoaDon />} />
-              <Route path="kich-co" element={<KichCo />} />
+            <Route element={<ProtectedRoute allowedRoles={['ROLE_ADMIN', 'ROLE_STAFF']} />}>
+              <Route path="/admin" element={<AdminLayout />}>
+                <Route path="statistics" element={<Statistics />} />
+                <Route index element={<Dashbord />} />
+                <Route path="ban-hang-tai-quay" element={<BanHangTaiQuay />} />
+                <Route
+                  path="/admin/thong-ke"
+                  element={
+                    <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                      <ThongKe />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/phieu-giam-gia"
+                  element={
+                    <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                      <PhieuGiamGia />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/giam-gia-hoa-don"
+                  element={
+                    <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                      <GiamGiaHoaDon />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route path="quan-ly-hoa-don" element={<QuanLyHoaDon />} />
+                <Route path="tra-hang" element={<ReturnOrderStatusPage />} />
+                <Route path="san-pham" element={<SanPham />} />
+                <Route path="thuong-hieu" element={<ThuongHieu />} />
+                <Route path="danh-muc" element={<DanhMuc />} />
+                <Route path="san-pham-chi-tiet" element={<SanPhamChiTiet />} />
+                <Route path="mau-sac" element={<MauSac />} />
+                <Route path="xuat-xu" element={<XuatXu />} />
+                <Route path="upload-file" element={<AnhSanPham />} />
+                <Route path="kieu-dang" element={<KieuDang />} />
+                <Route path="de-giay" element={<DeGiay />} />
+                <Route path="chat-lieu" element={<ChatLieu />} />
+                <Route path="nhan-vien" element={<NhanVien />} />
+                <Route path="khach-hang" element={<KhachHang />} />
+                <Route path="chuc-vu" element={<ChucVu />} />
+                <Route path="hang-khachHang" element={<HangKhachHang />} />
+                <Route path="phieu-giam-gia" element={<PhieuGiamGia />} />
+                <Route path="giam-gia-hoa-don" element={<GiamGiaHoaDon />} />
+                <Route path="kich-co" element={<KichCo />} />
+              </Route>
             </Route>
+            <Route path="/unauthorized" element={<Unauthorized />} />
           </Routes>
         </div>
       </Router>

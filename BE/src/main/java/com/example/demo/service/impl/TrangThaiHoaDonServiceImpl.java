@@ -12,10 +12,7 @@ import com.itextpdf.kernel.pdf.PdfWriter;
 import com.itextpdf.layout.Document;
 import com.itextpdf.layout.element.Paragraph;
 import java.io.ByteArrayOutputStream;
-import java.util.Collections;
-import java.util.List;
-import java.util.Optional;
-import java.util.UUID;
+import java.util.*;
 import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -51,6 +48,8 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     if (currentStatus == 8) {
       throw new RuntimeException("Hóa đơn đã bị hủy, không thể xác nhận tiếp.");
     }
+    List<HoaDonChiTietEntity> hoaDonChiTietEntities = new ArrayList<>();
+
 
     // Chuyển đổi trạng thái theo luồng hợp lý
     switch (currentStatus) {
@@ -58,6 +57,8 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         hoaDon.setTrangThai(3); // Chờ xác nhận → Đã xác nhận
         // Trừ số lượng tồn kho khi chuyển từ "Chờ xác nhận" sang "Đã xác nhận"
         updateStockAfterOrderConfirmed(hoaDon);
+        hoaDonChiTietEntities=hoaDon.getItems();
+
         lichSuHoaDonService.createLichSuHoaDon(id, 3, 0);
         break;
       case 3:
@@ -92,8 +93,19 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
       default:
         throw new RuntimeException("Trạng thái hiện tại không thể xác nhận tiếp.");
     }
+    hoaDonRepository.save(hoaDon);
+    hoaDonChiTietEntities.forEach((hdct)->{
+      sendEmail(hdct.getGiayChiTietEntity());
+    });
+    return hoaDon;
+  }
 
-    return hoaDonRepository.save(hoaDon);
+  private void sendEmail( GiayChiTietEntity gct){
+      gct.getHoaDonChiTietEntities().forEach((hdct) ->{
+        if (hdct.getSoLuong() > gct.getSoLuongTon() && hdct.getHoaDonEntity().getTrangThai()==0){
+          sendMailService.sendMail(hdct.getHoaDonEntity().getUserEntity().getEmail(),"djt cu m","cam on");
+        }
+      });
   }
 
   // Giảm số lượng tồn kho khi trạng thái hóa đơn được xác nhận

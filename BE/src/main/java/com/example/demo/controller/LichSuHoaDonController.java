@@ -12,6 +12,7 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -21,6 +22,7 @@ public class LichSuHoaDonController {
 
   private final LichSuHoaDonService lichSuHoaDonService;
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/getAll")
   public ResponseEntity<?> getAll() {
     // Lấy tất cả lịch sử hóa đơn từ service
@@ -46,32 +48,38 @@ public class LichSuHoaDonController {
     return ResponseEntity.ok(lichSuDTOs);
   }
 
-
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/search")
   public ResponseEntity<?> findAndPageLichSuHoaDon(@RequestBody LichSuHoaDonDto lichSuHoaDonDto) {
     Pageable pageable = PageRequest.of(lichSuHoaDonDto.getPage(), lichSuHoaDonDto.getSize());
     return ResponseEntity.ok(lichSuHoaDonService.findByPagingCriteria(lichSuHoaDonDto, pageable));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/add")
   public ResponseEntity<?> add(@RequestBody LichSuHoaDonDto lichSuHoaDonDto) {
     return ResponseEntity.ok(lichSuHoaDonService.add(lichSuHoaDonDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PutMapping("/update")
   public ResponseEntity<?> update(@RequestBody LichSuHoaDonDto lichSuHoaDonDto) {
     return ResponseEntity.ok(lichSuHoaDonService.update(lichSuHoaDonDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/detail/{id}")
   public ResponseEntity<?> detail(@PathVariable("id") UUID id) {
     return ResponseEntity.ok(lichSuHoaDonService.detail(id));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @DeleteMapping("/delete/{id}")
   public ResponseEntity<?> delete(@PathVariable("id") UUID id) {
     return ResponseEntity.ok(lichSuHoaDonService.delete(id));
   }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/hoa-don")
   public ResponseEntity<?> getLichSuHoaDonByHoaDonId(@RequestParam UUID hoaDonId) {
     // Lấy danh sách lịch sử hóa đơn từ service
