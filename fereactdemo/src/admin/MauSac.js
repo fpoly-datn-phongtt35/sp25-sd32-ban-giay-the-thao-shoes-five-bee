@@ -76,7 +76,7 @@ const MauSac = () => {
             setTen("");
             setValue(1);
         } catch (error) {
-            message.error("Thêm màu sắc thất bại");
+            message.error((error.response?.data?.message || error.message));
         }
     };
 

@@ -35,12 +35,19 @@ public class XuatXuServiceImpl implements XuatXuService {
 
     @Override
     public XuatXuEntity add(XuatXuDto xuatXuDto) {
+        // Kiểm tra tên xuất xứ đã tồn tại (không phân biệt hoa thường, bỏ khoảng trắng)
+        Optional<XuatXuEntity> existing = xuatXuRepository.findByTenIgnoreCase(xuatXuDto.getTen().trim());
+        if (existing.isPresent()) {
+            throw new RuntimeException("Tên xuất xứ đã tồn tại.");
+        }
+
         XuatXuEntity xuatXuEntity = new XuatXuEntity();
         xuatXuEntity.setMa(xuatXuDto.getMa());
         xuatXuEntity.setTen(xuatXuDto.getTen());
         xuatXuEntity.setTrangThai(xuatXuDto.getTrangThai());
         return xuatXuRepository.save(xuatXuEntity);
     }
+
 
     @Override
     public XuatXuEntity addNhanh(XuatXuDto xuatXuDto) {

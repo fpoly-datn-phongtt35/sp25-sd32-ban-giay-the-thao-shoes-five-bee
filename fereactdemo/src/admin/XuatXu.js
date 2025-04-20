@@ -76,7 +76,7 @@ const XuatXu = () => {
             setTen("");
             setValue(1);
         } catch (error) {
-            message.error("Thêm xuất xứ thất bại ");
+            message.error((error.response?.data?.message || error.message));
         }
     };
 

@@ -77,7 +77,7 @@ const DeGiay = () => {
             setTen("");
             setValue(1);
         } catch (error) {
-            message.error('Lỗi khi thêm đế giày');
+            message.error((error.response?.data?.message || error.message));
             console.error("Lỗi khi thêm đế giày", error);
         }
     };
