@@ -214,42 +214,51 @@ public class AuthServiceImpl implements AuthService {
     @Override
     public ResponseEntity<?> sendBackOtp(UserOtpDto userOtpDto) {
         UserEntity userEntity = userRepository.findByEmail(userOtpDto.getEmail())
-                .orElseThrow(() ->new RuntimeException("khong tim thay email người dùng này "));
-        if(userEntity.getIsEnabled()){
-            return ResponseEntity.ok(Map.of("message","tài khoản của người dùng chưa được kích hoạt"));
+                .orElseThrow(() -> new RuntimeException("Không tìm thấy email người dùng này"));
+
+        if (userEntity.getIsEnabled()) {
+            return ResponseEntity.ok(Map.of("message", "Tài khoản của người dùng đã được kích hoạt"));
         }
+
         String newOtp = OtpUtil.generateOtp(6);
         userEntity.setOtpCode(newOtp);
         userEntity.setOtpGeneratedTime(LocalDateTime.now());
         userRepository.save(userEntity);
-        buildEmail(userEntity.getHoTen(),newOtp,userOtpDto.getEmail());
-        return ResponseEntity.ok(Map.of("message","Mã OTP mới đã được gửi đến email của bạn vui lòng kiểm tra để xác nhận"));
+
+        // Gửi email
+        buildEmail(userEntity.getHoTen(), newOtp, userOtpDto.getEmail());
+
+        return ResponseEntity.ok(Map.of("message", "Mã OTP mới đã được gửi đến email của bạn. Vui lòng kiểm tra để xác nhận."));
     }
 
     private void buildEmail(String name, String otpCode, String toEmail) {
         String emailBody = String.format("""
-            <div style="font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c">
-                <table role="presentation" width="100%%" style="border-collapse:collapse;min-width:100%%;width:100%%!important" cellpadding="0" cellspacing="0" border="0">
-                    <tr>
-                        <td bgcolor="#0b0c0c" style="padding:20px;text-align:center;">
-                            <span style="font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;">Xác nhận đăng ký tài khoản</span>
-                        </td>
-                    </tr>
-                </table>
-                <table align="center" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;width:100%%;margin:20px auto;">
-                    <tr>
-                        <td style="font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;">
-                            <p>Chào <strong>%s</strong>,</p>
-                            <p>Cảm ơn bạn đã đăng ký tài khoản. Đây là mã OTP của bạn:</p>
-                            <p style="font-size:24px;font-weight:bold;text-align:center;color:#1D70B8;">%s</p>
-                            <p>Mã OTP này sẽ hết hạn sau 1 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
-                            <p>Hẹn gặp lại!</p>
-                        </td>
-                    </tr>
-                </table>
-            </div>
-            """, name, otpCode);
+        <html>
+        <body style="font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c">
+            <table role="presentation" width="100%%" style="border-collapse:collapse;min-width:100%%;width:100%%!important" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                    <td bgcolor="#0b0c0c" style="padding:20px;text-align:center;">
+                        <span style="font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;">Xác nhận đăng ký tài khoản</span>
+                    </td>
+                </tr>
+            </table>
+            <table align="center" cellpadding="0" cellspacing="0" border="0" style="max-width:580px;width:100%%;margin:20px auto;">
+                <tr>
+                    <td style="font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;">
+                        <p>Chào <strong>%s</strong>,</p>
+                        <p>Cảm ơn bạn đã đăng ký tài khoản. Đây là mã OTP của bạn:</p>
+                        <p style="font-size:24px;font-weight:bold;text-align:center;color:#1D70B8;">%s</p>
+                        <p>Mã OTP này sẽ hết hạn sau 1 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
+                        <p>Hẹn gặp lại!</p>
+                    </td>
+                </tr>
+            </table>
+        </body>
+        </html>
+        """, name, otpCode);
 
+        // Gọi service đã sửa để đảm bảo gửi đúng encoding
         sendMailService.sendMail(toEmail, emailBody, "OTP mới của bạn");
     }
+
 }

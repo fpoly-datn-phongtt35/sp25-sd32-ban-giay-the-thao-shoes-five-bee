@@ -76,7 +76,7 @@ const ThuongHieu = () => {
             setTen("");
             setValue(1);
         } catch (error) {
-            message.error("Lỗi khi thêm mới thương hiệu");
+            message.error((error.response?.data?.message || error.message));
         }
     };
 

@@ -35,12 +35,19 @@ public class ThuongHieuServiceImpl implements ThuongHieuService {
 
     @Override
     public ThuongHieuEntity add(ThuongHieuDto thuongHieuDto) {
+        // Kiểm tra tên thương hiệu đã tồn tại (không phân biệt hoa thường, bỏ khoảng trắng)
+        Optional<ThuongHieuEntity> existing = thuongHieuRepository.findByTenIgnoreCase(thuongHieuDto.getTen().trim());
+        if (existing.isPresent()) {
+            throw new RuntimeException("Tên thương hiệu đã tồn tại.");
+        }
+
         ThuongHieuEntity thuongHieuEntity = new ThuongHieuEntity();
         thuongHieuEntity.setMa(thuongHieuDto.getMa());
         thuongHieuEntity.setTen(thuongHieuDto.getTen());
         thuongHieuEntity.setTrangThai(thuongHieuDto.getTrangThai());
         return thuongHieuRepository.save(thuongHieuEntity);
     }
+
 
     @Override
     public ThuongHieuEntity addNhanh(ThuongHieuDto thuongHieuDto) {

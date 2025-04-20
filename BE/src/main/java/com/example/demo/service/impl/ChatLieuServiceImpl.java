@@ -35,6 +35,14 @@ public class ChatLieuServiceImpl implements ChatLieuService {
 
     @Override
     public ChatLieuEntity add(ChatLieuDto chatLieuDto) {
+        // Kiểm tra tên đã tồn tại hay chưa (bỏ qua khoảng trắng và không phân biệt hoa thường)
+        Optional<ChatLieuEntity> existing = chatLieuRepository
+                .findByTenIgnoreCase(chatLieuDto.getTen().trim());
+
+        if (existing.isPresent()) {
+            throw new RuntimeException("Tên chất liệu đã tồn tại.");
+        }
+
         ChatLieuEntity chatLieuEntity = new ChatLieuEntity();
         chatLieuEntity.setMa(chatLieuDto.getMa());
         chatLieuEntity.setTen(chatLieuDto.getTen());

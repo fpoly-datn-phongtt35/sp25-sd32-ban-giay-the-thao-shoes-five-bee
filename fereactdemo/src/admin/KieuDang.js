@@ -75,7 +75,7 @@ const KieuDang = () => {
             setTen("");
             setValue(0);
         } catch (error) {
-            message.error("Lỗi không thể thêm kiểu dáng của giày");
+            message.error((error.response?.data?.message || error.message));
         }
     };
 

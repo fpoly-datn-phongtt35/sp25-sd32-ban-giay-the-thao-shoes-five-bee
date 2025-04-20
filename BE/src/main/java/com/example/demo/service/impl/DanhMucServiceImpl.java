@@ -33,12 +33,19 @@ public class DanhMucServiceImpl implements DanhMucService {
 
     @Override
     public DanhMucEntity add(DanhMucDto danhMucDto) {
+        // Kiểm tra trùng tên
+        Optional<DanhMucEntity> existing = danhMucRepository.findByTenIgnoreCase(danhMucDto.getTen().trim());
+        if (existing.isPresent()) {
+            throw new RuntimeException("Tên danh mục đã tồn tại.");
+        }
+
         DanhMucEntity danhMucEntity = new DanhMucEntity();
         danhMucEntity.setMa(danhMucDto.getMa());
         danhMucEntity.setTen(danhMucDto.getTen());
         danhMucEntity.setTrangThai(danhMucDto.getTrangThai());
         return danhMucRepository.save(danhMucEntity);
     }
+
 
     @Override
     public DanhMucEntity addNhanh(DanhMucDto danhMucDto) {
