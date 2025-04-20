@@ -42,7 +42,7 @@ public class HoaDonChiTietEntity {
     @JoinColumn(name = "ID_HOA_DON")
     private HoaDonEntity hoaDonEntity;
 
-    @ManyToOne
+    @ManyToOne(cascade = CascadeType.ALL)
     @JoinColumn(name = "ID_GIAY_CHI_TIET")
     private GiayChiTietEntity giayChiTietEntity;
 

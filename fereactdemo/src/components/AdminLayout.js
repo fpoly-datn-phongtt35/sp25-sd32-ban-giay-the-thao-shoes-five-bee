@@ -66,6 +66,8 @@ const AdminLayout = () => {
             return user?.email || 'Guest';
         }
     };
+    const isAdmin = user?.roles.includes('ROLE_ADMIN');
+
     const navigate = useNavigate();
     const menuItems = (
         <Menu>
@@ -87,7 +89,7 @@ const AdminLayout = () => {
                     defaultSelectedKeys={['']}
                     onClick={({ key }) => handleMenuItemClick(key)}
                     items={[
-                        {
+                        isAdmin && {
                             key: '/admin/thong-ke',
                             icon: <DashboardOutlined />,
                             label: 'Thống Kê',
@@ -191,7 +193,7 @@ const AdminLayout = () => {
                                 // }
                             ]
                         },
-                        {
+                        isAdmin && {
                             key: '1',
                             icon: <TagOutlined />,
                             label: 'Giảm Giá',

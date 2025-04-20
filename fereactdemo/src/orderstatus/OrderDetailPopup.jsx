@@ -24,7 +24,6 @@ const OrderDetailPopup = ({
   const [reviewedProductIds, setReviewedProductIds] = useState([]);
   const [tenNguoiNhanMoi, setTenNguoiNhanMoi] = useState('');
   const [sdtNguoiNhanMoi, setSdtNguoiNhanMoi] = useState('');
-  const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({
     tenNguoiNhanMoi: selectedOrder?.tenNguoiNhanMoi || "",
     sdtNguoiNhanMoi: selectedOrder?.sdtNguoiNhanMoi || "",
@@ -129,14 +128,14 @@ const OrderDetailPopup = ({
       await updateOrderAddress(updatedOrder.id, selectedAddressId);
       setUpdatedOrder((prevOrder) => ({
         ...prevOrder,
-        diaChi: selectedAddress.tenDiaChi || "",
+        diaChiCuThe: selectedAddress.diaChiCuThe || "",
         xa: selectedAddress.xa || "",
         huyen: selectedAddress.huyen || "",
         tinh: selectedAddress.tinh || "",
       }));
       selectedOrder.hoTen = selectedAddress.hoTen || "";
       selectedOrder.soDienThoai = selectedAddress.soDienThoai || "";
-      selectedOrder.diaChi = selectedAddress.tenDiaChi || "";
+      selectedOrder.diaChi = selectedAddress.diaChiCuThe || "";
       selectedOrder.xa = selectedAddress.xa || "";
       selectedOrder.huyen = selectedAddress.huyen || "";
       selectedOrder.tinh = selectedAddress.tinh || "";
@@ -182,7 +181,7 @@ const OrderDetailPopup = ({
         sdtNguoiNhan: formData.sdtNguoiNhanMoi
       }));
     } catch (error) {
-      setMessage(error.response?.data || 'Có lỗi xảy ra.');
+      message.warning(error.response?.data || 'Có lỗi xảy ra.');
     }
   };
 
@@ -267,7 +266,7 @@ const OrderDetailPopup = ({
                 >
                   {addresses.map((addr) => (
                     <Select.Option key={addr.id} value={addr.id}>
-                      {`${addr.tenDiaChi}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
+                      {`${addr.diaChiCuThe}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
                     </Select.Option>
                   ))}
                 </Select>
@@ -334,7 +333,7 @@ const OrderDetailPopup = ({
               >
                 {addresses.map((addr) => (
                   <Select.Option key={addr.id} value={addr.id}>
-                    {`${addr.tenDiaChi}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
+                    {`${addr.diaChiCuThe}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
                   </Select.Option>
                 ))}
               </Select>

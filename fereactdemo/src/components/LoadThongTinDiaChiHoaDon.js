@@ -31,7 +31,7 @@ const DataCustomerInfo = ({ customerId, onDiaChiChange, moTa }) => {
         setCustomerData(filtered);
         if (filtered.length > 0) {
           onDiaChiChange({
-            diaChi: `${filtered[0].tenDiaChi}, ${filtered[0].xa}, ${filtered[0].huyen}, ${filtered[0].thanhPho}`,
+            diaChi: `${filtered[0].diaChiCuThe}, ${filtered[0].xa}, ${filtered[0].huyen}, ${filtered[0].thanhPho}`,
             moTa: ghiChu,
           });
         }
@@ -74,7 +74,7 @@ const DataCustomerInfo = ({ customerId, onDiaChiChange, moTa }) => {
             </Col>
             <Col span={12}>
               <Form.Item label="Địa chỉ cụ thể">
-                <Input value={customerData[0].tenDiaChi} readOnly />
+                <Input value={customerData[0].diaChiCuThe} readOnly />
               </Form.Item>
             </Col>
             <Col span={24}>

@@ -12,6 +12,7 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.io.IOException;
@@ -24,11 +25,13 @@ import java.util.UUID;
 public class GiayController {
   private final GiayService giayService;
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @PostMapping("/getAll")
   public ResponseEntity<?> getAll() {
     return ResponseEntity.ok(giayService.getAll());
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @PostMapping("/search")
   public ResponseEntity<?> findAndPageChatLieu(@RequestBody GiayDto giayDto) {
     Pageable pageable = PageRequest.of(giayDto.getPage(), giayDto.getSize());
@@ -36,37 +39,44 @@ public class GiayController {
             giayService.findByPagingCriteria(giayDto, pageable));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/add-bien-the")
   public ResponseEntity<?> addBienThe(@RequestBody GiayRequest giayRequest) {
     return ResponseEntity.ok(giayService.addGiayAndGiayChiTiet(giayRequest));
     }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/add")
   public ResponseEntity<?> add(@RequestBody GiayDto giayDto) {
     return ResponseEntity.ok(giayService.add(giayDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/update")
   public ResponseEntity<?> update(@RequestBody GiayDto giayDto) {
     System.out.println("Received GiayDto: " + giayDto);
     return ResponseEntity.ok(giayService.update(giayDto));
   }
 
-
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @PostMapping("/detail")
   public ResponseEntity<?> detail(@RequestBody GiayDto giayDto) {
     return ResponseEntity.ok(giayService.detail(giayDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/delete")
   public ResponseEntity<?> delete(@RequestBody GiayDto giayDto) {
     return ResponseEntity.ok(giayService.delete(giayDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/{id}/anhGiay")
   public ResponseEntity<?> anhGiay(@PathVariable("id") UUID id, @RequestBody List<UUID> anhGiayIds) {
     return ResponseEntity.ok(giayService.assignAnhGiay(id,anhGiayIds));
   }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/export-excel")
   public ResponseEntity<byte[]> exportExcel() throws IOException {
     byte[] excelFile = giayService.exportExcel().toByteArray();
@@ -74,6 +84,8 @@ public class GiayController {
     headers.add("Content-Disposition", "attachment; filename=giay.xlsx");
     return new ResponseEntity<>(excelFile, headers, HttpStatus.OK);
   }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @GetMapping("/search-ten")
   public ResponseEntity<?> searchGiayByName(@RequestParam String ten) {
     if (ten == null || ten.trim().isEmpty()) {

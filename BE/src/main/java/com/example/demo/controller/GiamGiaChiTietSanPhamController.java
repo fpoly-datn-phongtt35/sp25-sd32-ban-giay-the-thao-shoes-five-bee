@@ -17,6 +17,7 @@ import org.springframework.web.bind.annotation.RestController;
 public class GiamGiaChiTietSanPhamController {
   private final GiamGiaChiTietSanPhamService giamGiaChiTietSanPhamService;
 
+
   @PostMapping("/getAll")
   public ResponseEntity<?> getAll() {
     return ResponseEntity.ok(giamGiaChiTietSanPhamService.getAll());
