@@ -46,8 +46,8 @@ public class BanHangTaiQuayController {
 
   @PostMapping("/add-product/{idHoaDon}")
   public ResponseEntity<?> themSanPhamVaoHoaDon(
-      @PathVariable("idHoaDon") UUID idHoaDon, @RequestParam UUID idSanPham) {
-    return ResponseEntity.ok(banHangTaiQuayService.themSanPhamVaoHoaDon(idHoaDon, idSanPham));
+      @PathVariable("idHoaDon") UUID idHoaDon, @RequestParam UUID idSanPham, @RequestParam boolean choNhapHang) {
+    return ResponseEntity.ok(banHangTaiQuayService.themSanPhamVaoHoaDon(idHoaDon, idSanPham, choNhapHang));
   }
 
   @PutMapping("/update-quantity/{idHoaDonChiTiet}")
