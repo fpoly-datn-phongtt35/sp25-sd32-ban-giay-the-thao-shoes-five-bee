@@ -6,6 +6,7 @@ import com.example.demo.service.TraHangService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -17,6 +18,7 @@ public class TraHangController {
     @Autowired
     private TraHangService traHangService;
 
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
     @GetMapping("/getAll")
     public ResponseEntity<?> getAll() {
         try {
@@ -27,6 +29,7 @@ public class TraHangController {
         }
     }
 
+    @PreAuthorize("hasRole('USER')" )
     @PostMapping("/{hoaDonId}")
     public ResponseEntity<?> traHang (@PathVariable UUID hoaDonId,
                                       @RequestBody List<TraHangChiTietResDto> traHangChiTietResDtos){

@@ -4,6 +4,7 @@ import com.example.demo.service.GioHangChiTietService;
 import com.example.demo.service.GioHangService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -15,11 +16,13 @@ public class GioHangController {
 
   @Autowired private GioHangChiTietService gioHangChiTietService;
 
+  @PreAuthorize("hasRole('USER')" )
   @GetMapping("/getAll")
   public ResponseEntity<?> getAll() {
     return ResponseEntity.ok(gioHangService.getCartItems());
   }
 
+  @PreAuthorize("hasRole('USER')" )
   @GetMapping("/tong-so-luong/{idGioHang}")
   public ResponseEntity<Integer> getTotalProductsInCart(@PathVariable UUID idGioHang){
     Integer totalProducts = gioHangChiTietService.getTotalProductsInCart(idGioHang);

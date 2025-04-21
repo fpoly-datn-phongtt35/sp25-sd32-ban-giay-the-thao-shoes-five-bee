@@ -71,4 +71,8 @@ public class GiayChiTietEntity {
   @OneToMany(mappedBy = "giayChiTiet", cascade = CascadeType.ALL,orphanRemoval = true,fetch = FetchType.LAZY)
   @JsonManagedReference(value = "giayChiTiet-giamGia")
   private List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntities = new ArrayList<>();
+
+  @OneToMany(mappedBy = "giayChiTietEntity", cascade = CascadeType.ALL)
+  @JsonIgnore
+  private List<HoaDonChiTietEntity> hoaDonChiTietEntities = new ArrayList<>();
 }

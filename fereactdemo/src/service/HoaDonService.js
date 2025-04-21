@@ -5,24 +5,32 @@ const REST_API_BASE_URLS = "http://localhost:5000/api/online";
 
 const REST_API_BASE_URLSS = "http://localhost:5000/hoa-don-chi-tiet";
 
-export const getHoaDon1 = () => axios.get(REST_API_BASE_URL);
+const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+const config = {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+};
+
+export const getHoaDon1 = () => axios.get(REST_API_BASE_URL, config);
 
 export const getHoaDonByKhachHangId1 = (userId) =>
-  axios.get(`${REST_API_BASE_URLS}/user/${userId}`);
+  axios.get(`${REST_API_BASE_URLS}/user/${userId}`, config);
 
 export const getHoaDonById1 = (hoaDonId) =>
-  axios.get(`${REST_API_BASE_URL}/${hoaDonId}`);
+  axios.get(`${REST_API_BASE_URL}/${hoaDonId}`, config);
 
 export const tachNguoiNhanMoiInHoaDon = (hoaDonId, thongTin) => {
-  axios.put(`${REST_API_BASE_URL}/hoa-don/${hoaDonId}/cap-nhat-thong-tin-nguoi-nhan`, thongTin);
+  axios.put(`${REST_API_BASE_URL}/hoa-don/${hoaDonId}/cap-nhat-thong-tin-nguoi-nhan`, thongTin, config);
 }
 
 export const topSelling = () =>
-  axios.get(`http://localhost:5000/hoa-don-chi-tiet/top-selling`);
+  axios.get(`http://localhost:5000/hoa-don-chi-tiet/top-selling`, config);
 
 export const updateOrderAddress = async (hoaDonId, diaChiId) => {
   try {
     const response = await axios.put(`${REST_API_BASE_URLSS}/${hoaDonId}/update-address`, null, {
+      ...config,
       params: { diaChiId },
     });
     return response.data;
@@ -34,9 +42,11 @@ export const updateOrderAddress = async (hoaDonId, diaChiId) => {
 
 export const updateOrderItemQuantity = async (idHoaDon, idGiayChiTiet, quantity) => {
   try {
-    const response = await axios.put(`${REST_API_BASE_URLSS}/${idHoaDon}/items/${idGiayChiTiet}/quantity`, {
-      soLuong: quantity,
-    });
+    const response = await axios.put(
+      `${REST_API_BASE_URLSS}/${idHoaDon}/items/${idGiayChiTiet}/quantity`,
+      { soLuong: quantity },
+      config
+    );
     return response.data;
   } catch (error) {
     console.error("Lỗi khi cập nhật số lượng:", error);
@@ -58,29 +68,29 @@ export const paymentOnline = (banHangOnlineRequest) => {
 };
 
 export const huyDonMuaUser = (id) =>
-  axios.put(`${REST_API_BASE_URL}/${id}/huy`);
+  axios.put(`${REST_API_BASE_URL}/${id}/huy`, config);
 
 export const deleteHoaDon1 = (id) =>
-  axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
+  axios.delete(`${REST_API_BASE_URL}/delete/${id}`, config);
 
 //Truongcute
-export const getHoaDon = () => axios.get(`${REST_API_BASE_URL}/getAll`);
+export const getHoaDon = () => axios.get(`${REST_API_BASE_URL}/getAll`, config);
 
 export const addHoaDon = (hoaDon) =>
-  axios.post(`${REST_API_BASE_URL}/add`, hoaDon);
+  axios.post(`${REST_API_BASE_URL}/add`, hoaDon, config);
 
 export const addProduct = (hoaDon) =>
-  axios.post(`${REST_API_BASE_URL}/add-product`, hoaDon);
+  axios.post(`${REST_API_BASE_URL}/add-product`, hoaDon, config);
 export const deleteHoaDon = (id) =>
-  axios.delete(`${REST_API_BASE_URL}/delete/${id}`);
+  axios.delete(`${REST_API_BASE_URL}/delete/${id}`, config);
 
 export const updateHoaDon = (id, hoaDon) =>
-  axios.put(`${REST_API_BASE_URL}/update/${id}`, hoaDon);
+  axios.put(`${REST_API_BASE_URL}/update/${id}`, hoaDon, config);
 
 // Truong
 export const detailHoaDon = async (id) => {
   try {
-    const response = await axios.get(`${REST_API_BASE_URL}/${id}`);
+    const response = await axios.get(`${REST_API_BASE_URL}/${id}`, config);
     return response.data;
   } catch (error) {
     console.error("Lỗi khi lấy chi tiết hóa đơn:", error);
@@ -89,7 +99,7 @@ export const detailHoaDon = async (id) => {
 };
 export const xacNhanHoaDon = async (id, data) => {
   try {
-    const response = await axios.put(`${REST_API_BASE_URL}/xac-nhan/${id}`, data);
+    const response = await axios.put(`${REST_API_BASE_URL}/xac-nhan/${id}`, data, config);
     return response.data;
   } catch (error) {
     console.error("❌ Lỗi khi xác nhận hóa đơn:", error);

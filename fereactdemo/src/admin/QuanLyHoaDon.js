@@ -309,7 +309,7 @@ const QuanLyHoaDon = () => {
         user_email: response.data.email, // Thêm email
         userId: response.data.userDto?.id, // Thêm userId
         user_phone: response.data.sdtNguoiNhan,
-        diaChi: response.data.diaChi || "Tại Quầy",
+        diaChi: response.data.diaChiCuThe || "Tại Quầy",
         tenNguoiNhanMoi: response.data.tenNguoiNhanMoi,
         sdtNguoiNhanMoi: response.data.sdtNguoiNhanMoi,
         xa: response.data.xa,
@@ -980,6 +980,22 @@ const QuanLyHoaDon = () => {
                 <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
                 <h6>
                   Địa Chỉ:{" "}
+                  {dataHoaDonChiTiet?.diaChiCuThe ||
+                    dataHoaDonChiTiet?.xa ||
+                    dataHoaDonChiTiet?.huyen ||
+                    dataHoaDonChiTiet?.tinh
+                    ? `${dataHoaDonChiTiet?.diaChiCuThe || ""}, ${dataHoaDonChiTiet?.xa || ""
+                    }, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""
+                    }`
+                    : "Tại Quầy"}
+                </h6>
+              </div>
+              <div className="phai">
+                <h4>Thông tin người nhận</h4>
+                <h6>Khách Hàng: {dataHoaDonChiTiet?.tenNguoiNhanMoi || "N/A"}</h6>
+                <h6>Số Điện Thoại: {dataHoaDonChiTiet?.sdtNguoiNhanMoi || "N/A"}</h6>
+                <h6>
+                  Địa Chỉ:{" "}
                   {dataHoaDonChiTiet?.diaChi ||
                     dataHoaDonChiTiet?.xa ||
                     dataHoaDonChiTiet?.huyen ||
@@ -1079,7 +1095,7 @@ const QuanLyHoaDon = () => {
                     </div>
                     <div className="info-row">
                       <h6 className="info-label">Địa chỉ:</h6>
-                      <span>{dataHoaDonChiTiet?.diaChi || "Tại quầy"}</span>
+                      <span>{dataHoaDonChiTiet?.diaChiCuThe || "Tại quầy"}</span>
                     </div>
                   </>
                 )}
