@@ -100,12 +100,42 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     return hoaDon;
   }
 
-  private void sendEmail( GiayChiTietEntity gct){
-      gct.getHoaDonChiTietEntities().forEach((hdct) ->{
-        if (hdct.getSoLuong() > gct.getSoLuongTon() && hdct.getHoaDonEntity().getTrangThai()==0){
-          sendMailService.sendMail(hdct.getHoaDonEntity().getUserEntity().getEmail(),"djt cu m","cam on");
-        }
-      });
+  private void sendEmail(GiayChiTietEntity gct) {
+    gct.getHoaDonChiTietEntities().forEach(hdct -> {
+      if (hdct.getSoLuong() > gct.getSoLuongTon() && hdct.getHoaDonEntity().getTrangThai() == 0) {
+        String email = hdct.getHoaDonEntity().getUserEntity().getEmail();
+        String tenSanPham = gct.getGiayEntity().getTen(); // Tên giày
+        int soLuongDat = hdct.getSoLuong();
+        int soLuongTon = gct.getSoLuongTon();
+        String maHoaDon = hdct.getHoaDonEntity().getMa(); // Giả sử có mã đơn hàng
+
+        String subject = "Thông báo về đơn hàng " + maHoaDon;
+
+        String body = String.format("""
+                Xin chào %s,
+
+                Cảm ơn bạn đã đặt hàng tại cửa hàng của chúng tôi.
+
+                Tuy nhiên, sản phẩm "%s" mà bạn đã đặt với số lượng %d hiện chỉ còn %d sản phẩm trong kho.
+
+                Vui lòng chọn một trong các lựa chọn sau:
+                - Chờ chúng tôi nhập thêm hàng và giữ đơn hàng.
+                - Hủy đơn hàng nếu bạn không muốn chờ.
+
+                Vui lòng phản hồi email này hoặc liên hệ bộ phận CSKH để xác nhận lựa chọn của bạn.
+
+                Trân trọng,
+                Đội ngũ bán hàng
+                """,
+                hdct.getHoaDonEntity().getUserEntity().getHoTen(), // Tên người dùng
+                tenSanPham,
+                soLuongDat,
+                soLuongTon
+        );
+
+        sendMailService.sendMail(email, subject, body);
+      }
+    });
   }
 
   // Giảm số lượng tồn kho khi trạng thái hóa đơn được xác nhận

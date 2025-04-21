@@ -131,12 +131,36 @@ function App() {
                 <Route path="kieu-dang" element={<KieuDang />} />
                 <Route path="de-giay" element={<DeGiay />} />
                 <Route path="chat-lieu" element={<ChatLieu />} />
-                <Route path="nhan-vien" element={<NhanVien />} />
+                <Route
+                  path="/admin/nhan-vien"
+                  element={
+                    <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                      <NhanVien />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/khach-hang"
+                  element={
+                    <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                      <KhachHang />
+                    </ProtectedRoute>
+                  }
+                />
+                <Route
+                  path="/admin/chuc-vu"
+                  element={
+                    <ProtectedRoute allowedRoles={['ROLE_ADMIN']}>
+                      <ChucVu />
+                    </ProtectedRoute>
+                  }
+                />
+                {/* <Route path="nhan-vien" element={<NhanVien />} />
                 <Route path="khach-hang" element={<KhachHang />} />
-                <Route path="chuc-vu" element={<ChucVu />} />
+                <Route path="chuc-vu" element={<ChucVu />} /> */}
                 <Route path="hang-khachHang" element={<HangKhachHang />} />
-                <Route path="phieu-giam-gia" element={<PhieuGiamGia />} />
-                <Route path="giam-gia-hoa-don" element={<GiamGiaHoaDon />} />
+                {/* <Route path="phieu-giam-gia" element={<PhieuGiamGia />} /> */}
+                {/* <Route path="giam-gia-hoa-don" element={<GiamGiaHoaDon />} /> */}
                 <Route path="kich-co" element={<KichCo />} />
               </Route>
             </Route>

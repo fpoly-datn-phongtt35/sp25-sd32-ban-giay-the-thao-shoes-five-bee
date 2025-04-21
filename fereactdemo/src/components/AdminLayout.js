@@ -170,7 +170,7 @@ const AdminLayout = () => {
                                 },
                             ]
                         },
-                        {
+                        isAdmin && {
                             key: '2',
                             icon: <TeamOutlined />,
                             label: 'Quản Lý Tài Khoản',
@@ -187,10 +187,6 @@ const AdminLayout = () => {
                                     key: '/admin/chuc-vu',
                                     label: 'Chức Vụ',
                                 },
-                                // {
-                                //     key: '/admin/hang-khachHang',
-                                //     label: 'Hạng Khách Hàng',
-                                // }
                             ]
                         },
                         isAdmin && {
