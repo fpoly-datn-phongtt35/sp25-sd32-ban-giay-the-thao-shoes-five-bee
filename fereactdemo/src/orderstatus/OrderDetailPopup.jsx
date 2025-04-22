@@ -162,16 +162,16 @@ const OrderDetailPopup = ({
         tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
         sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
       });
-      
+
       // // Cập nhật lại selectedOrder
       // selectedOrder.tenNguoiNhan = formData.tenNguoiNhanMoi;
       // selectedOrder.sdtNguoiNhan = formData.sdtNguoiNhanMoi;
-      
+
       setFormData({
         tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
         sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
       });
-      
+
       message.success("Thêm thông tin người nhận thành công");
 
       console.log(response);
@@ -212,18 +212,18 @@ const OrderDetailPopup = ({
                 {selectedOrder?.hinhThucMua === 2
                   ? "Online"
                   : selectedOrder?.hinhThucMua === 1
-                  ? "Tại quầy"
-                  : "N/A"}
+                    ? "Tại quầy"
+                    : "N/A"}
               </h6>
               <h6>
                 Hình Thức Thanh Toán:{" "}
                 {selectedOrder?.hinhThucThanhToan === 0
                   ? "Tiền mặt"
                   : selectedOrder?.hinhThucThanhToan === 1
-                  ? "VNpay"
-                  : selectedOrder?.hinhThucThanhToan === 2
-                  ? "Thu hộ (COD)"
-                  : "N/A"}
+                    ? "VNpay"
+                    : selectedOrder?.hinhThucThanhToan === 2
+                      ? "Thu hộ (COD)"
+                      : "N/A"}
               </h6>
               <h6>
                 Tổng Tiền:{" "}
@@ -240,12 +240,25 @@ const OrderDetailPopup = ({
               <h6>
                 Địa Chỉ :
                 {selectedOrder?.diaChi
-                  ? `${selectedOrder.diaChi || ""}, ${
-                      selectedOrder.xa || ""
-                    }, ${selectedOrder.huyen || ""}, ${
-                      selectedOrder.tinh || ""
-                    }`
+                  ? `${selectedOrder.diaChi || ""}, ${selectedOrder.xa || ""
+                  }, ${selectedOrder.huyen || ""}, ${selectedOrder.tinh || ""
+                  }`
                   : "Tại quầy"}
+              </h6>
+
+              <h4>Thông tin người nhận</h4>
+              <h6>
+                Khách Hàng: {dataHoaDonChiTiet?.tenNguoiNhanMoi || dataHoaDonChiTiet?.user || "N/A"}
+              </h6>
+              <h6>
+                Số Điện Thoại: {dataHoaDonChiTiet?.sdtNguoiNhanMoi || dataHoaDonChiTiet?.user_phone || "N/A"}
+              </h6>
+              <h6>
+                Địa Chỉ:{" "}
+                {dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe ||
+                  dataHoaDonChiTiet?.xa || dataHoaDonChiTiet?.huyen || dataHoaDonChiTiet?.tinh
+                  ? `${dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe || ""}, ${dataHoaDonChiTiet?.xa || ""}, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""}`
+                  : "Tại Quầy"}
               </h6>
               {selectedOrder?.trangThai === 0 && (
                 <Button type="primary" onClick={handleEditAddress}>

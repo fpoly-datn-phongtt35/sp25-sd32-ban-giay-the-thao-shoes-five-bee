@@ -992,17 +992,17 @@ const QuanLyHoaDon = () => {
               </div>
               <div className="phai">
                 <h4>Thông tin người nhận</h4>
-                <h6>Khách Hàng: {dataHoaDonChiTiet?.tenNguoiNhanMoi || "N/A"}</h6>
-                <h6>Số Điện Thoại: {dataHoaDonChiTiet?.sdtNguoiNhanMoi || "N/A"}</h6>
+                <h6>
+                  Khách Hàng: {dataHoaDonChiTiet?.tenNguoiNhanMoi || dataHoaDonChiTiet?.user || "N/A"}
+                </h6>
+                <h6>
+                  Số Điện Thoại: {dataHoaDonChiTiet?.sdtNguoiNhanMoi || dataHoaDonChiTiet?.user_phone || "N/A"}
+                </h6>
                 <h6>
                   Địa Chỉ:{" "}
-                  {dataHoaDonChiTiet?.diaChi ||
-                    dataHoaDonChiTiet?.xa ||
-                    dataHoaDonChiTiet?.huyen ||
-                    dataHoaDonChiTiet?.tinh
-                    ? `${dataHoaDonChiTiet?.diaChi || ""}, ${dataHoaDonChiTiet?.xa || ""
-                    }, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""
-                    }`
+                  {dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe ||
+                    dataHoaDonChiTiet?.xa || dataHoaDonChiTiet?.huyen || dataHoaDonChiTiet?.tinh
+                    ? `${dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe || ""}, ${dataHoaDonChiTiet?.xa || ""}, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""}`
                     : "Tại Quầy"}
                 </h6>
               </div>
