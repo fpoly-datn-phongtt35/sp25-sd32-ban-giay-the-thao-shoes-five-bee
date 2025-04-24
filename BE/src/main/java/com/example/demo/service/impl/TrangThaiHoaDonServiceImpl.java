@@ -144,7 +144,7 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         emailContent.append("</tr>");
         emailContent.append("</table>");
 
-        // Action buttons table
+        // Action buttons
         emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:0 auto 20px;border-collapse:collapse;\">");
         emailContent.append("<tr>");
         emailContent.append("<th style=\"text-align:center;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Hành động</th>");
@@ -175,10 +175,12 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         emailContent.append("</body>");
         emailContent.append("</html>");
 
-        sendMailService.sendMail(email, subject, emailContent.toString());
+        // ✅ Gọi đúng thứ tự: to, body (HTML), subject
+        sendMailService.sendMail(email, emailContent.toString(), subject);
       }
     });
   }
+
 
   // Giảm số lượng tồn kho khi trạng thái hóa đơn được xác nhận
   private void updateStockAfterOrderConfirmed(HoaDonEntity hoaDon) {

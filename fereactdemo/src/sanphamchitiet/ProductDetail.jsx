@@ -400,9 +400,8 @@ const ProductDetail = () => {
               {sizeList.map((size) => (
                 <div
                   key={size}
-                  className={`size-box ${
-                    selectedSize === size ? "active" : ""
-                  }`}
+                  className={`size-box ${selectedSize === size ? "active" : ""
+                    }`}
                   onClick={() => {
                     setSelectedSize(size); // Cập nhật kích cỡ đã chọn
                     handleSizeSelect(size); // Gọi hàm xử lý khi chọn kích cỡ
@@ -422,9 +421,8 @@ const ProductDetail = () => {
                 (color) => (
                   <div
                     key={color}
-                    className={`color-box ${
-                      selectedColor === color ? "active" : ""
-                    }`}
+                    className={`color-box ${selectedColor === color ? "active" : ""
+                      }`}
                     onClick={() => handleColorSelect(color)}
                   >
                     {color}
@@ -463,7 +461,7 @@ const ProductDetail = () => {
               : productGiay?.giaBan?.toLocaleString() || "0"}
             ₫
           </div>
-          {selectedColor && selectedSize && selectedVariant?.soLuong === 0 && (
+          {selectedColor && selectedSize && selectedVariant && (
             <Button
               type="primary"
               onClick={() => handleSubscribe(selectedVariant.idGiayChiTiet)}
@@ -473,9 +471,10 @@ const ProductDetail = () => {
                 color: "white",
               }}
             >
-              Theo dõi khi có hàng
+              Theo dõi sản phẩm khi có thêm hàng
             </Button>
           )}
+
         </div>
 
         {/* Chính sách */}
@@ -589,7 +588,7 @@ const ProductDetail = () => {
                         src={
                           product.anhUrl ||
                           (product.giayEntity?.anhGiayEntities &&
-                          product.giayEntity.anhGiayEntities.length > 0
+                            product.giayEntity.anhGiayEntities.length > 0
                             ? product.giayEntity.anhGiayEntities[0].tenUrl
                             : "/default-product.jpg")
                         }
