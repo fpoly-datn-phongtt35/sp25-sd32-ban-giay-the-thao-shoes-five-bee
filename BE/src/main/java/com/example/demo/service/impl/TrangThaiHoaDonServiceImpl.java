@@ -104,36 +104,78 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
     gct.getHoaDonChiTietEntities().forEach(hdct -> {
       if (hdct.getSoLuong() > gct.getSoLuongTon() && hdct.getHoaDonEntity().getTrangThai() == 0) {
         String email = hdct.getHoaDonEntity().getUserEntity().getEmail();
-        String tenSanPham = gct.getGiayEntity().getTen(); // Tên giày
+        String tenSanPham = gct.getGiayEntity().getTen();
         int soLuongDat = hdct.getSoLuong();
         int soLuongTon = gct.getSoLuongTon();
-        String maHoaDon = hdct.getHoaDonEntity().getMa(); // Giả sử có mã đơn hàng
+        String maHoaDon = hdct.getHoaDonEntity().getMa();
+        String tenNguoiDung = hdct.getHoaDonEntity().getUserEntity().getHoTen();
 
         String subject = "Thông báo về đơn hàng " + maHoaDon;
 
-        String body = String.format("""
-                Xin chào %s,
+        StringBuilder emailContent = new StringBuilder();
+        emailContent.append("<!DOCTYPE html>");
+        emailContent.append("<html lang=\"vi\">");
+        emailContent.append("<head>");
+        emailContent.append("<meta charset=\"UTF-8\">");
+        emailContent.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
+        emailContent.append("</head>");
+        emailContent.append("<body>");
+        emailContent.append("<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">");
 
-                Cảm ơn bạn đã đặt hàng tại cửa hàng của chúng tôi.
+        // Header
+        emailContent.append("<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">");
+        emailContent.append("<tr>");
+        emailContent.append("<td bgcolor=\"#0b0c0c\" style=\"padding:20px;text-align:center;\">");
+        emailContent.append("<span style=\"font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;\">Thông báo tình trạng đơn hàng</span>");
+        emailContent.append("</td>");
+        emailContent.append("</tr>");
+        emailContent.append("</table>");
 
-                Tuy nhiên, sản phẩm "%s" mà bạn đã đặt với số lượng %d hiện chỉ còn %d sản phẩm trong kho.
+        // Body content
+        emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+        emailContent.append("<tr>");
+        emailContent.append("<td style=\"font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;\">");
+        emailContent.append("<p>Chào <strong>").append(tenNguoiDung).append("</strong>,</p>");
+        emailContent.append("<p>Bạn đã đặt <strong>").append(soLuongDat).append("</strong> sản phẩm \"<strong>")
+                .append(tenSanPham).append("</strong>\", nhưng hiện kho chỉ còn <strong>")
+                .append(soLuongTon).append("</strong> sản phẩm.</p>");
+        emailContent.append("<p>Vui lòng chọn một trong hai lựa chọn dưới đây để tiếp tục xử lý đơn hàng của bạn:</p>");
+        emailContent.append("</td>");
+        emailContent.append("</tr>");
+        emailContent.append("</table>");
 
-                Vui lòng chọn một trong các lựa chọn sau:
-                - Chờ chúng tôi nhập thêm hàng và giữ đơn hàng.
-                - Hủy đơn hàng nếu bạn không muốn chờ.
+        // Action buttons table
+        emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:0 auto 20px;border-collapse:collapse;\">");
+        emailContent.append("<tr>");
+        emailContent.append("<th style=\"text-align:center;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Hành động</th>");
+        emailContent.append("</tr>");
+        emailContent.append("<tr>");
+        emailContent.append("<td style=\"padding:15px;border-bottom:1px solid #dddddd;text-align:center;\">");
+        emailContent.append("<a href=\"http://localhost:3000/orderStatusPage?action=wait&orderId=").append(maHoaDon)
+                .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#1D70B8;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;margin-right:10px;\">")
+                .append("Chờ nhập hàng</a>");
+        emailContent.append("<a href=\"http://localhost:3000/orderStatusPage?action=cancel&orderId=").append(maHoaDon)
+                .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#d9534f;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;\">")
+                .append("Hủy đơn hàng</a>");
+        emailContent.append("</td>");
+        emailContent.append("</tr>");
+        emailContent.append("</table>");
 
-                Vui lòng phản hồi email này hoặc liên hệ bộ phận CSKH để xác nhận lựa chọn của bạn.
+        // Footer
+        emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+        emailContent.append("<tr>");
+        emailContent.append("<td style=\"font-size:16px;line-height:1.6;color:#0b0c0c;padding:10px 20px;text-align:center;\">");
+        emailContent.append("<p>Đơn hàng của bạn sẽ được giữ trong vòng 24 giờ nếu không có phản hồi.</p>");
+        emailContent.append("<p>Trân trọng,<br>Đội ngũ bán hàng</p>");
+        emailContent.append("</td>");
+        emailContent.append("</tr>");
+        emailContent.append("</table>");
 
-                Trân trọng,
-                Đội ngũ bán hàng
-                """,
-                hdct.getHoaDonEntity().getUserEntity().getHoTen(), // Tên người dùng
-                tenSanPham,
-                soLuongDat,
-                soLuongTon
-        );
+        emailContent.append("</div>");
+        emailContent.append("</body>");
+        emailContent.append("</html>");
 
-        sendMailService.sendMail(email, subject, body);
+        sendMailService.sendMail(email, subject, emailContent.toString());
       }
     });
   }
