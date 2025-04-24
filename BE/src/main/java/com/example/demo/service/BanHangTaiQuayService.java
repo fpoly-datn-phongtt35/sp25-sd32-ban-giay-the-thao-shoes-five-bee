@@ -16,7 +16,7 @@ public interface BanHangTaiQuayService {
 
   HoaDonEntity createHoaDonBanHangTaiQuay();
 
-  HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham);
+  HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham,boolean choNhapHang);
 
   HoaDonChiTietEntity updateSoLuongGiay(UUID idHoaDonChiTiet, boolean isIncrease);
 
