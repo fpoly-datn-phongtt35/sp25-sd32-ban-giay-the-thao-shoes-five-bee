@@ -5,17 +5,14 @@ import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.BanHangTaiQuayService;
 import com.example.demo.service.GiamGiaHoaDonChiTietService;
+import com.example.demo.service.SendMailService;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.example.demo.service.SendMailService;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -41,16 +38,14 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
       Boolean isGiaoHang,
       HoaDonRequest hoaDonRequest) {
 
-    HoaDonEntity hoaDon =
-        hoaDonRepository
-            .findById(idHoaDon)
+    HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon)
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
 
     // Kiểm tra người dùng đã mua hàng chưa
     List<UserEntity> users = userRepository.findBySoDienThoai(hoaDonRequest.getSdtNguoiNhan());
     UserEntity user = users.isEmpty() ? null : users.get(0);
     // Kiểm tra trạng thái hóa đơn
-    if (hoaDon.getTrangThai() != 1 && hoaDon.getTrangThai() != 9) {
+    if (hoaDon.getTrangThai() != 1) {
       throw new IllegalArgumentException("Hóa đơn đã được thanh toán hoặc không hợp lệ");
     }
 
@@ -61,14 +56,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     }
 
     // Tổng tiền sản phẩm gốc
-    BigDecimal tongTienSanPhamGoc =
-        danhSachSanPham.stream()
+    BigDecimal tongTienSanPhamGoc = danhSachSanPham.stream()
             .map(hdct -> hdct.getGiaBan().multiply(BigDecimal.valueOf(hdct.getSoLuong())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
     // Tổng tiền sản phẩm khi có giảm giá sản phẩm
-    BigDecimal tongTienSanPhamKhiGiam =
-        danhSachSanPham.stream()
+    BigDecimal tongTienSanPhamKhiGiam = danhSachSanPham.stream()
             .map(hdct -> hdct.getDonGia().multiply(BigDecimal.valueOf(hdct.getSoLuong())))
             .reduce(BigDecimal.ZERO, BigDecimal::add);
 
@@ -76,13 +69,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     BigDecimal soTienGiamKhiApMa = BigDecimal.ZERO;
     if (idGiamGia != null) {
       GiamGiaHoaDonEntity giamGia = giamGiaHoaDonRepository.findById(idGiamGia).orElse(null);
-      if (giamGia != null
-          && giamGia.getSoLuong() > 0
-          && tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0
-          && giamGia.getTrangThai() == 0) {
+      if (giamGia != null &&
+              giamGia.getSoLuong() > 0 &&
+              tongTienSanPhamKhiGiam.compareTo(giamGia.getDieuKien()) >= 0 &&
+              giamGia.getTrangThai() == 0) {
 
-        soTienGiamKhiApMa =
-            giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
+        soTienGiamKhiApMa = giamGiaHoaDonChiTietService.apDungPhieuGiamGia(
                 idHoaDon, giamGia, tongTienSanPhamKhiGiam);
       }
     }
@@ -95,9 +87,9 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setNgayThanhToan(new Date());
     hoaDon.setMoTa(hoaDonRequest.getMoTa());
     hoaDon.setTenNguoiNhan(
-        (user != null || hoaDonRequest.getTenNguoiNhan() != null)
-            ? hoaDonRequest.getTenNguoiNhan()
-            : "Khách lẻ");
+            (user != null || hoaDonRequest.getTenNguoiNhan() != null)
+                    ? hoaDonRequest.getTenNguoiNhan()
+                    : "Khách lẻ");
     hoaDon.setSdtNguoiNhan(hoaDonRequest.getSdtNguoiNhan());
     hoaDon.setEmail(hoaDonRequest.getEmail());
     hoaDon.setXa(hoaDonRequest.getXa());
@@ -110,34 +102,36 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     hoaDon.setPhiShip(phiShip);
     hoaDon.setHinhThucNhanHang(isGiaoHang ? 1 : 2);
 
-    // ✅ Cập nhật trạng thái hóa đơn chi tiết → 2 nếu là thanh toán tại quầy (0, 1) và không giao
-    // hàng
-    if (!isGiaoHang && (hinhThucThanhToan == 0 || hinhThucThanhToan == 1)) {
-      danhSachSanPham.forEach(
-          hdct -> {
-            hdct.setTrangThai(2); // 2 = Hoàn thành
-            hoaDonChiTietRepository.save(hdct);
-          });
+    // Cập nhật trạng thái hóa đơn
+    if (hinhThucThanhToan == 2) {
+      hoaDon.setTrangThai(0);  // Chờ thanh toán khi giao hàng
+    } else {
+      hoaDon.setTrangThai(
+              isGiaoHang
+                      ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2)
+                      : 2
+      );
     }
 
-    boolean isTonKhoKhongDu = true;
+    // ✅ Cập nhật trạng thái hóa đơn chi tiết → 2 nếu là thanh toán tại quầy (0, 1) và không giao hàng
+    if (!isGiaoHang && (hinhThucThanhToan == 0 || hinhThucThanhToan == 1)) {
+      danhSachSanPham.forEach(hdct -> {
+        hdct.setTrangThai(2); // 2 = Hoàn thành
+        hoaDonChiTietRepository.save(hdct);
+      });
+    }
+
     // Trừ tồn kho nếu không phải "thanh toán khi giao hàng"
     if (hinhThucThanhToan != 2) {
       for (HoaDonChiTietEntity hdct : danhSachSanPham) {
         GiayChiTietEntity giayChiTiet = hdct.getGiayChiTietEntity();
         int soLuongMua = hdct.getSoLuong();
-        int soLuongTon = giayChiTiet.getSoLuongTon();
 
-        // ✅ Nếu tồn kho KHÔNG ĐỦ → chuyển trạng thái sang chờ nhập hàng
-        if (soLuongTon < soLuongMua) {
-          hdct.setTrangThai(9); // 9 = Chờ nhập hàng
-          hoaDonChiTietRepository.save(hdct);
-          isTonKhoKhongDu = true;
-          continue;
+        if (giayChiTiet.getSoLuongTon() < soLuongMua) {
+          throw new IllegalArgumentException("Sản phẩm " + giayChiTiet.getId() + " không đủ tồn kho");
         }
 
-        // ✅ Nếu tồn kho ĐỦ → trừ tồn và cập nhật trạng thái hoàn thành
-        giayChiTiet.setSoLuongTon(soLuongTon - soLuongMua);
+        giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() - soLuongMua);
         giayChiTietRepository.save(giayChiTiet);
 
         GiayEntity giayEntity = giayChiTiet.getGiayEntity();
@@ -147,23 +141,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
           giayEntity.setSoLuongTon(tongMoi);
           giayRepository.save(giayEntity);
         }
-
-        // ✅ Cập nhật trạng thái hoàn thành nếu đủ hàng
-        if (!isGiaoHang && (hinhThucThanhToan == 0 || hinhThucThanhToan == 1)) {
-          hdct.setTrangThai(2); // 2 = Hoàn thành
-          hoaDonChiTietRepository.save(hdct);
-        }
-      }
-    }
-
-    if (isTonKhoKhongDu) {
-      hoaDon.setTrangThai(9); // Chờ nhập hàng
-    } else {
-      if (hinhThucThanhToan == 2) {
-        hoaDon.setTrangThai(0); // Chờ thanh toán khi giao hàng
-      } else {
-        hoaDon.setTrangThai(
-            isGiaoHang ? (hinhThucThanhToan == 0 || hinhThucThanhToan == 1 ? 3 : 2) : 2);
       }
     }
 
@@ -282,7 +259,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
   @Override
   public HoaDonChiTietEntity themSanPhamVaoHoaDon(
-      UUID idHoaDon, UUID idSanPham, boolean choNhapHang) {
+      UUID idHoaDon, UUID idSanPham) {
     HoaDonEntity hoaDon =
         hoaDonRepository
             .findById(idHoaDon)
@@ -293,7 +270,7 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .findById(idSanPham)
             .orElseThrow(() -> new IllegalArgumentException("Sản phẩm không tồn tại"));
 
-    if (!choNhapHang && giayChiTiet.getSoLuongTon() <= 0) {
+    if (giayChiTiet.getSoLuongTon() <= 0) {
       throw new IllegalArgumentException("Sản phẩm đã hết hàng, không thể thêm vào hóa đơn");
     }
 
