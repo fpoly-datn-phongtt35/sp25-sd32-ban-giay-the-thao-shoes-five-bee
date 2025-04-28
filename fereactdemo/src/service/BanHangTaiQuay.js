@@ -49,30 +49,19 @@ export const themSanPhamVaoHoaDon = async (idHoaDon, idSanPham) => {
 
 export const updateSoLuongGiay = async (idHoaDonChiTiet, isIncrease) => {
   try {
-    const response = await fetch(
-      `${REST_API_BASE_URL}/update-quantity/${idHoaDonChiTiet}?isIncrease=${isIncrease}`, config,
-      {
-        method: "PUT",
-        headers: {
-          "Content-Type": "application/json",
-        },
-      }
+    const response = await axios.put(
+      `${REST_API_BASE_URL}/update-quantity/${idHoaDonChiTiet}`,
+      null, // Không cần body
+      { params: { isIncrease } } // Query params truyền đúng như backend yêu cầu
     );
-
-    console.log("📌 API Raw Response:", response);
-
-    if (!response.ok) {
-      const errorText = await response.text();
-      throw new Error(`API lỗi: ${response.status} - ${errorText}`);
-    }
-
-    const data = await response.json();
-    console.log("📌 API JSON Response:", data);
-
-    return data;
+    console.log("✅ API JSON Response:", response.data);
+    return response.data;
   } catch (error) {
-    console.error("❌ Lỗi API:", error);
-    throw error;
+    console.error("❌ Lỗi API updateSoLuongGiay:", error);
+    if (error.response && error.response.data) {
+      throw new Error(error.response.data);
+    }
+    throw new Error("Lỗi khi cập nhật số lượng giày");
   }
 };
 

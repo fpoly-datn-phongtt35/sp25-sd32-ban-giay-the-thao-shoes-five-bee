@@ -407,10 +407,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .findById(idHoaDonChiTiet)
             .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn chi tiết"));
 
-    //    GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
-    //    giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + hoaDonChiTiet.getSoLuong());
-    //
-    //    giayChiTietRepository.save(giayChiTiet);
 
     hoaDonChiTietRepository.delete(hoaDonChiTiet);
   }
