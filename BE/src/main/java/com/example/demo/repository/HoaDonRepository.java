@@ -20,6 +20,8 @@ public interface HoaDonRepository extends JpaRepository<HoaDonEntity, UUID>, Jpa
     // thanh toán onl sẽ lên đầu của quản lý hóa đơn
     List<HoaDonEntity> findAllByOrderByTrangThaiDescNgayThanhToanDesc();
 
+    Optional<HoaDonEntity> findByMa(String maHoaDon);
+
     @Query("SELECT SUM(h.tongTien) FROM HoaDonEntity h " +
             "WHERE h.trangThai = 2 AND CAST(h.ngayThanhToan AS DATE) = CAST(GETDATE() AS DATE)")
     BigDecimal doanhThuNgayHienTai();

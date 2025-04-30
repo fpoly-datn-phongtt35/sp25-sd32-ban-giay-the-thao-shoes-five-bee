@@ -84,6 +84,9 @@ public class HoaDonEntity {
     @Column(name = "PHI_SHIP")
     private BigDecimal phiShip;
 
+    @Column(name = "is_cho_nhap_hang")
+    private Boolean choNhapHang;
+
     @Column(name = "TRANG_THAI")
     private Integer trangThai;
 
