@@ -41,9 +41,12 @@ const GiamGiaHoaDon = () => {
         SO_LUONG: item.soLuong,
         TRANG_THAI: item.trangThai,
       }));
-      console.log("GiamGiaHoaDonData", GiamGiaHoaDonData);
+
+      // 💡 Sắp xếp từ cao đến thấp theo phần trăm giảm
+      GiamGiaHoaDonData.sort((a, b) => b.PHAN_TRAM_GIAM - a.PHAN_TRAM_GIAM);
 
       setGiamGiaHoaDon(GiamGiaHoaDonData);
+
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu đợt giảm giá:", error);
     }
