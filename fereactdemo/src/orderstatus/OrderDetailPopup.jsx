@@ -246,8 +246,8 @@ const OrderDetailPopup = ({
                   : "Tại quầy"}
               </h6>
               <h4>Thông tin người nhận</h4>
-              <h6>Tên người nhận : {selectedOrder?.tenNguoiNhanMoi || "N/A"}</h6>
-              <h6>Số Điện Thoại : {selectedOrder?.sdtNguoiNhanMoi || "N/A"}</h6>
+              <h6>Tên người nhận : {selectedOrder?.tenNguoiNhan || selectedOrder?.tenNguoiNhanMoi || "N/A"}</h6>
+              <h6>Số Điện Thoại : {selectedOrder?.sdtNguoiNhan || selectedOrder?.sdtNguoiNhanMoi || "N/A"}</h6>
               <h6>
                 Địa Chỉ :
                 {selectedOrder?.diaChi
