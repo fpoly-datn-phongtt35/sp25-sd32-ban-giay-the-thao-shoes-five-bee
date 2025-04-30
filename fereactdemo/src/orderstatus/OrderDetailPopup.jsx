@@ -24,7 +24,6 @@ const OrderDetailPopup = ({
   const [reviewedProductIds, setReviewedProductIds] = useState([]);
   const [tenNguoiNhanMoi, setTenNguoiNhanMoi] = useState('');
   const [sdtNguoiNhanMoi, setSdtNguoiNhanMoi] = useState('');
-  const [message, setMessage] = useState('');
   const [formData, setFormData] = useState({
     tenNguoiNhanMoi: selectedOrder?.tenNguoiNhanMoi || "",
     sdtNguoiNhanMoi: selectedOrder?.sdtNguoiNhanMoi || "",
@@ -129,14 +128,14 @@ const OrderDetailPopup = ({
       await updateOrderAddress(updatedOrder.id, selectedAddressId);
       setUpdatedOrder((prevOrder) => ({
         ...prevOrder,
-        diaChi: selectedAddress.tenDiaChi || "",
+        diaChiCuThe: selectedAddress.diaChiCuThe || "",
         xa: selectedAddress.xa || "",
         huyen: selectedAddress.huyen || "",
         tinh: selectedAddress.tinh || "",
       }));
       selectedOrder.hoTen = selectedAddress.hoTen || "";
       selectedOrder.soDienThoai = selectedAddress.soDienThoai || "";
-      selectedOrder.diaChi = selectedAddress.tenDiaChi || "";
+      selectedOrder.diaChi = selectedAddress.diaChiCuThe || "";
       selectedOrder.xa = selectedAddress.xa || "";
       selectedOrder.huyen = selectedAddress.huyen || "";
       selectedOrder.tinh = selectedAddress.tinh || "";
@@ -163,16 +162,16 @@ const OrderDetailPopup = ({
         tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
         sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
       });
-      
+
       // // Cập nhật lại selectedOrder
       // selectedOrder.tenNguoiNhan = formData.tenNguoiNhanMoi;
       // selectedOrder.sdtNguoiNhan = formData.sdtNguoiNhanMoi;
-      
+
       setFormData({
         tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
         sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
       });
-      
+
       message.success("Thêm thông tin người nhận thành công");
 
       console.log(response);
@@ -182,7 +181,7 @@ const OrderDetailPopup = ({
         sdtNguoiNhan: formData.sdtNguoiNhanMoi
       }));
     } catch (error) {
-      setMessage(error.response?.data || 'Có lỗi xảy ra.');
+      message.warning(error.response?.data || 'Có lỗi xảy ra.');
     }
   };
 
@@ -213,18 +212,18 @@ const OrderDetailPopup = ({
                 {selectedOrder?.hinhThucMua === 2
                   ? "Online"
                   : selectedOrder?.hinhThucMua === 1
-                  ? "Tại quầy"
-                  : "N/A"}
+                    ? "Tại quầy"
+                    : "N/A"}
               </h6>
               <h6>
                 Hình Thức Thanh Toán:{" "}
                 {selectedOrder?.hinhThucThanhToan === 0
                   ? "Tiền mặt"
                   : selectedOrder?.hinhThucThanhToan === 1
-                  ? "VNpay"
-                  : selectedOrder?.hinhThucThanhToan === 2
-                  ? "Thu hộ (COD)"
-                  : "N/A"}
+                    ? "VNpay"
+                    : selectedOrder?.hinhThucThanhToan === 2
+                      ? "Thu hộ (COD)"
+                      : "N/A"}
               </h6>
               <h6>
                 Tổng Tiền:{" "}
@@ -241,13 +240,23 @@ const OrderDetailPopup = ({
               <h6>
                 Địa Chỉ :
                 {selectedOrder?.diaChi
-                  ? `${selectedOrder.diaChi || ""}, ${
-                      selectedOrder.xa || ""
-                    }, ${selectedOrder.huyen || ""}, ${
-                      selectedOrder.tinh || ""
-                    }`
+                  ? `${selectedOrder.diaChi || ""}, ${selectedOrder.xa || ""
+                  }, ${selectedOrder.huyen || ""}, ${selectedOrder.tinh || ""
+                  }`
                   : "Tại quầy"}
               </h6>
+              <h4>Thông tin người nhận</h4>
+              <h6>Tên người nhận : {selectedOrder?.tenNguoiNhan || selectedOrder?.tenNguoiNhanMoi || "N/A"}</h6>
+              <h6>Số Điện Thoại : {selectedOrder?.sdtNguoiNhan || selectedOrder?.sdtNguoiNhanMoi || "N/A"}</h6>
+              <h6>
+                Địa Chỉ :
+                {selectedOrder?.diaChi
+                  ? `${selectedOrder.diaChi || ""}, ${selectedOrder.xa || ""
+                  }, ${selectedOrder.huyen || ""}, ${selectedOrder.tinh || ""
+                  }`
+                  : "Tại quầy"}
+              </h6>
+
               {selectedOrder?.trangThai === 0 && (
                 <Button type="primary" onClick={handleEditAddress}>
                   Chỉnh sửa địa chỉ
@@ -267,7 +276,7 @@ const OrderDetailPopup = ({
                 >
                   {addresses.map((addr) => (
                     <Select.Option key={addr.id} value={addr.id}>
-                      {`${addr.tenDiaChi}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
+                      {`${addr.diaChiCuThe}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
                     </Select.Option>
                   ))}
                 </Select>
@@ -334,7 +343,7 @@ const OrderDetailPopup = ({
               >
                 {addresses.map((addr) => (
                   <Select.Option key={addr.id} value={addr.id}>
-                    {`${addr.tenDiaChi}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
+                    {`${addr.diaChiCuThe}, ${addr.xa}, ${addr.huyen}, ${addr.thanhPho}`}
                   </Select.Option>
                 ))}
               </Select>

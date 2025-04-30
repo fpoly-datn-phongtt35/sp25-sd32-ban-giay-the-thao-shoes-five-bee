@@ -12,6 +12,7 @@ import com.example.demo.service.TrangThaiHoaDonService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -23,6 +24,7 @@ public class BanHangOnlineController {
 
   private final TrangThaiHoaDonService trangThaiHoaDonService;
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @PostMapping("/thanh-toan")
   public ResponseEntity<?> banHangOnline(@RequestBody BanHangOnlineRequest banHangOnlineRequest) {
     HoaDonEntity hoaDon = banHangService.banHangOnline(banHangOnlineRequest.getIdGiamGia(), banHangOnlineRequest.getHinhThucThanhToan(), banHangOnlineRequest);
@@ -30,6 +32,7 @@ public class BanHangOnlineController {
   }
 
 
+  @PreAuthorize("hasRole('USER')")
   @GetMapping("/user/{userId}")
   public ResponseEntity<List<HoaDonEntity>> getHoaDonByUserId(@PathVariable UUID userId){
     List<HoaDonEntity> hoaDonEntities = trangThaiHoaDonService.getHoaDonByUserId(userId);

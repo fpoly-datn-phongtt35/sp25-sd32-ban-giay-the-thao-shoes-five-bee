@@ -53,8 +53,8 @@ const ChucVu = () => {
   };
 
   const add = async () => {
-    if (!ma || !ten) {
-      message.error("Không được để trống mã và tên");
+    if (!ten) {
+      message.error("Không được để trống tên");
       return;
     }
     const newTrangThai = value === 1 ? 0 : 1;
@@ -104,7 +104,7 @@ const ChucVu = () => {
   };
 
   const editChucVuButton = async () => {
-    if (!ma || !ten) {
+    if (!ten) {
       message.error("Vui lòng điền đầy đủ thông tin");
       return;
     }

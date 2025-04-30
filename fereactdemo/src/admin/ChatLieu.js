@@ -69,7 +69,7 @@ const ChatLieu = () => {
             setTen("");
             setValue(1);
         } catch (error) {
-            message.error('Lỗi khi thêm chất liệu!');
+            message.error((error.response?.data?.message || error.message));
             console.error("Lỗi khi thêm chất liệu:", error);
         }
     };

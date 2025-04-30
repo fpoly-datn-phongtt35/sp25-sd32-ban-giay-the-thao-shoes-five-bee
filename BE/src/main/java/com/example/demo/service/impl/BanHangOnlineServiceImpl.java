@@ -5,8 +5,10 @@ import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.BanHangService;
 import com.example.demo.service.GiamGiaHoaDonChiTietService;
+import com.example.demo.service.SendMailService;
 import com.example.demo.service.UsersService;
 import java.math.BigDecimal;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
@@ -48,35 +50,35 @@ public class BanHangOnlineServiceImpl implements BanHangService {
 
     String email = usersService.getAuthenticatedUserEmail();
 
+
     List<GioHangChiTietEntity> gioHangChiTietEntities =
         gioHangChiTietRepository.findAllById(banHangOnlineRequest.getIdsGioHangChiTiet());
+
     List<HoaDonChiTietEntity> hoaDonChiTietEntities =
         gioHangChiTietEntities.stream()
             .map(
                 gioHangChiTietEntity -> {
-                  GiayChiTietEntity giayChiTiet =
-                      giayChiTietRepository
-                          .findById(gioHangChiTietEntity.getGiayChiTietEntity().getId())
-                          .orElse(null);
-
+                    GiayChiTietEntity giayChiTiet =
+                            giayChiTietRepository
+                                    .findById(gioHangChiTietEntity.getGiayChiTietEntity().getId())
+                                    .orElse(null);
                   List<GiamGiaChiTietSanPhamEntity> giamGiaOpt =
                       giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
                   BigDecimal soTienDaGiam =
                       giamGiaOpt != null &&  !giamGiaOpt.isEmpty() ? giamGiaOpt.get(0).getSoTienDaGiam() : BigDecimal.ZERO;
                   BigDecimal donGia = giayChiTiet.getGiaBan().subtract(soTienDaGiam);
 
-
                       giayChiTietRepository.save(giayChiTiet);
 
 
                   return HoaDonChiTietEntity.builder()
-                      .soLuong(gioHangChiTietEntity.getSoLuong())
-                      .giaBan(giayChiTiet.getGiaBan())
-                      .donGia(donGia)
-                      .trangThai(1)
-                      .giayChiTietEntity(giayChiTiet)
-                      .hoaDonEntity(hoaDonEntity)
-                      .build();
+                          .soLuong(gioHangChiTietEntity.getSoLuong())
+                          .giaBan(giayChiTiet.getGiaBan())
+                          .donGia(donGia)
+                          .trangThai(1)
+                          .giayChiTietEntity(giayChiTiet)
+                          .hoaDonEntity(hoaDonEntity)
+                          .build();
                 })
             .collect(Collectors.toList());
 
@@ -130,6 +132,7 @@ public class BanHangOnlineServiceImpl implements BanHangService {
     hoaDonEntity.setXa(banHangOnlineRequest.getXa());
     hoaDonEntity.setHuyen(banHangOnlineRequest.getHuyen());
     hoaDonEntity.setTinh(banHangOnlineRequest.getTinh());
+    hoaDonEntity.setUserEntity(userRepository.findByEmail(email).get());
     hoaDonEntity.setDiaChi(banHangOnlineRequest.getDiaChi());
     hoaDonEntity.setTongTien(tongTienThanhToan);
     hoaDonEntity.setHinhThucMua(2);
@@ -167,11 +170,14 @@ public class BanHangOnlineServiceImpl implements BanHangService {
     hoaDonEntity.setUserEntity(userRepository.findByEmail(email).get());
 
     hoaDonChiTietRepository.saveAll(hoaDonChiTietEntities);
+//    giayChiTietRepository.save(giay)
 
     gioHangChiTietRepository.deleteAllById(banHangOnlineRequest.getIdsGioHangChiTiet());
 
     return hoaDonRepository.save(hoaDonEntity);
   }
+
+
 
     private String generateUniqueCode() {
         return "HD" + UUID.randomUUID().toString().substring(0, 6).toUpperCase();

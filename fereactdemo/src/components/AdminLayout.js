@@ -66,6 +66,8 @@ const AdminLayout = () => {
             return user?.email || 'Guest';
         }
     };
+    const isAdmin = user?.roles.includes('ROLE_ADMIN');
+
     const navigate = useNavigate();
     const menuItems = (
         <Menu>
@@ -87,7 +89,7 @@ const AdminLayout = () => {
                     defaultSelectedKeys={['']}
                     onClick={({ key }) => handleMenuItemClick(key)}
                     items={[
-                        {
+                        isAdmin && {
                             key: '/admin/thong-ke',
                             icon: <DashboardOutlined />,
                             label: 'Thống Kê',
@@ -120,11 +122,6 @@ const AdminLayout = () => {
                                     key: '/admin/thuong-hieu',
 
                                     label: 'Thương Hiệu',
-                                },
-                                {
-                                    key: '/admin/san-pham-chi-tiet',
-
-                                    label: 'Sản Phẩm Chi Tiết',
                                 },
                                 {
                                     key: '/admin/mau-sac',
@@ -168,7 +165,7 @@ const AdminLayout = () => {
                                 },
                             ]
                         },
-                        {
+                        isAdmin && {
                             key: '2',
                             icon: <TeamOutlined />,
                             label: 'Quản Lý Tài Khoản',
@@ -185,13 +182,9 @@ const AdminLayout = () => {
                                     key: '/admin/chuc-vu',
                                     label: 'Chức Vụ',
                                 },
-                                // {
-                                //     key: '/admin/hang-khachHang',
-                                //     label: 'Hạng Khách Hàng',
-                                // }
                             ]
                         },
-                        {
+                        isAdmin && {
                             key: '1',
                             icon: <TagOutlined />,
                             label: 'Giảm Giá',

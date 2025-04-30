@@ -2,6 +2,7 @@ package com.example.demo.controller;
 
 import com.example.demo.config.VnPayConfig;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -18,7 +19,7 @@ import java.util.*;
 @CrossOrigin(origins = "http://localhost:3000")
 public class PaymentController {
 
-
+    @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
     @GetMapping("/pay")
     public ResponseEntity<String> getPay(@RequestParam BigDecimal amount, @RequestParam UUID orderId) throws UnsupportedEncodingException {
         String vnp_Version = "2.1.0";

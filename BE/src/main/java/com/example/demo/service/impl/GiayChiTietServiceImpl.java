@@ -241,7 +241,9 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
                   giayChiTietDto.getAnhGiayDtos().stream()
                       .map(AnhGiayDto::getId)
                       .collect(Collectors.toList());
-              this.assignAnhGiay(idGiay, ids);
+              if(!ids.isEmpty()) {
+                  this.assignAnhGiay(idGiay, ids);
+              }
               return giayChiTietRepository.save(o);
             })
         .orElse(null);

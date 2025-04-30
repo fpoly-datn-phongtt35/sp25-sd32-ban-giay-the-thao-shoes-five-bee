@@ -5,17 +5,14 @@ import com.example.demo.entity.*;
 import com.example.demo.repository.*;
 import com.example.demo.service.BanHangTaiQuayService;
 import com.example.demo.service.GiamGiaHoaDonChiTietService;
+import com.example.demo.service.SendMailService;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 import java.util.UUID;
 import java.util.stream.Collectors;
-
-import com.example.demo.service.SendMailService;
-import jakarta.mail.internet.MimeMessage;
 import lombok.RequiredArgsConstructor;
 import org.springframework.mail.javamail.JavaMailSender;
-import org.springframework.mail.javamail.MimeMessageHelper;
 import org.springframework.stereotype.Service;
 
 @Service
@@ -32,13 +29,14 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   private final GiayRepository giayRepository;
   private final SendMailService sendMailService;
   private final JavaMailSender javaMailSender;
+
   @Override
   public void thanhToanTaiQuay(
-          UUID idHoaDon,
-          UUID idGiamGia,
-          Integer hinhThucThanhToan,
-          Boolean isGiaoHang,
-          HoaDonRequest hoaDonRequest) {
+      UUID idHoaDon,
+      UUID idGiamGia,
+      Integer hinhThucThanhToan,
+      Boolean isGiaoHang,
+      HoaDonRequest hoaDonRequest) {
 
     HoaDonEntity hoaDon = hoaDonRepository.findById(idHoaDon)
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
@@ -155,7 +153,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     }
   }
 
-
   public void sendFormDanhGia(UserEntity user, List<HoaDonChiTietEntity> danhSachSanPham) {
     StringBuilder productItems = new StringBuilder();
 
@@ -165,15 +162,21 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
 
       productItems.append("<tr>");
       productItems.append("<td style=\"padding:15px;border-bottom:1px solid #dddddd;\">");
-      productItems.append("<p style=\"margin:0;font-size:16px;\"><strong>")
-              .append(hdct.getGiayChiTietEntity().getGiayEntity().getTen())
-              .append("</strong></p>");
+      productItems
+          .append("<p style=\"margin:0;font-size:16px;\"><strong>")
+          .append(hdct.getGiayChiTietEntity().getGiayEntity().getTen())
+          .append("</strong></p>");
       productItems.append("</td>");
-      productItems.append("<td style=\"padding:15px;border-bottom:1px solid #dddddd;text-align:center;\">");
-      productItems.append("<a href=\"http://localhost:3000/danh-gia?userId=")
-              .append(userId).append("&hoaDonChiTietId=").append(hoaDonChiTietId)
-              .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#1D70B8;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;\">")
-              .append("Đánh giá ngay</a>");
+      productItems.append(
+          "<td style=\"padding:15px;border-bottom:1px solid #dddddd;text-align:center;\">");
+      productItems
+          .append("<a href=\"http://localhost:3000/danh-gia?userId=")
+          .append(userId)
+          .append("&hoaDonChiTietId=")
+          .append(hoaDonChiTietId)
+          .append(
+              "\" style=\"display:inline-block;padding:10px 20px;background-color:#1D70B8;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;\">")
+          .append("Đánh giá ngay</a>");
       productItems.append("</td>");
       productItems.append("</tr>");
     }
@@ -186,32 +189,43 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     emailContent.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
     emailContent.append("</head>");
     emailContent.append("<body>");
-    emailContent.append("<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">");
-    emailContent.append("<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">");
+    emailContent.append(
+        "<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">");
+    emailContent.append(
+        "<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">");
     emailContent.append("<tr>");
     emailContent.append("<td bgcolor=\"#0b0c0c\" style=\"padding:20px;text-align:center;\">");
-    emailContent.append("<span style=\"font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;\">Đánh giá sản phẩm</span>");
+    emailContent.append(
+        "<span style=\"font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;\">Đánh giá sản phẩm</span>");
     emailContent.append("</td>");
     emailContent.append("</tr>");
     emailContent.append("</table>");
-    emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+    emailContent.append(
+        "<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
     emailContent.append("<tr>");
-    emailContent.append("<td style=\"font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;\">");
+    emailContent.append(
+        "<td style=\"font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;\">");
     emailContent.append("<p>Chào <strong>").append(user.getHoTen()).append("</strong>,</p>");
-    emailContent.append("<p>Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi. Vui lòng đánh giá sản phẩm bạn đã mua:</p>");
+    emailContent.append(
+        "<p>Cảm ơn bạn đã mua hàng tại cửa hàng của chúng tôi. Vui lòng đánh giá sản phẩm bạn đã mua:</p>");
     emailContent.append("</td>");
     emailContent.append("</tr>");
     emailContent.append("</table>");
-    emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:0 auto 20px;border-collapse:collapse;\">");
+    emailContent.append(
+        "<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:0 auto 20px;border-collapse:collapse;\">");
     emailContent.append("<tr>");
-    emailContent.append("<th style=\"text-align:left;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Sản phẩm</th>");
-    emailContent.append("<th style=\"text-align:center;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Hành động</th>");
+    emailContent.append(
+        "<th style=\"text-align:left;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Sản phẩm</th>");
+    emailContent.append(
+        "<th style=\"text-align:center;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Hành động</th>");
     emailContent.append("</tr>");
     emailContent.append(productItems.toString());
     emailContent.append("</table>");
-    emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+    emailContent.append(
+        "<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
     emailContent.append("<tr>");
-    emailContent.append("<td style=\"font-size:16px;line-height:1.6;color:#0b0c0c;padding:10px 20px;text-align:center;\">");
+    emailContent.append(
+        "<td style=\"font-size:16px;line-height:1.6;color:#0b0c0c;padding:10px 20px;text-align:center;\">");
     emailContent.append("<p>Cảm ơn đánh giá của bạn!</p>");
     emailContent.append("<p>Trân trọng,<br>Đội ngũ cửa hàng</p>");
     emailContent.append("</td>");
@@ -221,8 +235,10 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
     emailContent.append("</body>");
     emailContent.append("</html>");
 
-    sendMailService.sendMail(user.getEmail(), "Đánh giá sản phẩm bạn đã mua", emailContent.toString());
+    sendMailService.sendMail(
+        user.getEmail(), "Đánh giá sản phẩm bạn đã mua", emailContent.toString());
   }
+
   @Override
   public HoaDonEntity createHoaDonBanHangTaiQuay() {
 
@@ -242,7 +258,8 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
   }
 
   @Override
-  public HoaDonChiTietEntity themSanPhamVaoHoaDon(UUID idHoaDon, UUID idSanPham) {
+  public HoaDonChiTietEntity themSanPhamVaoHoaDon(
+      UUID idHoaDon, UUID idSanPham) {
     HoaDonEntity hoaDon =
         hoaDonRepository
             .findById(idHoaDon)
@@ -347,12 +364,12 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .orElseThrow(() -> new IllegalArgumentException("Hóa đơn không tồn tại"));
     List<HoaDonChiTietEntity> hoaDonChiTietList = hoaDonChiTietRepository.findByHoaDon(hoaDon);
 
-//    hoaDonChiTietList.forEach(
-//        chiTiet -> {
-//          GiayChiTietEntity giayChiTiet = chiTiet.getGiayChiTietEntity();
-////          giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + chiTiet.getSoLuong());
-////          giayChiTietRepository.save(giayChiTiet);
-//        });
+    //    hoaDonChiTietList.forEach(
+    //        chiTiet -> {
+    //          GiayChiTietEntity giayChiTiet = chiTiet.getGiayChiTietEntity();
+    ////          giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + chiTiet.getSoLuong());
+    ////          giayChiTietRepository.save(giayChiTiet);
+    //        });
 
     hoaDonChiTietRepository.deleteAll(hoaDonChiTietList);
 
@@ -390,10 +407,6 @@ public class BanHangTaiQuayServiceImpl implements BanHangTaiQuayService {
             .findById(idHoaDonChiTiet)
             .orElseThrow(() -> new IllegalArgumentException("Không tìm thấy hóa đơn chi tiết"));
 
-//    GiayChiTietEntity giayChiTiet = hoaDonChiTiet.getGiayChiTietEntity();
-//    giayChiTiet.setSoLuongTon(giayChiTiet.getSoLuongTon() + hoaDonChiTiet.getSoLuong());
-//
-//    giayChiTietRepository.save(giayChiTiet);
 
     hoaDonChiTietRepository.delete(hoaDonChiTiet);
   }

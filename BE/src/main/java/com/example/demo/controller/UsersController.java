@@ -17,6 +17,7 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.data.domain.Pageable;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.*;
 import org.springframework.web.multipart.MultipartFile;
 
@@ -25,16 +26,19 @@ import org.springframework.web.multipart.MultipartFile;
 public class UsersController {
   @Autowired private UsersService usersService;
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/getAll")
   public ResponseEntity<?> getAll() {
     return ResponseEntity.ok(usersService.getAll());
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/get-by-sdt")
   public ResponseEntity<?> getBySdt(@RequestParam String sdt) {
     return ResponseEntity.ok(usersService.getBySdt(sdt));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/add")
   public ResponseEntity<?> add(
       @RequestPart("userDto") UserDto userDto, @RequestParam("file") MultipartFile file)
@@ -43,12 +47,14 @@ public class UsersController {
     return ResponseEntity.ok(Collections.singletonMap("message", "add success"));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/search")
   public ResponseEntity<?> findAndPageChatLieu(@RequestBody UserDtoSearch userDtoSearch) {
     Pageable pageable = PageRequest.of(userDtoSearch.getPage(), userDtoSearch.getSize());
     return ResponseEntity.ok(usersService.findByPagingCriteria(userDtoSearch, pageable));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/export-excel")
   public ResponseEntity<?> exportExcel(
       @RequestBody UserDtoSearch userDtoSearch, HttpServletResponse httpServletResponse) {
@@ -90,6 +96,7 @@ public class UsersController {
     }
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/import-excel")
   public ResponseEntity<?> importUserFormExcel(@RequestParam("file") MultipartFile file)
       throws IOException {
@@ -111,6 +118,7 @@ public class UsersController {
     }
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/import-excelSkipDuplicate")
   public ResponseEntity<?> importExcelSkipDuplicate(@RequestParam("file") MultipartFile file)
       throws IOException {
@@ -132,6 +140,7 @@ public class UsersController {
     }
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @PutMapping("/update")
   public ResponseEntity<?> update(
       @RequestPart("userDto") UserDto userDto,
@@ -141,12 +150,14 @@ public class UsersController {
     return ResponseEntity.ok(Collections.singletonMap("message", "update success"));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/delete")
   public ResponseEntity<?> delete(@RequestBody UserDto userDto) {
     usersService.delete(userDto);
     return ResponseEntity.ok(Collections.singletonMap("message", "delete success"));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @GetMapping("/detail/{id}")
   public ResponseEntity<?> detail(@PathVariable UUID id) {
     UserDto userDto = new UserDto();
@@ -154,6 +165,7 @@ public class UsersController {
     return ResponseEntity.ok(usersService.detail(userDto));
   }
 
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @GetMapping("/lich-su-mua-hang/{id}")
   public ResponseEntity<?> lichSuMuaHang(@PathVariable("id") UUID id) {
     return ResponseEntity.ok(usersService.lichSuMuaHang(id));

@@ -36,12 +36,19 @@ public class DeGiayServiceImpl implements DeGiayService {
 
     @Override
     public DeGiayEntity add(DeGiayDto deGiayDto) {
+        // Kiểm tra tên đã tồn tại (không phân biệt hoa thường, loại bỏ khoảng trắng đầu cuối)
+        Optional<DeGiayEntity> existing = deGiayRepository.findByTenIgnoreCase(deGiayDto.getTen().trim());
+        if (existing.isPresent()) {
+            throw new RuntimeException("Tên đế giày đã tồn tại.");
+        }
+
         DeGiayEntity deGiayEntity = new DeGiayEntity();
         deGiayEntity.setMa(deGiayDto.getMa());
         deGiayEntity.setTen(deGiayDto.getTen());
         deGiayEntity.setTrangThai(deGiayDto.getTrangThai());
         return deGiayRepository.save(deGiayEntity);
     }
+
 
     @Override
     public DeGiayEntity addNhanh(DeGiayDto deGiayDto) {

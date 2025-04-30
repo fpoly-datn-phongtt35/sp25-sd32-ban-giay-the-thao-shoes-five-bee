@@ -36,6 +36,12 @@ public class KieuDangServiceImpl implements KieuDangService {
 
     @Override
     public KieuDangEntity add(KieuDangDto kieuDangDto) {
+        // Kiểm tra trùng tên (bỏ khoảng trắng đầu/cuối, không phân biệt hoa thường)
+        Optional<KieuDangEntity> existing = kieuDangRepository.findByTenIgnoreCase(kieuDangDto.getTen().trim());
+        if (existing.isPresent()) {
+            throw new RuntimeException("Tên kiểu dáng đã tồn tại.");
+        }
+
         KieuDangEntity kieuDangEntity = new KieuDangEntity();
         kieuDangEntity.setMa(kieuDangDto.getMa());
         kieuDangEntity.setTen(kieuDangDto.getTen());

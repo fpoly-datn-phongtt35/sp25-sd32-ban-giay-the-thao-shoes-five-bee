@@ -31,18 +31,14 @@ public class SendMailServiceImpl implements SendMailService {
     public void sendMail(String to, String body, String subject) {
         try {
             MimeMessage message = javaMailSender.createMimeMessage();
-            message.setFrom(new InternetAddress(fromEmailId));
-            message.setRecipients(MimeMessage.RecipientType.TO, InternetAddress.parse(to));
-            message.setSubject(subject, "UTF-8");
 
-            // Chỉ cần set nội dung gốc HTML, KHÔNG encode base64 thủ công
-            MimeBodyPart mimeBodyPart = new MimeBodyPart();
-            mimeBodyPart.setContent(body, "text/html; charset=UTF-8");
-            mimeBodyPart.setHeader("Content-Transfer-Encoding", "base64");
+            // Dùng helper để xử lý HTML, UTF-8 và multipart an toàn
+            MimeMessageHelper helper = new MimeMessageHelper(message, true, "UTF-8");
 
-            Multipart multipart = new MimeMultipart();
-            multipart.addBodyPart(mimeBodyPart);
-            message.setContent(multipart);
+            helper.setFrom(fromEmailId);
+            helper.setTo(to);
+            helper.setSubject(subject);
+            helper.setText(body, true); // `true` => nội dung HTML
 
             javaMailSender.send(message);
         } catch (MessagingException e) {

@@ -67,7 +67,8 @@ const KichCo = () => {
             setTen("");
             setValue(1);
         } catch (error) {
-            message.error('Lỗi khi thêm kích cỡ!');
+            message.error(
+                (error.response?.data?.message || error.message));
             console.error("Lỗi khi thêm kích cỡ:", error);
         }
     };
