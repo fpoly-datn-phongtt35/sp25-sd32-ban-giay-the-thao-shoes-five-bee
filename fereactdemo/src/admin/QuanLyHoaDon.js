@@ -115,6 +115,8 @@ const QuanLyHoaDon = () => {
         return "Đã giao hàng";
       case 7:
         return "Trả hàng";
+      case 9:
+        return "Chờ nhập hàng";
 
       default:
         return "Đã hủy";

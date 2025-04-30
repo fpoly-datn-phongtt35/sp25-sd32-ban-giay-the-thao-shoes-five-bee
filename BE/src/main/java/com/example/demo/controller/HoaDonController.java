@@ -7,6 +7,8 @@ import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.TrangThaiHoaDonService;
 import java.util.List;
 import java.util.UUID;
+
+import com.example.demo.service.impl.TrangThaiHoaDonServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
 import org.springframework.http.HttpStatus;
@@ -19,11 +21,22 @@ import org.springframework.web.bind.annotation.*;
 public class HoaDonController {
   @Autowired private TrangThaiHoaDonService trangThaiHoaDonService;
   @Autowired private HoaDonRepository hoaDonRepository;
+  @Autowired private TrangThaiHoaDonServiceImpl trangThaiHoaDonServiceImpl;
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PutMapping("/xac-nhan/{id}")
-  public HoaDonEntity xacNhanHoaDon(@PathVariable UUID id) {
+  public HoaDonEntity xacNhanHoaDon(@PathVariable UUID id){
     return trangThaiHoaDonService.xacNhanHoaDon(id);
+  }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
+  @GetMapping("/check-cho-nhap-hang")
+  public ResponseEntity<String> checkChoNhapHang(
+  @RequestParam("action")String action,
+  @RequestParam("orderId")String orderId) {
+    boolean isChoNhapHang = "wait".equals(action);
+    trangThaiHoaDonServiceImpl.handleUserResponse(orderId, isChoNhapHang);
+    return ResponseEntity.ok("Cảm ơn bạn đã phản hồi đơn hàng.");
   }
 
   // 0 cho xac nhan

@@ -17,6 +17,7 @@ import java.util.stream.Collectors;
 import lombok.AllArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @AllArgsConstructor
@@ -151,10 +152,15 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         emailContent.append("</tr>");
         emailContent.append("<tr>");
         emailContent.append("<td style=\"padding:15px;border-bottom:1px solid #dddddd;text-align:center;\">");
-        emailContent.append("<a href=\"http://localhost:3000/orderStatusPage?action=wait&orderId=").append(maHoaDon)
+        String feBaseUrl = "http://localhost:3000/orderStatusPage";
+
+        emailContent.append("<a href=\"").append(feBaseUrl)
+                .append("?action=wait&orderId=").append(maHoaDon)
                 .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#1D70B8;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;margin-right:10px;\">")
                 .append("Chờ nhập hàng</a>");
-        emailContent.append("<a href=\"http://localhost:3000/orderStatusPage?action=cancel&orderId=").append(maHoaDon)
+
+        emailContent.append("<a href=\"").append(feBaseUrl)
+                .append("?action=cancel&orderId=").append(maHoaDon)
                 .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#d9534f;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;\">")
                 .append("Hủy đơn hàng</a>");
         emailContent.append("</td>");
@@ -179,6 +185,16 @@ public class TrangThaiHoaDonServiceImpl implements TrangThaiHoaDonService {
         sendMailService.sendMail(email, emailContent.toString(), subject);
       }
     });
+  }
+
+  @Transactional
+  public void handleUserResponse(String maHoaDon, boolean isChoNhapHang) {
+    HoaDonEntity hoaDon = hoaDonRepository.findByMa(maHoaDon)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy hóa đơn"));
+
+    hoaDon.setChoNhapHang(isChoNhapHang); // Giả sử bạn có field này
+    hoaDon.setTrangThai(isChoNhapHang ? 9 : 8); // 9: chờ nhập hàng, 8: hủy
+    hoaDonRepository.save(hoaDon);
   }
 
 
