@@ -5,19 +5,18 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
     const token = localStorage.getItem("token");
 
     if (!token) {
-        // Chưa đăng nhập
         return <Navigate to="/login" replace />;
     }
 
     try {
-        // Giải mã token để lấy role
+       
         const payload = JSON.parse(atob(token.split('.')[1]));
 
-        // Kiểm tra cả trường "role" hoặc "roles"
+  
         let userRoles = [];
 
         if (payload.role) {
-            // Nếu role là string thì chuyển thành mảng
+          
             userRoles = typeof payload.role === 'string' ? [payload.role] : payload.role;
         } else if (payload.roles) {
             // Nếu đã là mảng thì giữ nguyên
@@ -30,7 +29,7 @@ const ProtectedRoute = ({ allowedRoles, children }) => {
             return <Navigate to="/unauthorized" replace />;
         }
 
-        // Kiểm tra nếu có children thì render children, không thì render Outlet
+      
         return children ? children : <Outlet />;
     } catch (error) {
         console.error("Lỗi khi giải mã token:", error);

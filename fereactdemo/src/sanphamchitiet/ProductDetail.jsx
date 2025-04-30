@@ -43,7 +43,7 @@ const ProductDetail = () => {
   // Ref cho carousel sản phẩm tương tự
   const carouselRef = useRef(null);
   // State cho phần đánh giá - chỉ hiển thị
-  console.log("anh chi tiet", anhCHiTiet);
+
   const [currentPage, setCurrentPage] = useState(1);
   const pageSize = 5;
   const startIndex = (currentPage - 1) * pageSize;
@@ -107,11 +107,16 @@ const ProductDetail = () => {
     if (!id) return;
 
     try {
-      // Kiểm tra xem sản phẩm chính có tồn tại không trước khi gọi API sản phẩm tương tự
       if (productGiay && productGiay.id) {
         const response = await getListGoiYSanPham(id);
         console.log("Sản phẩm tương tự:", response.data);
-        setSimilarProducts(response.data || []);
+
+        // Lọc ra những sản phẩm có ít nhất 1 ảnh trong danhSachAnh
+        const productsWithImages = (response.data || []).filter(
+          (product) => product.danhSachAnh && product.danhSachAnh.length > 0
+        );
+
+        setSimilarProducts(productsWithImages);
       }
     } catch (error) {
       console.error("Lỗi khi lấy sản phẩm tương tự:", error);
@@ -400,8 +405,9 @@ const ProductDetail = () => {
               {sizeList.map((size) => (
                 <div
                   key={size}
-                  className={`size-box ${selectedSize === size ? "active" : ""
-                    }`}
+                  className={`size-box ${
+                    selectedSize === size ? "active" : ""
+                  }`}
                   onClick={() => {
                     setSelectedSize(size); // Cập nhật kích cỡ đã chọn
                     handleSizeSelect(size); // Gọi hàm xử lý khi chọn kích cỡ
@@ -421,8 +427,9 @@ const ProductDetail = () => {
                 (color) => (
                   <div
                     key={color}
-                    className={`color-box ${selectedColor === color ? "active" : ""
-                      }`}
+                    className={`color-box ${
+                      selectedColor === color ? "active" : ""
+                    }`}
                     onClick={() => handleColorSelect(color)}
                   >
                     {color}
@@ -474,7 +481,6 @@ const ProductDetail = () => {
               Theo dõi sản phẩm khi có thêm hàng
             </Button>
           )}
-
         </div>
 
         {/* Chính sách */}
@@ -583,18 +589,29 @@ const ProductDetail = () => {
                       (window.location.href = `/product-detailSPTT/${product.id}`)
                     }
                   >
-                    <div className="similar-product-image">
+                    {/* <div className="similar-product-image">
                       <img
                         src={
                           product.anhUrl ||
                           (product.giayEntity?.anhGiayEntities &&
-                            product.giayEntity.anhGiayEntities.length > 0
+                          product.giayEntity.anhGiayEntities.length > 0
                             ? product.giayEntity.anhGiayEntities[0].tenUrl
                             : "/default-product.jpg")
                         }
                         alt={product.giayEntity?.ten || "Giày sản phẩm"}
                       />
+                    </div> */}
+                    <div className="similar-product-image">
+                      <img
+                        src={
+                          product.danhSachAnh && product.danhSachAnh.length > 0
+                            ? product.danhSachAnh[0].tenUrl
+                            : "/default-product.jpg"
+                        }
+                        alt={product.giayEntity?.ten || "Giày sản phẩm"}
+                      />
                     </div>
+
                     <div className="similar-product-info">
                       <h3 className="similar-product-name">
                         {product.giayEntity?.ten || "Tên sản phẩm"}
