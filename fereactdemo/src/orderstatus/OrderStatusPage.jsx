@@ -17,6 +17,7 @@ export const OrderStatusPage = () => {
     { id: "2", label: "Hoàn Thành" },
     { id: "7", label: "Trả Hàng"},
     { id: "8", label: "Đã Hủy" },
+    { id: "9", label: "Chờ Nhập Hàng"}
   ];
 
   const handleTabClick = (tabId) => {
