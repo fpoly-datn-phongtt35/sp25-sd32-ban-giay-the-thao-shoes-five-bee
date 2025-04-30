@@ -50,8 +50,8 @@ public class BanHangTaiQuayController {
   @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PostMapping("/add-product/{idHoaDon}")
   public ResponseEntity<?> themSanPhamVaoHoaDon(
-      @PathVariable("idHoaDon") UUID idHoaDon, @RequestParam UUID idSanPham, @RequestParam boolean choNhapHang) {
-    return ResponseEntity.ok(banHangTaiQuayService.themSanPhamVaoHoaDon(idHoaDon, idSanPham, choNhapHang));
+      @PathVariable("idHoaDon") UUID idHoaDon, @RequestParam UUID idSanPham) {
+    return ResponseEntity.ok(banHangTaiQuayService.themSanPhamVaoHoaDon(idHoaDon, idSanPham));
   }
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )

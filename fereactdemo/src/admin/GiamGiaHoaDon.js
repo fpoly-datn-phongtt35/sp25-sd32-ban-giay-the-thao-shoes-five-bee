@@ -48,10 +48,7 @@ const GiamGiaHoaDon = () => {
       console.error("Lỗi khi tải dữ liệu đợt giảm giá:", error);
     }
   };
-  const onChange = (e) => {
-    console.log("radio checked", e.target.value);
-    setValue(e.target.value);
-  };
+
   useEffect(() => {
     loadGiamGiaHoaDon();
   }, []);
@@ -161,13 +158,15 @@ const GiamGiaHoaDon = () => {
   };
 
   const handleUpdateSubmit = async () => {
-    const updatedTrangThai = value === 1 ? 0 : 1;
-
-    // Kiểm tra xem có ID không
     if (!updatingGiamGiaHoaDon?.ID) {
       message.error("Không tìm thấy ID của mã giảm giá cần cập nhật!");
       return;
     }
+
+    const updatedTrangThai = getTrangThaiFromDates(
+      new Date(ngayBatDau),
+      new Date(ngayKetThuc)
+    );
 
     const updatedGiamGiaHoaDon = {
       id: updatingGiamGiaHoaDon.ID,
@@ -178,7 +177,7 @@ const GiamGiaHoaDon = () => {
       ngayKetThuc: ngayKetThuc,
       phanTramGiam: parseFloat(phanTramGiam),
       soLuong: parseInt(soLuong),
-      trangThai: updatedTrangThai,
+      trangThai: updatedTrangThai, // 🚀 Auto tính trạng thái
     };
 
     try {
@@ -187,6 +186,7 @@ const GiamGiaHoaDon = () => {
       loadGiamGiaHoaDon();
       setIsModalVisible(false);
       setUpdatingGiamGiaHoaDon(null);
+      // Reset các input
       setTen("");
       setDieuKien("");
       setSoTienGiamMax("");
@@ -194,13 +194,14 @@ const GiamGiaHoaDon = () => {
       setPhanTramGiam("");
       setNgayBatDau("");
       setNgayKetThuc("");
-      setValue(null);
+
     } catch (error) {
       console.error("Lỗi khi cập nhật mã giảm giá:", error);
       message.error("Lỗi khi cập nhật mã giảm giá!" +
         (error.response?.data?.message || error.message));
     }
   };
+
 
   const handleDelete = async (record) => {
     try {
@@ -385,12 +386,7 @@ const GiamGiaHoaDon = () => {
               onChange={(e) => setSoLuong(e.target.value)}
             />
           </Form.Item>
-          <Form.Item label="Trạng Thái">
-            <Radio.Group onChange={onChange} value={value}>
-              <Radio value={0}>Hoạt động</Radio>
-              <Radio value={1}>Không hoạt động</Radio>
-            </Radio.Group>
-          </Form.Item>
+
         </Form>
       </Modal>
     </div>

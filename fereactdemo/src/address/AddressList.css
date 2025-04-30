@@ -1,5 +1,4 @@
-Tổng thể container
-.address-container {
+Tổng thể container .address-container {
   width: 80%;
   margin: 0 auto;
   padding: 20px;
@@ -64,7 +63,7 @@ Tổng thể container
 .address-info span {
   display: block;
   margin-top: 5px;
-  color: #888;
+  color:white;
 }
 
 .address-info p {
@@ -75,11 +74,12 @@ Tổng thể container
 .default-tag {
   display: inline-block;
   background-color: #ff5722;
-  color: white;
+  
   padding: 5px 10px;
   font-size: 0.9em;
   border-radius: 5px;
   margin-top: 10px;
+  width: 80px;
 }
 
 .address-actions a {
@@ -101,4 +101,3 @@ Tổng thể container
   border-radius: 5px;
   cursor: pointer;
 }
-

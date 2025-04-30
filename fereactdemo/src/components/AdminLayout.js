@@ -124,11 +124,6 @@ const AdminLayout = () => {
                                     label: 'Thương Hiệu',
                                 },
                                 {
-                                    key: '/admin/san-pham-chi-tiet',
-
-                                    label: 'Sản Phẩm Chi Tiết',
-                                },
-                                {
                                     key: '/admin/mau-sac',
 
                                     label: 'Màu Sắc',

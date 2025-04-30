@@ -439,8 +439,8 @@ const KhachHang = () => {
                     </Form.Item>
                     <Form.Item label="Trạng thái">
                         <Radio.Group onChange={onChange} value={value}>
-                            <Radio value={0}>Đang sử dụng</Radio>
-                            <Radio value={1}>Không sử dụng</Radio>
+                            <Radio value={0}>Không sử dụng</Radio>
+                            <Radio value={1}>Đang sử dụng</Radio>
                         </Radio.Group>
                     </Form.Item>
                 </Form>
