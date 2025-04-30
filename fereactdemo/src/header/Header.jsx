@@ -2,9 +2,13 @@ import React, { useEffect, useState } from "react";
 import "./header.css";
 import { Link, useNavigate } from "react-router-dom";
 import { Avatar, Dropdown, Menu, Space } from "antd";
-import { BellOutlined, ShoppingCartOutlined, UserOutlined } from "@ant-design/icons";
+import {
+  BellOutlined,
+  ShoppingCartOutlined,
+  UserOutlined,
+} from "@ant-design/icons";
 import { jwtDecode } from "jwt-decode";
-import { countProductsInCart } from '../service/GioHangChiTietService';
+import { countProductsInCart } from "../service/GioHangChiTietService";
 export const Header = () => {
   const [isLoggedIn, setIsLoggedIn] = useState(false);
   const [user, setUser] = useState(null);
@@ -19,16 +23,16 @@ export const Header = () => {
   useEffect(() => {
     const checkLoginStatus = () => {
       const token = localStorage.getItem("token");
-      if(token){
-        try{
-            const tokenData = jwtDecode(token);
-            setUser({
-              email: tokenData.sub,
-              hoTen : tokenData.hoTen,
-              roles: [tokenData.role]
+      if (token) {
+        try {
+          const tokenData = jwtDecode(token);
+          setUser({
+            email: tokenData.sub,
+            hoTen: tokenData.hoTen,
+            roles: [tokenData.role],
           });
           setIsLoggedIn(true);
-        }catch(error){
+        } catch (error) {
           console.error("Error decoding token:", error);
         }
       }
@@ -65,7 +69,7 @@ export const Header = () => {
       return user?.hoTen || "Guest";
     }
   };
-  const idGioHang = localStorage.getItem("idGioHang")
+  const idGioHang = localStorage.getItem("idGioHang");
   useEffect(() => {
     const fetchTotalProducts = async () => {
       if (idGioHang) {
@@ -83,7 +87,7 @@ export const Header = () => {
     };
 
     fetchTotalProducts();
-  }, [idGioHang]); 
+  }, [idGioHang]);
 
   const menuItems = (
     <Menu>
@@ -96,7 +100,6 @@ export const Header = () => {
       <Menu.Item key="logout" onClick={handleLogout}>
         <span>Đăng Xuất</span>
       </Menu.Item>
-      
     </Menu>
   );
 
@@ -118,14 +121,12 @@ export const Header = () => {
             </a>
           </div>
         </div>
-          
+
         {/* Mobile Header */}
         <div className="col-md-4 col-sm-12 col-xs-12 evo-header-mobile">
-
-
           <div className="logo evo-flexitem evo-flexitem-fill">
             <a
-              href="/home"
+              href="/productAll"
               className="logo-wrapper"
               title="Be Classy - Giày Da Nam, Giày Tây Nam Sang Trọng"
             >
@@ -157,66 +158,64 @@ export const Header = () => {
         {/* Right Header */}
         <div className="col-md-4 col-sm-12 col-xs-12 right-header hidden-sm hidden-xs">
           <ul className="justify-end">
-          {isLoggedIn ? (
+            {isLoggedIn ? (
               <Dropdown overlay={menuItems} trigger={["hover"]}>
                 <Space className="user-dropdown">
-                  <Avatar style={{ backgroundColor: "#87d068" }} icon={<UserOutlined />} />
+                  <Avatar
+                    style={{ backgroundColor: "#87d068" }}
+                    icon={<UserOutlined />}
+                  />
                   <span>{renderUserName()}</span>
                 </Space>
               </Dropdown>
             ) : (
-            <li className="site-nav-item site-nav-account">
-              <a href="/account" title="Tài khoản" rel="nofollow">
-                Tài khoản
-              </a>
-              <ul>
-                <li>
-                  <a rel="nofollow" href="/login" title="Đăng nhập">
-                    Đăng nhập
-                  </a>
-                </li>
-                <li>
-                  <a rel="nofollow" href="/register" title="Đăng ký">
-                    Đăng ký
-                  </a>
-                </li>
-              </ul>
-            </li>
+              <li className="site-nav-item site-nav-account">
+                <a href="/account" title="Tài khoản" rel="nofollow">
+                  Tài khoản
+                </a>
+                <ul>
+                  <li>
+                    <a rel="nofollow" href="/login" title="Đăng nhập">
+                      Đăng nhập
+                    </a>
+                  </li>
+                  <li>
+                    <a rel="nofollow" href="/register" title="Đăng ký">
+                      Đăng ký
+                    </a>
+                  </li>
+                </ul>
+              </li>
             )}
-             <li className="site-nav-item site-nav-cart mini-cart">
-      <a href="/cart" title="Giỏ hàng" rel="nofollow">
-        <ShoppingCartOutlined style={{ fontSize: '20px' }} />
-        <span className="count_item_pr">{totalProducts}</span>
-      </a>
-      <div className="top-cart-content">
-        <ul id="cart-sidebar" className="mini-products-list count_li">
-          {totalProducts > 0 ? (
-            <div className="item-list">
-              <p>Có {totalProducts} sản phẩm trong giỏ hàng.</p>
-            </div>
-          ) : (
-            <div className="no-item">
-              <p>Không có sản phẩm nào trong giỏ hàng.</p>
-            </div>
-          )}
-        </ul>
-      </div>
-    </li>
-
+            <li className="site-nav-item site-nav-cart mini-cart">
+              <a href="/cart" title="Giỏ hàng" rel="nofollow">
+                <ShoppingCartOutlined style={{ fontSize: "20px" }} />
+                <span className="count_item_pr">{totalProducts}</span>
+              </a>
+              <div className="top-cart-content">
+                <ul id="cart-sidebar" className="mini-products-list count_li">
+                  {totalProducts > 0 ? (
+                    <div className="item-list">
+                      <p>Có {totalProducts} sản phẩm trong giỏ hàng.</p>
+                    </div>
+                  ) : (
+                    <div className="no-item">
+                      <p>Không có sản phẩm nào trong giỏ hàng.</p>
+                    </div>
+                  )}
+                </ul>
+              </div>
+            </li>
           </ul>
         </div>
       </div>
 
-      <div class="container nav-evo-watch">
+      {/* <div class="container nav-evo-watch">
         <div class="row">
           <div class="col-md-12 col-lg-12 last-header">
             <ul id="nav" class="nav">
               <li class=" nav-item has-childs ">
-                <a
-                  href="/productAll"
-                  class="nav-link"
-                  title="DRESS SHOES"
-                >
+                <a href="/productAll" class="nav-link" title="DRESS SHOES">
                   DRESS SHOES{" "}
                   <i class="fa fa-angle-down" data-toggle="dropdown"></i>
                 </a>
@@ -348,7 +347,7 @@ export const Header = () => {
             </ul>
           </div>
         </div>
-      </div>
+      </div> */}
     </div>
   );
 };

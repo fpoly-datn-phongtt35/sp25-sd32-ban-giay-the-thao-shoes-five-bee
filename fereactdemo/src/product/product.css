@@ -17,12 +17,12 @@
     height: 60%;
     margin-top: 20px;
 }
-
+/* 
 .product button {
     width: calc(100% - 24px);
     margin: auto;
     border: none;
-}
+} */
 .product span {
   color: orangered;
 }

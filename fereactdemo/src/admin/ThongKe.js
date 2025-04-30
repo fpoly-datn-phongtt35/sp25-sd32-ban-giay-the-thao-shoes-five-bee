@@ -8,7 +8,7 @@ import {
 } from "../service/GiayChiTietService";
 
 import { topSelling } from "../service/HoaDonService";
-import { getDoanhThuNamHienTai, getDoanhThuNgayHienTai, getDoanhThuThangHienTai, getDoanhThuTheoKhoangNgay, getDoanhThuTheoNgayCuThe } from "../service/DoanhThu";
+import { getDoanhThuNamHienTai, getDoanhThuNgayHienTai, getDoanhThuThangHienTai, getDoanhThuTheoKhoangNgay, getDoanhThuTheoNgayCuThe, getDoanhThuNamCuThe, getDoanhThuThangCuThe } from "../service/DoanhThu";
 ChartJS.register(Title, Tooltip, Legend, ArcElement, ChartDataLabels);
 
 const Statistics = () => {
@@ -100,22 +100,24 @@ const Statistics = () => {
   // Lọc theo năm
   const fetchByYear = async () => {
     try {
-      const res = await getDoanhThuNamHienTai(selectedYear);
+      const res = await getDoanhThuNamCuThe(selectedYear);  // ❗ Sửa lại đúng hàm
       setDoanhThuNam(createChartData("Doanh Thu Năm", res.data, "#FF6384"));
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu năm:", error);
     }
   };
 
+
   // Lọc theo tháng
   const fetchByMonth = async () => {
     try {
-      const res = await getDoanhThuThangHienTai(selectedYear, selectedMonth);
+      const res = await getDoanhThuThangCuThe(selectedYear, selectedMonth);  // ❗ Sửa lại đúng hàm
       setDoanhThuThang(createChartData("Doanh Thu Tháng", res.data, "#36A2EB"));
     } catch (error) {
       console.error("Lỗi khi lấy dữ liệu tháng:", error);
     }
   };
+
 
   // Lọc theo ngày cụ thể
   const fetchByDate = async () => {

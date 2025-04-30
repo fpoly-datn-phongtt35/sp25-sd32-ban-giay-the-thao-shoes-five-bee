@@ -57,7 +57,7 @@ const Login = () => {
       if (response.roles.includes("ROLE_ADMIN") || response.roles.includes("ROLE_STAFF")) {
         navigate("/admin");
       } else if (response.roles.includes("ROLE_USER")) {
-        navigate("/home");
+        navigate("/productAll");
       } else {
         navigate("/");
       }

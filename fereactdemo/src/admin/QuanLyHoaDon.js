@@ -311,7 +311,8 @@ const QuanLyHoaDon = () => {
         user_email: response.data.email, // Thêm email
         userId: response.data.userDto?.id, // Thêm userId
         user_phone: response.data.sdtNguoiNhan,
-        diaChi: response.data.diaChiCuThe || "Tại Quầy",
+        diaChi: response.data.diaChi || response.data.diaChiCuThe || "Tại Quầy",
+
         tenNguoiNhanMoi: response.data.tenNguoiNhanMoi,
         sdtNguoiNhanMoi: response.data.sdtNguoiNhanMoi,
         xa: response.data.xa,
@@ -982,13 +983,9 @@ const QuanLyHoaDon = () => {
                 <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
                 <h6>
                   Địa Chỉ:{" "}
-                  {dataHoaDonChiTiet?.diaChiCuThe ||
-                    dataHoaDonChiTiet?.xa ||
-                    dataHoaDonChiTiet?.huyen ||
-                    dataHoaDonChiTiet?.tinh
-                    ? `${dataHoaDonChiTiet?.diaChiCuThe || ""}, ${dataHoaDonChiTiet?.xa || ""
-                    }, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""
-                    }`
+                  {dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe ||
+                    dataHoaDonChiTiet?.xa || dataHoaDonChiTiet?.huyen || dataHoaDonChiTiet?.tinh
+                    ? `${dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe || ""}, ${dataHoaDonChiTiet?.xa || ""}, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""}`
                     : "Tại Quầy"}
                 </h6>
               </div>

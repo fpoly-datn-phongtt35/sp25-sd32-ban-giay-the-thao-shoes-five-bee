@@ -295,6 +295,7 @@ const NhanVien = () => {
                         },
                     ]}
                     dataSource={nhanVien}
+                    scroll={{ x: 'max-content' }}
                 />
             </div>
             <Modal title="Cập nhật Nhân Viên" onOk={editNhanVienButton} open={isModalVisible} onCancel={() => setIsModalVisible(false)}>

@@ -103,7 +103,7 @@ export const AddressList = () => {
               <strong>{item.tenNguoiNhan}</strong>
               <span>{item.sdtNguoiNhan}</span>
               <p>{` ${item.xa}, ${item.huyen}, ${item.thanhPho}`}</p>
-              {item.trangThai.toLocaleString() === "1" && <span className="default-tag">Mặc định</span>}
+              {item .trangThai.toLocaleString() === "1" && <span className="default-tag">Mặc định</span>}
             </div>
             <div className="address-actions">
               {/* <UpdateAddressModal addressData={item} onAddAddress={handleAddAddress} /> */}
