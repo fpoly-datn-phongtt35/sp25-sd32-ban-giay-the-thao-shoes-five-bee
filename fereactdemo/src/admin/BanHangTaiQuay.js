@@ -1401,11 +1401,11 @@ const BanHangTaiQuay = () => {
                             fontSize: "0.7em",
                           }}
                         >
-                          {item.GIABAN.toLocaleString("vi-VN")} đ
+                          {item.GIABAN?.toLocaleString("vi-VN")} đ
                         </span>
                       </>
                     ) : (
-                      <span>{item.GIABAN.toLocaleString("vi-VN")} đ</span>
+                      <span>{item.GIABAN?.toLocaleString("vi-VN")} đ</span>
                     )}
                   </td>
 

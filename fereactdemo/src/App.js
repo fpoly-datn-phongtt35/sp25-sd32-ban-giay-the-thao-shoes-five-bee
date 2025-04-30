@@ -70,7 +70,7 @@ function App() {
           <Routes>
             {/* Group các route cần Layout */}
             <Route element={<Layout />}>
-              <Route path="/home" element={<Home />} />
+              {/* <Route path="/home" element={<Home />} /> */}
               <Route path="/cart" element={<Cart />} />
               <Route path="/check-out" element={<Bill />} />
               <Route path="/orderStatusPage" element={<OrderStatusPage />} />
