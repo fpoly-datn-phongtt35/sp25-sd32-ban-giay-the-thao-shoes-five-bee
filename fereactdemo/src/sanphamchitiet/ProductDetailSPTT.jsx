@@ -132,20 +132,10 @@ const ProductDetailSPTT = () => {
         <div className="product-info">
           <p className="product-title">{productGiay?.tenGiay}</p>
           <div className="product-price">
-            {productGiay?.giaKhiGiam ? (
-              <>
-                <span className="original-price">
-                  {Number(productGiay.giaBan ?? 0).toLocaleString()}₫
-                </span>
-                <span className="discounted-price">
-                  {Number(productGiay.giaKhiGiam ?? 0).toLocaleString()}₫
-                </span>
-              </>
-            ) : (
-              <span className="discounted-price">
-                {Number(currentPrice ?? 0).toLocaleString()}₫
-              </span>
-            )}
+          {productGiay?.giaKhiGiam
+              ? productGiay.giaKhiGiam.toLocaleString()
+              : productGiay?.giaBan?.toLocaleString() || "0"}
+            ₫
           </div>
         </div>
 

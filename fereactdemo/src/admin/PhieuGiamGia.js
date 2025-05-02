@@ -101,6 +101,7 @@ const DotGiamGia = () => {
   const loadDotGiamGia = async () => {
     try {
       const result = await getPhieuGiamGia();
+
       const dotGiamGiaData = result.data.map((item, index) => ({
         key: index,
         ID: item.id,
@@ -111,11 +112,16 @@ const DotGiamGia = () => {
         NGAY_KET_THUC: item.ngayKetThuc,
         TRANG_THAI: item.trangThai,
       }));
+
+      // ✅ Sắp xếp từ cao đến thấp theo phần trăm giảm
+      dotGiamGiaData.sort((a, b) => b.PHAN_TRAM_GIAM - a.PHAN_TRAM_GIAM);
+
       setDotGiamGia(dotGiamGiaData);
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu đợt giảm giá:", error);
     }
   };
+
   const getAllGiay = async () => {
     try {
       const result = await getGiay();

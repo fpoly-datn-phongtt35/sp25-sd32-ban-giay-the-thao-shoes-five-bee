@@ -619,10 +619,14 @@ const SanPham = () => {
   };
 
   const creatGiay = async () => {
-    // if (!ten || !giaBan) {
-    //   message.error("Không được để trống!");
-    //   return;
-    // }
+    if (!ten || !giaBan) {
+      message.error("Không được để trống!");
+      return;
+    }
+    if (parseFloat(giaBan) <= 0) {
+      message.error("Giá bán phải lớn hơn 0!");
+      return;
+    }
 
     const newTrangThai = value === 1 ? 1 : 0;
 

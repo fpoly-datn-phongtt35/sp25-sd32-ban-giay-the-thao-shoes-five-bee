@@ -24,7 +24,7 @@ const Unauthorized = () => {
             if (userRoles.includes("ROLE_ADMIN") || userRoles.includes("ROLE_STAFF")) {
                 redirectPath = "/admin";
             } else if (userRoles.includes("ROLE_USER")) {
-                redirectPath = "/home";
+                redirectPath = "/productAll";
             }
         }
     } catch (error) {
