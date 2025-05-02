@@ -4,7 +4,7 @@ import {
   message,
 } from "antd";
 import './OrderStyle.css';
-import { Link, useSearchParams } from "react-router-dom";
+import { Link, Navigate, useNavigate, useSearchParams } from "react-router-dom";
 import { huyDonMuaUser, updateHoaDon1 } from "../service/HoaDonService.js"
 import ReturnRequestModal from '../orderstatus/ReturnRequestForm.js';
 import { fetchOrderDetails } from '../service/ReturnOrderService';  // API tạo yêu cầu trả hàng
@@ -22,32 +22,50 @@ const OrderItem = ({ order, onChangeData }) => {
   const [params] = useSearchParams();
   const action = params.get("action");
   const orderId = params.get("orderId");
+  const navigate = useNavigate();
+
 
   useEffect(() => {
-    if (action && orderId) {
-      const token = localStorage.getItem("token"); // hoặc sessionStorage
+    if (!action || !orderId) return;
 
-      if (!token) {
-        alert("Chưa đăng nhập hoặc thiếu token.");
-        return;
-      }
+    const token = localStorage.getItem("token");
+    if (!token) {
+      alert("Chưa đăng nhập hoặc thiếu token.");
+      return;
+    }
 
+    const commonConfig = {
+      params: { action, orderId },
+      headers: {
+        Authorization: `Bearer ${token}`,
+      },
+    };
+
+    if (action === "continue" || action === "cancel") {
       axios
-        .get("http://localhost:5000/trang-thai-hoa-don/check-cho-nhap-hang", {
-          params: { action, orderId },
-          headers: {
-            Authorization: `Bearer ${token}`,
-          },
-        })
+        .get("http://localhost:5000/trang-thai-hoa-don/continue-order", commonConfig)
         .then((res) => {
-          message.success("Xử lý thành công: " + res.data);
+          message.success(res.data);
+          navigate("http://localhost:3000/orderStatusPage");
         })
         .catch((err) => {
-          message.success("Đã xảy ra lỗi: " + err.message);
+          message.error("Lỗi: " + (err.response?.data || err.message));
         });
+    } else if (action === "wait") {
+      axios
+        .get("http://localhost:5000/trang-thai-hoa-don/check-cho-nhap-hang", commonConfig)
+        .then((res) => {
+          message.success(res.data);
+        })
+        .catch((err) => {
+          message.error("Lỗi: " + (err.response?.data || err.message));
+        });
+    } else {
+      message.error("Hành động không hợp lệ.");
     }
   }, [action, orderId]);
   console.log(action);
+
 
   const togglePopup = () => {
     setIsPopupVisible(!isPopupVisible);
