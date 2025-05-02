@@ -2,11 +2,21 @@ package com.example.demo.controller;
 
 import com.example.demo.dto.request.HoaDonDto;
 import com.example.demo.dto.request.ThongTinNguoiNhanDto;
+import com.example.demo.entity.GiayChiTietEntity;
+import com.example.demo.entity.GiayEntity;
+import com.example.demo.entity.HoaDonChiTietEntity;
 import com.example.demo.entity.HoaDonEntity;
+import com.example.demo.repository.GiayChiTietRepository;
+import com.example.demo.repository.GiayRepository;
+import com.example.demo.repository.HoaDonChiTietRepository;
 import com.example.demo.repository.HoaDonRepository;
 import com.example.demo.service.TrangThaiHoaDonService;
+
+import java.util.HashSet;
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 import com.example.demo.service.impl.TrangThaiHoaDonServiceImpl;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,6 +32,12 @@ public class HoaDonController {
   @Autowired private TrangThaiHoaDonService trangThaiHoaDonService;
   @Autowired private HoaDonRepository hoaDonRepository;
   @Autowired private TrangThaiHoaDonServiceImpl trangThaiHoaDonServiceImpl;
+  @Autowired
+  private HoaDonChiTietRepository hoaDonChiTietRepository;
+  @Autowired
+  private GiayChiTietRepository giayChiTietRepository;
+  @Autowired
+  private GiayRepository giayRepository;
 
   @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
   @PutMapping("/xac-nhan/{id}")
@@ -37,6 +53,55 @@ public class HoaDonController {
     boolean isChoNhapHang = "wait".equals(action);
     trangThaiHoaDonServiceImpl.handleUserResponse(orderId, isChoNhapHang);
     return ResponseEntity.ok("Cảm ơn bạn đã phản hồi đơn hàng.");
+  }
+
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
+  @GetMapping("/continue-order")
+  public ResponseEntity<?> xuLyTiepTucDonHang(
+          @RequestParam("action") String action,
+          @RequestParam("orderId") String orderId
+  ){
+    HoaDonEntity hoaDonEntity = hoaDonRepository.findByMa(orderId)
+            .orElseThrow(() -> new RuntimeException("Không tìm thấy mã hóa đơn"));
+
+    if ("continue".equalsIgnoreCase(action) && hoaDonEntity.getTrangThai() == 9){
+      List<HoaDonChiTietEntity> hoaDonChiTietEntities = hoaDonChiTietRepository.findByHoaDon(hoaDonEntity);
+      for (HoaDonChiTietEntity ct : hoaDonChiTietEntities) {
+        GiayChiTietEntity chiTiet = ct.getGiayChiTietEntity();
+        int soLuongMua = ct.getSoLuong();
+
+        if (chiTiet.getSoLuongTon() < soLuongMua) {
+          return ResponseEntity.badRequest().body("Không đủ tồn kho cho sản phẩm: " + chiTiet.getId());
+        }
+
+        // Trừ số lượng tồn
+        chiTiet.setSoLuongTon(chiTiet.getSoLuongTon() - soLuongMua);
+        giayChiTietRepository.save(chiTiet);
+      }
+
+
+      Set<UUID> giayIds = hoaDonChiTietEntities.stream()
+              .map(ct -> ct.getGiayChiTietEntity().getGiayEntity().getId())
+              .collect(Collectors.toSet());
+
+      for (UUID giayId : giayIds) {
+        List<GiayChiTietEntity> bienThes = giayChiTietRepository.findByGiayEntityId(giayId);
+        int tongTon = bienThes.stream().mapToInt(GiayChiTietEntity::getSoLuongTon).sum();
+
+        GiayEntity giay = bienThes.get(0).getGiayEntity();
+        giay.setSoLuongTon(tongTon);
+        giayRepository.save(giay);
+      }
+      hoaDonEntity.setTrangThai(4);
+      hoaDonRepository.save(hoaDonEntity);
+      return ResponseEntity.ok("Đơn hàng đã chuyển sang trạng thái chờ vận chuyển");
+    }
+    if ("cancel".equalsIgnoreCase(action) && hoaDonEntity.getTrangThai() == 9) {
+      hoaDonEntity.setTrangThai(8); // trạng thái HỦY
+      hoaDonRepository.save(hoaDonEntity);
+      return ResponseEntity.ok("Đơn hàng đã được hủy");
+    }
+    return ResponseEntity.badRequest().body("Thao tác không hợp lệ hoặc trạng thái không phù hợp");
   }
 
   // 0 cho xac nhan

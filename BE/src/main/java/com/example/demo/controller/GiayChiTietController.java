@@ -60,7 +60,7 @@ public class GiayChiTietController {
     return ResponseEntity.ok(giayChiTietService.update(giayChiTietDto));
   }
 
-  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')" )
+  @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF') or hasRole('USER')" )
   @GetMapping("/detail/{id}")
   public ResponseEntity<?> detail(@PathVariable UUID id) {
     GiayChiTietDto giayChiTietDto = new GiayChiTietDto();

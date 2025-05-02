@@ -8,6 +8,7 @@ import com.example.demo.entity.GiayEntity;
 import com.example.demo.repository.*;
 import com.example.demo.service.AnhGiayService;
 import com.example.demo.service.GiayChiTietService;
+import com.example.demo.service.SendMailService;
 import com.example.demo.service.SubscriptionService;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.MultiFormatWriter;
@@ -44,6 +45,7 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   private final AnhGiayService anhGiayService;
   private final GiayServiceImpl giayServiceImpl;
   private final SubscriptionService subscriptionService;
+  private final SendMailService sendMailService;
 
   @Override
   public GiayChiTietEntity updateSoLuongVaGaiaBan(UUID id, Integer soLuong, BigDecimal giaBan) {
@@ -198,9 +200,17 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
   public GiayChiTietEntity update(GiayChiTietDto giayChiTietDto) {
     Optional<GiayChiTietEntity> optional = giayChiTietRepository.findById(giayChiTietDto.getId());
 
+    if (optional.isEmpty()){
+        return null;
+    }
+
+    GiayChiTietEntity giayChiTietEntity = optional.get();
+    int soLuongTonTruoc = giayChiTietEntity.getSoLuongTon();
+
     if (optional.get().getSoLuongTon() == 0) {
       subscriptionService.notifyAllCustomersAboutProduct(giayChiTietDto.getId());
     }
+
     return optional
         .map(
             o -> {
@@ -223,6 +233,7 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
                     giayRepository.findById(giayChiTietDto.getGiayDto().getId()).orElse(null));
               }
 
+
               o.setTrangThai(giayChiTietDto.getTrangThai());
 
               GiayEntity giay = o.getGiayEntity();
@@ -244,10 +255,101 @@ public class GiayChiTietServiceImpl implements GiayChiTietService {
               if(!ids.isEmpty()) {
                   this.assignAnhGiay(idGiay, ids);
               }
-              return giayChiTietRepository.save(o);
-            })
-        .orElse(null);
+              GiayChiTietEntity giayChiTietEntity1 = giayChiTietRepository.save(o);
+                // sau khi cap nhật nếu số lượng tồn mới > 0 và trước đó là  0 -> sendMail
+                if (soLuongTonTruoc == 0 && giayChiTietEntity1.getSoLuongTon() > 0){
+                    sendEmail(giayChiTietEntity1);
+                }
+                return giayChiTietEntity1;
+            }).orElse(null);
   }
+
+    private void sendEmail(GiayChiTietEntity gct) {
+        gct.getHoaDonChiTietEntities().forEach(hdct -> {
+            int soLuongDat = hdct.getSoLuong();
+            int soLuongTon = gct.getSoLuongTon();
+
+            if (soLuongTon >= soLuongDat && hdct.getHoaDonEntity().getTrangThai() == 9) {
+                String email = hdct.getHoaDonEntity().getUserEntity().getEmail();
+                String tenSanPham = gct.getGiayEntity().getTen();
+                String maHoaDon = hdct.getHoaDonEntity().getMa();
+                String tenNguoiDung = hdct.getHoaDonEntity().getUserEntity().getHoTen();
+
+                String subject = "Thông báo về đơn hàng " + maHoaDon;
+
+                StringBuilder emailContent = new StringBuilder();
+                emailContent.append("<!DOCTYPE html>");
+                emailContent.append("<html lang=\"vi\">");
+                emailContent.append("<head>");
+                emailContent.append("<meta charset=\"UTF-8\">");
+                emailContent.append("<meta http-equiv=\"Content-Type\" content=\"text/html; charset=UTF-8\">");
+                emailContent.append("</head>");
+                emailContent.append("<body>");
+                emailContent.append("<div style=\"font-family:Helvetica,Arial,sans-serif;font-size:16px;margin:0;color:#0b0c0c\">");
+
+                // Header
+                emailContent.append("<table role=\"presentation\" width=\"100%\" style=\"border-collapse:collapse;min-width:100%;width:100%!important\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\">");
+                emailContent.append("<tr>");
+                emailContent.append("<td bgcolor=\"#0b0c0c\" style=\"padding:20px;text-align:center;\">");
+                emailContent.append("<span style=\"font-size:28px;line-height:1.3;color:#ffffff;font-weight:bold;\">Thông báo tình trạng đơn hàng</span>");
+                emailContent.append("</td>");
+                emailContent.append("</tr>");
+                emailContent.append("</table>");
+
+                // Body content
+                emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+                emailContent.append("<tr>");
+                emailContent.append("<td style=\"font-size:19px;line-height:1.6;color:#0b0c0c;padding:10px 20px;\">");
+                emailContent.append("<p>Chào <strong>").append(tenNguoiDung).append("</strong>,</p>");
+                emailContent.append("<p>Bạn đã đặt <strong>").append(soLuongDat).append("</strong> sản phẩm \"<strong>")
+                        .append(tenSanPham).append("</strong>\".</p>");
+                emailContent.append("<p>Hiện kho đã có đủ hàng với <strong>")
+                        .append(soLuongTon).append("</strong> sản phẩm có sẵn.</p>");
+                emailContent.append("<p>Vui lòng chọn một trong hai lựa chọn dưới đây để tiếp tục xử lý đơn hàng của bạn:</p>");
+                emailContent.append("</td>");
+                emailContent.append("</tr>");
+                emailContent.append("</table>");
+
+                // Action buttons
+                emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:0 auto 20px;border-collapse:collapse;\">");
+                emailContent.append("<tr>");
+                emailContent.append("<th style=\"text-align:center;padding:15px;background-color:#f8f8f8;border-bottom:2px solid #1D70B8;\">Hành động</th>");
+                emailContent.append("</tr>");
+                emailContent.append("<tr>");
+                emailContent.append("<td style=\"padding:15px;border-bottom:1px solid #dddddd;text-align:center;\">");
+                String feBaseUrl = "http://localhost:3000/orderStatusPage";
+
+                emailContent.append("<a href=\"").append(feBaseUrl)
+                        .append("?action=continue&orderId=").append(maHoaDon)
+                        .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#1D70B8;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;margin-right:10px;\">")
+                        .append("Tiếp tục đơn hàng</a>");
+
+                emailContent.append("<a href=\"").append(feBaseUrl)
+                        .append("?action=cancel&orderId=").append(maHoaDon)
+                        .append("\" style=\"display:inline-block;padding:10px 20px;background-color:#d9534f;color:#ffffff;text-decoration:none;border-radius:5px;font-weight:bold;\">")
+                        .append("Hủy đơn hàng</a>");
+                emailContent.append("</td>");
+                emailContent.append("</tr>");
+                emailContent.append("</table>");
+
+                // Footer
+                emailContent.append("<table align=\"center\" cellpadding=\"0\" cellspacing=\"0\" border=\"0\" style=\"max-width:580px;width:100%;margin:20px auto;\">");
+                emailContent.append("<tr>");
+                emailContent.append("<td style=\"font-size:16px;line-height:1.6;color:#0b0c0c;padding:10px 20px;text-align:center;\">");
+                emailContent.append("<p>Đơn hàng của bạn sẽ được giữ trong vòng 24 giờ nếu không có phản hồi.</p>");
+                emailContent.append("<p>Trân trọng,<br>Đội ngũ bán hàng</p>");
+                emailContent.append("</td>");
+                emailContent.append("</tr>");
+                emailContent.append("</table>");
+
+                emailContent.append("</div>");
+                emailContent.append("</body>");
+                emailContent.append("</html>");
+
+                sendMailService.sendMail(email, emailContent.toString(), subject);
+            }
+        });
+    }
 
   @Override
   public GiayChiTietEntity detail(GiayChiTietDto giayChiTietDto) {
