@@ -591,15 +591,16 @@ const BanHangTaiQuay = () => {
             const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
             return {
               ID: item.id,
-              ID_GIAY_CHI_TIET: item.giayChiTietEntity?.id, // ✅ thêm dòng này
+              ID_GIAY_CHI_TIET: item.giayChiTietEntity?.id,
               TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
               SOLUONG: item.soLuong,
               GIA_KHI_GIAM: item.donGia,
               GIABAN: item.giayChiTietEntity?.giaBan || 0,
               ANH_GIAY:
-                item.danhSachAnh?.length > 0
-                  ? item.danhSachAnh[0]?.tenUrl
-                  : "https://via.placeholder.com/150", // Sử dụng ảnh placeholder nếu không có ảnh
+                item.giayChiTietEntity?.danhSachAnh?.length > 0
+                  ? item.giayChiTietEntity.danhSachAnh[0]?.tenUrl
+                  : "https://via.placeholder.com/150",
+              // Sử dụng ảnh placeholder nếu không có ảnh
 
               KICH_CO: kichCo,
               MAU_SAC: mauSac,
