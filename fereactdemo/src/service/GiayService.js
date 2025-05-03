@@ -15,7 +15,7 @@ export const getGiay = () => axios.post(`${REST_API_BASE_URL}/getAll`, config);
 export const addGiay = async (giay) => {
   try {
     const response = await axios.post(`${REST_API_BASE_URL}/add`, giay, config);
-    return response.data;
+    return response;
   } catch (error) {
     if (error.response && error.response.status === 400) {
       throw new Error(error.response.data); 
