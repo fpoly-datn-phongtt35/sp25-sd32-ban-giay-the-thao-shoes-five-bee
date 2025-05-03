@@ -46,7 +46,6 @@ const GiamGiaHoaDon = () => {
       GiamGiaHoaDonData.sort((a, b) => b.PHAN_TRAM_GIAM - a.PHAN_TRAM_GIAM);
 
       setGiamGiaHoaDon(GiamGiaHoaDonData);
-
     } catch (error) {
       console.error("Lỗi khi tải dữ liệu đợt giảm giá:", error);
     }
@@ -121,8 +120,6 @@ const GiamGiaHoaDon = () => {
       return;
     }
 
-
-
     const newTrangThai = getTrangThaiFromDates(
       new Date(ngayBatDau),
       new Date(ngayKetThuc)
@@ -153,7 +150,9 @@ const GiamGiaHoaDon = () => {
       setNgayBatDau("");
       setNgayKetThuc("");
     } catch (error) {
-      message.error("Lỗi khi thêm!" + (error.response?.data?.message || error.message));
+      message.error(
+        "Lỗi khi thêm!" + (error.response?.data?.message || error.message)
+      );
       console.error("Lỗi khi thêm:", error);
     }
 
@@ -197,14 +196,14 @@ const GiamGiaHoaDon = () => {
       setPhanTramGiam("");
       setNgayBatDau("");
       setNgayKetThuc("");
-
     } catch (error) {
       console.error("Lỗi khi cập nhật mã giảm giá:", error);
-      message.error("Lỗi khi cập nhật mã giảm giá!" +
-        (error.response?.data?.message || error.message));
+      message.error(
+        "Lỗi khi cập nhật mã giảm giá!" +
+          (error.response?.data?.message || error.message)
+      );
     }
   };
-
 
   const handleDelete = async (record) => {
     try {
@@ -233,6 +232,7 @@ const GiamGiaHoaDon = () => {
     { title: "Tên", dataIndex: "TEN", key: "TEN" },
     {
       title: "Điều Kiện",
+      witdh: 50,
       dataIndex: "DIEU_KIEN",
       key: "DIEU_KIEN",
       render: (text) => `${text ? text.toLocaleString() : "0"} VND`,
@@ -241,6 +241,7 @@ const GiamGiaHoaDon = () => {
       title: "Số tiền giảm Max",
       dataIndex: "SO_TIEN_GIAM_MAX",
       key: "SO_TIEN_GIAM_MAX",
+      render: (text) => `${text ? text.toLocaleString() : "0"} VND`,
     },
     { title: "Ngày Bắt Đầu", dataIndex: "NGAY_BAT_DAU", key: "NGAY_BAT_DAU" },
     {
@@ -258,7 +259,8 @@ const GiamGiaHoaDon = () => {
       title: "Trạng Thái",
       dataIndex: "TRANG_THAI",
       key: "TRANG_THAI",
-      render: (text) => (text === 0 ? "Hoạt Động" : text === 1 ? "Không Hoạt Động" : "Đang chờ"),
+      render: (text) =>
+        text === 0 ? "Hoạt Động" : text === 1 ? "Không Hoạt Động" : "Đang chờ",
     },
     {
       title: "Thao tác",
@@ -271,7 +273,16 @@ const GiamGiaHoaDon = () => {
       ),
     },
   ];
-
+  const formatCurrency = (value) => {
+    if (!value) return "";
+    // Xoá ký tự không phải số
+    const number = value.toString().replace(/\D/g, "");
+    return Number(number).toLocaleString("vi-VN") + " VNĐ";
+  };
+  const parseCurrency = (value) => {
+    // Xoá tất cả ký tự không phải số
+    return value.replace(/\D/g, "");
+  };
   return (
     <div className="dot-giam-gia">
       <h1>Quản lý giảm giá hóa đơn</h1>
@@ -296,25 +307,17 @@ const GiamGiaHoaDon = () => {
           <Form.Item label="Tên">
             <Input value={ten} onChange={(e) => setTen(e.target.value)} />
           </Form.Item>
+
           <Form.Item label="Điều Kiện">
             <Input
-              value={dieuKien}
-              onChange={(e) => setDieuKien(e.target.value)}
+              value={formatCurrency(dieuKien)}
+              onChange={(e) => {
+                const rawValue = parseCurrency(e.target.value);
+                setDieuKien(rawValue);
+              }}
             />
           </Form.Item>
-          <Form.Item label="Số Tiền Giảm Max">
-            <Input
-              value={soTienGiamMax}
-              onChange={(e) => setSoTienGiamMax(e.target.value)}
-            />
-          </Form.Item>
-          <Form.Item label="Ngày Bắt Đầu">
-            <Input
-              type="date"
-              value={ngayBatDau}
-              onChange={(e) => setNgayBatDau(e.target.value)}
-            />
-          </Form.Item>
+
           <Form.Item label="Phần Trăm Giảm">
             <Input
               value={phanTramGiam}
@@ -325,6 +328,13 @@ const GiamGiaHoaDon = () => {
             <Input
               value={soLuong}
               onChange={(e) => setSoLuong(e.target.value)}
+            />
+          </Form.Item>
+          <Form.Item label="Ngày Bắt Đầu">
+            <Input
+              type="date"
+              value={ngayBatDau}
+              onChange={(e) => setNgayBatDau(e.target.value)}
             />
           </Form.Item>
           <Form.Item label="Ngày Kết Thúc">
@@ -353,16 +363,28 @@ const GiamGiaHoaDon = () => {
           </Form.Item>
           <Form.Item label="Điều Kiện">
             <Input
-              value={dieuKien}
-              onChange={(e) => setDieuKien(e.target.value)}
+              value={Number(dieuKien).toLocaleString("vi-VN") + " VNĐ"}
+              onChange={(e) => {
+                const rawValue = e.target.value.replace(/\D/g, ""); // Xoá mọi ký tự không phải số
+                setDieuKien(rawValue);
+              }}
             />
           </Form.Item>
+
           <Form.Item label="Số Tiền Giảm Max">
             <Input
-              value={soTienGiamMax}
-              onChange={(e) => setSoTienGiamMax(e.target.value)}
+              value={
+                soTienGiamMax
+                  ? Number(soTienGiamMax).toLocaleString("vi-VN") + " VNĐ"
+                  : ""
+              }
+              onChange={(e) => {
+                const rawValue = e.target.value.replace(/\D/g, ""); // loại bỏ ký tự không phải số
+                setSoTienGiamMax(rawValue);
+              }}
             />
           </Form.Item>
+
           <Form.Item label="Ngày Bắt Đầu">
             <Input
               type="date"
@@ -389,7 +411,6 @@ const GiamGiaHoaDon = () => {
               onChange={(e) => setSoLuong(e.target.value)}
             />
           </Form.Item>
-
         </Form>
       </Modal>
     </div>

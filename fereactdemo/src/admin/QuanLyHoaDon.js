@@ -62,7 +62,7 @@ const QuanLyHoaDon = () => {
   });
 
   const handleChange = (field, value) => {
-    setFormData(prev => ({ ...prev, [field]: value }));
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   useEffect(() => {
@@ -82,19 +82,22 @@ const QuanLyHoaDon = () => {
       // Call the API to update the new recipient information
       const response = await tachNguoiNhanMoiInHoaDon(hoaDonId, {
         tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
-        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
+        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi,
       });
 
       // Update the local state with the new values
-      setDataHoaDonChiTiet(prev => ({
+      setDataHoaDonChiTiet((prev) => ({
         ...prev,
         tenNguoiNhanMoi: formData.tenNguoiNhanMoi,
-        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi
+        sdtNguoiNhanMoi: formData.sdtNguoiNhanMoi,
       }));
 
       message.success("Thông tin người nhận mới đã được cập nhật thành công");
     } catch (error) {
-      message.error(error.response?.data || "Có lỗi xảy ra khi cập nhật thông tin người nhận mới");
+      message.error(
+        error.response?.data ||
+          "Có lỗi xảy ra khi cập nhật thông tin người nhận mới"
+      );
     }
   };
   const mapTrangThai = (trangThai) => {
@@ -135,8 +138,6 @@ const QuanLyHoaDon = () => {
       });
     }
   }, [dataHoaDonChiTiet]);
-
-
 
   const fetchLichSuHoaDon = async () => {
     try {
@@ -253,10 +254,10 @@ const QuanLyHoaDon = () => {
             item.hinhThucThanhToan === 0
               ? "Tiền mặt"
               : item.hinhThucThanhToan === 1
-                ? "Chuyển khoản"
-                : item.hinhThucThanhToan === 2
-                  ? "Thanh toán khi nhận hàng"
-                  : "VNPay",
+              ? "Chuyển khoản"
+              : item.hinhThucThanhToan === 2
+              ? "Thanh toán khi nhận hàng"
+              : "VNPay",
 
           phiShip: item.phiShip ?? 0, // Phí ship (nếu có)
           soTienGiam: item.soTienGiam ?? 0, // Số tiền giảm giá
@@ -292,7 +293,6 @@ const QuanLyHoaDon = () => {
   const fetchHoaDonChiTiet = async (id) => {
     try {
       const response = await getHoaDonById1(id);
-
 
       // Tính tổng tiền sản phẩm từ items
       const tongTienSanPham = (response.data.items || []).reduce(
@@ -334,7 +334,8 @@ const QuanLyHoaDon = () => {
           giaBan: item.giaBan,
           soLuong: item.soLuong,
           hinhAnh:
-            item.giayChiTietEntity?.giayEntity?.anhGiayEntities?.[0]?.tenUrl,
+            item.giayChiTietEntity?.danhSachAnh?.[0]?.tenUrl ||
+            "https://via.placeholder.com/150",
         })),
         // Thêm thông tin giảm giá
         chuongTrinhGiamGiaChiTietHoaDons:
@@ -653,9 +654,9 @@ const QuanLyHoaDon = () => {
         const tongTienGoc =
           record.products && record.products.length > 0
             ? record.products.reduce(
-              (total, product) => total + product.soLuong * product.giaBan,
-              0
-            )
+                (total, product) => total + product.soLuong * product.giaBan,
+                0
+              )
             : record.tongTien + (record.soTienGiam || 0); // Nếu không có products, tính ngược từ tổng tiền và số tiền giảm
 
         // Nếu có giảm giá, hiển thị cả giá gốc và giá sau giảm
@@ -983,25 +984,49 @@ const QuanLyHoaDon = () => {
                 <h6>Số Điện Thoại: {dataHoaDonChiTiet?.user_phone || "N/A"}</h6>
                 <h6>
                   Địa Chỉ:{" "}
-                  {dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe ||
-                    dataHoaDonChiTiet?.xa || dataHoaDonChiTiet?.huyen || dataHoaDonChiTiet?.tinh
-                    ? `${dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe || ""}, ${dataHoaDonChiTiet?.xa || ""}, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""}`
+                  {dataHoaDonChiTiet?.diaChi ||
+                  dataHoaDonChiTiet?.diaChiCuThe ||
+                  dataHoaDonChiTiet?.xa ||
+                  dataHoaDonChiTiet?.huyen ||
+                  dataHoaDonChiTiet?.tinh
+                    ? `${
+                        dataHoaDonChiTiet?.diaChi ||
+                        dataHoaDonChiTiet?.diaChiCuThe ||
+                        ""
+                      }, ${dataHoaDonChiTiet?.xa || ""}, ${
+                        dataHoaDonChiTiet?.huyen || ""
+                      }, ${dataHoaDonChiTiet?.tinh || ""}`
                     : "Tại Quầy"}
                 </h6>
               </div>
               <div className="phai">
                 <h4>Thông tin người nhận</h4>
                 <h6>
-                  Khách Hàng: {dataHoaDonChiTiet?.tenNguoiNhanMoi || dataHoaDonChiTiet?.user || "N/A"}
+                  Khách Hàng:{" "}
+                  {dataHoaDonChiTiet?.tenNguoiNhanMoi ||
+                    dataHoaDonChiTiet?.user ||
+                    "N/A"}
                 </h6>
                 <h6>
-                  Số Điện Thoại: {dataHoaDonChiTiet?.sdtNguoiNhanMoi || dataHoaDonChiTiet?.user_phone || "N/A"}
+                  Số Điện Thoại:{" "}
+                  {dataHoaDonChiTiet?.sdtNguoiNhanMoi ||
+                    dataHoaDonChiTiet?.user_phone ||
+                    "N/A"}
                 </h6>
                 <h6>
                   Địa Chỉ:{" "}
-                  {dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe ||
-                    dataHoaDonChiTiet?.xa || dataHoaDonChiTiet?.huyen || dataHoaDonChiTiet?.tinh
-                    ? `${dataHoaDonChiTiet?.diaChi || dataHoaDonChiTiet?.diaChiCuThe || ""}, ${dataHoaDonChiTiet?.xa || ""}, ${dataHoaDonChiTiet?.huyen || ""}, ${dataHoaDonChiTiet?.tinh || ""}`
+                  {dataHoaDonChiTiet?.diaChi ||
+                  dataHoaDonChiTiet?.diaChiCuThe ||
+                  dataHoaDonChiTiet?.xa ||
+                  dataHoaDonChiTiet?.huyen ||
+                  dataHoaDonChiTiet?.tinh
+                    ? `${
+                        dataHoaDonChiTiet?.diaChi ||
+                        dataHoaDonChiTiet?.diaChiCuThe ||
+                        ""
+                      }, ${dataHoaDonChiTiet?.xa || ""}, ${
+                        dataHoaDonChiTiet?.huyen || ""
+                      }, ${dataHoaDonChiTiet?.tinh || ""}`
                     : "Tại Quầy"}
                 </h6>
               </div>
@@ -1009,7 +1034,7 @@ const QuanLyHoaDon = () => {
               {/* Thêm phần hiển thị thông tin giảm giá */}
               {dataHoaDonChiTiet?.chuongTrinhGiamGiaChiTietHoaDons &&
                 dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.length >
-                0 && (
+                  0 && (
                   <div className="giamgia">
                     <h4>Thông tin giảm giá</h4>
                     {dataHoaDonChiTiet.chuongTrinhGiamGiaChiTietHoaDons.map(
@@ -1060,7 +1085,9 @@ const QuanLyHoaDon = () => {
                       <Input
                         placeholder="Tên người nhận mới"
                         value={formData.tenNguoiNhanMoi}
-                        onChange={(e) => handleChange("tenNguoiNhanMoi", e.target.value)}
+                        onChange={(e) =>
+                          handleChange("tenNguoiNhanMoi", e.target.value)
+                        }
                       />
                     </div>
 
@@ -1069,7 +1096,9 @@ const QuanLyHoaDon = () => {
                       <Input
                         placeholder="Số điện thoại người nhận mới"
                         value={formData.sdtNguoiNhanMoi}
-                        onChange={(e) => handleChange("sdtNguoiNhanMoi", e.target.value)}
+                        onChange={(e) =>
+                          handleChange("sdtNguoiNhanMoi", e.target.value)
+                        }
                       />
                     </div>
 
@@ -1094,7 +1123,9 @@ const QuanLyHoaDon = () => {
                     </div>
                     <div className="info-row">
                       <h6 className="info-label">Địa chỉ:</h6>
-                      <span>{dataHoaDonChiTiet?.diaChiCuThe || "Tại quầy"}</span>
+                      <span>
+                        {dataHoaDonChiTiet?.diaChiCuThe || "Tại quầy"}
+                      </span>
                     </div>
                   </>
                 )}
@@ -1250,8 +1281,9 @@ const QuanLyHoaDon = () => {
                       {[...Array(5)].map((_, index) => (
                         <span
                           key={index}
-                          className={`star ${index < danhGia[0].saoDanhGia ? "active" : ""
-                            }`}
+                          className={`star ${
+                            index < danhGia[0].saoDanhGia ? "active" : ""
+                          }`}
                         >
                           ★
                         </span>
