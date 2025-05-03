@@ -12,7 +12,19 @@ const config = {
 
 export const getGiay = () => axios.post(`${REST_API_BASE_URL}/getAll`, config);
 
-export const addGiay = (giay) => axios.post(`${REST_API_BASE_URL}/add`, giay, config);
+export const addGiay = async (giay) => {
+  try {
+    const response = await axios.post(`${REST_API_BASE_URL}/add`, giay, config);
+    return response.data;
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      throw new Error(error.response.data); 
+    } else {
+      throw new Error("Đã xảy ra lỗi khi thêm giày.");
+    }
+  }
+};
+
 export const addBienThe = (giay) => axios.post(
   `${REST_API_BASE_URL}/add-bien-the`,
   giay, config,
