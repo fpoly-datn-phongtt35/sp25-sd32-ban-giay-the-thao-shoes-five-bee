@@ -76,7 +76,7 @@ export const Header = () => {
         try {
           console.log("Gọi API với ID giỏ hàng:", idGioHang);
           const total = await countProductsInCart(idGioHang);
-          console.log("Kết quả trả về từ API:", total);
+          // console.log("Kết quả trả về từ API:", total);
           setTotalProducts(total);
         } catch (error) {
           console.error("Lỗi khi gọi API:", error);

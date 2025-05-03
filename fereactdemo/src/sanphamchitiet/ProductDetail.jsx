@@ -59,7 +59,6 @@ const ProductDetail = () => {
     const fetchReviewsWithUserInfo = async () => {
       try {
         const response = await getProductDanhGiaById(id);
-        console.log("📌 Kết quả API đánh giá:", response.data);
 
         if (Array.isArray(response.data)) {
           // Lấy thông tin người dùng cho mỗi đánh giá
@@ -109,7 +108,7 @@ const ProductDetail = () => {
     try {
       if (productGiay && productGiay.id) {
         const response = await getListGoiYSanPham(id);
-        console.log("Sản phẩm tương tự:", response.data);
+        // console.log("Sản phẩm tương tự:", response.data);
 
         // Lọc ra những sản phẩm có ít nhất 1 ảnh trong danhSachAnh
         const productsWithImages = (response.data || []).filter(
@@ -237,9 +236,10 @@ const ProductDetail = () => {
 
     if (variantsWithSameColor.length > 0) {
       // Lấy danh sách size
-      const sizeList = variantsWithSameColor.map(
-        (variant) => variant.tenKichCo
-      );
+      const sizeList = [
+        ...new Set(variantsWithSameColor.map((v) => v.tenKichCo)),
+      ];
+
       setSizeList(sizeList);
 
       // Ưu tiên tìm biến thể có giá khi giảm
@@ -249,7 +249,8 @@ const ProductDetail = () => {
 
       const giaKhiGiam = variantWithDiscount?.giaKhiGiam;
       const giaBan = variantWithDiscount?.giaBan;
-      const finalPrice = giaKhiGiam ?? giaBan ?? 0;
+      const finalPrice = giaKhiGiam || giaBan || 0;
+
       setCurrentPrice(finalPrice);
 
       // Lấy danh sách ảnh
@@ -297,7 +298,7 @@ const ProductDetail = () => {
 
     if (selectedVariant) {
       setSoLuongChiTiet(selectedVariant.soLuong); // Lưu số lượng tương ứng với kích cỡ đã chọn
-      console.log("Số lượng của kích cỡ đã chọn:", selectedVariant.soLuong);
+      // console.log("Số lượng của kích cỡ đã chọn:", selectedVariant.soLuong);
     }
   };
 
@@ -352,14 +353,11 @@ const ProductDetail = () => {
       <div className="left">
         <div className="product-images">
           {anhCHiTiet.length > 0 ? (
-            anhCHiTiet.map((url, index) => (
-              <img
-                key={index}
-                src={url || "default_image.jpg"} // Nếu URL không có thì dùng ảnh mặc định
-                alt={productGiay.ten}
-                style={{ width: "600px", height: "600px", margin: "5px" }}
-              />
-            ))
+            <img
+              src={anhCHiTiet[0] || "default_image.jpg"}
+              alt={productGiay.ten}
+              style={{ width: "600px", height: "600px", margin: "5px" }}
+            />
           ) : productGiay.anhGiayEntities?.length > 0 ? (
             productGiay.anhGiayEntities.map((anh, index) => (
               <img
@@ -377,25 +375,41 @@ const ProductDetail = () => {
       <div className="right">
         <div className="product-info">
           <p className="product-title">{productGiay?.ten}</p>
-          <div className="product-price">
-            {selectedVariantDetails?.giaKhiGiam ? (
-              <>
-                <span className="original-price">
-                  {Number(selectedVariantDetails.giaBan ?? 0).toLocaleString()}₫
-                </span>
+          {selectedVariantDetails?.giaBan > 0 || currentPrice > 0 ? (
+            <div className="product-price">
+              {selectedVariantDetails ? (
+                selectedVariantDetails.giaKhiGiam &&
+                selectedVariantDetails.giaKhiGiam !==
+                  selectedVariantDetails.giaBan ? (
+                  <>
+                    <span className="original-price">
+                      {Number(selectedVariantDetails.giaBan).toLocaleString(
+                        "vi-VN"
+                      )}{" "}
+                      ₫
+                    </span>
+                    <span className="discounted-price">
+                      {Number(selectedVariantDetails.giaKhiGiam).toLocaleString(
+                        "vi-VN"
+                      )}{" "}
+                      ₫
+                    </span>
+                  </>
+                ) : (
+                  <span className="discounted-price">
+                    {Number(selectedVariantDetails.giaBan).toLocaleString(
+                      "vi-VN"
+                    )}{" "}
+                    ₫
+                  </span>
+                )
+              ) : (
                 <span className="discounted-price">
-                  {Number(
-                    selectedVariantDetails.giaKhiGiam ?? 0
-                  ).toLocaleString()}
-                  ₫
+                  {Number(currentPrice ?? 0).toLocaleString("vi-VN")} ₫
                 </span>
-              </>
-            ) : (
-              <span className="discounted-price">
-                {Number(currentPrice ?? 0).toLocaleString()}₫
-              </span>
-            )}
-          </div>
+              )}
+            </div>
+          ) : null}
         </div>
 
         <div className="product-options">
@@ -464,8 +478,8 @@ const ProductDetail = () => {
           >
             MUA NGAY VỚI GIÁ {""}
             {selectedColor
-              ? currentPrice.toLocaleString()
-              : productGiay?.giaBan?.toLocaleString() || "0"}
+              ? Number(currentPrice ?? 0).toLocaleString("vi-VN")
+              : Number(productGiay?.giaBan ?? 0).toLocaleString("vi-VN")}
             ₫
           </div>
           {selectedColor && selectedSize && selectedVariant && (

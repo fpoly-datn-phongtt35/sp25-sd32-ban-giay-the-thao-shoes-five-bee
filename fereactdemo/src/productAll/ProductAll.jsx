@@ -145,7 +145,7 @@ export const ProductAll = () => {
           src="/banner.jpg"
           alt="Banner"
           className="banner-img"
-          style={{ marginTop: 140 }}
+          style={{ marginTop: 20 }}
         />
         <div className="slider">
           <div className="imgBanner">
