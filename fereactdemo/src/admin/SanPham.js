@@ -114,6 +114,7 @@ const SanPham = () => {
   const [selectedCapNhatAnhBienThe, setSelectedCapNhatAnhBienThe] =
     useState("");
   const [selectedGiayIds, setSelectedGiayIds] = useState([]);
+  const [recordToDelete, setRecordToDelete] = useState(null);
 
   const [soLuongTon1, setSoLuongTon1] = useState(null);
   const [selectedRecord, setSelectedRecord] = useState(null);
@@ -647,20 +648,42 @@ const SanPham = () => {
     };
 
     try {
-      // 1️⃣ Gọi API tạo sản phẩm, lấy `id` của sản phẩm vừa tạo
       const giayResponse = await addGiay(newDataGiay);
-      const giayId = giayResponse.data.id; // Lấy ID sản phẩm mới từ response
+      const giayMoi = giayResponse.data;
+      const giayId = giayMoi.id;
 
-      // 2️⃣ Nếu có ảnh, gọi API gán ảnh cho sản phẩm đó
+      // Nếu có ảnh thì gán ảnh
       if (selectedAnhGiay && selectedAnhGiay.length > 0) {
         await assignAnhGiay(giayId, selectedAnhGiay);
         message.success("Đã gán ảnh vào sản phẩm!");
       }
 
-      message.success("Thêm sản phẩm thành công!");
-      getAllGiay();
+      // ➕ Thêm sản phẩm mới lên đầu danh sách
+      setGiay((prev) => [
+        {
+          ID: giayMoi.id,
+          MA: giayMoi.ma || "",
+          TEN: giayMoi.ten,
+          MOTA: giayMoi.moTa,
+          GIABAN: giayMoi.giaBan,
+          SOLUONGTON: giayMoi.soLuongTon,
+          TRANG_THAI: giayMoi.trangThai,
+          THUONG_HIEU: giayMoi.thuongHieu?.ten || null,
+          DANH_MUC: giayMoi.danhMuc?.ten || null,
+          CHAT_LIEU: giayMoi.chatLieu?.ten || null,
+          DE_GIAY: giayMoi.deGiay?.ten || null,
+          XUAT_XU: giayMoi.xuatXu?.ten || null,
+          KIEU_DANG: giayMoi.kieuDang?.ten || null,
+          ANH_GIAY:
+            giayMoi.anhGiayEntities?.[0]?.tenUrl || null,
+          KICH_CO: giayMoi.kichCo?.ten || null,
+        },
+        ...giay,
+      ]);
 
-      // Reset lại form
+      message.success("Thêm sản phẩm thành công!");
+
+      // Reset form
       setTen("");
       setMoTa("");
       setGiaBan("");
@@ -676,15 +699,14 @@ const SanPham = () => {
       setSelectedKichCo(null);
       setSelectedAnhGiay(null);
 
-      console.log("Sản phẩm mới:", giayResponse.data);
+      setIsModalVisible1(false);
     } catch (error) {
       message.error(
         "Lỗi thêm sản phẩm: " + (error.response?.data?.message || error.message)
       );
     }
-
-    setIsModalVisible1(false);
   };
+
 
   const removeGiay = async (record) => {
     try {
@@ -1593,7 +1615,10 @@ const SanPham = () => {
 
                 <DeleteOutlined
                   style={{ cursor: "pointer", color: "red" }}
-                  onClick={() => setConfirmOpen(true)} // Hiển thị hộp thoại xác nhận
+                  onClick={() => {
+                    setRecordToDelete(record);   // ✅ lưu đúng sản phẩm muốn xoá
+                    setConfirmOpen(true);        // ✅ mở modal xác nhận
+                  }}
                 />
 
                 {/* Hộp thoại xác nhận xóa */}
@@ -1601,13 +1626,19 @@ const SanPham = () => {
                   open={confirmOpen}
                   onConfirm={() => {
                     setConfirmOpen(false);
-                    removeGiay(record);
-                    console.log(record);
+                    if (recordToDelete) {
+                      removeGiay(recordToDelete);
+                      setRecordToDelete(null);
+                    }
                   }}
-                  onCancel={() => setConfirmOpen(false)}
+                  onCancel={() => {
+                    setConfirmOpen(false);
+                    setRecordToDelete(null);
+                  }}
                   title="Xác nhận xóa"
-                  content={`Bạn có chắc muốn xóa giày "${record.TEN}" không?`}
+                  content={`Bạn có chắc muốn xóa giày "${recordToDelete?.TEN}" không?`}
                 />
+
               </Space>
             ),
           },
