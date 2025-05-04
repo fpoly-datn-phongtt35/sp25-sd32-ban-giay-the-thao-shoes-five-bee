@@ -159,13 +159,20 @@ const SanPham = () => {
     setIsPopupOpen(false);
   };
   const CapNhatAnhBienThe = () => {
-    // Log danh sách ID giày được chọn từ selectedGiayIds
     console.log("Danh sách ID giày đã chọn:", selectedGiayIds);
-
-    // Tiến hành các thao tác khác nếu cần
+  
+    // Reset modal và danh sách đã chọn
     setIsThemNhanhAnh(false);
-    // Reset danh sách ID giày đã chọn
+    // setSelectedGiayIds(null); 
   };
+  const huyCapNhatAnhBienThe = () => {
+  
+ 
+    setIsThemNhanhAnh(false);
+    setSelectedGiayIds([]); 
+  };
+  
+  
 
   const getMauSacList = async () => {
     const result = await getMauSac();
@@ -1294,7 +1301,7 @@ const SanPham = () => {
               open={isThemNhanhAnh}
               onCancel={() => setIsThemNhanhAnh(false)} // Đóng modal
               footer={[
-                <Button key="cancel" onClick={() => setIsThemNhanhAnh(false)}>
+                <Button key="cancel" onClick={huyCapNhatAnhBienThe}>
                   Hủy
                 </Button>,
                 <Button key="ok" type="primary" onClick={CapNhatAnhBienThe}>

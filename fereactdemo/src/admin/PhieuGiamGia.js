@@ -55,6 +55,7 @@ const DotGiamGia = () => {
   const [stockMin, setStockMin] = useState();
   const [stockMax, setStockMax] = useState();
 
+  
   const [filteredByBrand, setFilteredByBrand] = useState([]);
   const [filters, setFilters] = useState({
     ten: "",
@@ -242,7 +243,7 @@ const DotGiamGia = () => {
             ? item.danhSachAnh[0].tenUrl
             : null,
       }));
-      console.log(danhSachChiTiet);
+      // console.log(danhSachChiTiet);
 
       // Cập nhật state
       setGiayChiTiet(danhSachChiTiet);
@@ -269,7 +270,7 @@ const DotGiamGia = () => {
       message.error("Phần trăm giảm phải lớn hơn 0!");
       return;
     }
-    if (parsedPhanTramGiam > 100) {
+    if (parsedPhanTramGiam >= 100) {
       message.error("Phần trăm giảm không được vượt quá 100%!");
       return;
     }
@@ -286,7 +287,7 @@ const DotGiamGia = () => {
       ngayKetThuc: ngayKetThuc,
       phanTramGiam: parsedPhanTramGiam,
       trangThai: newTrangThai,
-      idGiayChiTiet: selectedProducts.map((product) => product.id),
+      idGiayChiTiet: selectedProducts.map((product) => product.ID),
     };
 
     console.log("Đợt giảm giá mới:", newDotGiamGia);
@@ -307,7 +308,13 @@ const DotGiamGia = () => {
       );
       console.error("Lỗi khi thêm:", error);
     }
-
+    setGiayChiTiet("");
+    setStockMin("");
+    setStockMax("");
+    setFilteredByBrand("");
+    setFilteredByColor("");
+    setSelectedColor("");
+    setSelectedBrand("");
     setIsAddModalVisible(false);
   };
 
@@ -522,7 +529,7 @@ const DotGiamGia = () => {
       // Thêm các trường thông tin khác nếu cần
     }));
 
-    console.log("Giày theo thương hiệu lọc được: ", giayChiTiet);
+    // console.log("Giày theo thương hiệu lọc được: ", giayChiTiet);
 
     // Lưu vào state để hiển thị
     setGiayChiTiet(giayChiTiet); // Cập nhật giày chi tiết đã lọc vào state
@@ -539,14 +546,14 @@ const DotGiamGia = () => {
       (item) => (color ? item.MAU_SAC === color : true) // Nếu có màu sắc chọn, lọc theo màu sắc, nếu không thì hiển thị tất cả
     );
 
-    console.log(filtered);
+    // console.log(filtered);
 
     const giayChiTiet = filtered.map((item) => ({
       ID: item.ID,
       ten: item.TEN,
       mauSac: item.MAU_SAC,
       kichCo: item.KICH_CO,
-      THUONG_HIEU: item.THUONG_HIEU,
+      thuongHieu: item.THUONG_HIEU,
       soLuongTon: item.SOLUONGTON,
       giaBan: item.GIABAN,
       anh: item.ANH_GIAY,
@@ -554,7 +561,7 @@ const DotGiamGia = () => {
       // Thêm các trường thông tin khác nếu cần
     }));
 
-    console.log("Giày theo màu sắc lọc được: ", giayChiTiet);
+    // console.log("Giày theo màu sắc lọc được: ", giayChiTiet);
 
     // Lưu vào state để hiển thị
     setGiayChiTiet(giayChiTiet); // Cập nhật giày chi tiết đã lọc vào state
@@ -579,7 +586,7 @@ const DotGiamGia = () => {
       anh: item.ANH_GIAY,
     }));
 
-    console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
+    // console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
 
     setGiayChiTiet(giayChiTiet);
     setFilteredByBrand(filtered);
