@@ -29,6 +29,12 @@ public class GiamGiaSanPhamController {
     return ResponseEntity.ok(giamGiaSanPhamService.taoChuongTrinhGiamGia(request));
   }
 
+  @PreAuthorize("hasRole('ADMIN')")
+  @GetMapping("/giay-chi-tiet")
+  public ResponseEntity<?> taoChuongTrinhGiamGia(@RequestParam UUID id) {
+    return ResponseEntity.ok(giamGiaSanPhamService.getGiayChiTietByGiamGia(id));
+  }
+
   @PreAuthorize("hasRole('ADMIN') or hasRole('STAFF')")
   @PostMapping("/getAll")
   public ResponseEntity<?> getAll() {
