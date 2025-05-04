@@ -63,6 +63,7 @@ const BanHangTaiQuay = () => {
   const [giaTriGiam, setGiaTriGiam] = useState(0); // Giá trị giảm
   const [loaiGiamGia, setLoaiGiamGia] = useState("VNĐ"); // Loại giảm giá (VNĐ hoặc %)
   const [totalHoaDonGoc, setTotalHoaDonGoc] = useState(totalHoaDon);
+
   const [tenMaGiamGia, setTenMaGiamGia] = useState("");
   const [changeAmount, setChangeAmount] = useState(0);
   const [pages, setPages] = useState([]);
@@ -406,12 +407,11 @@ const BanHangTaiQuay = () => {
   };
 
   const handleMaGiamGiaChange = async (value) => {
-    let hoaDonGoc = totalHoaDon + giaTriGiam; // Reset tổng tiền về ban đầu trước khi áp dụng mã mới
+    let hoaDonGoc = totalHoaDonGoc; // ✅ Luôn dùng giá trị gốc
 
-    // Nếu đã có mã giảm giá, hủy mã cũ
     if (tenMaGiamGia) {
       message.info(`Hủy mã giảm giá cũ: ${tenMaGiamGia}`);
-      setTotalHoaDon(hoaDonGoc);
+      setTotalHoaDon(hoaDonGoc); // ✅ Reset lại tổng tiền
       setGiaTriGiam(0);
       setTenMaGiamGia("");
     }
@@ -420,15 +420,7 @@ const BanHangTaiQuay = () => {
 
     try {
       const response = await detailGiamGiaHoaDon(value);
-      console.log("Chi tiết mã giảm giá:", response.data);
-
       const maGiamGia = response.data;
-
-      // Bỏ qua mã giảm giá nếu không hoạt động
-      // if (maGiamGia.TRANG_THAI !== 0) {
-      //   message.error("Mã giảm giá này không hoạt động!");
-      //   return;
-      // }
 
       const today = new Date();
       const startDate = new Date(maGiamGia.ngayBatDau);
@@ -456,21 +448,14 @@ const BanHangTaiQuay = () => {
         return;
       }
 
-      // Lấy số tiền giảm tối đa từ API
-      const soTienGiamMax = maGiamGia.soTienGiamMax;
-
-      // Tính số tiền giảm theo phần trăm
       let soTienGiam = (hoaDonGoc * maGiamGia.phanTramGiam) / 100;
-
-      // Kiểm tra nếu số tiền giảm vượt quá số tiền tối đa
-      if (soTienGiam > soTienGiamMax) {
-        soTienGiam = soTienGiamMax;
+      if (soTienGiam > maGiamGia.soTienGiamMax) {
+        soTienGiam = maGiamGia.soTienGiamMax;
       }
 
-      // Cập nhật tổng tiền sau giảm
-      const sotienHoaDonSaukhigiam = hoaDonGoc - soTienGiam;
+      const tongSauGiam = hoaDonGoc - soTienGiam;
 
-      setTotalHoaDon(sotienHoaDonSaukhigiam);
+      setTotalHoaDon(tongSauGiam);
       setTenMaGiamGia(maGiamGia.ten);
       setGiaTriGiam(soTienGiam);
       setLoaiGiamGia("PERCENT");
@@ -483,6 +468,7 @@ const BanHangTaiQuay = () => {
       message.error("Không thể lấy thông tin mã giảm giá");
     }
   };
+
 
   const getChuongTrinhGiamGia = async () => {
     try {
@@ -635,6 +621,7 @@ const BanHangTaiQuay = () => {
         }, 0);
 
         setTotalHoaDon(newTotalAmount);
+        setTotalHoaDonGoc(newTotalAmount);
         console.log(`💰 Tổng tiền của hóa đơn ${idHoaDon}:`, newTotalAmount);
 
         return updatedProducts;
