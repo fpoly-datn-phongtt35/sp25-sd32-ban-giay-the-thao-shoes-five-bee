@@ -18,9 +18,9 @@ export const addGiay = async (giay) => {
     return response;
   } catch (error) {
     if (error.response && error.response.status === 400) {
-      throw new Error(error.response.data); 
+      throw new Error(error.response.data);
     } else {
-      throw new Error("Đã xảy ra lỗi khi thêm giày.");
+      throw new Error("Sản phẩm đã tồn tại");
     }
   }
 };

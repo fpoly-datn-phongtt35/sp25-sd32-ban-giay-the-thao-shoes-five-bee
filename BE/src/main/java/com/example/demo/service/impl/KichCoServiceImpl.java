@@ -41,7 +41,7 @@ public class KichCoServiceImpl implements KichCoService {
 
         // Kiểm tra xem tên kích cỡ đã tồn tại chưa
         if (kichCoRepository.existsByTenIgnoreCase(tenKichCo)) {
-            throw new IllegalArgumentException("Tên kích cỡ đã tồn tại");
+            throw new IllegalArgumentException("Kích cỡ đã tồn tại");
         }
 
         KichCoEntity kichCoEntity = new KichCoEntity();
