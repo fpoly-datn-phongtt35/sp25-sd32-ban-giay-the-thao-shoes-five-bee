@@ -167,7 +167,7 @@ public class GiayServiceImpl implements GiayService {
     }
 
     // Nếu không có sản phẩm trùng tên, tiến hành lưu giày mới
-    return giayRepository.save(
+    return giayRepository.save( 
             GiayEntity.builder()
                     .ma(giayDto.getMa())
                     .ten(giayDto.getTen())

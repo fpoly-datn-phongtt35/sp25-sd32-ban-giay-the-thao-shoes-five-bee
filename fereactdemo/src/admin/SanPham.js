@@ -185,7 +185,6 @@ const SanPham = () => {
   const getAnhList = async () => {
     const result = await getAnhGiay();
     const activeanhGiay = result.data.filter((item) => item.trangThai === 1);
-    console.log("anh giay", activeanhGiay);
 
     setAnhGiay(activeanhGiay);
   };
@@ -412,21 +411,25 @@ const SanPham = () => {
       title: "Đơn giá",
       dataIndex: "giaBan",
       key: "giaBan",
-      render: (text, record) => (
-        <Input
-          value={Number(text)?.toLocaleString("vi-VN")} // Format hiển thị
-          onChange={(e) => {
-            // Gỡ định dạng (loại bỏ dấu chấm hoặc phẩy), chuyển về số nguyên
-            const rawValue = e.target.value.replace(/\D/g, ""); // Chỉ giữ số
-            handleInputChange(
-              { target: { value: rawValue } },
-              record,
-              "giaBan"
-            );
-          }}
-        />
-      ),
+      render: (text, record) => {
+        const editedValue = editedData[record.id]?.giaBan ?? record.giaBan;
+
+        return (
+          <Input
+            value={Number(editedValue)?.toLocaleString("vi-VN")}
+            onChange={(e) => {
+              const rawValue = e.target.value.replace(/\D/g, ""); // Loại bỏ ký tự không phải số
+              handleInputChange(
+                { target: { value: rawValue } },
+                record,
+                "giaBan"
+              );
+            }}
+          />
+        );
+      },
     },
+
     {
       title: "Số lượng",
       dataIndex: "soLuongTon",
@@ -558,6 +561,7 @@ const SanPham = () => {
         // Nếu muốn lấy toàn bộ ảnh: item.anhGiayEntities ? item.anhGiayEntities.map(img => img.tenUrl) : [],
         KICH_CO: item.kichCo ? item.kichCo.ten : null,
       }));
+      console.log("du lieu giay", dataGiay);
 
       setGiay(dataGiay);
     } catch (error) {
@@ -719,6 +723,7 @@ const SanPham = () => {
         "Lỗi thêm sản phẩm: " + (error.response?.data?.message || error.message)
       );
     }
+    getAllGiay()
   };
 
   const removeGiay = async (record) => {
