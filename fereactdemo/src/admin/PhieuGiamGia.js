@@ -233,7 +233,7 @@ const DotGiamGia = () => {
       }
 
       const danhSachChiTiet = response.data.map((item) => ({
-        id: item.id,
+        ID: item.id,
         ten: item.giayEntity?.ten || "N/A",
         anh: item.danhSachAnh.length > 0 ? item.danhSachAnh[0] : null,
         giaBan: item.giaBan || 0,

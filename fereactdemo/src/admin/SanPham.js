@@ -160,19 +160,15 @@ const SanPham = () => {
   };
   const CapNhatAnhBienThe = () => {
     console.log("Danh sách ID giày đã chọn:", selectedGiayIds);
-  
+
     // Reset modal và danh sách đã chọn
     setIsThemNhanhAnh(false);
-    // setSelectedGiayIds(null); 
+    // setSelectedGiayIds(null);
   };
   const huyCapNhatAnhBienThe = () => {
-  
- 
     setIsThemNhanhAnh(false);
-    setSelectedGiayIds([]); 
+    setSelectedGiayIds([]);
   };
-  
-  
 
   const getMauSacList = async () => {
     const result = await getMauSac();
@@ -268,7 +264,6 @@ const SanPham = () => {
       await removeGiayChiTiet(record.id);
       message.success("Xóa sản phẩm chi tiết thành công!");
 
-
       setDanhSachChiTiet((prevList) =>
         prevList.filter((item) => item.id !== record.id)
       );
@@ -331,7 +326,7 @@ const SanPham = () => {
       console.error("❌ Lỗi khi thêm giày chi tiết:", error);
       message.error(
         "Lỗi khi thực hiện thao tác: " +
-        (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message)
       );
     }
   };
@@ -346,9 +341,9 @@ const SanPham = () => {
 
     const anhGiayDtos = Array.isArray(selectedGiayIds)
       ? selectedGiayIds.map((item) => ({
-        id: item.id,
-        tenUrl: item.tenUrl,
-      }))
+          id: item.id,
+          tenUrl: item.tenUrl,
+        }))
       : [];
     console.log("anhGiayDtos", anhGiayDtos);
 
@@ -374,7 +369,7 @@ const SanPham = () => {
         delete newData[record.id];
         return newData;
       });
-      setSelectedGiayIds([])
+      setSelectedGiayIds([]);
       fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
     } catch (error) {
       console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
@@ -423,12 +418,15 @@ const SanPham = () => {
           onChange={(e) => {
             // Gỡ định dạng (loại bỏ dấu chấm hoặc phẩy), chuyển về số nguyên
             const rawValue = e.target.value.replace(/\D/g, ""); // Chỉ giữ số
-            handleInputChange({ target: { value: rawValue } }, record, "giaBan");
+            handleInputChange(
+              { target: { value: rawValue } },
+              record,
+              "giaBan"
+            );
           }}
         />
       ),
     },
-    
     {
       title: "Số lượng",
       dataIndex: "soLuongTon",
@@ -450,7 +448,12 @@ const SanPham = () => {
           <img
             src={tenUrl}
             alt="Ảnh sản phẩm"
-            style={{ width: 60, height: 60, objectFit: "cover", borderRadius: 4 }}
+            style={{
+              width: 60,
+              height: 60,
+              objectFit: "cover",
+              borderRadius: 4,
+            }}
           />
         ) : (
           <Button
@@ -686,8 +689,7 @@ const SanPham = () => {
           DE_GIAY: giayMoi.deGiay?.ten || null,
           XUAT_XU: giayMoi.xuatXu?.ten || null,
           KIEU_DANG: giayMoi.kieuDang?.ten || null,
-          ANH_GIAY:
-            giayMoi.anhGiayEntities?.[0]?.tenUrl || null,
+          ANH_GIAY: giayMoi.anhGiayEntities?.[0]?.tenUrl || null,
           KICH_CO: giayMoi.kichCo?.ten || null,
         },
         ...giay,
@@ -718,7 +720,6 @@ const SanPham = () => {
       );
     }
   };
-
 
   const removeGiay = async (record) => {
     try {
@@ -761,9 +762,9 @@ const SanPham = () => {
       kichCo: record.kichCo ? { id: record.kichCo.id } : null,
       anhGiay: record.anhGiayEntities
         ? record.anhGiayEntities.map((ag) => ({
-          id: ag.id,
-          tenUrl: ag.tenUrl,
-        }))
+            id: ag.id,
+            tenUrl: ag.tenUrl,
+          }))
         : [],
     };
 
@@ -858,7 +859,7 @@ const SanPham = () => {
       );
       message.error(
         "Lỗi cập nhật sản phẩm: " +
-        (error.response?.data?.message || error.message)
+          (error.response?.data?.message || error.message)
       );
     }
   };
@@ -1231,8 +1232,9 @@ const SanPham = () => {
                     {kichCoList.map((kc) => (
                       <button
                         key={kc.id}
-                        className={`option-btn ${tempSelectedKichCo.includes(kc.id) ? "selected" : ""
-                          }`}
+                        className={`option-btn ${
+                          tempSelectedKichCo.includes(kc.id) ? "selected" : ""
+                        }`}
                         onClick={() => handleSelectKichCo(kc.id)}
                       >
                         {kc.ten}
@@ -1261,8 +1263,9 @@ const SanPham = () => {
                     {mauSacList.map((ms) => (
                       <button
                         key={ms.id}
-                        className={`option-btn ${tempSelectedMauSac.includes(ms.id) ? "selected" : ""
-                          }`}
+                        className={`option-btn ${
+                          tempSelectedMauSac.includes(ms.id) ? "selected" : ""
+                        }`}
                         onClick={() => handleSelectMauSac(ms.id)}
                       >
                         {ms.ten}
@@ -1597,10 +1600,17 @@ const SanPham = () => {
             render: (text, record) => {
               // Kiểm tra số lượng tồn
               const statusText =
-                record.SOLUONGTON < 30 ? "Sắp hết hàng" : (record.TRANG_THAI === 0 ? "Hoạt động" : "Không hoạt động");
+                record.SOLUONGTON < 30
+                  ? "Sắp hết hàng"
+                  : record.TRANG_THAI === 0
+                  ? "Hoạt động"
+                  : "Không hoạt động";
 
               // Điều kiện thay đổi màu sắc của Switch khi sản phẩm gần hết hàng
-              const switchStyle = record.SOLUONGTON < 30 ? { backgroundColor: 'red', borderColor: 'red' } : {};
+              const switchStyle =
+                record.SOLUONGTON < 30
+                  ? { backgroundColor: "red", borderColor: "red" }
+                  : {};
 
               return (
                 <Switch
@@ -1608,7 +1618,7 @@ const SanPham = () => {
                   disabled
                   checkedChildren={statusText}
                   unCheckedChildren="Không hoạt động"
-                  style={switchStyle}  // Áp dụng màu đỏ khi số lượng tồn dưới 30
+                  style={switchStyle} // Áp dụng màu đỏ khi số lượng tồn dưới 30
                 />
               );
             },
@@ -1628,8 +1638,8 @@ const SanPham = () => {
                 <DeleteOutlined
                   style={{ cursor: "pointer", color: "red" }}
                   onClick={() => {
-                    setRecordToDelete(record);   // ✅ lưu đúng sản phẩm muốn xoá
-                    setConfirmOpen(true);        // ✅ mở modal xác nhận
+                    setRecordToDelete(record); // ✅ lưu đúng sản phẩm muốn xoá
+                    setConfirmOpen(true); // ✅ mở modal xác nhận
                   }}
                 />
 
@@ -1650,7 +1660,6 @@ const SanPham = () => {
                   title="Xác nhận xóa"
                   content={`Bạn có chắc muốn xóa giày "${recordToDelete?.TEN}" không?`}
                 />
-
               </Space>
             ),
           },
