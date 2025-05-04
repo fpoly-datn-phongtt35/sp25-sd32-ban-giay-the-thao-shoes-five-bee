@@ -369,11 +369,12 @@ const SanPham = () => {
         return newData;
       });
       setSelectedGiayIds([]);
-      fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
     } catch (error) {
       console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
       message.error("❌ Lỗi cập nhật sản phẩm chi tiết!");
     }
+    fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
+
   };
 
   const handleAddImage = (record) => {
