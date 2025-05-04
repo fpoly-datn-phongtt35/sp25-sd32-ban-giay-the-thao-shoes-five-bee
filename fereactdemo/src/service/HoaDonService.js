@@ -54,17 +54,26 @@ export const updateOrderItemQuantity = async (idHoaDon, idGiayChiTiet, quantity)
   }
 };
 
-export const paymentOnline = (banHangOnlineRequest) => {
+export const paymentOnline = async (banHangOnlineRequest) => {
   const token = localStorage.getItem("token");
-  return axios.post(
-    `${REST_API_BASE_URLS}/thanh-toan`,
-    banHangOnlineRequest,
-    {
-      headers: {
-        Authorization: `Bearer ${token}`,
-      },
+  try {
+    const response = await axios.post(
+      `${REST_API_BASE_URLS}/thanh-toan`,
+      banHangOnlineRequest,
+      {
+        headers: {
+          Authorization: `Bearer ${token}`,
+        },
+      }
+    );
+    return response;
+  } catch (error) {
+    if (error.response && error.response.status === 400) {
+      throw new Error(error.response.data);
+    } else {
+      throw new Error("Đã xảy ra lỗi khi thanh toán.");
     }
-  );
+  }
 };
 
 export const huyDonMuaUser = (id) =>

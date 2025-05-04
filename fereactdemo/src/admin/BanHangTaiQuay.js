@@ -533,7 +533,13 @@ const BanHangTaiQuay = () => {
           email: user.email ?? "Không có email",
           diaChi:
             Array.isArray(user.diaChiEntities) && user.diaChiEntities.length > 0
-              ? user.diaChiEntities.map((diaChi) => diaChi.diaChi).join(", ")
+              ? user.diaChiEntities
+                .map((diaChi) =>
+                  [diaChi.diaChi, diaChi.diaChiCuThe, diaChi.xa, diaChi.huyen, diaChi.thanhPho]
+                    .filter(Boolean)
+                    .join(", ")
+                )
+                .join("; ")
               : "Không có địa chỉ",
         }));
 
@@ -587,26 +593,26 @@ const BanHangTaiQuay = () => {
 
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => {
-            const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
-            const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
-            return {
-              ID: item.id,
-              ID_GIAY_CHI_TIET: item.giayChiTietEntity?.id,
-              TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
-              SOLUONG: item.soLuong,
-              GIA_KHI_GIAM: item.donGia,
-              GIABAN: item.giayChiTietEntity?.giaBan || 0,
-              ANH_GIAY:
-                item.giayChiTietEntity?.danhSachAnh?.length > 0
-                  ? item.giayChiTietEntity.danhSachAnh[0]?.tenUrl
-                  : "https://via.placeholder.com/150",
-              // Sử dụng ảnh placeholder nếu không có ảnh
+          const kichCo = item.giayChiTietEntity?.kichCoEntity?.ten ?? "N/A";
+          const mauSac = item.giayChiTietEntity?.mauSacEntity?.ten ?? "N/A";
+          return {
+            ID: item.id,
+            ID_GIAY_CHI_TIET: item.giayChiTietEntity?.id,
+            TEN: item.giayChiTietEntity?.giayEntity?.ten || "Không xác định",
+            SOLUONG: item.soLuong,
+            GIA_KHI_GIAM: item.donGia,
+            GIABAN: item.giayChiTietEntity?.giaBan || 0,
+            ANH_GIAY:
+              item.giayChiTietEntity?.danhSachAnh?.length > 0
+                ? item.giayChiTietEntity.danhSachAnh[0]?.tenUrl
+                : "https://via.placeholder.com/150",
+            // Sử dụng ảnh placeholder nếu không có ảnh
 
-              KICH_CO: kichCo,
-              MAU_SAC: mauSac,
-              TRANG_THAI: "Đang bán",
-            };
-          })
+            KICH_CO: kichCo,
+            MAU_SAC: mauSac,
+            TRANG_THAI: "Đang bán",
+          };
+        })
         : [];
 
       console.log("formattedData (đã có ID_GIAY_CHI_TIET)", formattedData);
@@ -712,20 +718,20 @@ const BanHangTaiQuay = () => {
       const result = await getHoaDon();
       const formattedData = Array.isArray(result.data)
         ? result.data.map((item) => ({
-            key: item.id,
-            order_id: item.id,
-            user: item.khachHang ? item.khachHang.hoTen : null,
-            user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
-            order_on: item.ngayTao
-              ? moment(item.ngayTao).format("DD/MM/YYYY")
-              : "N/A",
-            status: mapTrangThai(item.trangThai),
-            trangThai: item.trangThai,
-            tongTien: item.tongTien,
-            hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
-            hinhThucThanhToan:
-              item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
-          }))
+          key: item.id,
+          order_id: item.id,
+          user: item.khachHang ? item.khachHang.hoTen : null,
+          user_phone: item.khachHang ? item.khachHang.soDienThoai : null,
+          order_on: item.ngayTao
+            ? moment(item.ngayTao).format("DD/MM/YYYY")
+            : "N/A",
+          status: mapTrangThai(item.trangThai),
+          trangThai: item.trangThai,
+          tongTien: item.tongTien,
+          hinhThucMua: item.hinhThucMua === 0 ? "Online" : "Tại quầy",
+          hinhThucThanhToan:
+            item.hinhThucThanhToan === 0 ? "Chuyển khoản" : "Tiền mặt",
+        }))
         : [];
       setData(formattedData);
     } catch (error) {
@@ -779,8 +785,8 @@ const BanHangTaiQuay = () => {
       sdtNguoiNhan: selectedKhachHang
         ? soDienThoai
         : sdtNguoiNhan?.trim() !== ""
-        ? sdtNguoiNhan
-        : null,
+          ? sdtNguoiNhan
+          : null,
       tongTien: totalHoaDon,
       email: email,
       diaChi: isGiaoHang ? diaChi : null,
@@ -1125,13 +1131,11 @@ const BanHangTaiQuay = () => {
                 {pages.map((page) => (
                   <div key={page.id} className="page_button_container">
                     <button
-                      className={`page_button ${
-                        selectedPage === page.id ? "selected" : ""
-                      } ${
-                        invoiceProductCounts[page.hoaDonId] > 0
+                      className={`page_button ${selectedPage === page.id ? "selected" : ""
+                        } ${invoiceProductCounts[page.hoaDonId] > 0
                           ? "has-products"
                           : "empty-invoice"
-                      }`}
+                        }`}
                       onClick={() => handleSelectPage(page.id, page.hoaDonId)}
                     >
                       HD {page.id}
@@ -1181,8 +1185,8 @@ const BanHangTaiQuay = () => {
           {/* hiển thị sản phẩm */}
           <div className="selected_products">
             {selectedHoaDonId &&
-            selectedProducts[selectedHoaDonId] &&
-            selectedProducts[selectedHoaDonId].length > 0 ? (
+              selectedProducts[selectedHoaDonId] &&
+              selectedProducts[selectedHoaDonId].length > 0 ? (
               selectedProducts[selectedHoaDonId].map((product) => {
                 console.log("aaaaaa", product);
                 return (
@@ -1358,9 +1362,9 @@ const BanHangTaiQuay = () => {
                   style={{
                     backgroundColor:
                       Array.isArray(selectedProducts[selectedPage]) &&
-                      selectedProducts[selectedPage].some(
-                        (product) => product.ID === item.ID
-                      )
+                        selectedProducts[selectedPage].some(
+                          (product) => product.ID === item.ID
+                        )
                         ? "#e0f7fa"
                         : "transparent",
                     opacity: item.SOLUONG === 0 ? 0.5 : 1,
@@ -1476,9 +1480,24 @@ const BanHangTaiQuay = () => {
             <Input
               type="text"
               value={diaChi}
-              onClick={() => setShowModal(true)}
+              onClick={() => {
+                // Nếu KH đã có địa chỉ thì không cho sửa
+                if (!selectedKhachHang || diaChi === "Không có địa chỉ") {
+                  setShowModal(true);
+                }
+              }}
               placeholder="Nhập địa chỉ khách hàng"
               readOnly
+              style={{
+                backgroundColor:
+                  selectedKhachHang && diaChi !== "Không có địa chỉ"
+                    ? "#f0f0f0"
+                    : "white",
+                cursor:
+                  selectedKhachHang && diaChi !== "Không có địa chỉ"
+                    ? "not-allowed"
+                    : "pointer",
+              }}
             />
             <AddressModal
               visible={showModal}
@@ -1487,6 +1506,7 @@ const BanHangTaiQuay = () => {
             />
           </div>
         )}
+
         <Button
           type="primary"
           onClick={handleAddKhachHang}

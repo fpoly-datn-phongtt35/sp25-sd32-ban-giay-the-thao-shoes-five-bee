@@ -55,7 +55,7 @@ const Login = () => {
 
       window.dispatchEvent(new Event("loginChange"));
       if (response.roles.includes("ROLE_ADMIN") || response.roles.includes("ROLE_STAFF")) {
-        navigate("/admin");
+        navigate("/admin/san-pham");
       } else if (response.roles.includes("ROLE_USER")) {
         navigate("/productAll");
       } else {
