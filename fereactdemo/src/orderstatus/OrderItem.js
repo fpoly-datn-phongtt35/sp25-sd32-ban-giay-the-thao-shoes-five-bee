@@ -46,7 +46,6 @@ const OrderItem = ({ order, onChangeData }) => {
         .get("http://localhost:5000/trang-thai-hoa-don/continue-order", commonConfig)
         .then((res) => {
           message.success(res.data);
-          navigate("http://localhost:3000/orderStatusPage");
         })
         .catch((err) => {
           message.error("Lỗi: " + (err.response?.data || err.message));

@@ -716,6 +716,7 @@ const QuanLyHoaDon = () => {
       for (const id of selectedRowKeys) {
         try {
           const response = await printfHoaDonChiTiet(id);
+          console.log("PDF size:", response.data?.byteLength || response.data?.size);
 
           // Kiểm tra xem response có dữ liệu hợp lệ không
           if (response && response.data) {

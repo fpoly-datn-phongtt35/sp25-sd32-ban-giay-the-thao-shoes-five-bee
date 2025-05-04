@@ -14,5 +14,6 @@ public class SignupRequest {
     private String matKhau;
     private String hoTen;
     private Date ngaySinh;
+    private String soDienThoai;
 
 }

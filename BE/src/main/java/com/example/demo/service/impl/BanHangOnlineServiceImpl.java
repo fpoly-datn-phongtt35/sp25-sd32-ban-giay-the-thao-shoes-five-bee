@@ -61,7 +61,15 @@ public class BanHangOnlineServiceImpl implements BanHangService {
                     GiayChiTietEntity giayChiTiet =
                             giayChiTietRepository
                                     .findById(gioHangChiTietEntity.getGiayChiTietEntity().getId())
-                                    .orElse(null);
+                                    .orElseThrow(() -> new RuntimeException());
+                    // kiểm tra số lượng tồn trước
+                  if (gioHangChiTietEntity.getSoLuong() > giayChiTiet.getSoLuongTon()){
+                      throw new RuntimeException("Sản phẩm"
+                      + giayChiTiet.getGiayEntity().getTen()
+                              + " không đủ số lượng tồn (còn "
+                              + giayChiTiet.getSoLuongTon() + ")");
+                  }
+
                   List<GiamGiaChiTietSanPhamEntity> giamGiaOpt =
                       giamGiaChiTietSanPhamRepository.findByGiayChiTiet(giayChiTiet.getId());
                   BigDecimal soTienDaGiam =
