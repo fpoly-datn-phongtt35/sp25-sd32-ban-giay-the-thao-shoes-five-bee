@@ -1433,19 +1433,20 @@ const SanPham = () => {
               >
                 <Select
                   mode="multiple"
+                  // style={{ width: '500px' }}
                   placeholder="Chọn Ảnh Giày"
                   value={selectedAnhGiay}
                   onChange={handleAnhGiayChange}
                 >
                   {Array.isArray(anhGiayList) &&
                     anhGiayList.map((ag) => (
-                      <Option key={ag.id} value={ag.id}>
+                      <Option key={ag.id} value={ag.id} >
                         <img
                           src={ag.tenUrl}
                           alt="Ảnh giày"
-                          style={{ width: "80%", height: 150, marginLeft: 30 }}
+                          style={{ width: "80%", height: 150 }}
                         />
-                        {ag.tenUrl}
+                        {/* {ag.tenUrl} */}
                       </Option>
                     ))}
                 </Select>
