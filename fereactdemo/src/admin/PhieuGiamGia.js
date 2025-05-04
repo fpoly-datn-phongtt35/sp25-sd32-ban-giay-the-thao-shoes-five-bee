@@ -302,7 +302,9 @@ const DotGiamGia = () => {
       setNgayKetThuc("");
       setSelectedProducts(null);
     } catch (error) {
-      message.error("Lỗi khi thêm!" + (error.response?.data?.message || error.message));
+      message.error(
+        "Lỗi khi thêm!" + (error.response?.data?.message || error.message)
+      );
       console.error("Lỗi khi thêm:", error);
     }
 
@@ -439,19 +441,24 @@ const DotGiamGia = () => {
   };
 
   const handleAddModalCancel = () => {
-
+    setGiayChiTiet("");
     setStockMin("");
     setStockMax("");
+    setFilteredByBrand("");
+    setFilteredByColor("");
+    setSelectedColor("");
+    setSelectedBrand("");
     setIsAddModalVisible(false);
   };
-  const danhSachKichCo = [
-    ...new Set(giayChiTietAll.map((item) => item.KICH_CO)),
-  ];
+
   const danhSachMauSac = [
     ...new Set(giayChiTietAll.map((item) => item.MAU_SAC)),
   ];
   const danhSachThuongHieu = [
     ...new Set(giayChiTietAll.map((item) => item.THUONG_HIEU)), // Lấy các thương hiệu không trùng lặp
+  ];
+  const danhSachKichCo = [
+    ...new Set(giayChiTietAll.map((item) => item.KICH_CO)),
   ];
   const soLuongTon = [
     ...new Set(giayChiTietAll.map((item) => item.SOLUONGTON)), // Lấy các thương hiệu không trùng lặp
@@ -471,27 +478,27 @@ const DotGiamGia = () => {
 
   //   return matchSearch && matchSize && matchColor;
   // });
-  const handleStockRangeFilter = () => {
-    const filtered = giayChiTietAll.filter(
-      (item) => item.SOLUONGTON >= stockMin && item.SOLUONGTON <= stockMax
-    );
+  // const handleStockRangeFilter = () => {
+  //   const filtered = giayChiTietAll.filter(
+  //     (item) => item.SOLUONGTON >= stockMin && item.SOLUONGTON <= stockMax
+  //   );
 
-    const giayChiTiet = filtered.map((item) => ({
-      ID: item.ID,
-      ten: item.TEN,
-      mauSac: item.MAU_SAC,
-      kichCo: item.KICH_CO,
-      thuongHieu: item.THUONG_HIEU,
-      soLuongTon: item.SOLUONGTON,
-      giaBan: item.GIABAN,
-      anh: item.ANH_GIAY,
-    }));
+  //   const giayChiTiet = filtered.map((item) => ({
+  //     ID: item.ID,
+  //     ten: item.TEN,
+  //     mauSac: item.MAU_SAC,
+  //     kichCo: item.KICH_CO,
+  //     thuongHieu: item.THUONG_HIEU,
+  //     soLuongTon: item.SOLUONGTON,
+  //     giaBan: item.GIABAN,
+  //     anh: item.ANH_GIAY,
+  //   }));
 
-    console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
+  //   console.log("Giày lọc theo khoảng số lượng: ", giayChiTiet);
 
-    setGiayChiTiet(giayChiTiet);
-    setFilteredByBrand(filtered);
-  };
+  //   setGiayChiTiet(giayChiTiet);
+  //   setFilteredByBrand(filtered);
+  // };
 
   const handleBrandChange = (e) => {
     const brand = e.target.value; // Lấy thương hiệu đã chọn
@@ -520,6 +527,8 @@ const DotGiamGia = () => {
     // Lưu vào state để hiển thị
     setGiayChiTiet(giayChiTiet); // Cập nhật giày chi tiết đã lọc vào state
     setFilteredByBrand(filtered); // Lưu vào state các giày lọc theo thương hiệu
+    setSelectedRowKey(null);
+    setSelectedProducts([]);
   };
   const handleColorChange = (e) => {
     const color = e.target.value; // Lấy màu sắc đã chọn
@@ -550,6 +559,8 @@ const DotGiamGia = () => {
     // Lưu vào state để hiển thị
     setGiayChiTiet(giayChiTiet); // Cập nhật giày chi tiết đã lọc vào state
     setFilteredByColor(filtered);
+    setSelectedRowKey(null);
+    setSelectedProducts([]);
   };
   useEffect(() => {
     // Lọc giày theo khoảng số lượng tồn
@@ -573,7 +584,14 @@ const DotGiamGia = () => {
     setGiayChiTiet(giayChiTiet);
     setFilteredByBrand(filtered);
   }, [stockMin, stockMax, giayChiTietAll]); // Lọc lại khi stockMin, stockMax thay đổi
-
+  const rowSelection = {
+    type: "radio",
+    selectedRowKeys: selectedRowKey !== null ? [selectedRowKey] : [],
+    onChange: (selectedRowKeys, selectedRows) => {
+      setSelectedRowKey(selectedRowKeys[0]);
+      setSelectedProducts(selectedRows);
+    },
+  };
   return (
     <div className="dot-giam-gia">
       <h1>Quản lý giảm giá sản phẩm</h1>
@@ -870,8 +888,10 @@ const DotGiamGia = () => {
               <Table
                 rowSelection={{
                   type: "checkbox",
-                  onChange: (selectedRowKeys, selectedRows) => {
-                    setSelectedProducts(selectedRows); // Lưu danh sách sản phẩm được chọn
+                  selectedRowKey: selectedRowKey, // bạn cần khai báo state cho nó
+                  onChange: (selectedRowKey, selectedRows) => {
+                    setSelectedRowKey(selectedRowKey);
+                    setSelectedProducts(selectedRows);
                   },
                 }}
                 pagination={{ pageSize: 5 }}
@@ -915,7 +935,7 @@ const DotGiamGia = () => {
                     width: 120,
                   },
                   {
-                    title: "Số lượng tồn",
+                    title: "Số lượng",
                     dataIndex: "soLuongTon",
                     width: 120,
                   },
@@ -923,7 +943,8 @@ const DotGiamGia = () => {
                   { title: "Kích cỡ", dataIndex: "kichCo", width: 100 },
                 ]}
                 dataSource={giayChiTiet}
-                rowKey="id"
+                rowKey={(record) => `${record.id}-${record.kichCo}-${record.mauSac}-${record.ten}`}
+
               />
             </div>
           </div>

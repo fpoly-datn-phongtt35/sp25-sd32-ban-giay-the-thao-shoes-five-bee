@@ -280,9 +280,9 @@ const ProductDetail = () => {
         tongSoLuong: totalQuantity,
       };
 
-      setSelectedVariantDetails(selectedDetails);
+      // setSelectedVariantDetails(selectedDetails);
 
-      console.log("Thông tin giày đã chọn:", selectedDetails);
+      // console.log("Thông tin giày đã chọn:", selectedDetails);
     } else {
       console.log("Không tìm thấy biến thể nào có màu sắc được chọn");
     }
@@ -290,18 +290,29 @@ const ProductDetail = () => {
 
   // Hàm xử lý khi chọn kích cỡ
   const handleSizeSelect = (size) => {
-    // Tìm số lượng tương ứng với kích cỡ đã chọn
     const selectedVariant = bienTheList.find(
       (variant) =>
         variant.tenMauSac === selectedColor && variant.tenKichCo === size
     );
-
+  
     if (selectedVariant) {
-      setSoLuongChiTiet(selectedVariant.soLuong); // Lưu số lượng tương ứng với kích cỡ đã chọn
-      // console.log("Số lượng của kích cỡ đã chọn:", selectedVariant.soLuong);
+      setSoLuongChiTiet(selectedVariant.soLuong);
+  
+      // Tạo lại thông tin giày đã chọn để log
+      const selectedInfo = {
+        tenMauSac: selectedColor,
+        tenKichCo: size,
+        giaBan: selectedVariant.giaBan,
+        giaKhiGiam: selectedVariant.giaKhiGiam,
+        giaHienThi: selectedVariant.giaKhiGiam || selectedVariant.giaBan,
+        soLuong: selectedVariant.soLuong,
+        anh: selectedVariant.anh?.map((img) => img.tenUrl) || [],
+      };
+      setSelectedVariantDetails(selectedInfo)
+      console.log("Thông tin giày đã chọn:", selectedInfo);
     }
   };
-
+  
   const handleAddToCart = async () => {
     if (!selectedSize || !selectedColor) {
       message.warning("Vui lòng chọn kích thước và màu sắc!");
