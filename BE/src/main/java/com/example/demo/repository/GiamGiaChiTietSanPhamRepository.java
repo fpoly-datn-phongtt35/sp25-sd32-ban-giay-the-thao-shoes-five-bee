@@ -24,8 +24,25 @@ public interface GiamGiaChiTietSanPhamRepository
   List<GiamGiaChiTietSanPhamEntity> findByGiayChiTiet(@Param("id") UUID id);
 
   @Query(
-          "SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.chuongTrinhGiamSanPhamEntity.id = :id AND g.trangThai = 0")
+      "SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.giayChiTiet.id = :id AND g.trangThai = 0 ORDER BY g.ngayBatDau DESC")
+  List<GiamGiaChiTietSanPhamEntity> findByGiayChiTietGiamGia(@Param("id") UUID id);
+
+  @Query(
+      "SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.giayChiTiet.id = :id AND g.chuongTrinhGiamSanPhamEntity.id = :giamGiaId")
+  List<GiamGiaChiTietSanPhamEntity> findByGiayChiTietKhiUpdate(
+      @Param("id") UUID id, @Param("giamGiaId") UUID giamGiaId);
+
+  @Query(
+      "SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.chuongTrinhGiamSanPhamEntity.id = :id AND g.trangThai = 0")
   List<GiamGiaChiTietSanPhamEntity> findByGiayChiTietByGiamGiaSanPham(@Param("id") UUID id);
+
+  @Query(
+      "SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.chuongTrinhGiamSanPhamEntity.id = :id")
+  List<GiamGiaChiTietSanPhamEntity> findByGiayChiTietByGiamGia(@Param("id") UUID id);
+
+  @Query(
+      "SELECT g FROM GiamGiaChiTietSanPhamEntity g WHERE g.chuongTrinhGiamSanPhamEntity.id = :id ORDER BY g.ngayBatDau DESC")
+  List<GiamGiaChiTietSanPhamEntity> findGiamGiaChiTietSanPhamEntitiesById(@Param("id") UUID id);
 
   @Modifying
   @Transactional

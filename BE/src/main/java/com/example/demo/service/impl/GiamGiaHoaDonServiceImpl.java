@@ -34,7 +34,7 @@ public class GiamGiaHoaDonServiceImpl implements GiamGiaHoaDonService {
         gg -> {
           if (gg.getNgayKetThuc().before(now)) {
             gg.setTrangThai(1);
-          } else if (gg.getNgayBatDau().after(now)) {
+          } else if (gg.getNgayBatDau().before(now)) {
             gg.setTrangThai(0);
           }
           giamGiaHoaDonRepository.save(gg);
