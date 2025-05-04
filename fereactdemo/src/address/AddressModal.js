@@ -125,7 +125,7 @@ function AddressModal({ onAddAddress }) {
         <Modal.Body>
           <Modal.Title>Địa chỉ mới</Modal.Title>
 
-          <Form onSubmit={handleSubmit} style={{marginTop: 20}}>
+          <Form onSubmit={handleSubmit} style={{ marginTop: 20 }}>
             <Form.Group controlId="formFullName">
               <Form.Label>Họ và tên</Form.Label>
               <Form.Control
@@ -137,7 +137,7 @@ function AddressModal({ onAddAddress }) {
               />
             </Form.Group>
 
-            <Form.Group controlId="formPhoneNumber" className="mt-3">
+            {/* <Form.Group controlId="formPhoneNumber" className="mt-3">
               <Form.Label>Số điện thoại</Form.Label>
               <Form.Control
                 type="text"
@@ -146,7 +146,7 @@ function AddressModal({ onAddAddress }) {
                 value={diaChi.sdtNguoiNhan}
                 onChange={handleInputChange}
               />
-            </Form.Group>
+            </Form.Group> */}
 
             <Form.Group controlId="formProvince" className="mt-3">
               <Form.Label>Tỉnh/Thành phố</Form.Label>

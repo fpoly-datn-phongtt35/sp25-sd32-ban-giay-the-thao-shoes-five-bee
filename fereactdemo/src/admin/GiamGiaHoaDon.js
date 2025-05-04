@@ -110,8 +110,14 @@ const GiamGiaHoaDon = () => {
       return;
     }
 
-    if (isNaN(parseFloat(soTienGiamMax)) || parseFloat(soTienGiamMax) <= 0) {
+    const parsedSoTienGiamMax = parseFloat(soTienGiamMax);
+
+    if (isNaN(parsedSoTienGiamMax) || parsedSoTienGiamMax <= 0) {
       message.error("Số tiền giảm tối đa phải là một số dương hợp lệ!");
+      return;
+    }
+    if (parsedSoTienGiamMax > 1000000) {
+      message.error("Số tiền giảm tối đa không được vượt quá 1.000.000 đ!");
       return;
     }
 
@@ -200,7 +206,7 @@ const GiamGiaHoaDon = () => {
       console.error("Lỗi khi cập nhật mã giảm giá:", error);
       message.error(
         "Lỗi khi cập nhật mã giảm giá!" +
-          (error.response?.data?.message || error.message)
+        (error.response?.data?.message || error.message)
       );
     }
   };
@@ -317,7 +323,37 @@ const GiamGiaHoaDon = () => {
               }}
             />
           </Form.Item>
-
+          <Form.Item
+            label="Số tiền giảm tối đa"
+            name="soTienGiamMax"
+            rules={[
+              {
+                required: true,
+                message: 'Vui lòng nhập số tiền giảm tối đa',
+              },
+              {
+                validator: (_, value) => {
+                  if (!value || parseFloat(value) <= 1000000) {
+                    return Promise.resolve();
+                  }
+                  return Promise.reject('Số tiền giảm tối đa không được vượt quá 1.000.000 đ!');
+                },
+              },
+            ]}
+          >
+            <Input
+              type="number"
+              onChange={(e) => setSoTienGiamMax(e.target.value)}
+              value={soTienGiamMax}
+            />
+          </Form.Item>
+          <Form.Item label="Ngày Bắt Đầu">
+            <Input
+              type="date"
+              value={ngayBatDau}
+              onChange={(e) => setNgayBatDau(e.target.value)}
+            />
+          </Form.Item>
           <Form.Item label="Phần Trăm Giảm">
             <Input
               value={phanTramGiam}

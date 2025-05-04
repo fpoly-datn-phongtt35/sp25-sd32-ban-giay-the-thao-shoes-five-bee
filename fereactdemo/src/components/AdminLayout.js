@@ -103,11 +103,11 @@ const AdminLayout = () => {
                             icon: <FolderOutlined />,
                             label: 'Quản Lý Hóa Đơn',
                         },
-                        {
-                            key: '/admin/tra-hang',
-                            icon: <CarOutlined />,
-                            label: 'Trả Hàng',
-                        },
+                        // {
+                        //     key: '/admin/tra-hang',
+                        //     icon: <CarOutlined />,
+                        //     label: 'Trả Hàng',
+                        // },
                         {
                             key: '3',
                             icon: <ProductOutlined />,

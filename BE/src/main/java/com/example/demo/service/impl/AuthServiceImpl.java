@@ -126,6 +126,7 @@ public class AuthServiceImpl implements AuthService {
         UserEntity userEntity = new UserEntity();
         userEntity.setEmail(signupRequest.getEmail());
         userEntity.setMatKhau(passwordEncoder.encode(signupRequest.getMatKhau()));
+        userEntity.setSoDienThoai(signupRequest.getSoDienThoai());
         userEntity.setHoTen(signupRequest.getHoTen());
         userEntity.setNgaySinh(signupRequest.getNgaySinh());
         userEntity.setIsEnabled(false);
@@ -195,7 +196,7 @@ public class AuthServiceImpl implements AuthService {
         if (user.getOtpCode() == null || !user.getOtpCode().trim().equals(userOtpDto.getOtpCode())) {
             return ResponseEntity.badRequest().body("Mã otp không hợp lệ");
         }
-        if (Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() > 60) {
+        if (Duration.between(user.getOtpGeneratedTime(), LocalDateTime.now()).getSeconds() > 3000) {
             return ResponseEntity.badRequest().body("Mã otp đã hết hạn");
         }
         user.setIsEnabled(true);
@@ -248,7 +249,7 @@ public class AuthServiceImpl implements AuthService {
                         <p>Chào <strong>%s</strong>,</p>
                         <p>Cảm ơn bạn đã đăng ký tài khoản. Đây là mã OTP của bạn:</p>
                         <p style="font-size:24px;font-weight:bold;text-align:center;color:#1D70B8;">%s</p>
-                        <p>Mã OTP này sẽ hết hạn sau 1 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
+                        <p>Mã OTP này sẽ hết hạn sau 5 phút. Vui lòng không chia sẻ mã này với bất kỳ ai.</p>
                         <p>Hẹn gặp lại!</p>
                     </td>
                 </tr>

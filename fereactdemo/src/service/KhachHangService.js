@@ -2,7 +2,14 @@ import axios from "../axiosConfig";
 
 const REST_API_BASE_URL = "/user";
 
-export const getAllKhachHang = () => axios.get(`${REST_API_BASE_URL}/getAll`);
+const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
+const config = {
+  headers: {
+    Authorization: `Bearer ${token}`,
+  },
+};
+
+export const getAllKhachHang = () => axios.get(`${REST_API_BASE_URL}/getAll`,config);
 
 export const addKhachHang = (khachHangData, file) => {
   const formData = new FormData();
@@ -16,12 +23,13 @@ export const addKhachHang = (khachHangData, file) => {
 
   return axios.post(`${REST_API_BASE_URL}/add`, formData, {
     headers: {
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'multipart/form-data'
     }
   });
 };
 export const getLichSuMuaHang = (userId) =>
-  axios.get(`/user/lich-su-mua-hang/${userId}`);
+  axios.get(`/user/lich-su-mua-hang/${userId}`,config);
 
 
 export const deleteKhachHang = (khachHang) =>
@@ -38,13 +46,14 @@ export const updateKhachHang = (khachHang, file) => {
   }
   return axios.put(`${REST_API_BASE_URL}/update`, formData, {
     headers: {
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'multipart/form-data'
     }
   });
 };
 
 export const detailKhachHang = (id) =>
-  axios.get(`${REST_API_BASE_URL}/detail/${id}`);
+  axios.get(`${REST_API_BASE_URL}/detail/${id}`,config);
 
 export const importExcel = (file) => {
   const formData = new FormData();
@@ -52,6 +61,7 @@ export const importExcel = (file) => {
 
   return axios.post(`${REST_API_BASE_URL}/import-excel`, formData, {
     headers: {
+      Authorization: `Bearer ${token}`,
       'Content-Type': 'multipart/form-data'
     }
   });
