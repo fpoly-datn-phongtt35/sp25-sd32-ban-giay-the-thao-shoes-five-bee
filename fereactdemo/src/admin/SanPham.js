@@ -374,7 +374,7 @@ const SanPham = () => {
         delete newData[record.id];
         return newData;
       });
-
+      setSelectedGiayIds([])
       fetchSanPhamChiTiet({ ID: selectedGiay1 }, false);
     } catch (error) {
       console.error("❌ Lỗi cập nhật:", error.response?.data || error.message);
@@ -419,11 +419,16 @@ const SanPham = () => {
       key: "giaBan",
       render: (text, record) => (
         <Input
-          defaultValue={text}
-          onChange={(e) => handleInputChange(e, record, "giaBan")}
+          value={Number(text)?.toLocaleString("vi-VN")} // Format hiển thị
+          onChange={(e) => {
+            // Gỡ định dạng (loại bỏ dấu chấm hoặc phẩy), chuyển về số nguyên
+            const rawValue = e.target.value.replace(/\D/g, ""); // Chỉ giữ số
+            handleInputChange({ target: { value: rawValue } }, record, "giaBan");
+          }}
         />
       ),
     },
+    
     {
       title: "Số lượng",
       dataIndex: "soLuongTon",

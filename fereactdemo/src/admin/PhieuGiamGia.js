@@ -12,6 +12,7 @@ import {
   DatePicker,
   Row,
   Col,
+  Tag,
 } from "antd";
 import {
   addPhieuGiamGia,
@@ -42,6 +43,8 @@ const DotGiamGia = () => {
   const [isAddModalVisible, setIsAddModalVisible] = useState(false);
   const { RangePicker } = DatePicker;
   const [giay, setGiay] = useState([]);
+  const [DanhSachGiayGiamGia, setDanhSachGiayGiamGia] = useState([]);
+  const [loading, setLoading] = useState(false);
   const [giayChiTiet, setGiayChiTiet] = useState([]);
   const [giayChiTietAll, setGiayChiTietAll] = useState([]);
   const [filteredByColor, setFilteredByColor] = useState([]);
@@ -55,8 +58,7 @@ const DotGiamGia = () => {
   // Lưu thương hiệu đã chọn
   const [stockMin, setStockMin] = useState();
   const [stockMax, setStockMax] = useState();
-
-  
+  const [visible, setVisible] = useState(false);
   const [filteredByBrand, setFilteredByBrand] = useState([]);
   const [filters, setFilters] = useState({
     ten: "",
@@ -380,17 +382,26 @@ const DotGiamGia = () => {
   };
   const handleDetail = async (record) => {
     try {
-      const response = await detailPhieuGiamGia(record.id); // 👈 Chỉ truyền UUID
-      const data = response.data;
+      const result = await detailPhieuGiamGia(record.ID);
+      const data = result.data;
+
       console.log("✅ Chi tiết phiếu giảm giá:", data);
-  
-      // set lại state nếu bạn cần
-      // setPhieuGiamGiaDetail(data);
+
+      const listGiay = Array.isArray(data.list) ? data.list : [];
+      console.log(listGiay);
+
+      setDanhSachGiayGiamGia(listGiay);
+      setVisible(true); // Mở modal
     } catch (error) {
-      console.error("❌ Lỗi khi lấy chi tiết phiếu giảm giá:", error.response?.data || error.message);
+      console.error(
+        "❌ Lỗi khi lấy chi tiết phiếu giảm giá:",
+        error.response?.data || error.message
+      );
     }
   };
-  
+  const handleCloseModal = () => {
+    setVisible(false);
+  };
   const columns = [
     { title: "Tên", dataIndex: "TEN", key: "TEN" },
     { title: "Mã", dataIndex: "MA", key: "MA" },
@@ -427,7 +438,6 @@ const DotGiamGia = () => {
       render: (text, record) => (
         <Space size="middle">
           <Button onClick={() => handleDetail(record)}>Chi tiết</Button>
-
           <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
           <Button onClick={() => handleDelete(record)}>Xóa</Button>
         </Space>
@@ -614,10 +624,110 @@ const DotGiamGia = () => {
       setSelectedProducts(selectedRows);
     },
   };
+
+  const columnsDanhsachgiay = [
+    {
+      title: "Tên Giày",
+      dataIndex: "tenGiay",
+      key: "tenGiay",
+      width: "150px",
+      render: (text, record) => <span>{record.tenGiay}</span>,
+    },
+    {
+      title: "Ảnh Giày",
+      dataIndex: "image",
+      key: "image",
+      width: "150px",
+      render: (text, record) => (
+        <img
+          src={record.image || "default-image.png"}
+          style={{
+            width: "50px",
+            height: "50px",
+            objectFit: "cover",
+            borderRadius: "5px",
+          }}
+        />
+      ),
+    },
+    {
+      title: "Màu Sắc",
+      dataIndex: "mauSac",
+      key: "mauSac",
+      width: "250px",
+      render: (text, record) => <span>{record.mauSac}</span>, // Sử dụng span thay vì Tag
+    },
+    {
+      title: "Kích Cỡ",
+      dataIndex: "kichCo",
+      key: "kichCo",
+      width: "250px",
+      render: (text, record) => <span>{record.kichCo}</span>, // Sử dụng span thay vì Tag
+    },
+    {
+      title: "Giá",
+      dataIndex: "giaBan",
+      key: "giaBan",
+      width: "150px",
+      render: (text, record) => (
+        <span>{record.giaBan?.toLocaleString("vi-VN")} VND</span>
+      ),
+    },
+    {
+      title: "Giá Sau Giảm",
+      dataIndex: "giaKhiGiam",
+      key: "giaKhiGiam",
+      width: "250px",
+      render: (text, record) => (
+        <span>{record.giaKhiGiam?.toLocaleString("vi-VN")} VND</span>
+      ),
+    },
+
+    {
+      title: "Số Lượng Tồn",
+      dataIndex: "soLuongTon",
+      key: "soLuongTon",
+      width: "350px",
+      render: (text, record) => <span>{record.soLuongTon}</span>,
+    },
+  ];
+  const data = DanhSachGiayGiamGia.map((item, index) => ({
+    key: index,
+    tenGiay: item.giayEntity?.ten,
+    mauSac: item.mauSacEntity?.ten,
+    kichCo: item.kichCoEntity?.ten,
+    giaBan: item.giaBan,
+    giaKhiGiam: item.giaKhiGiam,
+    image: item.danhSachAnh?.[0]?.tenUrl, // Giả sử mỗi giày có ít nhất 1 ảnh
+    soLuongTon: item.soLuongTon,
+  }));
+  console.log(data);
   return (
     <div className="dot-giam-gia">
       <h1>Quản lý giảm giá sản phẩm</h1>
       <Button onClick={handleAdd}>Thêm Phiếu Giảm Giá</Button>
+
+      {/* thông tin giày giảm giá */}
+      <Modal
+        title="Danh sách giày áp dụng giảm giá"
+        visible={visible}
+        onCancel={handleCloseModal}
+        footer={null}
+        width={1500}
+      >
+        {loading ? (
+          <div>Đang tải...</div>
+        ) : (
+          <>
+            <Table
+              columns={columnsDanhsachgiay}
+              dataSource={data}
+              pagination={false}
+              scroll={{ x: true }}
+            />
+          </>
+        )}
+      </Modal>
 
       {/* bộ lọc */}
       <div
@@ -965,8 +1075,9 @@ const DotGiamGia = () => {
                   { title: "Kích cỡ", dataIndex: "kichCo", width: 100 },
                 ]}
                 dataSource={giayChiTiet}
-                rowKey={(record) => `${record.id}-${record.kichCo}-${record.mauSac}-${record.ten}`}
-
+                rowKey={(record) =>
+                  `${record.id}-${record.kichCo}-${record.mauSac}-${record.ten}`
+                }
               />
             </div>
           </div>

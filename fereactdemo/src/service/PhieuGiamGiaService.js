@@ -14,6 +14,6 @@ export const updatePhieuGiamGia = (id, phieuGiamGia) =>
   axios.post(`${REST_API_BASE_URL}/update/${id}`, phieuGiamGia);
 
 export const detailPhieuGiamGia = (id) =>
-  axios.post(`${REST_API_BASE_URL}/detail`, { id });
+  axios.post(`${REST_API_BASE_URL}/detail/${id}`);
 export const taoGiamGia = (GiamGiaChiTietSanPhamRequest) =>
   axios.post(`${REST_API_BASE_URL}/tao-giam-gia`, GiamGiaChiTietSanPhamRequest);
