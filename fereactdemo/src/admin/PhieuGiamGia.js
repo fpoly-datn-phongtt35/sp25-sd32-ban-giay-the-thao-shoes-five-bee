@@ -19,6 +19,7 @@ import {
   getPhieuGiamGia,
   updatePhieuGiamGia,
   taoGiamGia,
+  detailPhieuGiamGia,
 } from "../service/PhieuGiamGiaService";
 import { getGiay, getGiayDetail } from "../service/GiayService";
 import { FilterOutlined } from "@ant-design/icons";
@@ -377,7 +378,19 @@ const DotGiamGia = () => {
       return 1; // Hết
     }
   };
-
+  const handleDetail = async (record) => {
+    try {
+      const response = await detailPhieuGiamGia(record.id); // 👈 Chỉ truyền UUID
+      const data = response.data;
+      console.log("✅ Chi tiết phiếu giảm giá:", data);
+  
+      // set lại state nếu bạn cần
+      // setPhieuGiamGiaDetail(data);
+    } catch (error) {
+      console.error("❌ Lỗi khi lấy chi tiết phiếu giảm giá:", error.response?.data || error.message);
+    }
+  };
+  
   const columns = [
     { title: "Tên", dataIndex: "TEN", key: "TEN" },
     { title: "Mã", dataIndex: "MA", key: "MA" },
@@ -413,6 +426,8 @@ const DotGiamGia = () => {
       key: "action",
       render: (text, record) => (
         <Space size="middle">
+          <Button onClick={() => handleDetail(record)}>Chi tiết</Button>
+
           <Button onClick={() => handleUpdate(record)}>Cập nhật</Button>
           <Button onClick={() => handleDelete(record)}>Xóa</Button>
         </Space>
