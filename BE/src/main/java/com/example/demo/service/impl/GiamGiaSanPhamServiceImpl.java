@@ -348,9 +348,9 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   }
 
   @Override
-  public GiamGiaSanPhamResponse detail(GiamGiaSanPhamDto giamGiaSanPhamDto) {
+  public GiamGiaSanPhamResponse detail(UUID id) {
     GiamGiaSanPhamEntity giamGiaSanPhamEntity =
-        giamGiaSanPhamRepository.findById(giamGiaSanPhamDto.getId()).orElse(null);
+        giamGiaSanPhamRepository.findById(id).orElse(null);
     List<GiayChiTietEntity> giayChiTietEntities = new ArrayList<>();
     List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntities =
         giamGiaSanPhamEntity.getGiamGiaChiTietSanPhamEntities();

@@ -64,9 +64,9 @@ public class GiamGiaSanPhamController {
   }
 
   @PreAuthorize("hasRole('ADMIN')")
-  @PostMapping("/detail")
-  public ResponseEntity<?> detail(@RequestBody GiamGiaSanPhamDto giamGiaSanPhamDto) {
-    return ResponseEntity.ok(giamGiaSanPhamService.detail(giamGiaSanPhamDto));
+  @PostMapping("/detail/{id}")
+  public ResponseEntity<?> detail(@PathVariable("id") UUID id) {
+    return ResponseEntity.ok(giamGiaSanPhamService.detail(id));
   }
 
   @PreAuthorize("hasRole('ADMIN')")
