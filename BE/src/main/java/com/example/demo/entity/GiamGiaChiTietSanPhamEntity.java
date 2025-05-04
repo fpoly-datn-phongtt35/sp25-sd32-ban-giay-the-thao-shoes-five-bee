@@ -2,7 +2,6 @@ package com.example.demo.entity;
 
 import com.fasterxml.jackson.annotation.JsonBackReference;
 import com.fasterxml.jackson.annotation.JsonFormat;
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import java.math.BigDecimal;
 import java.sql.Date;
@@ -29,11 +28,11 @@ public class GiamGiaChiTietSanPhamEntity {
     @Column(name = "SO_TIEN_DA_GIAM")
     private BigDecimal soTienDaGiam;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd",timezone = "Asia/Ho_Chi_Minh")
     @Column(name = "NGAY_BAT_DAU")
     private Date ngayBatDau;
 
-    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd")
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd",timezone = "Asia/Ho_Chi_Minh")
     @Column(name = "NGAY_KET_THUC")
     private Date ngayKetThuc;
 

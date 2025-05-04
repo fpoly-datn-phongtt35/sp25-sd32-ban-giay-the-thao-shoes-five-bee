@@ -40,13 +40,21 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
   @Override
   public void updateTrangThaiGimGiaSanPham() {
-    List<GiamGiaSanPhamEntity> danhSachGiamGia = giamGiaSanPhamRepository.findAll();
+    List<GiamGiaSanPhamEntity> danhSachGiamGiaSp = giamGiaSanPhamRepository.findAll();
     Date now = new Date();
 
-    danhSachGiamGia.forEach(
+    danhSachGiamGiaSp.forEach(
         gg -> {
           if (gg.getNgayKetThuc().before(now)) {
             gg.setTrangThai(1);
+
+            List<GiamGiaChiTietSanPhamEntity> giaChiTietSanPhamEntities =
+                giamGiaChiTietSanPhamRepository.findByGiayChiTietByGiamGia(gg.getId());
+            for (GiamGiaChiTietSanPhamEntity giamGiaChiTietSanPhamEntity :
+                giaChiTietSanPhamEntities) {
+              giamGiaChiTietSanPhamEntity.setTrangThai(1);
+              giamGiaChiTietSanPhamRepository.save(giamGiaChiTietSanPhamEntity);
+            }
 
             List<GiayChiTietEntity> sanPhamBiAnhHuong =
                 giamGiaChiTietSanPhamRepository
@@ -72,9 +80,46 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
               giayChiTietRepository.save(sanPham);
             }
-          } else if (gg.getNgayBatDau().after(now)) {
+          } else if (gg.getNgayBatDau().before(now)) {
             gg.setTrangThai(0);
+
+            // Cập nhật trạng thái chi tiết
+            List<GiamGiaChiTietSanPhamEntity> chiTietList =
+                    giamGiaChiTietSanPhamRepository.findByGiayChiTietByGiamGia(gg.getId());
+            for (GiamGiaChiTietSanPhamEntity chiTiet : chiTietList) {
+              chiTiet.setTrangThai(0);
+              giamGiaChiTietSanPhamRepository.save(chiTiet);
+            }
+
+            // Lấy các sản phẩm bị ảnh hưởng
+            List<GiayChiTietEntity> sanPhamBiAnhHuong =
+                    chiTietList.stream().map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet).distinct().toList();
+
+            for (GiayChiTietEntity sanPham : sanPhamBiAnhHuong) {
+              // Tìm chương trình đang hoạt động mới nhất sau cập nhật
+              List<GiamGiaChiTietSanPhamEntity> danhSachGiamGia =
+                      giamGiaChiTietSanPhamRepository.findByGiayChiTiet(sanPham.getId());
+
+              danhSachGiamGia.sort((g1, g2) -> g2.getNgayBatDau().compareTo(g1.getNgayBatDau())); // mới nhất trước
+
+              Optional<GiamGiaChiTietSanPhamEntity> uuTien =
+                      danhSachGiamGia.stream().filter(g -> g.getTrangThai() == 0).findFirst();
+
+              if (uuTien.isPresent()) {
+                GiamGiaChiTietSanPhamEntity apDung = uuTien.get();
+                BigDecimal phanTram = BigDecimal.valueOf(apDung.getChuongTrinhGiamSanPhamEntity().getPhanTramGiam());
+                BigDecimal soTienGiam = sanPham.getGiaBan()
+                        .multiply(phanTram)
+                        .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+                sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienGiam));
+              } else {
+                sanPham.setGiaKhiGiam(null); // không còn giảm giá nào
+              }
+
+              giayChiTietRepository.save(sanPham);
+            }
           }
+
           giamGiaSanPhamRepository.save(gg);
         });
   }
@@ -83,12 +128,13 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   public GiamGiaSanPhamEntity taoChuongTrinhGiamGia(
       GiamGiaChiTietSanPhamRequest giamGiaChiTietSanPhamRequest) {
 
-
     if (giamGiaChiTietSanPhamRequest.getPhanTramGiam() > 100) {
       throw new IllegalArgumentException("Phần trăm giảm không được vượt quá 100%.");
     }
 
-    if (giamGiaChiTietSanPhamRequest.getNgayBatDau().after(giamGiaChiTietSanPhamRequest.getNgayKetThuc())) {
+    if (giamGiaChiTietSanPhamRequest
+        .getNgayBatDau()
+        .after(giamGiaChiTietSanPhamRequest.getNgayKetThuc())) {
       throw new IllegalArgumentException("Ngày bắt đầu không được lớn hơn ngày kết thúc.");
     }
 
@@ -142,14 +188,15 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
           if (giamGiaChiTietSanPhamEntity.isEmpty()) {
             if (trangThai == 2) {
-              sanPham.setGiaKhiGiam(BigDecimal.ZERO);
+              sanPham.setGiaKhiGiam(null);
             } else {
               sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienDaGiam));
             }
           } else {
             if (giamGiaChiTietSanPhamRequest
-                .getNgayBatDau()
-                .before(giamGiaChiTietSanPhamEntity.get(0).getNgayBatDau())) {
+                    .getNgayBatDau()
+                    .before(giamGiaChiTietSanPhamEntity.get(0).getNgayBatDau())
+                || trangThai == 2) {
               sanPham.setGiaKhiGiam(
                   sanPham
                       .getGiaBan()
@@ -187,18 +234,92 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   public GiamGiaSanPhamEntity update(GiamGiaSanPhamDto giamGiaSanPhamDto) {
     Optional<GiamGiaSanPhamEntity> optional =
         giamGiaSanPhamRepository.findById(giamGiaSanPhamDto.getId());
-    return optional
-        .map(
-            o -> {
-              o.setMa(giamGiaSanPhamDto.getMa());
-              o.setTen(giamGiaSanPhamDto.getTen());
-              o.setPhanTramGiam(giamGiaSanPhamDto.getPhanTramGiam());
-              o.setNgayBatDau(giamGiaSanPhamDto.getNgayBatDau());
-              o.setNgayKetThuc(giamGiaSanPhamDto.getNgayKetThuc());
-              o.setTrangThai(giamGiaSanPhamDto.getTrangThai());
-              return giamGiaSanPhamRepository.save(o);
-            })
-        .orElse(null);
+
+    Integer trangThai;
+    Date now = new Date();
+    if (!now.before(giamGiaSanPhamDto.getNgayBatDau())
+        && !now.after(giamGiaSanPhamDto.getNgayKetThuc())) {
+      trangThai = 0;
+    } else if (now.before(giamGiaSanPhamDto.getNgayKetThuc())) {
+      trangThai = 2;
+    } else {
+      trangThai = 1;
+    }
+
+    GiamGiaSanPhamEntity giamGiaSanPhamEntity =
+        optional
+            .map(
+                o -> {
+                  o.setMa(giamGiaSanPhamDto.getMa());
+                  o.setTen(giamGiaSanPhamDto.getTen());
+                  o.setPhanTramGiam(giamGiaSanPhamDto.getPhanTramGiam());
+                  o.setNgayBatDau(giamGiaSanPhamDto.getNgayBatDau());
+                  o.setNgayKetThuc(giamGiaSanPhamDto.getNgayKetThuc());
+                  o.setTrangThai(trangThai);
+                  return giamGiaSanPhamRepository.save(o);
+                })
+            .orElse(null);
+
+
+    BigDecimal soTienDaGiamGia = null;
+
+    List<GiayChiTietEntity> sanPhamBiAnhHuong =
+            giamGiaChiTietSanPhamRepository
+                    .findByGiayChiTietByGiamGia(giamGiaSanPhamDto.getId())
+                    .stream()
+                    .map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet)
+                    .collect(Collectors.toList());
+
+    for (GiayChiTietEntity sanPham : sanPhamBiAnhHuong) {
+      // Bước 1: Cập nhật lại GiamGiaChiTietSanPhamEntity trước
+      List<GiamGiaChiTietSanPhamEntity> chiTietList =
+              giamGiaChiTietSanPhamRepository.findByGiayChiTietKhiUpdate(sanPham.getId(), giamGiaSanPhamDto.getId());
+
+      if (!chiTietList.isEmpty()) {
+        GiamGiaChiTietSanPhamEntity chiTiet = chiTietList.get(0);
+        chiTiet.setTrangThai(trangThai);
+        chiTiet.setNgayBatDau(giamGiaSanPhamDto.getNgayBatDau());
+        chiTiet.setNgayKetThuc(giamGiaSanPhamDto.getNgayKetThuc());
+        chiTiet.setSoTienDaGiam(
+                sanPham.getGiaBan()
+                        .multiply(BigDecimal.valueOf(giamGiaSanPhamDto.getPhanTramGiam()))
+                        .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP)
+        );
+        giamGiaChiTietSanPhamRepository.save(chiTiet);
+      }
+
+      // Bước 2: Tìm lại tất cả các chương trình của sản phẩm sau khi đã cập nhật ngày bắt đầu
+      List<GiamGiaChiTietSanPhamEntity> danhSachGiamGia =
+              giamGiaChiTietSanPhamRepository.findByGiayChiTietGiamGia(sanPham.getId());
+
+      // Sắp xếp giảm dần theo ngày bắt đầu
+      danhSachGiamGia.sort((g1, g2) -> g2.getNgayBatDau().compareTo(g1.getNgayBatDau()));
+
+      // Bước 3: Áp dụng chương trình mới nhất (nếu còn hiệu lực)
+      Optional<GiamGiaChiTietSanPhamEntity> uuTien =
+              danhSachGiamGia.stream()
+                      .filter(g -> g.getTrangThai() == 0) // chỉ lấy chương trình đang hoạt động
+                      .findFirst();
+
+      if (uuTien.isPresent()) {
+        GiamGiaChiTietSanPhamEntity apDung = uuTien.get();
+        BigDecimal phanTram = BigDecimal.valueOf(apDung.getChuongTrinhGiamSanPhamEntity().getPhanTramGiam());
+        BigDecimal soTienGiam = sanPham.getGiaBan()
+                .multiply(phanTram)
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
+
+        sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienGiam));
+      } else {
+        // Không còn chương trình nào active → bỏ giảm giá
+        sanPham.setGiaKhiGiam(null);
+      }
+
+      giayChiTietRepository.save(sanPham);
+    }
+
+
+
+    return giamGiaSanPhamEntity;
   }
 
   private String generateMa() {
@@ -229,11 +350,14 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
           giamGiaChiTietSanPhamRepository.findByGiayChiTiet(sanPham.getId());
 
       if (!giamGiaGanNhat.isEmpty()) {
-        if (giamGiaGanNhat.size() > 1) {
+        if (giamGiaSanPhamEntity.getTrangThai() != 0) {
+          BigDecimal soTienDaGiam = giamGiaGanNhat.get(0).getSoTienDaGiam();
+          sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienDaGiam));
+        } else if (giamGiaGanNhat.size() > 1) {
           BigDecimal soTienDaGiam = giamGiaGanNhat.get(1).getSoTienDaGiam();
           sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienDaGiam));
         } else if (giamGiaGanNhat.size() <= 1) {
-          sanPham.setGiaKhiGiam(BigDecimal.ZERO);
+          sanPham.setGiaKhiGiam(null);
         }
       } else {
         sanPham.setGiaKhiGiam(null);
