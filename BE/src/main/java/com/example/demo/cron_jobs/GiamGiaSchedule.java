@@ -18,7 +18,7 @@ public class GiamGiaSchedule {
   private final GiamGiaHoaDonService giamGiaHoaDonService;
   private final GiamGiaSanPhamService giamGiaSanPhamService;
 
-  @Scheduled(fixedDelay = 86400) // Chạy mỗi ngày
+  @Scheduled(fixedDelay = 86400000) // Chạy mỗi ngày
   public void runGiamGiaScheduler() {
     try {
       log.info(
