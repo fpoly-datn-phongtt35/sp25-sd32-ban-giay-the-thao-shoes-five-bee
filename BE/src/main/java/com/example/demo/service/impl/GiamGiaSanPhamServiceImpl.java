@@ -2,6 +2,7 @@ package com.example.demo.service.impl;
 
 import com.example.demo.dto.request.GiamGiaChiTietSanPhamRequest;
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
+import com.example.demo.dto.response.GiamGiaSanPhamResponse;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaChiTietSanPhamEntity;
 import com.example.demo.entity.GiamGiaSanPhamEntity;
@@ -347,10 +348,25 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   }
 
   @Override
-  public GiamGiaSanPhamEntity detail(GiamGiaSanPhamDto giamGiaSanPhamDto) {
-    Optional<GiamGiaSanPhamEntity> optional =
-        giamGiaSanPhamRepository.findById(giamGiaSanPhamDto.getId());
-    return optional.orElse(null);
+  public GiamGiaSanPhamResponse detail(GiamGiaSanPhamDto giamGiaSanPhamDto) {
+    GiamGiaSanPhamEntity giamGiaSanPhamEntity =
+        giamGiaSanPhamRepository.findById(giamGiaSanPhamDto.getId()).orElse(null);
+    List<GiayChiTietEntity> giayChiTietEntities = new ArrayList<>();
+    List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntities =
+        giamGiaSanPhamEntity.getGiamGiaChiTietSanPhamEntities();
+    for (GiamGiaChiTietSanPhamEntity giamGiaChiTietSanPhamEntity : giamGiaChiTietSanPhamEntities) {
+      giayChiTietEntities.add(giamGiaChiTietSanPhamEntity.getGiayChiTiet());
+    }
+    return GiamGiaSanPhamResponse.builder()
+        .id(giamGiaSanPhamEntity.getId())
+        .ma(giamGiaSanPhamEntity.getMa())
+        .ten(giamGiaSanPhamEntity.getTen())
+        .phanTramGiam(giamGiaSanPhamEntity.getPhanTramGiam())
+        .ngayBatDau(giamGiaSanPhamEntity.getNgayBatDau())
+        .ngayKetThuc(giamGiaSanPhamEntity.getNgayKetThuc())
+        .trangThai(giamGiaSanPhamEntity.getTrangThai())
+        .list(giayChiTietEntities)
+        .build();
   }
 
   @Override

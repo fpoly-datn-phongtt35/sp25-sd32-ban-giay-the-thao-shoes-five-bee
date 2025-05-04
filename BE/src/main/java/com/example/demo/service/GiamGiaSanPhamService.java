@@ -2,6 +2,7 @@ package com.example.demo.service;
 
 import com.example.demo.dto.request.GiamGiaChiTietSanPhamRequest;
 import com.example.demo.dto.request.GiamGiaSanPhamDto;
+import com.example.demo.dto.response.GiamGiaSanPhamResponse;
 import com.example.demo.dto.response.PageResponse;
 import com.example.demo.entity.GiamGiaSanPhamEntity;
 
@@ -29,7 +30,7 @@ public interface GiamGiaSanPhamService {
 
   GiamGiaSanPhamEntity update(GiamGiaSanPhamDto giamGiaSanPhamDto);
 
-  GiamGiaSanPhamEntity detail(GiamGiaSanPhamDto giamGiaSanPhamDto);
+  GiamGiaSanPhamResponse detail(GiamGiaSanPhamDto giamGiaSanPhamDto);
 
   GiamGiaSanPhamEntity delete(GiamGiaSanPhamDto giamGiaSanPhamDto);
 
