@@ -204,7 +204,15 @@ export const Bill = () => {
       navigate("/orderStatusPage");
     } catch (error) {
       console.error("Lỗi khi tạo đơn hàng", error);
-      message.error("Đã có lỗi xảy ra khi tạo đơn hàng.");
+      if (error.response && error.response.data) {
+        const errorMessage =
+          typeof error.response.data === "string"
+            ? error.response.data
+            : error.response.data.message || "Đã có lỗi xảy ra khi tạo đơn hàng.";
+        message.error(errorMessage);
+      } else {
+        message.error(error.message || "Đã có lỗi xảy ra khi tạo đơn hàng.");
+      }
     }
   };
 

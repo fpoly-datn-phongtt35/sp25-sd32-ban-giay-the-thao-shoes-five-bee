@@ -111,8 +111,14 @@ const GiamGiaHoaDon = () => {
       return;
     }
 
-    if (isNaN(parseFloat(soTienGiamMax)) || parseFloat(soTienGiamMax) <= 0) {
+    const parsedSoTienGiamMax = parseFloat(soTienGiamMax);
+
+    if (isNaN(parsedSoTienGiamMax) || parsedSoTienGiamMax <= 0) {
       message.error("Số tiền giảm tối đa phải là một số dương hợp lệ!");
+      return;
+    }
+    if (parsedSoTienGiamMax > 1000000) {
+      message.error("Số tiền giảm tối đa không được vượt quá 1.000.000 đ!");
       return;
     }
 
@@ -302,12 +308,30 @@ const GiamGiaHoaDon = () => {
               onChange={(e) => setDieuKien(e.target.value)}
             />
           </Form.Item>
-          <Form.Item label="Số Tiền Giảm Max">
-            <Input
-              value={soTienGiamMax}
-              onChange={(e) => setSoTienGiamMax(e.target.value)}
-            />
-          </Form.Item>
+          <Form.Item
+        label="Số tiền giảm tối đa"
+        name="soTienGiamMax"
+        rules={[
+          {
+            required: true,
+            message: 'Vui lòng nhập số tiền giảm tối đa',
+          },
+          {
+            validator: (_, value) => {
+              if (!value || parseFloat(value) <= 1000000) {
+                return Promise.resolve();
+              }
+              return Promise.reject('Số tiền giảm tối đa không được vượt quá 1.000.000 đ!');
+            },
+          },
+        ]}
+      >
+  <Input
+    type="number"
+    onChange={(e) => setSoTienGiamMax(e.target.value)}
+    value={soTienGiamMax}
+  />
+</Form.Item>
           <Form.Item label="Ngày Bắt Đầu">
             <Input
               type="date"

@@ -1,6 +1,6 @@
 import axios from "../axiosConfig";
 
-const REST_API_BASE_URL = "http://localhost:5000/api/hoadonchitiet";
+const REST_API_BASE_URL = "http://localhost:5000/hoa-don-chi-tiet";
 
 // Lấy token từ localStorage hoặc sessionStorage
 const token = localStorage.getItem("token"); // hoặc sessionStorage.getItem("token")
@@ -39,7 +39,7 @@ export const detailHoaDonChiTiet = (id) =>
   axios.get(`${REST_API_BASE_URL}/detail/${id}`, config);
 
 export const printfHoaDonChiTiet = (id) =>
-  axios.get(`${REST_API_BASE_URL}/download-pdf/${id}`, config, {
-    responseType: "blob",
-
+  axios.get(`${REST_API_BASE_URL}/download-pdf-hdct/${id}`, {
+    ...config,
+    responseType: "arraybuffer",
   });
