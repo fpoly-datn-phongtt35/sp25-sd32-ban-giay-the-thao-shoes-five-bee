@@ -243,12 +243,12 @@ const GiamGiaHoaDon = () => {
       key: "DIEU_KIEN",
       render: (text) => `${text ? text.toLocaleString() : "0"} VND`,
     },
-    {
-      title: "Số tiền giảm Max",
-      dataIndex: "SO_TIEN_GIAM_MAX",
-      key: "SO_TIEN_GIAM_MAX",
-      render: (text) => `${text ? text.toLocaleString() : "0"} VND`,
-    },
+    // {
+    //   title: "Số tiền giảm Max",
+    //   dataIndex: "SO_TIEN_GIAM_MAX",
+    //   key: "SO_TIEN_GIAM_MAX",
+    //   render: (text) => `${text ? text.toLocaleString() : "0"} VND`,
+    // },
     { title: "Ngày Bắt Đầu", dataIndex: "NGAY_BAT_DAU", key: "NGAY_BAT_DAU" },
     {
       title: "Ngày Kết Thúc",
@@ -323,7 +323,7 @@ const GiamGiaHoaDon = () => {
               }}
             />
           </Form.Item>
-          <Form.Item
+          {/* <Form.Item
             label="Số tiền giảm tối đa"
             name="soTienGiamMax"
             rules={[
@@ -346,14 +346,8 @@ const GiamGiaHoaDon = () => {
               onChange={(e) => setSoTienGiamMax(e.target.value)}
               value={soTienGiamMax}
             />
-          </Form.Item>
-          <Form.Item label="Ngày Bắt Đầu">
-            <Input
-              type="date"
-              value={ngayBatDau}
-              onChange={(e) => setNgayBatDau(e.target.value)}
-            />
-          </Form.Item>
+          </Form.Item> */}
+
           <Form.Item label="Phần Trăm Giảm">
             <Input
               value={phanTramGiam}
@@ -407,7 +401,7 @@ const GiamGiaHoaDon = () => {
             />
           </Form.Item>
 
-          <Form.Item label="Số Tiền Giảm Max">
+          {/* <Form.Item label="Số Tiền Giảm Max">
             <Input
               value={
                 soTienGiamMax
@@ -419,7 +413,7 @@ const GiamGiaHoaDon = () => {
                 setSoTienGiamMax(rawValue);
               }}
             />
-          </Form.Item>
+          </Form.Item> */}
 
           <Form.Item label="Ngày Bắt Đầu">
             <Input
