@@ -30,7 +30,7 @@ public interface GiamGiaSanPhamService {
 
   GiamGiaSanPhamEntity update(GiamGiaSanPhamDto giamGiaSanPhamDto);
 
-  GiamGiaSanPhamResponse detail(GiamGiaSanPhamDto giamGiaSanPhamDto);
+  GiamGiaSanPhamResponse detail(UUID id);
 
   GiamGiaSanPhamEntity delete(GiamGiaSanPhamDto giamGiaSanPhamDto);
 
