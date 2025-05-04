@@ -8,11 +8,16 @@ import com.example.demo.entity.GiamGiaSanPhamEntity;
 import java.io.ByteArrayOutputStream;
 import java.io.IOException;
 import java.util.List;
+import java.util.UUID;
 
+import com.example.demo.entity.GiayChiTietEntity;
 import com.example.demo.entity.GiayEntity;
 import org.springframework.data.domain.Pageable;
 
 public interface GiamGiaSanPhamService {
+
+  List<GiayChiTietEntity> getGiayChiTietByGiamGia(UUID id);
+
   void updateTrangThaiGimGiaSanPham();
 
   GiamGiaSanPhamEntity taoChuongTrinhGiamGia(

@@ -39,6 +39,18 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
   private final GiayChiTietRepository giayChiTietRepository;
 
   @Override
+  public List<GiayChiTietEntity> getGiayChiTietByGiamGia(UUID id) {
+    List<GiayChiTietEntity> giayChiTietEntities = new ArrayList<>();
+    GiamGiaSanPhamEntity giamGiaSanPhamEntity = giamGiaSanPhamRepository.findById(id).orElse(null);
+    List<GiamGiaChiTietSanPhamEntity> giamGiaChiTietSanPhamEntities =
+        giamGiaSanPhamEntity.getGiamGiaChiTietSanPhamEntities();
+    for (GiamGiaChiTietSanPhamEntity giamGiaChiTietSanPhamEntity : giamGiaChiTietSanPhamEntities) {
+      giayChiTietEntities.add(giamGiaChiTietSanPhamEntity.getGiayChiTiet());
+    }
+    return giayChiTietEntities;
+  }
+
+  @Override
   public void updateTrangThaiGimGiaSanPham() {
     List<GiamGiaSanPhamEntity> danhSachGiamGiaSp = giamGiaSanPhamRepository.findAll();
     Date now = new Date();
@@ -85,7 +97,7 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
             // Cập nhật trạng thái chi tiết
             List<GiamGiaChiTietSanPhamEntity> chiTietList =
-                    giamGiaChiTietSanPhamRepository.findByGiayChiTietByGiamGia(gg.getId());
+                giamGiaChiTietSanPhamRepository.findByGiayChiTietByGiamGia(gg.getId());
             for (GiamGiaChiTietSanPhamEntity chiTiet : chiTietList) {
               chiTiet.setTrangThai(0);
               giamGiaChiTietSanPhamRepository.save(chiTiet);
@@ -93,22 +105,29 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
             // Lấy các sản phẩm bị ảnh hưởng
             List<GiayChiTietEntity> sanPhamBiAnhHuong =
-                    chiTietList.stream().map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet).distinct().toList();
+                chiTietList.stream()
+                    .map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet)
+                    .distinct()
+                    .toList();
 
             for (GiayChiTietEntity sanPham : sanPhamBiAnhHuong) {
               // Tìm chương trình đang hoạt động mới nhất sau cập nhật
               List<GiamGiaChiTietSanPhamEntity> danhSachGiamGia =
-                      giamGiaChiTietSanPhamRepository.findByGiayChiTiet(sanPham.getId());
+                  giamGiaChiTietSanPhamRepository.findByGiayChiTiet(sanPham.getId());
 
-              danhSachGiamGia.sort((g1, g2) -> g2.getNgayBatDau().compareTo(g1.getNgayBatDau())); // mới nhất trước
+              danhSachGiamGia.sort(
+                  (g1, g2) -> g2.getNgayBatDau().compareTo(g1.getNgayBatDau())); // mới nhất trước
 
               Optional<GiamGiaChiTietSanPhamEntity> uuTien =
-                      danhSachGiamGia.stream().filter(g -> g.getTrangThai() == 0).findFirst();
+                  danhSachGiamGia.stream().filter(g -> g.getTrangThai() == 0).findFirst();
 
               if (uuTien.isPresent()) {
                 GiamGiaChiTietSanPhamEntity apDung = uuTien.get();
-                BigDecimal phanTram = BigDecimal.valueOf(apDung.getChuongTrinhGiamSanPhamEntity().getPhanTramGiam());
-                BigDecimal soTienGiam = sanPham.getGiaBan()
+                BigDecimal phanTram =
+                    BigDecimal.valueOf(apDung.getChuongTrinhGiamSanPhamEntity().getPhanTramGiam());
+                BigDecimal soTienGiam =
+                    sanPham
+                        .getGiaBan()
                         .multiply(phanTram)
                         .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
                 sanPham.setGiaKhiGiam(sanPham.getGiaBan().subtract(soTienGiam));
@@ -260,20 +279,20 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
                 })
             .orElse(null);
 
-
     BigDecimal soTienDaGiamGia = null;
 
     List<GiayChiTietEntity> sanPhamBiAnhHuong =
-            giamGiaChiTietSanPhamRepository
-                    .findByGiayChiTietByGiamGia(giamGiaSanPhamDto.getId())
-                    .stream()
-                    .map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet)
-                    .collect(Collectors.toList());
+        giamGiaChiTietSanPhamRepository
+            .findByGiayChiTietByGiamGia(giamGiaSanPhamDto.getId())
+            .stream()
+            .map(GiamGiaChiTietSanPhamEntity::getGiayChiTiet)
+            .collect(Collectors.toList());
 
     for (GiayChiTietEntity sanPham : sanPhamBiAnhHuong) {
       // Bước 1: Cập nhật lại GiamGiaChiTietSanPhamEntity trước
       List<GiamGiaChiTietSanPhamEntity> chiTietList =
-              giamGiaChiTietSanPhamRepository.findByGiayChiTietKhiUpdate(sanPham.getId(), giamGiaSanPhamDto.getId());
+          giamGiaChiTietSanPhamRepository.findByGiayChiTietKhiUpdate(
+              sanPham.getId(), giamGiaSanPhamDto.getId());
 
       if (!chiTietList.isEmpty()) {
         GiamGiaChiTietSanPhamEntity chiTiet = chiTietList.get(0);
@@ -281,30 +300,33 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
         chiTiet.setNgayBatDau(giamGiaSanPhamDto.getNgayBatDau());
         chiTiet.setNgayKetThuc(giamGiaSanPhamDto.getNgayKetThuc());
         chiTiet.setSoTienDaGiam(
-                sanPham.getGiaBan()
-                        .multiply(BigDecimal.valueOf(giamGiaSanPhamDto.getPhanTramGiam()))
-                        .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP)
-        );
+            sanPham
+                .getGiaBan()
+                .multiply(BigDecimal.valueOf(giamGiaSanPhamDto.getPhanTramGiam()))
+                .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP));
         giamGiaChiTietSanPhamRepository.save(chiTiet);
       }
 
       // Bước 2: Tìm lại tất cả các chương trình của sản phẩm sau khi đã cập nhật ngày bắt đầu
       List<GiamGiaChiTietSanPhamEntity> danhSachGiamGia =
-              giamGiaChiTietSanPhamRepository.findByGiayChiTietGiamGia(sanPham.getId());
+          giamGiaChiTietSanPhamRepository.findByGiayChiTietGiamGia(sanPham.getId());
 
       // Sắp xếp giảm dần theo ngày bắt đầu
       danhSachGiamGia.sort((g1, g2) -> g2.getNgayBatDau().compareTo(g1.getNgayBatDau()));
 
       // Bước 3: Áp dụng chương trình mới nhất (nếu còn hiệu lực)
       Optional<GiamGiaChiTietSanPhamEntity> uuTien =
-              danhSachGiamGia.stream()
-                      .filter(g -> g.getTrangThai() == 0) // chỉ lấy chương trình đang hoạt động
-                      .findFirst();
+          danhSachGiamGia.stream()
+              .filter(g -> g.getTrangThai() == 0) // chỉ lấy chương trình đang hoạt động
+              .findFirst();
 
       if (uuTien.isPresent()) {
         GiamGiaChiTietSanPhamEntity apDung = uuTien.get();
-        BigDecimal phanTram = BigDecimal.valueOf(apDung.getChuongTrinhGiamSanPhamEntity().getPhanTramGiam());
-        BigDecimal soTienGiam = sanPham.getGiaBan()
+        BigDecimal phanTram =
+            BigDecimal.valueOf(apDung.getChuongTrinhGiamSanPhamEntity().getPhanTramGiam());
+        BigDecimal soTienGiam =
+            sanPham
+                .getGiaBan()
                 .multiply(phanTram)
                 .divide(BigDecimal.valueOf(100), RoundingMode.HALF_UP);
 
@@ -316,8 +338,6 @@ public class GiamGiaSanPhamServiceImpl implements GiamGiaSanPhamService {
 
       giayChiTietRepository.save(sanPham);
     }
-
-
 
     return giamGiaSanPhamEntity;
   }

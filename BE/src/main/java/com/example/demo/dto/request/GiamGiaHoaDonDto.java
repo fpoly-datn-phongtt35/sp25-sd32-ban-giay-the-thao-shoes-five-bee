@@ -1,5 +1,6 @@
 package com.example.demo.dto.request;
 
+import com.fasterxml.jackson.annotation.JsonFormat;
 import jakarta.persistence.Column;
 import lombok.AllArgsConstructor;
 import lombok.Getter;
@@ -22,7 +23,9 @@ public class GiamGiaHoaDonDto extends PageDto{
     private String ten;
     private BigDecimal dieuKien;
     private BigDecimal soTienGiamMax;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd",timezone = "Asia/Ho_Chi_Minh")
     private Date ngayBatDau;
+    @JsonFormat(shape = JsonFormat.Shape.STRING, pattern = "yyyy-MM-dd",timezone = "Asia/Ho_Chi_Minh")
     private Date ngayKetThuc;
     private Integer phanTramGiam;
     private Integer soLuong;
